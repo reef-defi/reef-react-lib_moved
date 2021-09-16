@@ -7,7 +7,7 @@
 ## Install
 
 ```bash
-npm install --save @reef-defi/react-lib
+yarn add @reef-defi/react-lib
 ```
 
 ## Usage
@@ -15,14 +15,19 @@ npm install --save @reef-defi/react-lib
 ```tsx
 import React, { Component } from 'react'
 
-import MyComponent from '@reef-defi/react-lib'
+import { Components } from '@reef-defi/react-lib'
 import '@reef-defi/react-lib/dist/index.css'
 
-class Example extends Component {
-  render() {
-    return <MyComponent />
-  }
-}
+const { Card, Button } = Components;
+
+const Example = (): JSX.Element => (
+  <Card.Card>
+    <Card.Header>
+      <Card.Title>Hello from the other side!</Card.Title>
+      <Button.Back onClick={() => {}} />
+    </Card.Header>
+  </Card.Card>
+)
 ```
 
 ## License
