@@ -1,9 +1,5 @@
 import React from "react"
 
-interface NavProps {
-
-}
-
 export const HorizontalNav: React.FC<{}> = ({children}): JSX.Element => (
   <nav>
     {children}

@@ -2,12 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { BackIcon, DownArrowIcon, PlusIcon } from '../Icons';
 
-// TODO move this out
-export interface ButtonStatus {
-  text: string;
-  isValid: boolean;
-}
-
 interface NavProps {
   to: string;
   selected: boolean;
