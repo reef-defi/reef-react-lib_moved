@@ -19,14 +19,13 @@ export const HeaderBlank = (): JSX.Element => (
   <div style={{ width: '46px' }} />
 );
 
-interface CardTitle {
+interface Title {
   title: string;
 }
 
-export const Title: React.FC<CardTitle> = ({ title }): JSX.Element => (
+export const Title: React.FC<Title> = ({ title }): JSX.Element => (
   <h5 className="h5 my-2 text-center">{title}</h5>
 );
-
 
 interface ErrorCardProps {
   title: string;
@@ -35,7 +34,7 @@ interface ErrorCardProps {
 
 export const ErrorCard = ({ title, message } : ErrorCardProps): JSX.Element => (
   <Card>
-    <h5 className="card-title">{title}</h5>
+    <Title title={title} />
     <p className="card-text text-danger" dangerouslySetInnerHTML={{ __html: message }} />
   </Card>
 );
