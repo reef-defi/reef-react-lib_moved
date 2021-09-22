@@ -8,13 +8,11 @@ import { BigNumber, Contract } from "ethers";
 export const checkIfERC20ContractExist = async (address: string, signer: Signer): Promise<void> => {
   try {
     const contract = new Contract(address, ERC20, signer);
-
     // TODO add additional checkers to be surtent of Contract existance
     await contract.name();
     await contract.symbol();
     await contract.decimals();
   } catch (error) {
-    console.error(error);
     throw new Error('Unknown address');
   }
 };
@@ -30,5 +28,5 @@ export const balanceOf = async (address: string, balanceAddress: string, signer:
   return balance;
 };
 
-export const getReefswapRouter = (network: Network, signer: Signer): Contract => new Contract(network.routerAddress, ReefswapRouter, signer);
-export const getReefswapFactory = (network: Network, signer: Signer): Contract => new Contract(network.factoryAddress, ReefswapFactory, signer);
+export const getReefswapRouter = (address: string, signer: Signer): Contract => new Contract(address, ReefswapRouter, signer);
+export const getReefswapFactory = (address: string, signer: Signer): Contract => new Contract(address, ReefswapFactory, signer);
