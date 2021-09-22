@@ -1,4 +1,4 @@
-import {BigNumber} from "ethers";
+import { BigNumber } from 'ethers';
 import { Signer } from '@reef-defi/evm-provider';
 
 export interface BasicToken {
@@ -31,7 +31,7 @@ export interface Pool {
   minimumLiquidity: string;
 }
 
-export type AvailableNetworks = 'mainnet' | 'testnet';
+export type AvailableNetworks = 'mainnet' | 'testnet'
 
 export interface Network {
   rpcUrl: string;
@@ -39,10 +39,9 @@ export interface Network {
   routerAddress: string;
   factoryAddress: string;
   name: AvailableNetworks;
-};
+}
 
-export type Networks = Record<AvailableNetworks, Network>;
-
+export type Networks = Record<AvailableNetworks, Network>
 
 export interface ReefSigner {
   signer: Signer;

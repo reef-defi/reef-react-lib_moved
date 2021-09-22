@@ -1,4 +1,4 @@
-import { Networks } from "../state/types";
+import { Networks } from '../state/types';
 
 export interface ButtonStatus {
   text: string;
@@ -15,7 +15,7 @@ export const ensure = (condition: boolean, message: string): void => {
   }
 };
 
-export const uniqueCombinations = <T, >(array: T[]): [T, T][] => {
+export const uniqueCombinations = <T>(array: T[]): [T, T][] => {
   const result: [T, T][] = [];
   for (let i = 0; i < array.length; i += 1) {
     for (let j = i + 1; j < array.length; j += 1) {
@@ -30,7 +30,7 @@ export const errorStatus = (text: string): ButtonStatus => ({
   text,
 });
 
-export const ensureVoidRun = (canRun: boolean) => <I, >(fun: (obj: I) => void, obj: I) => {
+export const ensureVoidRun = (canRun: boolean) => <I>(fun: (obj: I) => void, obj: I): void => {
   if (canRun) {
     fun(obj);
   }

@@ -1,20 +1,35 @@
 import { Signer } from '@reef-defi/evm-provider';
-import { Contract} from 'ethers';
+import { Contract } from 'ethers';
 import { Network, Pool, Token } from '../state/types';
 import { ensure, uniqueCombinations } from '../utils/utils';
-import { ReefswapPair} from '../assets/abi/ReefswapPair';
-import {balanceOf, getReefswapFactory} from './rpc';
+import { ReefswapPair } from '../assets/abi/ReefswapPair';
+import { balanceOf, getReefswapFactory } from './rpc';
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 
-const findPoolTokenAddress = async (address1: string, address2: string, signer: Signer, network: Network): Promise<string> => {
+const findPoolTokenAddress = async (
+  address1: string,
+  address2: string,
+  signer: Signer,
+  network: Network,
+): Promise<string> => {
   const reefswapFactory = getReefswapFactory(network.factoryAddress, signer);
   const address = await reefswapFactory.getPair(address1, address2);
   return address;
 };
 
-export const loadPool = async (token1: Token, token2: Token, signer: Signer, network: Network): Promise<Pool> => {
-  const address = await findPoolTokenAddress(token1.address, token2.address, signer, network);
+export const loadPool = async (
+  token1: Token,
+  token2: Token,
+  signer: Signer,
+  network: Network,
+): Promise<Pool> => {
+  const address = await findPoolTokenAddress(
+    token1.address,
+    token2.address,
+    signer,
+    network,
+  );
   ensure(address !== EMPTY_ADDRESS, 'Pool does not exist!');
   const contract = new Contract(address, ReefswapPair, signer);
 
@@ -30,8 +45,14 @@ export const loadPool = async (token1: Token, token2: Token, signer: Signer, net
   const tokenBalance2 = await balanceOf(token2.address, address, signer);
 
   const [finalToken1, finalToken2] = token1.address === address1
-    ? [{ ...token1, balance: tokenBalance1 }, { ...token2, balance: tokenBalance2 }]
-    : [{ ...token2, balance: tokenBalance2 }, { ...token1, balance: tokenBalance1 }];
+    ? [
+      { ...token1, balance: tokenBalance1 },
+      { ...token2, balance: tokenBalance2 },
+    ]
+    : [
+      { ...token2, balance: tokenBalance2 },
+      { ...token1, balance: tokenBalance1 },
+    ];
 
   const [finalReserve1, finalReserve2] = token1.address === address1
     ? [reserves[0], reserves[1]]
@@ -50,8 +71,11 @@ export const loadPool = async (token1: Token, token2: Token, signer: Signer, net
   };
 };
 
-
-export const loadPools = async (tokens: Token[], signer: Signer, network: Network): Promise<Pool[]> => {
+export const loadPools = async (
+  tokens: Token[],
+  signer: Signer,
+  network: Network,
+): Promise<Pool[]> => {
   const tokenCombinations = uniqueCombinations(tokens);
   const pools: Pool[] = [];
   for (let index = 0; index < tokenCombinations.length; index += 1) {
@@ -62,7 +86,7 @@ export const loadPools = async (tokens: Token[], signer: Signer, network: Networ
       /* eslint-disable no-await-in-loop */
       // await ensurePoolBalance(pool);
       pools.push(pool);
-    } catch (e) { }
+    } catch (e) {}
   }
   return pools;
 };
