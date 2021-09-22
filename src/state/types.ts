@@ -1,51 +1,52 @@
-import { Signer } from '@reef-defi/evm-provider';
 import { BigNumber } from 'ethers';
+import { Signer } from '@reef-defi/evm-provider';
+
+export interface BasicToken {
+  name: string;
+  address: string;
+  iconUrl: string;
+}
+
+export interface Token extends BasicToken {
+  balance: BigNumber;
+  decimals: number;
+}
+
+export interface TokenWithAmount extends Token {
+  amount: string;
+  price: number;
+  isEmpty: boolean;
+}
+
+export interface Pool {
+  token1: Token;
+  token2: Token;
+  decimals: number;
+  // TODO transform reserve1, reserve2, userPoolBalance and minimumLiquidity to BigNumber
+  reserve1: string;
+  reserve2: string;
+  totalSupply: string;
+  poolAddress: string;
+  userPoolBalance: string;
+  minimumLiquidity: string;
+}
+
+export type AvailableNetworks = 'mainnet' | 'testnet'
+
+export interface Network {
+  rpcUrl: string;
+  reefscanUrl: string;
+  routerAddress: string;
+  factoryAddress: string;
+  name: AvailableNetworks;
+}
+
+export type Networks = Record<AvailableNetworks, Network>
 
 export interface ReefSigner {
-  name: string;
   signer: Signer;
-  balance: BigNumber;
+  name: string;
   address: string;
   evmAddress: string;
   isEvmClaimed: boolean;
-  source: string;
-  genesisHash?: string;
 }
-
-export type Color = 'success' | 'danger' | 'warning';
-export type Notify = 'success' | 'error' | 'warning' | 'info';
-export type TokenSelector = 'token1' | 'token2';
-
-// const baseFun = <T, >(value: string, type: T) => {};
-export type NotifyFun = (message: string, type?: Notify) => void;
-// type Test = BaseFun<Notify>;
-
-type OnTokenSelect = (address: string, type?: TokenSelector) => void;
-
-// Optional pick picks K keys from T and sets them to optional
-// all other keys are discarded
-export type OptionalPick<T, K extends keyof T> = {
-  [P in keyof Pick<T, K>]?: T[P];
-}
-
-// Enables option to select desired keys to be optional
-export type SelectPartial<T, K extends keyof T> = OptionalPick<T, K> | Pick<T, Exclude<keyof T, K>>;
-
-export interface DefaultOptions {
-  back: () => void;
-  notify: NotifyFun;
-  onTokenSelect: OnTokenSelect;
-  updateTokenState: () => Promise<void>;
-  onAddressChange: (address: string) => Promise<void>;
-}
-
-// export type PartialOptions = SelectedPartial<DefaultOptions, "back" | "notify">;
-export type PartialOptions = Partial<DefaultOptions>;
-
-export const defaultOptions: DefaultOptions = {
-  back: () => {},
-  notify: () => {},
-  onTokenSelect: () => {},
-  onAddressChange: async () => {},
-  updateTokenState: async () => {},
-};
