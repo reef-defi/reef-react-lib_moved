@@ -1,3 +1,4 @@
+import "./Style.css";
 export * from './state/types';
 export * as rpc from './rpc';
 export * as hooks from './hooks';
