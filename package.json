@@ -60,7 +60,8 @@
   "dependencies": {
     "@reef-defi/evm-provider": "^0.1.10",
     "bootstrap": "^5.1.1",
-    "eslint-import-resolver-typescript": "^2.4.0"
+    "eslint-import-resolver-typescript": "^2.4.0",
+    "react-tooltip": "^4.2.21"
   },
   "resolutions": {
     "@ethersproject/abstract-signer": "5.0.9",
