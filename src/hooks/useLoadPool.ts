@@ -1,9 +1,9 @@
-import { Signer } from "@reef-defi/evm-provider";
-import { useRef, useState, useEffect } from "react";
-import { Pool, Token } from "..";
-import { loadPool } from "../rpc/pools";
-import { Network } from "../state/types";
-import { ensureVoidRun } from "../utils/utils";
+import { Signer } from '@reef-defi/evm-provider';
+import { useRef, useState, useEffect } from 'react';
+import { Pool, Token } from '..';
+import { loadPool } from '../rpc/pools';
+import { Network } from '../state/types';
+import { ensureVoidRun } from '../utils/utils';
 
 type LoadingPool = Pool | undefined;
 

@@ -1,11 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { BackIcon, DownArrowIcon, PlusIcon } from '../Icons';
-
-interface NavProps {
-  to: string;
-  selected: boolean;
-}
 
 interface ButtonProps {
   onClick?: () => void;
@@ -15,7 +9,7 @@ export const Button: React.FC<ButtonProps> = ({
   children,
   onClick = () => {},
 }): JSX.Element => (
-  <button type="button" className="btn btn-reef" onClick={onClick}>
+  <button type="button" className="btn btn-reef border-rad" onClick={onClick}>
     {children}
   </button>
 );
@@ -27,21 +21,6 @@ export const Empty: React.FC<ButtonProps> = ({
   <button type="button" className="btn" onClick={onClick}>
     {children}
   </button>
-);
-
-export const Nav: React.FC<NavProps> = ({
-  to,
-  children,
-  selected = false,
-}): JSX.Element => (
-  <Link
-    to={to}
-    className={`border-rad h-100 fs-6 fw-bold px-3 py-2 ${
-      selected ? 'nav-selected' : 'nav-button'
-    }`}
-  >
-    {children}
-  </Link>
 );
 
 // TODO maybe we do not need this one?
