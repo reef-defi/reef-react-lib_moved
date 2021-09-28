@@ -1,4 +1,53 @@
 import React from 'react';
+import { Button } from '../Button';
+import { Title } from '../Text';
+
+interface Modal {
+  id?: string;
+}
+
+export const Modal: React.FC<Modal> = ({children, id="modal"}): JSX.Element => (
+  <div
+    className="modal fade"
+    id={id}
+    tabIndex={-1}
+    aria-labelledby={id}
+    aria-hidden="true"
+  >
+    <div className="modal-dialog modal-dialog-centered">
+      <div className="modal-content border-rad">
+        {children}
+      </div>
+    </div>
+  </div>
+);
+
+export const ModalHeader: React.FC<unknown> = ({children}): JSX.Element => (
+  <div className="modal-header border-0">
+    {children}
+  </div>
+);
+
+export const ModalBody: React.FC<unknown> = ({children}): JSX.Element => (
+  <div className="modal-body py-0">
+    {children}
+  </div>
+);
+
+export const ModalFooter: React.FC<unknown> = ({children}): JSX.Element => (
+  <div className="modal-footer bg-white border-0 border-rad">
+    {children}
+  </div>
+);
+
+export const ModalClose = (): JSX.Element => (
+  <button
+    type="button"
+    className="btn-close"
+    data-bs-dismiss="modal"
+    aria-label="Close"
+  />
+);
 
 interface ConfirmationModal {
   id?: string;
@@ -12,40 +61,18 @@ const ConfirmationModal: React.FC<ConfirmationModal> = ({
   confirmFun,
   children,
 }): JSX.Element => (
-  <div
-    className="modal fade"
-    id={id}
-    tabIndex={-1}
-    aria-labelledby="exampleModalLabel"
-    aria-hidden="true"
-  >
-    <div className="modal-dialog modal-dialog-centered">
-      <div className="modal-content border-rad">
-        <div className="modal-header border-0">
-          <h5 className="title-text" id="exampleModalLabel">
-            {title}
-          </h5>
-          <button
-            type="button"
-            className="btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-          />
-        </div>
-        <div className="modal-body py-0">{children}</div>
-        <div className="modal-footer bg-white border-0 border-rad">
-          <button
-            type="button"
-            className="btn btn-lg btn-reef w-100 border-rad"
-            onClick={confirmFun}
-            data-bs-dismiss="modal"
-          >
-            {title}
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+  <Modal id={id}>
+    <ModalHeader>
+      <Title>{title}</Title>
+      <ModalClose />
+    </ModalHeader>
+    <ModalBody>{children}</ModalBody>
+    <ModalFooter>
+      <Button onClick={confirmFun}>
+        {title}
+      </Button>
+    </ModalFooter>
+  </Modal>
 );
 
 export default ConfirmationModal;
