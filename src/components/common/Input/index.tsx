@@ -16,7 +16,6 @@ export const Input = ({value, disabled, maxLength, placeholder, onChange}: Input
     placeholder={placeholder}
     className="form-control form-control-lg border-rad"
     onChange={(event) => onChange(event.target.value)}
-
   />
 );
 

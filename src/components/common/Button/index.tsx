@@ -1,5 +1,5 @@
 import React from 'react';
-import { BackIcon, DownArrowIcon, PlusIcon } from '../Icons';
+import { BackIcon, DownArrowIcon, DownIcon, PlusIcon } from '../Icons';
 
 interface ButtonProps {
   onClick?: () => void;
@@ -9,7 +9,7 @@ export const Button: React.FC<ButtonProps> = ({
   children,
   onClick = () => {},
 }): JSX.Element => (
-  <button type="button" className="btn btn-reef border-rad" onClick={onClick}>
+  <button type="button" className="btn btn-reef border-rad" onClick={onClick} data-bs-dismiss="modal">
     {children}
   </button>
 );
@@ -73,3 +73,4 @@ export const Icon: React.FC<IconButton> = ({
     {children}
   </button>
 );
+
