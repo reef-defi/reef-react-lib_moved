@@ -1,25 +1,22 @@
-import { useState } from 'react';
-import { Provider } from '@reef-defi/evm-provider';
+import { useState } from "react";
+import {Provider} from "@reef-defi/evm-provider";
 import { WsProvider } from '@polkadot/api';
-import { useAsyncEffect } from './useAsyncEffect';
+import { useAsyncEffect } from "./useAsyncEffect";
 
-export type UseProvider = [Provider | undefined, boolean, string];
-// should be used only once per url in app
-export const useProvider = (providerUrl?: string | undefined): UseProvider => {
+type UseProvider = [Provider|undefined, boolean, string];
+
+export const useProvider = (providerUrl: string): UseProvider => {
   const [provider, setProvider] = useState<Provider>();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useAsyncEffect(async () => {
-    if (!providerUrl) {
-      return;
-    }
     Promise.resolve()
-      .then(() => setError(''))
+      .then(() => setError(""))
       .then(() => setIsLoading(true))
       .then(async () => {
         const newProvider = new Provider({
-          provider: new WsProvider(providerUrl),
+          provider: new WsProvider(providerUrl)
         });
         await newProvider.api.isReadyOrError;
         return newProvider;
