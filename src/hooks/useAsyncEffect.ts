@@ -5,13 +5,12 @@ const emptyDep: React.DependencyList = [];
 export const useAsyncEffect = (
   fun: () => Promise<void>,
   dependencyList = emptyDep,
-  cleanUp = () => {}
+  cleanUp = () => {},
 ) => {
-
   useEffect(() => {
     fun();
     return () => {
       cleanUp();
     };
-  }, [...dependencyList])
-}
+  }, [...dependencyList]);
+};
