@@ -9,7 +9,7 @@ export const Button: React.FC<ButtonProps> = ({
   children,
   onClick = () => {},
 }): JSX.Element => (
-  <button type="button" className="btn btn-reef" onClick={onClick}>
+  <button type="button" className="btn btn-reef border-rad" onClick={onClick}>
     {children}
   </button>
 );
