@@ -6,7 +6,7 @@ export const useAsyncEffect = (
   fun: () => Promise<void>,
   dependencyList = emptyDep,
   cleanUp = () => {},
-) => {
+): void => {
   useEffect(() => {
     fun();
     return () => {

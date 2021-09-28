@@ -7,7 +7,7 @@ export const useUpdateAccountBalance = (address?: string, provider?: Provider): 
 
   useEffect(() => {
     const load = async (): Promise<void> => {
-      if (!provider || !address) { return; }
+      if (!provider || !address) { return; }
       Promise.resolve()
         .then(() => provider.api.derive.balances.all(address))
         .then((res) => res.freeBalance.toHuman())
