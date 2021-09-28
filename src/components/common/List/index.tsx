@@ -12,3 +12,6 @@ export const ListItem: React.FC<unknown> = ({children}): JSX.Element => (
     {children}
   </li>
 )
+export const ListEmptyItem = (): JSX.Element => (
+  <li className="list-group-item px-2" />
+);

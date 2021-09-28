@@ -1,5 +1,25 @@
 import React from 'react';
 
+interface Input {
+  value?: string
+  disabled?: boolean;
+  maxLength?: number;
+  placeholder?: string;
+  onChange: (value: string) => void;
+}
+
+export const Input = ({value, disabled, maxLength, placeholder, onChange}: Input): JSX.Element => (
+  <input
+    value={value}
+    disabled={disabled}
+    maxLength={maxLength}
+    placeholder={placeholder}
+    className="form-control form-control-lg border-rad"
+    onChange={(event) => onChange(event.target.value)}
+
+  />
+);
+
 interface InputAmount {
   amount: string;
   disabled?: boolean;
@@ -23,3 +43,4 @@ export const InputAmount = ({
     onChange={(event) => onAmountChange(event.target.value)}
   />
 );
+
