@@ -5,10 +5,10 @@ interface Input {
   disabled?: boolean;
   maxLength?: number;
   placeholder?: string;
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
 }
 
-export const Input = ({value, disabled, maxLength, placeholder, onChange}: Input): JSX.Element => (
+export const Input = ({value, disabled, maxLength, placeholder, onChange=(_) => {}}: Input): JSX.Element => (
   <input
     value={value}
     disabled={disabled}

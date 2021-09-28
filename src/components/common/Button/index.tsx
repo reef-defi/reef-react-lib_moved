@@ -1,5 +1,5 @@
 import React from 'react';
-import { BackIcon, DownArrowIcon, DownIcon, PlusIcon } from '../Icons';
+import { BackIcon, DownArrowIcon, PlusIcon } from '../Icons';
 
 interface ButtonProps {
   onClick?: () => void;
