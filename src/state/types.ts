@@ -50,3 +50,9 @@ export interface ReefSigner {
   evmAddress: string;
   isEvmClaimed: boolean;
 }
+
+export interface TokenState {
+  index: number;
+  amount: string;
+  price: number;
+}

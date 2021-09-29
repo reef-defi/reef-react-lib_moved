@@ -1,0 +1,15 @@
+{
+  "tokens": [
+    {
+      "name": "REEF",
+      "address": "0x0000000000000000000000000000000001000000",
+      "iconUrl": "https://s2.coinmarketcap.com/static/img/coins/64x64/6951.png",
+      "coingeckoId": "reef-finance"
+    },
+    {
+      "name": "TEST",
+      "address": "0x15820d37b1cC11f102076070897ACde06511B2fa",
+      "iconUrl": ""
+    }
+  ]
+}

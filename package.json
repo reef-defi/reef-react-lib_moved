@@ -5,6 +5,7 @@
   "author": "Frenkiee",
   "license": "MIT",
   "repository": "",
+  "private": true,
   "main": "dist/index.js",
   "module": "dist/index.modern.js",
   "source": "src/index.tsx",
@@ -58,10 +59,13 @@
     "dist"
   ],
   "dependencies": {
+    "@polkadot/extension-dapp": "^0.38.6",
     "@reef-defi/evm-provider": "^0.1.10",
+    "@types/react-router-dom": "^5.3.0",
     "bootstrap": "^5.1.1",
     "eslint-import-resolver-typescript": "^2.4.0",
-    "react-router-dom": "^5.3.0"
+    "react-router-dom": "^5.3.0",
+    "axios": "^0.21.4"
   },
   "resolutions": {
     "@ethersproject/abstract-signer": "5.0.9",
