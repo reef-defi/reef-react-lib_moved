@@ -9,12 +9,12 @@ export const Button: React.FC<ButtonProps> = ({
   children,
   onClick = () => {},
 }): JSX.Element => (
-  <button type="button" className="btn btn-reef border-rad" onClick={onClick}>
+  <button type="button" className="btn btn-reef border-rad" onClick={onClick} data-bs-dismiss="modal">
     {children}
   </button>
 );
 
-export const Empty: React.FC<ButtonProps> = ({
+export const EmptyButton: React.FC<ButtonProps> = ({
   children,
   onClick = () => {},
 }): JSX.Element => (
@@ -24,10 +24,10 @@ export const Empty: React.FC<ButtonProps> = ({
 );
 
 // TODO maybe we do not need this one?
-export const Back = ({ onClick }: ButtonProps): JSX.Element => (
-  <Empty onClick={onClick}>
+export const BackButton = ({ onClick }: ButtonProps): JSX.Element => (
+  <EmptyButton onClick={onClick}>
     <BackIcon />
-  </Empty>
+  </EmptyButton>
 );
 
 // TODO Move out or refactore!
@@ -60,7 +60,7 @@ export const SwitchToken = ({
   </div>
 );
 
-export const Icon: React.FC<IconButton> = ({
+export const IconButton: React.FC<IconButton> = ({
   onClick,
   children,
 }): JSX.Element => (

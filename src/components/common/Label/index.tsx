@@ -1,5 +1,11 @@
 import React from 'react';
 
+export const Label: React.FC<unknown> = ({ children }) => (
+  <label>
+    {children}
+  </label>
+);
+
 interface ConfirmLabel {
   title: string;
   value: string;
