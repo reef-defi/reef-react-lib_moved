@@ -50,3 +50,5 @@ export interface ReefSigner {
   evmAddress: string;
   isEvmClaimed: boolean;
 }
+
+export type Color = "success" | "danger" | "warning";
