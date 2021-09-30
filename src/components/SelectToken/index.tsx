@@ -19,13 +19,15 @@ interface SelectToken {
   selectedTokenName: string;
   tokens: Token[],
   onTokenSelect: (newToken: Token) => void;
-  findToken: (address: string) => Promise<void>;
+  onAddressChange?: (address: string) => Promise<void>;
 }
 
 const COMMON_BASES = ["REEF"];
 
+const emptyFunction = async (): Promise<void> => {};
+
 const SelectToken = ({
-  id = 'exampleModal', tokens, selectedTokenName, onTokenSelect, fullWidth = false, iconUrl, findToken
+  id = 'exampleModal', tokens, selectedTokenName, onTokenSelect, fullWidth = false, iconUrl, onAddressChange=emptyFunction
 } : SelectToken): JSX.Element => {
 
   const [isLoading, setIsLoading] = useState(false);
@@ -66,7 +68,7 @@ const SelectToken = ({
   useAsyncEffect(async () => {
     await Promise.resolve()
       .then(() => setIsLoading(true))
-      .then(() => findToken(address))
+      .then(() => onAddressChange(address))
       .finally(() => setIsLoading(false));
   }, [address])
 
