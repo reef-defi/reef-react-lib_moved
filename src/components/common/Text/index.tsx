@@ -1,4 +1,5 @@
 import React from 'react';
+import { Color } from '../../../state/types';
 
 export const Title: React.FC<unknown> = ({children}): JSX.Element => (
   <h5 className="title-text user-select-none">
@@ -16,6 +17,16 @@ export const Text: React.FC<unknown> = ({children}): JSX.Element => (
   <span className="user-select-none">
     {children}
   </span>
+);
+
+interface ColorText {
+  color?: Color;
+}
+
+export const ColorText: React.FC<ColorText> = ({children, color="success"}): JSX.Element => (
+  <div className={`user-select-none text-${color}`}>
+    {children}
+  </div>
 );
 
 export const MiniText: React.FC<unknown> = ({children}): JSX.Element => (
