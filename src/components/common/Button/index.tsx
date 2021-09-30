@@ -73,4 +73,3 @@ export const IconButton: React.FC<IconButton> = ({
     {children}
   </button>
 );
-

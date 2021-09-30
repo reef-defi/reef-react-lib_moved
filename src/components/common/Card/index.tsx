@@ -36,7 +36,7 @@ export const ErrorCard = ({ title, message }: ErrorCardProps): JSX.Element => (
   </Card>
 );
 
-export const SubCard: React.FC<unknown> = ({children}): JSX.Element => (
+export const SubCard: React.FC<unknown> = ({ children }): JSX.Element => (
   <div className="field border-rad p-3">
     {children}
   </div>

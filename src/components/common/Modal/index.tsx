@@ -6,7 +6,7 @@ interface Modal {
   id?: string;
 }
 
-export const Modal: React.FC<Modal> = ({children, id="modal"}): JSX.Element => (
+export const Modal: React.FC<Modal> = ({ children, id = 'modal' }): JSX.Element => (
   <div
     className="modal fade"
     id={id}
@@ -22,19 +22,19 @@ export const Modal: React.FC<Modal> = ({children, id="modal"}): JSX.Element => (
   </div>
 );
 
-export const ModalHeader: React.FC<unknown> = ({children}): JSX.Element => (
+export const ModalHeader: React.FC<unknown> = ({ children }): JSX.Element => (
   <div className="modal-header border-0">
     {children}
   </div>
 );
 
-export const ModalBody: React.FC<unknown> = ({children}): JSX.Element => (
+export const ModalBody: React.FC<unknown> = ({ children }): JSX.Element => (
   <div className="modal-body py-0">
     {children}
   </div>
 );
 
-export const ModalFooter: React.FC<unknown> = ({children}): JSX.Element => (
+export const ModalFooter: React.FC<unknown> = ({ children }): JSX.Element => (
   <div className="modal-footer bg-white border-0 border-rad">
     {children}
   </div>

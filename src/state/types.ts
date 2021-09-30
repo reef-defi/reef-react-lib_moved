@@ -51,4 +51,4 @@ export interface ReefSigner {
   isEvmClaimed: boolean;
 }
 
-export type Color = "success" | "danger" | "warning";
+export type Color = 'success' | 'danger' | 'warning';

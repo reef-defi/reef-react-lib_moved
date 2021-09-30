@@ -1,11 +1,11 @@
-import React from "react"
-import { TokenWithAmount, Token, Color } from "../../state";
-import { showBalance, toBalance } from "../../utils/math";
-import { SubCard } from "../common/Card";
-import { CenterColumn, FlexColumn } from "../common/Display";
-import { InputAmount } from "../common/Input";
-import { ColorText, MiniText } from "../common/Text";
-import SelectToken from "../SelectToken";
+import React from 'react';
+import { TokenWithAmount, Token, Color } from '../../state';
+import { showBalance, toBalance } from '../../utils/math';
+import { SubCard } from '../common/Card';
+import { CenterColumn, FlexColumn } from '../common/Display';
+import { InputAmount } from '../common/Input';
+import { ColorText, MiniText } from '../common/Text';
+import SelectToken from '../SelectToken';
 
 interface TokenAmountFieldProps {
   id?: string;
@@ -18,9 +18,11 @@ interface TokenAmountFieldProps {
 }
 
 const TokenAmountFieldBase: React.FC<TokenAmountFieldProps> = ({
-  id = 'exampleModal', token, tokens, onTokenSelect, onAmountChange, placeholder = '0.0', children, onAddressChange= async () => {}
+  id = 'exampleModal', token, tokens, onTokenSelect, onAmountChange, placeholder = '0.0', children, onAddressChange = async () => {},
 }): JSX.Element => {
-  const {name, isEmpty, amount, iconUrl,} = token;
+  const {
+    name, isEmpty, amount, iconUrl,
+  } = token;
 
   return (
     <SubCard>
@@ -45,10 +47,11 @@ const TokenAmountFieldBase: React.FC<TokenAmountFieldProps> = ({
       </CenterColumn>
     </SubCard>
   );
-}
+};
 
 export const TokenAmountField = ({
-  id, token, tokens, placeholder, onTokenSelect, onAmountChange, onAddressChange} : TokenAmountFieldProps): JSX.Element => {
+  id, token, tokens, placeholder, onTokenSelect, onAmountChange, onAddressChange,
+} : TokenAmountFieldProps): JSX.Element => {
   const { amount, price, isEmpty } = token;
   const amo = parseFloat(amount);
   return (
@@ -69,10 +72,10 @@ export const TokenAmountField = ({
       </MiniText>
     </TokenAmountFieldBase>
   );
-}
+};
 
 export const TokenAmountFieldMax = ({
-  id, token, tokens, placeholder, onTokenSelect, onAmountChange, onAddressChange
+  id, token, tokens, placeholder, onTokenSelect, onAmountChange, onAddressChange,
 }: TokenAmountFieldProps): JSX.Element => {
   const { amount, price, isEmpty } = token;
   const amo = parseFloat(amount);
@@ -96,8 +99,8 @@ export const TokenAmountFieldMax = ({
         {!isEmpty && price !== 0 && amount !== '' && `~$ ${(amo * price).toFixed(4)}`}
       </MiniText>
     </TokenAmountFieldBase>
-  )
-}
+  );
+};
 
 interface TokenAmountFieldImpactPriceProps extends TokenAmountFieldProps {
   percentage: number;
@@ -108,13 +111,15 @@ const PercentageView = ({ percentage }: {percentage: number}): JSX.Element => {
   if (percentage > 0) { color = 'success'; } else if (percentage < -0.05) { color = 'danger'; } else { color = 'warning'; }
   return (
     <ColorText color={color}>
-      ({`${(percentage * 100).toFixed(2)} %`})
+      (
+      {`${(percentage * 100).toFixed(2)} %`}
+      )
     </ColorText>
   );
 };
 
 export const TokenAmountFieldImpactPrice = ({
-  id, token, tokens, placeholder, percentage, onTokenSelect, onAmountChange, onAddressChange
+  id, token, tokens, placeholder, percentage, onTokenSelect, onAmountChange, onAddressChange,
 }: TokenAmountFieldImpactPriceProps): JSX.Element => {
   const { amount, price, isEmpty } = token;
   const amo = parseFloat(amount);
@@ -141,4 +146,3 @@ export const TokenAmountFieldImpactPrice = ({
     </TokenAmountFieldBase>
   );
 };
-

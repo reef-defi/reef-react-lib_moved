@@ -8,7 +8,9 @@ interface Input {
   onChange?: (value: string) => void;
 }
 
-export const Input = ({value, disabled, maxLength, placeholder, onChange=(_) => {}}: Input): JSX.Element => (
+export const Input = ({
+  value, disabled, maxLength, placeholder, onChange = (_) => {},
+}: Input): JSX.Element => (
   <input
     value={value}
     disabled={disabled}
@@ -42,4 +44,3 @@ export const InputAmount = ({
     onChange={(event) => onAmountChange(event.target.value)}
   />
 );
-

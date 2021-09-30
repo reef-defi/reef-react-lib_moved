@@ -1,16 +1,22 @@
-import React, { useState } from "react"
-import { useAsyncEffect } from "../../hooks";
-import { Token } from "../../state/types";
-import { trim } from "../../utils";
-import { IconButton } from "../common/Button";
-import { CenterRow, FlexColumn, FlexRow, Margin } from "../common/Display";
-import { TokenIcon, DownIcon } from "../common/Icons";
-import { Input } from "../common/Input";
-import { List, ListEmptyItem, ListItem } from "../common/List";
-import { Loading } from "../common/Loading";
-import { Modal, ModalBody, ModalClose, ModalHeader } from "../common/Modal";
-import { Title, Text, LeadText, MiniText } from "../common/Text";
-import { QuestionTooltip } from "../common/Tooltip";
+import React, { useState } from 'react';
+import { useAsyncEffect } from '../../hooks';
+import { Token } from '../../state/types';
+import { trim } from '../../utils';
+import { IconButton } from '../common/Button';
+import {
+  CenterRow, FlexColumn, FlexRow, Margin,
+} from '../common/Display';
+import { TokenIcon, DownIcon } from '../common/Icons';
+import { Input } from '../common/Input';
+import { List, ListEmptyItem, ListItem } from '../common/List';
+import { Loading } from '../common/Loading';
+import {
+  Modal, ModalBody, ModalClose, ModalHeader,
+} from '../common/Modal';
+import {
+  Title, Text, LeadText, MiniText,
+} from '../common/Text';
+import { QuestionTooltip } from '../common/Tooltip';
 
 interface SelectToken {
   id?: string;
@@ -22,14 +28,13 @@ interface SelectToken {
   onAddressChange?: (address: string) => Promise<void>;
 }
 
-const COMMON_BASES = ["REEF"];
+const COMMON_BASES = ['REEF'];
 
 const emptyFunction = async (): Promise<void> => {};
 
 const SelectToken = ({
-  id = 'exampleModal', tokens, selectedTokenName, onTokenSelect, fullWidth = false, iconUrl, onAddressChange=emptyFunction
+  id = 'exampleModal', tokens, selectedTokenName, onTokenSelect, fullWidth = false, iconUrl, onAddressChange = emptyFunction,
 } : SelectToken): JSX.Element => {
-
   const [isLoading, setIsLoading] = useState(false);
   const [address, setAddress] = useState('');
 
@@ -50,7 +55,10 @@ const SelectToken = ({
             </FlexColumn>
           </Margin>
           <CenterRow>
-            <Text>{}Balance TODO!</Text>
+            <Text>
+              {}
+              Balance TODO!
+            </Text>
           </CenterRow>
         </FlexRow>
       </ListItem>
@@ -63,14 +71,14 @@ const SelectToken = ({
         <TokenIcon src={token.iconUrl} />
         <Text>{token.name}</Text>
       </IconButton>
-    ))
+    ));
 
   useAsyncEffect(async () => {
     await Promise.resolve()
       .then(() => setIsLoading(true))
       .then(() => onAddressChange(address))
       .finally(() => setIsLoading(false));
-  }, [address])
+  }, [address]);
 
   return (
     <>
@@ -96,7 +104,10 @@ const SelectToken = ({
           <Margin size="3">
             Common bases
             <QuestionTooltip>
-              These tokens are commonly <br />paired with other tokens.
+              These tokens are commonly
+              {' '}
+              <br />
+              paired with other tokens.
             </QuestionTooltip>
           </Margin>
           <Margin>
@@ -111,6 +122,6 @@ const SelectToken = ({
       </Modal>
     </>
   );
-}
+};
 
 export default SelectToken;
