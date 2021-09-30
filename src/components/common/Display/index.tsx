@@ -24,6 +24,13 @@ export const CenterColumn: React.FC<unknown> = ({children}): JSX.Element => (
   </div>
 )
 
+export const ContentBetween: React.FC<unknown> = ({children}): JSX.Element => (
+  <div className="d-flex justify-content-between">
+    {children}
+  </div>
+);
+
+
 interface Size {
   size?: "1" | "2" | "3" | "4" | "5" | "6";
 }

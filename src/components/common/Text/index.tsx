@@ -34,3 +34,9 @@ export const MiniText: React.FC<unknown> = ({children}): JSX.Element => (
     {children}
   </span>
 );
+
+export const MutedText: React.FC<unknown> = ({children}): JSX.Element => (
+  <span className="text-muted">
+    {children}
+  </span>
+);
