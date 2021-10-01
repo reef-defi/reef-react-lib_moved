@@ -56,3 +56,5 @@ export interface TokenState {
   amount: string;
   price: number;
 }
+
+export type Color = 'success' | 'danger' | 'warning';

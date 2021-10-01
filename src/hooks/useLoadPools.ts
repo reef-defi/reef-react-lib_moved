@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Signer } from "@reef-defi/evm-provider";
+import { Signer } from '@reef-defi/evm-provider';
 import { Token, Pool } from '..';
 import { loadPools } from '../rpc/pools';
 import { Network } from '../state/types';
