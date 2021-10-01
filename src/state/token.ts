@@ -1,4 +1,6 @@
 import { BigNumber } from 'ethers';
+import { ensure } from '../utils';
+import { calculateAmount } from '../utils/math';
 
 export interface BasicToken {
   name: string;
@@ -49,3 +51,6 @@ export const toTokenAmount = (token: Token, state: TokenState): TokenWithAmount 
   ...state,
   isEmpty: false,
 });
+
+export const ensureTokenAmount = (token: TokenWithAmount): void =>
+  ensure(BigNumber.from(calculateAmount(token)).lte(token.balance), `Insufficient ${token.name} balance`);

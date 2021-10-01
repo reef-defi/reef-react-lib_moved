@@ -1,9 +1,9 @@
 import { Signer } from '@reef-defi/evm-provider';
 import { Contract } from 'ethers';
-import { Network, Pool, Token } from '../state/types';
 import { ensure, uniqueCombinations } from '../utils/utils';
 import { ReefswapPair } from '../assets/abi/ReefswapPair';
 import { balanceOf, getReefswapFactory } from './rpc';
+import { Network, Token, Pool } from '..';
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 
@@ -11,9 +11,9 @@ const findPoolTokenAddress = async (
   address1: string,
   address2: string,
   signer: Signer,
-  network: Network,
+  factoryAddress: string
 ): Promise<string> => {
-  const reefswapFactory = getReefswapFactory(network.factoryAddress, signer);
+  const reefswapFactory = getReefswapFactory(factoryAddress, signer);
   const address = await reefswapFactory.getPair(address1, address2);
   return address;
 };
@@ -22,13 +22,13 @@ export const loadPool = async (
   token1: Token,
   token2: Token,
   signer: Signer,
-  network: Network,
+  factoryAddress: string
 ): Promise<Pool> => {
   const address = await findPoolTokenAddress(
     token1.address,
     token2.address,
     signer,
-    network,
+    factoryAddress,
   );
   ensure(address !== EMPTY_ADDRESS, 'Pool does not exist!');
   const contract = new Contract(address, ReefswapPair, signer);
@@ -82,9 +82,8 @@ export const loadPools = async (
     try {
       const [token1, token2] = tokenCombinations[index];
       /* eslint-disable no-await-in-loop */
-      const pool = await loadPool(token1, token2, signer, network);
+      const pool = await loadPool(token1, token2, signer, network.factoryAddress);
       /* eslint-disable no-await-in-loop */
-      // await ensurePoolBalance(pool);
       pools.push(pool);
     } catch (e) {}
   }

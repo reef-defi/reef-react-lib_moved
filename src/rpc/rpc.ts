@@ -37,5 +37,7 @@ export const balanceOf = async (
   return balance;
 };
 
-export const getReefswapRouter = (address: string, signer: Signer): Contract => new Contract(address, ReefswapRouter, signer);
-export const getReefswapFactory = (address: string, signer: Signer): Contract => new Contract(address, ReefswapFactory, signer);
+export const getReefswapRouter = (address: string, signer: Signer): Contract =>
+  new Contract(address, ReefswapRouter, signer);
+export const getReefswapFactory = (address: string, signer: Signer): Contract =>
+  new Contract(address, ReefswapFactory, signer);
