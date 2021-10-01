@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAsyncEffect } from '../../hooks';
-import { Token } from '../../state/types';
+import { Token } from '../../state';
 import { trim } from '../../utils';
 import { IconButton } from '../common/Button';
 import {
