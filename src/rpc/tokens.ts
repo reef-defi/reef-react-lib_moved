@@ -62,8 +62,7 @@ export const loadToken = async (address: string, signer: Signer, iconUrl: string
 };
 
 export const loadAccountTokens = async (signer: Signer, network: Network): Promise<TokenWithAmount[]> => {
-  // TODO remove
-  const signerAddress = await signer.getAddress();
+  const signerAddress = await signer.getAddress(); // '0x4a944a2b85afe9851bea6c33941f8adb85469d41';
   const rpc = axios.create({
     baseURL: network.reefscanUrl,
   });
