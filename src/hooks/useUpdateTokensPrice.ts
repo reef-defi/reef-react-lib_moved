@@ -1,11 +1,8 @@
 import { Signer } from '@reef-defi/evm-provider';
 import { useEffect, useRef, useState } from 'react';
-import { BigNumber } from 'ethers';
 import { retrieveReefCoingeckoPrice } from '../api';
 import { loadPool } from '../rpc';
-import {
-  Pool, reefTokenWithAmount, Token, TokenWithAmount,
-} from '../state';
+import { Pool, Token, TokenWithAmount } from '../state';
 import { ensureVoidRun } from '../utils';
 import { poolRatio } from '../utils/math';
 
@@ -20,17 +17,8 @@ interface UpdateTokensPriceHook {
   setToken2: (token: TokenWithAmount) => void;
 }
 
-const REEF_TOKEN = reefTokenWithAmount();
-
 export const useUpdateTokensPrice = ({
-  pool,
-  token1,
-  token2,
-  tokens,
-  signer,
-  factoryAddress,
-  setToken1,
-  setToken2,
+  pool, token1, token2, tokens, signer, factoryAddress, setToken1, setToken2,
 }: UpdateTokensPriceHook): boolean => {
   const mounted = useRef(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -43,39 +31,26 @@ export const useUpdateTokensPrice = ({
 
   useEffect(() => {
     const load = async (): Promise<void> => {
-      if (!pool || !signer) {
-        return;
-      }
+      if (!pool || !signer) { return; }
       try {
         mounted.current = true;
         setIsLoading(true);
         const reefPrice = await retrieveReefCoingeckoPrice();
+        const baseRatio = poolRatio(pool);
 
-        // const baseRatio = poolRatio(pool);
-        if (token1.address === REEF_TOKEN.address) {
-          const ratio = BigNumber.from(pool.reserve1).mul(1000000).div(pool.reserve2).toNumber() / 1000000;
-          updateTokens(reefPrice, reefPrice * ratio);
-        } else if (token2.address === REEF_TOKEN.address) {
-          const ratio = BigNumber.from(pool.reserve2).mul(1000000).div(pool.reserve1).toNumber() / 1000000;
-          updateTokens(reefPrice * ratio, reefPrice);
+        if (token1.name === 'REEF') {
+          updateTokens(reefPrice, reefPrice / baseRatio);
+        } else if (token2.name === 'REEF') {
+          updateTokens(reefPrice, reefPrice * baseRatio);
         } else {
-          const sellPool = await loadPool(
-            tokens[0],
-            token1,
-            signer,
-            factoryAddress,
-          );
-
-          const ratio = BigNumber.from(pool.reserve1).mul(1000000).div(pool.reserve2).toNumber() / 1000000;
+          // const sellPool = await poolContract(tokens[0], token1, signer, settings);
+          const sellPool = await loadPool(tokens[0], token1, signer, factoryAddress);
           const sellRatio = poolRatio(sellPool);
-          updateTokens(
-            reefPrice * sellRatio,
-            reefPrice * sellRatio * ratio,
-          );
+          updateTokens(reefPrice / sellRatio, reefPrice / sellRatio * baseRatio);
         }
       } catch (error) {
         console.error(error);
-        updateTokens(1, 1);
+        updateTokens(0, 0);
       } finally {
         ensureMount(setIsLoading, false);
       }

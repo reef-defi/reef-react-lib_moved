@@ -24,9 +24,9 @@ interface ColorText {
 }
 
 export const ColorText: React.FC<ColorText> = ({ children, color = 'success' }): JSX.Element => (
-  <div className={`user-select-none text-${color}`}>
+  <span className={`user-select-none text-${color}`}>
     {children}
-  </div>
+  </span>
 );
 
 export const MiniText: React.FC<unknown> = ({ children }): JSX.Element => (

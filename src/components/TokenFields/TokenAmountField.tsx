@@ -2,7 +2,7 @@ import React from 'react';
 import { TokenWithAmount, Token, Color } from '../../state';
 import { showBalance, toBalance } from '../../utils/math';
 import { SubCard } from '../common/Card';
-import { CenterColumn, FlexColumn } from '../common/Display';
+import { CenterColumn, FlexRow } from '../common/Display';
 import { InputAmount } from '../common/Input';
 import { ColorText, MiniText } from '../common/Text';
 import SelectToken from '../SelectToken';
@@ -26,7 +26,7 @@ const TokenAmountFieldBase: React.FC<TokenAmountFieldProps> = ({
 
   return (
     <SubCard>
-      <FlexColumn>
+      <FlexRow>
         <SelectToken
           id={id}
           tokens={tokens}
@@ -41,7 +41,7 @@ const TokenAmountFieldBase: React.FC<TokenAmountFieldProps> = ({
           placeholder={placeholder}
           onAmountChange={onAmountChange}
         />
-      </FlexColumn>
+      </FlexRow>
       <CenterColumn>
         {children}
       </CenterColumn>

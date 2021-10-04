@@ -1,4 +1,4 @@
-import { Networks } from '../state/types';
+import { Networks } from '../state';
 
 export interface ButtonStatus {
   text: string;

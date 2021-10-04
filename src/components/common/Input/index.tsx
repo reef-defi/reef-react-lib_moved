@@ -44,3 +44,40 @@ export const InputAmount = ({
     onChange={(event) => onAmountChange(event.target.value)}
   />
 );
+
+export const InputGroup: React.FC<unknown> = ({ children }): JSX.Element => (
+  <div className="input-group">
+    {children}
+  </div>
+);
+
+export const InputTextGroup: React.FC<unknown> = ({ children }): JSX.Element => (
+  <div className="input-group-text field-input border-rad ps-1">
+    {children}
+  </div>
+);
+
+interface NumberInput {
+  min?: number;
+  max?: number;
+  step?: number;
+  value: string;
+  className?: string;
+  placeholder?: string;
+  onChange: (value: string) => void;
+}
+
+export const NumberInput = ({
+  value, min, max, step, placeholder, onChange, className = '',
+}: NumberInput): JSX.Element => (
+  <input
+    min={min}
+    max={max}
+    step={step}
+    type="number"
+    value={value}
+    placeholder={placeholder}
+    onChange={(event) => onChange(event.target.value)}
+    className={`form-control field-input border-rad text-end ${className}`}
+  />
+);
