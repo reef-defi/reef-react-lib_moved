@@ -26,9 +26,9 @@ export const ConfirmLabel = ({
 );
 
 export const FormLabel: React.FC<unknown> = ({ children }): JSX.Element => (
-  <div className="form-label text-muted sub-text">
+  <label className="form-label text-muted sub-text d-flex flex-row">
     {children}
-  </div>
+  </label>
 );
 
 export const TransactionWarningLabel: React.FC<unknown> = ({ children }): JSX.Element => (

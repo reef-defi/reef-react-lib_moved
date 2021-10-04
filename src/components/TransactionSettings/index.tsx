@@ -2,14 +2,14 @@ import React from 'react';
 import {
   DEFAULT_DEADLINE, DEFAULT_SLIPPAGE_TOLERANCE, MAX_SLIPPAGE_TOLERANCE, Settings,
 } from '../../state';
-import { ButtonGroup, EmptyButton, PercentageButton } from '../common/Button';
+import { ButtonGroup, PercentageButton } from '../common/Button';
 import {
-  FlexColumn, FlexRow, Margin, MS, PT,
+  FlexRow, MS, PT,
 } from '../common/Display';
 import { DropdownButton, DropdownMenu } from '../common/Dropdown';
 import { GearIcon } from '../common/Icons';
 import { InputGroup, InputTextGroup, NumberInput } from '../common/Input';
-import { FormLabel, Label, TransactionWarningLabel } from '../common/Label';
+import { FormLabel, TransactionWarningLabel } from '../common/Label';
 import { MutedText, Title } from '../common/Text';
 import { QuestionTooltip } from '../common/Tooltip';
 
@@ -20,7 +20,7 @@ interface TransactionSettings {
   setSettings: (value: Settings) => void;
 }
 
-const TransactionSettings: React.FC<TransactionSettings> = ({
+export const TransactionSettings: React.FC<TransactionSettings> = ({
   settings, setSettings, id = 'settings', defaultSlippageTolerance = DEFAULT_SLIPPAGE_TOLERANCE,
 }): JSX.Element => (
   <ButtonGroup>
@@ -31,16 +31,10 @@ const TransactionSettings: React.FC<TransactionSettings> = ({
       <Title>Transaction settings</Title>
       <FormLabel>
         Slippage tolerance
-        <QuestionTooltip>
+        <QuestionTooltip id="slipperage-tolerance">
           Your transaction will revert if
-          {' '}
-          <br />
-          {' '}
           the price changes
-          {' '}
-          <br />
           unfacorably by more than
-          <br />
           this percentage.
         </QuestionTooltip>
       </FormLabel>
@@ -72,11 +66,9 @@ const TransactionSettings: React.FC<TransactionSettings> = ({
       </PT>
       <FormLabel>
         Deadline
-        <QuestionTooltip>
+        <QuestionTooltip id="deadline">
           Your transaction will revert if
-          <br />
           it is pending for more than
-          <br />
           this period or time.
         </QuestionTooltip>
       </FormLabel>
@@ -101,5 +93,3 @@ const TransactionSettings: React.FC<TransactionSettings> = ({
     </DropdownMenu>
   </ButtonGroup>
 );
-
-export default TransactionSettings;
