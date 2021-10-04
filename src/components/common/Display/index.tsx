@@ -39,3 +39,45 @@ export const Margin: React.FC<Size> = ({ children, size = '1' }): JSX.Element =>
     {children}
   </div>
 );
+
+export const MT: React.FC<Size> = ({children, size="1"}): JSX.Element => (
+  <div className={`mt-${size}`}>
+    {children}
+  </div>
+);
+export const ME: React.FC<Size> = ({children, size="1"}): JSX.Element => (
+  <div className={`me-${size}`}>
+    {children}
+  </div>
+);
+export const MB: React.FC<Size> = ({children, size="1"}): JSX.Element => (
+  <div className={`mb-${size}`}>
+    {children}
+  </div>
+);
+export const MS: React.FC<Size> = ({children, size="1"}): JSX.Element => (
+  <div className={`ms-${size}`}>
+    {children}
+  </div>
+);
+
+export const PT: React.FC<Size> = ({children, size="1"}): JSX.Element => (
+  <div className={`pt-${size}`}>
+    {children}
+  </div>
+);
+export const PE: React.FC<Size> = ({children, size="1"}): JSX.Element => (
+  <div className={`pe-${size}`}>
+    {children}
+  </div>
+);
+export const PB: React.FC<Size> = ({children, size="1"}): JSX.Element => (
+  <div className={`pb-${size}`}>
+    {children}
+  </div>
+);
+export const PS: React.FC<Size> = ({children, size="1"}): JSX.Element => (
+  <div className={`ps-${size}`}>
+    {children}
+  </div>
+);
