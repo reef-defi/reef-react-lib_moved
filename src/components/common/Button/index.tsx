@@ -41,7 +41,7 @@ interface IconButton {
   onClick?: () => void;
 }
 
-export const SwitchToken = ({
+export const SwitchTokenButton = ({
   addIcon,
   disabled,
   onClick,
@@ -69,6 +69,26 @@ export const IconButton: React.FC<IconButton> = ({
     className="btn btn-select border-rad px-2 py-1"
     onClick={onClick}
     data-bs-dismiss="modal"
+  >
+    {children}
+  </button>
+);
+
+export const ButtonGroup: React.FC<unknown> = ({children}): JSX.Element => (
+  <div className="btn-group">
+    {children}
+  </div>
+);
+
+interface PercentageButton {
+  percentage?: number;
+  onClick?: () => void;
+}
+export const PercentageButton: React.FC<PercentageButton> = ({children, percentage=Number.NaN, onClick}): JSX.Element => (
+  <button
+    type="button"
+    className={`btn ${Number.isNaN(percentage) ? 'btn-reef' : 'btn-secondary'} border-rad me-1`}
+    onClick={onClick}
   >
     {children}
   </button>
