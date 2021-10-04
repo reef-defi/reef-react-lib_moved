@@ -8,7 +8,7 @@ import { poolRatio } from '../utils/math';
 
 interface UpdateTokensPriceHook {
   pool?: Pool;
-  signer: Signer;
+  signer?: Signer;
   tokens: Token[];
   factoryAddress: string;
   token1: TokenWithAmount;
@@ -31,7 +31,7 @@ export const useUpdateTokensPrice = ({
 
   useEffect(() => {
     const load = async (): Promise<void> => {
-      if (!pool) { return; }
+      if (!pool || !signer) { return; }
       try {
         mounted.current = true;
         setIsLoading(true);

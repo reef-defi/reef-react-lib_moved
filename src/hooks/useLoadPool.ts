@@ -6,7 +6,7 @@ import { ensureVoidRun } from '../utils/utils';
 
 type LoadingPool = Pool | undefined;
 
-export const useLoadPool = (token1: Token, token2: Token, signer: Signer, factoryAddress: string): [LoadingPool, boolean] => {
+export const useLoadPool = (token1: Token, token2: Token, factoryAddress: string, signer?: Signer): [LoadingPool, boolean] => {
   const mounted = useRef(true);
 
   const [pool, setPool] = useState<Pool>();
@@ -16,7 +16,7 @@ export const useLoadPool = (token1: Token, token2: Token, signer: Signer, factor
 
   useEffect(() => {
     const load = async (): Promise<void> => {
-      if (!token1.address || !token2.address) { return; }
+      if (!token1.address || !token2.address || !signer) { return; }
       try {
         mounted.current = true;
         setIsLoading(true);

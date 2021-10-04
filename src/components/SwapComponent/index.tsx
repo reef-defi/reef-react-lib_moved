@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { BigNumber } from 'ethers';
 import {
-  createEmptyTokenWithAmount, defaultSettings, ensureTokenAmount, Network, Notify, Pool, ReefSigner, resolveSettings, Token, TokenWithAmount, toTokenAmount,
+  createEmptyTokenWithAmount, defaultSettings, ensureTokenAmount, Network, Notify, Pool, ReefSigner, reefTokenWithAmount, resolveSettings, Token, TokenWithAmount,
 } from '../../state';
 import { ButtonStatus, ensure } from '../../utils';
 import {
@@ -18,23 +18,23 @@ import {
 } from '../common/Card';
 import { TokenAmountFieldImpactPrice, TokenAmountFieldMax } from '../TokenFields';
 import { SwitchTokenButton } from '../common/Button';
-import TransactionSettings from '../TransactionSettings';
 import SwapConfirmationModal from './SwapConfirmationModal';
 import { CenterColumn, MT } from '../common/Display';
 import { OpenModalButton } from '../common/Modal';
 import { LoadingButtonIconWithText } from '../common/Loading';
+import { TransactionSettings } from '../TransactionSettings';
 
 interface SwapComponent {
   tokens: Token[];
   network: Network;
-  account: ReefSigner;
+  account?: ReefSigner;
   reloadTokens: () => void;
   notify: (message: string, type: Notify) => void;
 }
 
-const swapStatus = (sell: TokenWithAmount, buy: TokenWithAmount, isEvmClaimed: boolean, pool?: Pool): ButtonStatus => {
+const swapStatus = (sell: TokenWithAmount, buy: TokenWithAmount, isEvmClaimed?: boolean, pool?: Pool): ButtonStatus => {
   try {
-    ensure(isEvmClaimed, 'Bind account');
+    ensure(isEvmClaimed === true, 'Bind account');
     ensure(!sell.isEmpty, 'Select sell token');
     ensure(!buy.isEmpty, 'Select buy token');
     ensure(!!pool, 'Invalid pair');
@@ -86,27 +86,23 @@ const loadingStatus = (status: string, isPoolLoading: boolean, isPriceLoading: b
   return '';
 };
 
-const SwapComponent = ({
+export const SwapComponent = ({
   tokens, network, account, notify, reloadTokens,
 } : SwapComponent): JSX.Element => {
-  const { signer, isEvmClaimed, evmAddress } = account;
   const [buy, setBuy] = useState(createEmptyTokenWithAmount());
-  const [sell, setSell] = useState(toTokenAmount(tokens[0], { amount: '', price: 0, index: 0 }));
+  const [sell, setSell] = useState(reefTokenWithAmount());
   const [status, setStatus] = useState('');
   const [settings, setSettings] = useState(defaultSettings());
   const [isSwapLoading, setIsSwapLoading] = useState(false);
 
-  const [pool, isPoolLoading] = useLoadPool(sell, buy, signer, network.factoryAddress);
+  const [pool, isPoolLoading] = useLoadPool(sell, buy, network.factoryAddress, account?.signer);
 
   const { percentage, deadline } = resolveSettings(settings);
   const { text, isValid } = useMemo(
-    () => swapStatus(sell, buy, isEvmClaimed, pool),
-    [sell, buy, percentage, isEvmClaimed, pool],
+    () => swapStatus(sell, buy, account?.isEvmClaimed, pool),
+    [sell, buy, percentage, account?.isEvmClaimed, pool],
   );
 
-  // console.log(pool?.poolAddress);
-
-  // Updating user token balance.. its a bit hecky
   useUpdateBalance(buy, tokens, setBuy);
   useUpdateBalance(sell, tokens, setSell);
   const isPriceLoading = useUpdateTokensPrice({
@@ -114,7 +110,7 @@ const SwapComponent = ({
     token1: sell,
     token2: buy,
     tokens,
-    signer,
+    signer: account?.signer,
     factoryAddress: network.factoryAddress,
     setToken1: setSell,
     setToken2: setBuy,
@@ -163,7 +159,8 @@ const SwapComponent = ({
   };
 
   const onSwap = async (): Promise<void> => {
-    if (!isValid) { return; }
+    if (!isValid || !account) { return; }
+    const {signer, evmAddress} = account;
     try {
       setIsSwapLoading(true);
       ensureTokenAmount(sell);
@@ -235,5 +232,3 @@ const SwapComponent = ({
     </Card>
   );
 };
-
-export default SwapComponent;
