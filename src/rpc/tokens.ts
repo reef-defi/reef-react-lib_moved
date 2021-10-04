@@ -1,17 +1,7 @@
-import { Signer } from "@reef-defi/evm-provider";
-import { BasicToken, Network, Token, TokenWithAmount } from "../state";
-import { availableReefNetworks } from "../utils";
-import { calculateAmount } from "../utils/math";
-import { getContract } from "./rpc";
-
-// TODO Move and load from reefscan-api!
-export const loadVerifiedERC20Tokens = async ({ name }: Network): Promise<BasicToken[]> => {
-  switch (name) {
-    case 'testnet': return [...availableReefNetworks.tokens];
-    case 'mainnet': return [...availableReefNetworks.tokens];
-    default: throw new Error('Chain URL does not exist!');
-  }
-};
+import { Signer } from '@reef-defi/evm-provider';
+import { Token, TokenWithAmount } from '../state';
+import { calculateAmount } from '../utils/math';
+import { getContract } from './rpc';
 
 export const retrieveTokenAddresses = (tokens: Token[]): string[] => tokens.map((token) => token.address);
 

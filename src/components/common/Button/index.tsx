@@ -74,7 +74,7 @@ export const IconButton: React.FC<IconButton> = ({
   </button>
 );
 
-export const ButtonGroup: React.FC<unknown> = ({children}): JSX.Element => (
+export const ButtonGroup: React.FC<unknown> = ({ children }): JSX.Element => (
   <div className="btn-group">
     {children}
   </div>
@@ -84,7 +84,7 @@ interface PercentageButton {
   percentage?: number;
   onClick?: () => void;
 }
-export const PercentageButton: React.FC<PercentageButton> = ({children, percentage=Number.NaN, onClick}): JSX.Element => (
+export const PercentageButton: React.FC<PercentageButton> = ({ children, percentage = Number.NaN, onClick }): JSX.Element => (
   <button
     type="button"
     className={`btn ${Number.isNaN(percentage) ? 'btn-reef' : 'btn-secondary'} border-rad me-1`}

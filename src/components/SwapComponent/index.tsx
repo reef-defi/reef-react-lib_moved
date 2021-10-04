@@ -1,22 +1,28 @@
-import React, { useMemo, useState } from "react"
-import { createEmptyTokenWithAmount, defaultSettings, ensureTokenAmount, Network, Notify, Pool, ReefSigner, resolveSettings, Token, TokenWithAmount, toTokenAmount } from "../../state";
-import { ButtonStatus, ensure } from "../../utils";
-import { convert2Normal, calculateAmount, getOutputAmount, getInputAmount, calculateAmountWithPercentage, calculateDeadline, calculateImpactPercentage } from "../../utils/math";
+import React, { useMemo, useState } from 'react';
 import { BigNumber } from 'ethers';
-import { useLoadPool } from "../../hooks";
-import { getReefswapRouter } from "../../rpc";
-import { useUpdateBalance } from "../../hooks/useUpdateBalance";
-import { useUpdateSwapAmount } from "../../hooks/useUpdateAmount";
-import { useUpdateTokensPrice } from "../../hooks/useUpdateTokensPrice";
-import { approveTokenAmount } from "../../rpc/tokens";
-import { Card, CardHeader, CardHeaderBlank, CardTitle } from "../common/Card";
-import { TokenAmountFieldImpactPrice, TokenAmountFieldMax } from "../TokenFields";
-import { SwitchTokenButton } from "../common/Button";
-import TransactionSettings from "../TransactionSettings";
-import SwapConfirmationModal from "./SwapConfirmationModal";
-import { CenterColumn, MT } from "../common/Display";
-import { OpenModalButton } from "../common/Modal";
-import { LoadingButtonIconWithText } from "../common/Loading";
+import {
+  createEmptyTokenWithAmount, defaultSettings, ensureTokenAmount, Network, Notify, Pool, ReefSigner, resolveSettings, Token, TokenWithAmount, toTokenAmount,
+} from '../../state';
+import { ButtonStatus, ensure } from '../../utils';
+import {
+  convert2Normal, calculateAmount, getOutputAmount, getInputAmount, calculateAmountWithPercentage, calculateDeadline, calculateImpactPercentage,
+} from '../../utils/math';
+import { useLoadPool } from '../../hooks';
+import { getReefswapRouter } from '../../rpc';
+import { useUpdateBalance } from '../../hooks/useUpdateBalance';
+import { useUpdateSwapAmount } from '../../hooks/useUpdateAmount';
+import { useUpdateTokensPrice } from '../../hooks/useUpdateTokensPrice';
+import { approveTokenAmount } from '../../rpc/tokens';
+import {
+  Card, CardHeader, CardHeaderBlank, CardTitle,
+} from '../common/Card';
+import { TokenAmountFieldImpactPrice, TokenAmountFieldMax } from '../TokenFields';
+import { SwitchTokenButton } from '../common/Button';
+import TransactionSettings from '../TransactionSettings';
+import SwapConfirmationModal from './SwapConfirmationModal';
+import { CenterColumn, MT } from '../common/Display';
+import { OpenModalButton } from '../common/Modal';
+import { LoadingButtonIconWithText } from '../common/Loading';
 
 interface SwapComponent {
   tokens: Token[];
@@ -25,7 +31,6 @@ interface SwapComponent {
   reloadTokens: () => void;
   notify: (message: string, type: Notify) => void;
 }
-
 
 const swapStatus = (sell: TokenWithAmount, buy: TokenWithAmount, isEvmClaimed: boolean, pool?: Pool): ButtonStatus => {
   try {
@@ -81,8 +86,10 @@ const loadingStatus = (status: string, isPoolLoading: boolean, isPriceLoading: b
   return '';
 };
 
-const SwapComponent = ({tokens, network, account, notify, reloadTokens} : SwapComponent): JSX.Element => {
-  const {signer, isEvmClaimed, evmAddress} = account;
+const SwapComponent = ({
+  tokens, network, account, notify, reloadTokens,
+} : SwapComponent): JSX.Element => {
+  const { signer, isEvmClaimed, evmAddress } = account;
   const [buy, setBuy] = useState(createEmptyTokenWithAmount());
   const [sell, setSell] = useState(toTokenAmount(tokens[0], { amount: '', price: 0, index: 0 }));
   const [status, setStatus] = useState('');
@@ -176,9 +183,9 @@ const SwapComponent = ({tokens, network, account, notify, reloadTokens} : SwapCo
         calculateDeadline(deadline),
 
       );
-      notify("Swap complete!", "success")
+      notify('Swap complete!', 'success');
     } catch (error) {
-      notify(error.message, "error");
+      notify(error.message, 'error');
     } finally {
       // TODO move this out!
       reloadTokens();
@@ -186,7 +193,7 @@ const SwapComponent = ({tokens, network, account, notify, reloadTokens} : SwapCo
       setStatus('');
     }
   };
-  
+
   return (
     <Card>
       <CardHeader>
@@ -227,6 +234,6 @@ const SwapComponent = ({tokens, network, account, notify, reloadTokens} : SwapCo
       />
     </Card>
   );
-}
+};
 
 export default SwapComponent;

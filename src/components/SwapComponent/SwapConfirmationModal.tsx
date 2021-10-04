@@ -1,13 +1,13 @@
-import React from "react"
-import { TokenWithAmount } from "../../state";
-import { calculateUsdAmount, minimumRecieveAmount } from "../../utils/math";
-import { SwitchTokenButton } from "../common/Button";
-import { SubCard } from "../common/Card";
-import { Margin } from "../common/Display";
-import { ConfirmLabel } from "../common/Label";
-import ConfirmationModal from "../common/Modal";
-import { MutedText } from "../common/Text";
-import { TokenAmountView } from "../TokenFields";
+import React from 'react';
+import { TokenWithAmount } from '../../state';
+import { calculateUsdAmount, minimumRecieveAmount } from '../../utils/math';
+import { SwitchTokenButton } from '../common/Button';
+import { SubCard } from '../common/Card';
+import { Margin } from '../common/Display';
+import { ConfirmLabel } from '../common/Label';
+import ConfirmationModal from '../common/Modal';
+import { MutedText } from '../common/Text';
+import { TokenAmountView } from '../TokenFields';
 
 interface SwapConfirmationModal {
   id?: string;
@@ -17,7 +17,9 @@ interface SwapConfirmationModal {
   confirmFun: () => Promise<void>;
 }
 
-const SwapConfirmationModal = ({id, buy, sell, percentage, confirmFun} : SwapConfirmationModal): JSX.Element => (
+const SwapConfirmationModal = ({
+  id, buy, sell, percentage, confirmFun,
+} : SwapConfirmationModal): JSX.Element => (
   <ConfirmationModal id={id} title="Confirm Swap" confirmFun={confirmFun}>
     <TokenAmountView name={sell.name} amount={sell.amount} usdAmount={calculateUsdAmount(sell)} placeholder="From" />
     <SwitchTokenButton disabled />

@@ -9,4 +9,4 @@ export interface ReefSigner {
 }
 
 export type Color = 'success' | 'danger' | 'warning';
-export type Notify = "success" | "error" | "warning";
+export type Notify = 'success' | 'error' | 'warning';

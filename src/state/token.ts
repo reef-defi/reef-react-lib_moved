@@ -52,5 +52,4 @@ export const toTokenAmount = (token: Token, state: TokenState): TokenWithAmount 
   isEmpty: false,
 });
 
-export const ensureTokenAmount = (token: TokenWithAmount): void =>
-  ensure(BigNumber.from(calculateAmount(token)).lte(token.balance), `Insufficient ${token.name} balance`);
+export const ensureTokenAmount = (token: TokenWithAmount): void => ensure(BigNumber.from(calculateAmount(token)).lte(token.balance), `Insufficient ${token.name} balance`);

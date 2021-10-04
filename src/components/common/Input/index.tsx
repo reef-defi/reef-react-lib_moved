@@ -45,20 +45,19 @@ export const InputAmount = ({
   />
 );
 
-export const InputGroup: React.FC<unknown> = ({children}): JSX.Element => (
+export const InputGroup: React.FC<unknown> = ({ children }): JSX.Element => (
   <div className="input-group">
     {children}
   </div>
 );
 
-export const InputTextGroup: React.FC<unknown> = ({children}): JSX.Element => (
+export const InputTextGroup: React.FC<unknown> = ({ children }): JSX.Element => (
   <div className="input-group-text field-input border-rad ps-1">
     {children}
   </div>
 );
 
 interface NumberInput {
-  id?: string;
   min?: number;
   max?: number;
   step?: number;
@@ -68,7 +67,9 @@ interface NumberInput {
   onChange: (value: string) => void;
 }
 
-export const NumberInput = ({value, min, max, step, placeholder, onChange, className="", id="number-input"}: NumberInput): JSX.Element => (
+export const NumberInput = ({
+  value, min, max, step, placeholder, onChange, className = '',
+}: NumberInput): JSX.Element => (
   <input
     min={min}
     max={max}

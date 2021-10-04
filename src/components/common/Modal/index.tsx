@@ -54,7 +54,7 @@ interface OpenModalButton {
   disabled?: boolean;
 }
 
-export const OpenModalButton: React.FC<OpenModalButton> = ({children, id="open-modal-button", disabled}): JSX.Element => (
+export const OpenModalButton: React.FC<OpenModalButton> = ({ children, id = 'open-modal-button', disabled }): JSX.Element => (
   <button
     type="button"
     disabled={disabled}

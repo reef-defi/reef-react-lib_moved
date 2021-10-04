@@ -11,7 +11,7 @@ const findPoolTokenAddress = async (
   address1: string,
   address2: string,
   signer: Signer,
-  factoryAddress: string
+  factoryAddress: string,
 ): Promise<string> => {
   const reefswapFactory = getReefswapFactory(factoryAddress, signer);
   const address = await reefswapFactory.getPair(address1, address2);
@@ -22,7 +22,7 @@ export const loadPool = async (
   token1: Token,
   token2: Token,
   signer: Signer,
-  factoryAddress: string
+  factoryAddress: string,
 ): Promise<Pool> => {
   const address = await findPoolTokenAddress(
     token1.address,

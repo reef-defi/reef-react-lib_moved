@@ -1,4 +1,3 @@
-
 export interface Settings {
   gasLimit: string;
   percentage: number;

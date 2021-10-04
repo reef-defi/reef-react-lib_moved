@@ -1,4 +1,3 @@
-
 export type AvailableNetworks = 'mainnet' | 'testnet'
 
 export interface Network {
