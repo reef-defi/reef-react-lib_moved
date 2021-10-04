@@ -53,3 +53,16 @@ export const toTokenAmount = (token: Token, state: TokenState): TokenWithAmount 
 });
 
 export const ensureTokenAmount = (token: TokenWithAmount): void => ensure(BigNumber.from(calculateAmount(token)).lte(token.balance), `Insufficient ${token.name} balance`);
+
+export const reefTokenWithAmount = (): TokenWithAmount => toTokenAmount({
+    name: "REEF",
+    address: "0x0000000000000000000000000000000001000000",
+    iconUrl: "https://s2.coinmarketcap.com/static/img/coins/64x64/6951.png",
+    balance: BigNumber.from(0),
+    decimals: 18
+  }, {
+    amount: '',
+    index: -1,
+    price: 0
+  }
+);
