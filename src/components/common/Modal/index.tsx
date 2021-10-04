@@ -49,6 +49,22 @@ export const ModalClose = (): JSX.Element => (
   />
 );
 
+interface OpenModalButton {
+  id?: string;
+  disabled?: boolean;
+}
+
+export const OpenModalButton: React.FC<OpenModalButton> = ({children, id="open-modal-button", disabled}): JSX.Element => (
+  <button
+    type="button"
+    disabled={disabled}
+    data-bs-toggle="modal"
+    data-bs-target={`#${id}`}
+    className="btn btn-reef btn-lg border-rad w-100"
+  >
+    {children}
+  </button>
+);
 interface ConfirmationModal {
   id?: string;
   title: string;

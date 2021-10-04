@@ -24,3 +24,15 @@ export const ConfirmLabel = ({
     <span className={`${valueSize} my-auto`}>{value}</span>
   </div>
 );
+
+export const FormLabel: React.FC<unknown> = ({children}): JSX.Element => (
+  <div className="form-label text-muted sub-text">
+    {children}
+  </div>
+);
+
+export const TransactionWarningLabel: React.FC<unknown> = ({children}): JSX.Element => (
+  <span className="text-warn sub-text mx-auto">
+    {children}
+  </span>
+);
