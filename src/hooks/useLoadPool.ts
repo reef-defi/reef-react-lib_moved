@@ -2,12 +2,11 @@ import { Signer } from '@reef-defi/evm-provider';
 import { useRef, useState, useEffect } from 'react';
 import { Pool, Token } from '..';
 import { loadPool } from '../rpc/pools';
-import { Network } from '../state/types';
 import { ensureVoidRun } from '../utils/utils';
 
 type LoadingPool = Pool | undefined;
 
-export const useLoadPool = (token1: Token, token2: Token, signer: Signer, settings: Network): [LoadingPool, boolean] => {
+export const useLoadPool = (token1: Token, token2: Token, factoryAddress: string, signer?: Signer): [LoadingPool, boolean] => {
   const mounted = useRef(true);
 
   const [pool, setPool] = useState<Pool>();
@@ -17,11 +16,11 @@ export const useLoadPool = (token1: Token, token2: Token, signer: Signer, settin
 
   useEffect(() => {
     const load = async (): Promise<void> => {
-      if (!token1.address || !token2.address) { return; }
+      if (!token1.address || !token2.address || !signer) { return; }
       try {
         mounted.current = true;
         setIsLoading(true);
-        const foundPool = await loadPool(token1, token2, signer, settings);
+        const foundPool = await loadPool(token1, token2, signer, factoryAddress);
         ensureMounted(setPool, foundPool);
       } catch (e) {
         setPool(undefined);

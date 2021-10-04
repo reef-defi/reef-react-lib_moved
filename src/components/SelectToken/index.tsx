@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAsyncEffect } from '../../hooks';
-import { Token } from '../../state/types';
+import { Token } from '../../state';
 import { trim } from '../../utils';
 import { IconButton } from '../common/Button';
 import {
@@ -81,7 +81,7 @@ const SelectToken = ({
   }, [address]);
 
   return (
-    <>
+    <div>
       <button type="button" className={`btn btn-select border-rad ${fullWidth && 'w-100'} ${isEmpty ? 'btn-reef' : 'btn-token-select'}`} data-bs-toggle="modal" data-bs-target={`#${id}`}>
         {!isEmpty && <TokenIcon src={iconUrl} />}
         <div className={`my-auto ${!isEmpty ? 'mx-2' : 'me-2'}`}>
@@ -120,7 +120,7 @@ const SelectToken = ({
           </List>
         </ModalBody>
       </Modal>
-    </>
+    </div>
   );
 };
 
