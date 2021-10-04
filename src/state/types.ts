@@ -1,4 +1,3 @@
-import { BigNumber } from 'ethers';
 import { Signer } from '@reef-defi/evm-provider';
 
 export interface ReefSigner {
