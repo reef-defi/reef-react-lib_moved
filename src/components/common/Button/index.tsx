@@ -1,77 +1,56 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { BackIcon, DownArrowIcon, PlusIcon } from '../Icons'
-
-interface NavProps {
-  to: string
-  selected: boolean
-}
+import React from 'react';
+import { BackIcon, DownArrowIcon, PlusIcon } from '../Icons';
 
 interface ButtonProps {
-  onClick?: () => void
+  onClick?: () => void;
 }
 
 export const Button: React.FC<ButtonProps> = ({
   children,
-  onClick = () => {}
+  onClick = () => {},
 }): JSX.Element => (
-  <button type='button' className='btn btn-reef' onClick={onClick}>
+  <button type="button" className="btn btn-reef border-rad" onClick={onClick} data-bs-dismiss="modal">
     {children}
   </button>
-)
+);
 
-export const Empty: React.FC<ButtonProps> = ({
+export const EmptyButton: React.FC<ButtonProps> = ({
   children,
-  onClick = () => {}
+  onClick = () => {},
 }): JSX.Element => (
-  <button type='button' className='btn' onClick={onClick}>
+  <button type="button" className="btn" onClick={onClick}>
     {children}
   </button>
-)
-
-export const Nav: React.FC<NavProps> = ({
-  to,
-  children,
-  selected = false
-}): JSX.Element => (
-  <Link
-    to={to}
-    className={`border-rad h-100 fs-6 fw-bold px-3 py-2 ${
-      selected ? 'nav-selected' : 'nav-button'
-    }`}
-  >
-    {children}
-  </Link>
-)
+);
 
 // TODO maybe we do not need this one?
-export const Back = ({ onClick }: ButtonProps): JSX.Element => (
-  <Empty onClick={onClick}>
+export const BackButton = ({ onClick }: ButtonProps): JSX.Element => (
+  <EmptyButton onClick={onClick}>
     <BackIcon />
-  </Empty>
-)
+  </EmptyButton>
+);
 
 // TODO Move out or refactore!
 interface SwitchTokenButton {
-  addIcon?: boolean
-  disabled?: boolean
-  onClick?: () => void
+  addIcon?: boolean;
+  disabled?: boolean;
+  onClick?: () => void;
 }
 
 interface IconButton {
-  onClick?: () => void
+  onClick?: () => void;
 }
 
-export const SwitchToken = ({
+export const SwitchTokenButton = ({
   addIcon,
   disabled,
-  onClick
+  onClick,
 }: SwitchTokenButton): JSX.Element => (
-  <div className='d-flex justify-content-center'>
-    <div className='btn-content-field border-rad'>
+  <div className="d-flex justify-content-center">
+    <div className="btn-content-field border-rad">
       <button
-        type='button'
-        className='btn btn-field border-rad hover-border'
+        type="button"
+        className="btn btn-field border-rad hover-border"
         onClick={onClick}
         disabled={disabled}
       >
@@ -79,18 +58,38 @@ export const SwitchToken = ({
       </button>
     </div>
   </div>
-)
+);
 
-export const Icon: React.FC<IconButton> = ({
+export const IconButton: React.FC<IconButton> = ({
   onClick,
-  children
+  children,
 }): JSX.Element => (
   <button
-    type='button'
-    className='btn btn-select border-rad px-2 py-1'
+    type="button"
+    className="btn btn-select border-rad px-2 py-1"
     onClick={onClick}
-    data-bs-dismiss='modal'
+    data-bs-dismiss="modal"
   >
     {children}
   </button>
-)
+);
+
+export const ButtonGroup: React.FC<unknown> = ({ children }): JSX.Element => (
+  <div className="btn-group">
+    {children}
+  </div>
+);
+
+interface PercentageButton {
+  percentage?: number;
+  onClick?: () => void;
+}
+export const PercentageButton: React.FC<PercentageButton> = ({ children, percentage = Number.NaN, onClick }): JSX.Element => (
+  <button
+    type="button"
+    className={`btn ${Number.isNaN(percentage) ? 'btn-reef' : 'btn-secondary'} border-rad me-1`}
+    onClick={onClick}
+  >
+    {children}
+  </button>
+);
