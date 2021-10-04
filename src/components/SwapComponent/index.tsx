@@ -160,7 +160,7 @@ export const SwapComponent = ({
 
   const onSwap = async (): Promise<void> => {
     if (!isValid || !account) { return; }
-    const {signer, evmAddress} = account;
+    const { signer, evmAddress } = account;
     try {
       setIsSwapLoading(true);
       ensureTokenAmount(sell);
