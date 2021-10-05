@@ -1,11 +1,25 @@
 import { Signer } from '@reef-defi/evm-provider';
 import { BigNumber } from 'ethers';
 import axios, { AxiosResponse } from 'axios';
+import { calculateAmount } from '../utils/math';
 import { getContract } from './rpc';
+import { getTokenListPrices } from '../api/prices';
 import {
   BasicToken, Network, Token, TokenState, TokenWithAmount,
-} from '../state/types';
-import { getTokenListPrices } from '../api/prices';
+} from '../state';
+
+export const retrieveTokenAddresses = (tokens: Token[]): string[] => tokens.map((token) => token.address);
+
+export const approveTokenAmount = async (token: TokenWithAmount, routerAddress: string, signer: Signer): Promise<void> => {
+  const contract = await getContract(token.address, signer);
+  const bnAmount = calculateAmount(token);
+  await contract.approve(routerAddress, bnAmount);
+};
+
+export const approveAmount = async (from: string, to: string, amount: string, signer: Signer): Promise<void> => {
+  const contract = await getContract(from, signer);
+  await contract.approve(to, amount);
+};
 
 interface AccountTokensRes {
   data: {
@@ -42,8 +56,6 @@ export const toTokenAmount = (token: Token, state: TokenState): TokenWithAmount 
 // TODO fetch from reefscan
 export const loadVerifiedERC20Tokens = async (): Promise<BasicToken[]> => [];
 
-export const retrieveTokenAddresses = (tokens: Token[]): string[] => tokens.map((token) => token.address);
-
 export const loadToken = async (address: string, signer: Signer, iconUrl: string): Promise<Token> => {
   const token = await getContract(address, signer);
 
@@ -62,7 +74,7 @@ export const loadToken = async (address: string, signer: Signer, iconUrl: string
 };
 
 export const loadAccountTokens = async (signer: Signer, network: Network): Promise<TokenWithAmount[]> => {
-  const signerAddress = await signer.getAddress(); // '0x4a944a2b85afe9851bea6c33941f8adb85469d41';
+  const signerAddress = await signer.getAddress();
   const rpc = axios.create({
     baseURL: network.reefscanUrl,
   });
