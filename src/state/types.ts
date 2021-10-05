@@ -8,11 +8,5 @@ export interface ReefSigner {
   isEvmClaimed: boolean;
 }
 
-export interface TokenState {
-  index: number;
-  amount: string;
-  price: number;
-}
-
 export type Color = 'success' | 'danger' | 'warning';
 export type Notify = 'success' | 'error' | 'warning';
