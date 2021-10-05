@@ -1,14 +1,10 @@
 {
   "name": "@reef-defi/react-lib",
   "version": "1.0.0",
-  "private": false,
   "description": "Reef React Library",
   "author": "Frenkiee",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/reef-defi/reef-react-lib.git"
-  },
+  "repository": "git@github.com:reef-defi/reef-react-lib.git",
   "main": "dist/index.js",
   "module": "dist/index.modern.js",
   "source": "src/index.tsx",
