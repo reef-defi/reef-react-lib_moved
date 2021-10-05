@@ -1,6 +1,6 @@
 import { BigNumber } from 'ethers';
-import { Pool, Token, TokenWithAmount } from '..';
 import { ensure } from './utils';
+import { Pool, Token, TokenWithAmount } from '../state';
 
 const findDecimalPoint = (amount: string): number => {
   const { length } = amount;
