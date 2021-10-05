@@ -5,7 +5,7 @@ import { calculateAmount } from '../utils/math';
 import { getContract } from './rpc';
 import { getTokenListPrices } from '../api/prices';
 import {
-  BasicToken, Network, Token, TokenState, TokenWithAmount,
+  BasicToken, createEmptyToken, Network, Token, TokenState, TokenWithAmount,
 } from '../state';
 
 export const retrieveTokenAddresses = (tokens: Token[]): string[] => tokens.map((token) => token.address);
@@ -40,14 +40,6 @@ interface AccountBalances {
 interface AccountBalancesRes {
   data: AccountBalances
 }
-
-export const createEmptyToken = (): Token => ({
-  name: 'Select token',
-  address: '',
-  balance: BigNumber.from('0'),
-  decimals: -1,
-  iconUrl: '',
-});
 
 export const createEmptyTokenWithAmount = (): TokenWithAmount => ({
   ...createEmptyToken(),

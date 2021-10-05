@@ -3,8 +3,6 @@ import { BigNumber, Contract } from 'ethers';
 import { ERC20 } from '../assets/abi/ERC20';
 import { ReefswapFactory } from '../assets/abi/ReefswapFactory';
 import { ReefswapRouter } from '../assets/abi/ReefswapRouter';
-import { TokenWithAmount } from '../state/types';
-import { calculateAmount } from '../utils/math';
 
 export const checkIfERC20ContractExist = async (
   address: string,
@@ -41,14 +39,3 @@ export const balanceOf = async (
 
 export const getReefswapRouter = (address: string, signer: Signer): Contract => new Contract(address, ReefswapRouter, signer);
 export const getReefswapFactory = (address: string, signer: Signer): Contract => new Contract(address, ReefswapFactory, signer);
-
-export const approveTokenAmount = async (token: TokenWithAmount, routerAddress: string, signer: Signer): Promise<void> => {
-  const contract = await getContract(token.address, signer);
-  const bnAmount = calculateAmount(token);
-  await contract.approve(routerAddress, bnAmount);
-};
-
-export const approveAmount = async (from: string, to: string, amount: string, signer: Signer): Promise<void> => {
-  const contract = await getContract(from, signer);
-  await contract.approve(to, amount);
-};
