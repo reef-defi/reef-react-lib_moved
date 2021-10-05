@@ -1,6 +1,6 @@
 import { Signer } from '@reef-defi/evm-provider';
 import { BigNumber } from 'ethers';
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import { calculateAmount } from '../utils/math';
 import { getContract } from './rpc';
 import { getTokenListPrices } from '../api/prices';
@@ -21,15 +21,24 @@ export const approveAmount = async (from: string, to: string, amount: string, si
   await contract.approve(to, amount);
 };
 
-interface AccountTokensRes {
-  data: {
-    // eslint-disable-next-line camelcase
-    account_id: string;
-    // eslint-disable-next-line camelcase
-    evm_address: string;
-    // eslint-disable-next-line camelcase
-    balances: { contract_id: string, balance: string, decimals: number, symbol: string }[]
-  }
+interface AccountTokenBalance {
+// eslint-disable-next-line camelcase
+  contract_id: string,
+  balance: string,
+  decimals: number,
+  symbol: string
+}
+
+interface AccountBalances {
+  // eslint-disable-next-line camelcase
+  account_id: string;
+  // eslint-disable-next-line camelcase
+  evm_address: string;
+  balances: AccountTokenBalance[]
+}
+
+interface AccountBalancesRes {
+  data: AccountBalances
 }
 
 export const createEmptyToken = (): Token => ({
@@ -79,15 +88,16 @@ export const loadAccountTokens = async (signer: Signer, network: Network): Promi
     baseURL: network.reefscanUrl,
   });
   const getAccountTokens = async (address: string): Promise<TokenWithAmount[]> => rpc
-    .post<void, AxiosResponse<AccountTokensRes>>('/api/account/tokens', { account: address })
+    .post<void, AccountBalancesRes>('/api/account/tokens', { account: address })
+    .then((res) => res.data)
     .then(
-      async ({ data }) => {
-        if (!data || !data.data || !data.data.balances) {
+      async (accountBalances: AccountBalances) => {
+        if (!accountBalances || !accountBalances.balances) {
           return [];
         }
-        const tokenSymbols = data.data.balances.map((tkn) => tkn.symbol);
+        const tokenSymbols = accountBalances.balances.map((tkn: AccountTokenBalance) => tkn.symbol);
         const prices = await getTokenListPrices(tokenSymbols);
-        return data.data.balances.map((resBal) => ({
+        return accountBalances.balances.map((resBal: AccountTokenBalance) => ({
           address: resBal.contract_id,
           name: resBal.symbol,
           amount: resBal.balance,
