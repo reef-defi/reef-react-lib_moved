@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useAsyncEffect } from '../../hooks';
 import { Token } from '../../state';
-import { trim } from '../../utils';
+import { toBalance, trim } from '../../utils';
 import { IconButton } from '../common/Button';
 import {
-  CenterRow, FlexColumn, FlexRow, Margin,
+  CenterRow, ContentEnd, FlexColumn, FlexRow, Margin, MS,
 } from '../common/Display';
 import { TokenIcon, DownIcon } from '../common/Icons';
 import { Input } from '../common/Input';
@@ -14,7 +14,7 @@ import {
   Modal, ModalBody, ModalClose, ModalHeader,
 } from '../common/Modal';
 import {
-  Title, Text, LeadText, MiniText,
+  Title, Text, LeadText, MiniText, MutedText,
 } from '../common/Text';
 import { QuestionTooltip } from '../common/Tooltip';
 
@@ -43,23 +43,26 @@ const SelectToken = ({
   const tokensView = tokens
     .filter((token) => token.name.startsWith(address) || token.address.startsWith(address))
     .map((token) => (
-      <ListItem key={token.address}>
+      <ListItem key={token.address} onClick={() => onTokenSelect(token)}>
         <FlexRow>
           <CenterRow>
             <TokenIcon src={token.iconUrl} />
           </CenterRow>
-          <Margin size="3">
+          <MS size="3">
             <FlexColumn>
               <LeadText>{token.name}</LeadText>
-              <MiniText>{trim(token.address, 20)}</MiniText>
+              <MutedText>
+                <MiniText>{trim(token.address, 20)}</MiniText>
+              </MutedText>
             </FlexColumn>
-          </Margin>
-          <CenterRow>
-            <Text>
-              {}
-              Balance TODO!
-            </Text>
-          </CenterRow>
+          </MS>
+          <ContentEnd>
+            <CenterRow>
+              <Text>
+                {toBalance(token).toFixed(4)}
+              </Text>
+            </CenterRow>
+          </ContentEnd>
         </FlexRow>
       </ListItem>
     ));
@@ -69,7 +72,9 @@ const SelectToken = ({
     .map((token) => (
       <IconButton onClick={() => onTokenSelect(token)} key={token.address}>
         <TokenIcon src={token.iconUrl} />
-        <Text>{token.name}</Text>
+        <MS size="2">
+          <Text>{token.name}</Text>
+        </MS>
       </IconButton>
     ));
 
@@ -102,13 +107,15 @@ const SelectToken = ({
             placeholder="Search token name or address"
           />
           <Margin size="3">
-            Common bases
-            <QuestionTooltip>
-              These tokens are commonly
-              {' '}
-              <br />
-              paired with other tokens.
-            </QuestionTooltip>
+            <FlexRow>
+              Common bases
+              <QuestionTooltip>
+                These tokens are commonly
+                {' '}
+                <br />
+                paired with other tokens.
+              </QuestionTooltip>
+            </FlexRow>
           </Margin>
           <Margin>
             {commonBasesView}
