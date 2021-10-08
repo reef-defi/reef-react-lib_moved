@@ -1,7 +1,7 @@
 import { Signer } from '@reef-defi/evm-provider';
 import { calculateAmount } from '../utils/math';
 import { getContract } from './rpc';
-import {BasicToken, Token, TokenWithAmount} from '../state';
+import { BasicToken, Token, TokenWithAmount } from '../state';
 
 export const retrieveTokenAddresses = (tokens: Token[]): string[] => tokens.map((token) => token.address);
 

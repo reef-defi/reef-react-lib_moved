@@ -10,7 +10,7 @@ export const List: React.FC<unknown> = ({ children }): JSX.Element => (
   </ul>
 );
 
-export const ListItem: React.FC<ListItem> = ({ children, onClick=() => {} }): JSX.Element => (
+export const ListItem: React.FC<ListItem> = ({ children, onClick = () => {} }): JSX.Element => (
   <li
     className="list-group-item list-group-item-action d-flex justify-content-between"
     onClick={onClick}

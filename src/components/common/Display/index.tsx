@@ -30,7 +30,7 @@ export const ContentBetween: React.FC<unknown> = ({ children }): JSX.Element => 
   </div>
 );
 
-export const ContentEnd: React.FC<unknown> = ({children}): JSX.Element => (
+export const ContentEnd: React.FC<unknown> = ({ children }): JSX.Element => (
   <div className="d-flex justify-content-end w-100">
     {children}
   </div>
@@ -67,13 +67,13 @@ export const MS: React.FC<Size> = ({ children, size = '1' }): JSX.Element => (
   </div>
 );
 
-export const MX: React.FC<Size> = ({children, size='auto'}): JSX.Element => (
+export const MX: React.FC<Size> = ({ children, size = 'auto' }): JSX.Element => (
   <div className={`mx-${size}`}>
     {children}
   </div>
 );
 
-export const PY: React.FC<Size> = ({children, size="auto"}): JSX.Element => (
+export const PY: React.FC<Size> = ({ children, size = 'auto' }): JSX.Element => (
   <div className={`py-${size}`}>
     {children}
   </div>
