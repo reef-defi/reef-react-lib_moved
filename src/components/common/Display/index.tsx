@@ -1,7 +1,7 @@
 import React from 'react';
 
 export const FlexRow: React.FC<unknown> = ({ children }): JSX.Element => (
-  <div className="d-flex flex-row">
+  <div className="d-flex flex-row w-100">
     {children}
   </div>
 );
@@ -30,8 +30,14 @@ export const ContentBetween: React.FC<unknown> = ({ children }): JSX.Element => 
   </div>
 );
 
+export const ContentEnd: React.FC<unknown> = ({ children }): JSX.Element => (
+  <div className="d-flex justify-content-end w-100">
+    {children}
+  </div>
+);
+
 interface Size {
-  size?: '1' | '2' | '3' | '4' | '5' | '6';
+  size?: '1' | '2' | '3' | '4' | '5' | '6' | 'auto';
 }
 
 export const Margin: React.FC<Size> = ({ children, size = '1' }): JSX.Element => (
@@ -57,6 +63,18 @@ export const MB: React.FC<Size> = ({ children, size = '1' }): JSX.Element => (
 );
 export const MS: React.FC<Size> = ({ children, size = '1' }): JSX.Element => (
   <div className={`ms-${size}`}>
+    {children}
+  </div>
+);
+
+export const MX: React.FC<Size> = ({ children, size = 'auto' }): JSX.Element => (
+  <div className={`mx-${size}`}>
+    {children}
+  </div>
+);
+
+export const PY: React.FC<Size> = ({ children, size = 'auto' }): JSX.Element => (
+  <div className={`py-${size}`}>
     {children}
   </div>
 );

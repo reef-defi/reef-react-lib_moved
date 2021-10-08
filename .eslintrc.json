@@ -25,6 +25,7 @@
     "no-use-before-define": "off",
     "no-mixed-operators": "warn",
     "jsx-a11y/interactive-supports-focus": "warn",
+    "jsx-a11y/no-noninteractive-element-interactions": "warn",
     "no-unused-expressions": ["error", { "allowShortCircuit": true }],
     "react/no-unused-prop-types": "warn",
     "@typescript-eslint/no-empty-function": "warn",
