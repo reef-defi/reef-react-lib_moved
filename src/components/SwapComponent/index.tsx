@@ -7,7 +7,7 @@ import { ButtonStatus, ensure } from '../../utils';
 import {
   convert2Normal, calculateAmount, getOutputAmount, getInputAmount, calculateAmountWithPercentage, calculateDeadline, calculateImpactPercentage,
 } from '../../utils/math';
-import { useLoadPool } from '../../hooks';
+import { useLoadPool } from '../../hooks/useLoadPool';
 import { getReefswapRouter } from '../../rpc';
 import { useUpdateBalance } from '../../hooks/useUpdateBalance';
 import { useUpdateSwapAmount } from '../../hooks/useUpdateAmount';
@@ -192,43 +192,47 @@ export const SwapComponent = ({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardHeaderBlank />
-        <CardTitle title="Swap" />
-        <TransactionSettings settings={settings} setSettings={setSettings} />
-      </CardHeader>
+    <CenterColumn>
+      <div style={{ minWidth: '500px' }}>
+        <Card>
+          <CardHeader>
+            <CardHeaderBlank />
+            <CardTitle title="Swap" />
+            <TransactionSettings settings={settings} setSettings={setSettings} />
+          </CardHeader>
 
-      <TokenAmountFieldMax
-        token={sell}
-        tokens={tokens}
-        id="sell-token-field"
-        onAmountChange={setSellAmount}
-        onTokenSelect={changeSellToken}
-      />
-      <SwitchTokenButton onClick={onSwitch} />
-      <TokenAmountFieldImpactPrice
-        token={buy}
-        tokens={tokens}
-        id="buy-token-field"
-        percentage={calculateImpactPercentage(sell, buy)}
-        onAmountChange={setBuyAmount}
-        onTokenSelect={changeBuyToken}
-      />
-      <MT size="2">
-        <CenterColumn>
-          <OpenModalButton id="swapModalToggle">
-            {isLoading ? <LoadingButtonIconWithText text={loadingStatus(status, isPoolLoading, isPriceLoading)} /> : text}
-          </OpenModalButton>
-        </CenterColumn>
-      </MT>
-      <SwapConfirmationModal
-        buy={buy}
-        sell={sell}
-        id="swapModalToggle"
-        percentage={settings.percentage}
-        confirmFun={onSwap}
-      />
-    </Card>
+          <TokenAmountFieldMax
+            token={sell}
+            tokens={tokens}
+            id="sell-token-field"
+            onAmountChange={setSellAmount}
+            onTokenSelect={changeSellToken}
+          />
+          <SwitchTokenButton onClick={onSwitch} />
+          <TokenAmountFieldImpactPrice
+            token={buy}
+            tokens={tokens}
+            id="buy-token-field"
+            percentage={calculateImpactPercentage(sell, buy)}
+            onAmountChange={setBuyAmount}
+            onTokenSelect={changeBuyToken}
+          />
+          <MT size="2">
+            <CenterColumn>
+              <OpenModalButton id="swapModalToggle">
+                {isLoading ? <LoadingButtonIconWithText text={loadingStatus(status, isPoolLoading, isPriceLoading)} /> : text}
+              </OpenModalButton>
+            </CenterColumn>
+          </MT>
+          <SwapConfirmationModal
+            buy={buy}
+            sell={sell}
+            id="swapModalToggle"
+            percentage={settings.percentage}
+            confirmFun={onSwap}
+          />
+        </Card>
+      </div>
+    </CenterColumn>
   );
 };
