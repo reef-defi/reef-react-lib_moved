@@ -3,7 +3,7 @@ import { Contract } from 'ethers';
 import { ensure, uniqueCombinations } from '../utils/utils';
 import { ReefswapPair } from '../assets/abi/ReefswapPair';
 import { balanceOf, getReefswapFactory } from './rpc';
-import { Network, Token, Pool } from '..';
+import { Token, Pool } from '..';
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 
@@ -74,7 +74,7 @@ export const loadPool = async (
 export const loadPools = async (
   tokens: Token[],
   signer: Signer,
-  network: Network,
+  factoryAddress: string,
 ): Promise<Pool[]> => {
   const tokenCombinations = uniqueCombinations(tokens);
   const pools: Pool[] = [];
@@ -82,7 +82,7 @@ export const loadPools = async (
     try {
       const [token1, token2] = tokenCombinations[index];
       /* eslint-disable no-await-in-loop */
-      const pool = await loadPool(token1, token2, signer, network.factoryAddress);
+      const pool = await loadPool(token1, token2, signer, factoryAddress);
       /* eslint-disable no-await-in-loop */
       pools.push(pool);
     } catch (e) {}
