@@ -14,7 +14,7 @@ export default List;
 export const ListItem: React.FC<ListItem> = ({ children, onClick}): JSX.Element => (
   <li
     onClick={onClick}
-    className={`list-group-item list-group-item-action d-flex justify-content-between border-rad ${onClick && 'pointer'}`}
+    className={`list-group-item d-flex justify-content-between border-rad ${onClick && 'pointer'}`}
   >
     {children}
   </li>
