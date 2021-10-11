@@ -54,6 +54,13 @@ export const DownIcon = ({ small }: BaseIcon): JSX.Element => (
   </Icon>
 );
 
+export const UpIcon = ({small}: BaseIcon): JSX.Element => (
+  <Icon className="bi-chevron-up" small={small}>
+    <path fillRule="evenodd"
+    d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"/>
+  </Icon>
+);
+
 export const DownArrowIcon = ({ small }: BaseIcon): JSX.Element => (
   <Icon className="bi-arrow-down-short" small={small}>
     <path

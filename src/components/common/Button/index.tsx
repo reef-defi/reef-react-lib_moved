@@ -5,11 +5,6 @@ interface ButtonProps {
   onClick?: () => void;
 }
 
-export interface ButtonStatus {
-  text: string;
-  isValid: boolean;
-}
-
 export const Button: React.FC<ButtonProps> = ({
   children,
   onClick = () => {},
@@ -97,3 +92,13 @@ export const PercentageButton: React.FC<PercentageButton> = ({ children, percent
     {children}
   </button>
 );
+
+export const DangerButton: React.FC<ButtonProps> = ({children, onClick}): JSX.Element => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="btn btn-danger border-rad"
+  >
+    {children}
+  </button>
+)

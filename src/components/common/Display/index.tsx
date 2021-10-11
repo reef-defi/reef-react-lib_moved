@@ -18,6 +18,12 @@ export const FlexColumn: React.FC<unknown> = ({ children }): JSX.Element => (
   </div>
 );
 
+export const FullColumn: React.FC<unknown> = ({children}): JSX.Element => (
+  <div className="d-flex flex-column w-100">
+    {children}
+  </div>
+);
+
 export const CenterRow: React.FC<unknown> = ({ children }): JSX.Element => (
   <div className="my-auto">
     {children}
