@@ -1,6 +1,12 @@
 import React from 'react';
 
 export const FlexRow: React.FC<unknown> = ({ children }): JSX.Element => (
+  <div className="d-flex flex-row">
+    {children}
+  </div>
+);
+
+export const FullRow: React.FC<unknown> = ({children}): JSX.Element => (
   <div className="d-flex flex-row w-100">
     {children}
   </div>
@@ -25,13 +31,23 @@ export const CenterColumn: React.FC<unknown> = ({ children }): JSX.Element => (
 );
 
 export const ContentBetween: React.FC<unknown> = ({ children }): JSX.Element => (
-  <div className="d-flex justify-content-between">
+  <div className="d-flex justify-content-between w-100">
     {children}
   </div>
 );
 
 export const ContentEnd: React.FC<unknown> = ({ children }): JSX.Element => (
   <div className="d-flex justify-content-end w-100">
+    {children}
+  </div>
+);
+
+interface MinWidth {
+  size: number;
+}
+
+export const MinWidth: React.FC<MinWidth> = ({children, size}): JSX.Element => (
+  <div style={{ minWidth: `${size}px`}}>
     {children}
   </div>
 );
