@@ -136,7 +136,7 @@ interface TokenIcon extends BaseIcon {
 }
 
 export const TokenIcon = ({ src }: TokenIcon): JSX.Element => (
-  <div className="d-flex my-auto">
+  <div className="d-flex my-auto user-select-none">
     {src === '' ? (
       <DefaultTokenIcon />
     ) : (

@@ -14,7 +14,7 @@ export const Button: React.FC<ButtonProps> = ({
   children,
   onClick = () => {},
 }): JSX.Element => (
-  <button type="button" className="btn btn-reef border-rad" onClick={onClick} data-bs-dismiss="modal">
+  <button type="button" className="btn btn-reef border-rad" onClick={onClick}>
     {children}
   </button>
 );
@@ -71,9 +71,8 @@ export const IconButton: React.FC<IconButton> = ({
 }): JSX.Element => (
   <button
     type="button"
-    className="btn btn-select border-rad px-2 py-1"
     onClick={onClick}
-    data-bs-dismiss="modal"
+    className="btn btn-select border-rad px-2 py-1"
   >
     {children}
   </button>
