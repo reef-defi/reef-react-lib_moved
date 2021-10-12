@@ -48,6 +48,7 @@ export const ContentEnd: React.FC<unknown> = ({ children }): JSX.Element => (
   </div>
 );
 
+
 interface MinWidth {
   size: number;
 }
@@ -118,6 +119,12 @@ export const PB: React.FC<Size> = ({ children, size = '1' }): JSX.Element => (
 );
 export const PS: React.FC<Size> = ({ children, size = '1' }): JSX.Element => (
   <div className={`ps-${size}`}>
+    {children}
+  </div>
+);
+
+export const Border: React.FC<Size> = ({children, size="1"}): JSX.Element => (
+  <div className={`border border-rad p-${size}`}>
     {children}
   </div>
 );

@@ -1,4 +1,5 @@
 import React from 'react';
+import Identicon from '@polkadot/react-identicon';
 
 interface BaseIcon {
   small?: boolean;
@@ -155,3 +156,17 @@ export const TokenIcon = ({ src }: TokenIcon): JSX.Element => (
     )}
   </div>
 );
+
+interface ReefAddressIcon {
+  address: string;
+}
+
+export const ReefAddressIcon = ({address}: ReefAddressIcon): JSX.Element => (
+  <div className="rounded-circle bg-white">
+    <Identicon
+      value={address}
+      size={30}
+      theme="substrate"
+    />
+  </div>
+)
