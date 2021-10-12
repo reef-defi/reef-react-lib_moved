@@ -93,7 +93,7 @@ export const PercentageButton: React.FC<PercentageButton> = ({ children, percent
   </button>
 );
 
-export const DangerButton: React.FC<ButtonProps> = ({children, onClick}): JSX.Element => (
+export const DangerButton: React.FC<ButtonProps> = ({ children, onClick }): JSX.Element => (
   <button
     type="button"
     onClick={onClick}
@@ -101,4 +101,4 @@ export const DangerButton: React.FC<ButtonProps> = ({children, onClick}): JSX.El
   >
     {children}
   </button>
-)
+);

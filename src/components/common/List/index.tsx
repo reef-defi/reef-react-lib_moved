@@ -11,7 +11,7 @@ const List: React.FC<unknown> = ({ children }): JSX.Element => (
 );
 export default List;
 
-export const ListItem: React.FC<ListItem> = ({ children, onClick}): JSX.Element => (
+export const ListItem: React.FC<ListItem> = ({ children, onClick }): JSX.Element => (
   <li
     onClick={onClick}
     className={`list-group-item d-flex justify-content-between border-rad ${onClick && 'pointer'}`}
@@ -20,7 +20,7 @@ export const ListItem: React.FC<ListItem> = ({ children, onClick}): JSX.Element 
   </li>
 );
 
-export const ListItemDismissModal: React.FC<ListItem> = ({children, onClick}): JSX.Element => (
+export const ListItemDismissModal: React.FC<ListItem> = ({ children, onClick }): JSX.Element => (
   <li
     onClick={onClick}
     data-bs-dismiss="modal"

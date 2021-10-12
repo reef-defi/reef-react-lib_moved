@@ -1,13 +1,21 @@
-import React from "react"
+import React from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { ReefSigner } from "../../state";
-import { trim } from "../../utils";
-import { Border, ContentBetween, FlexRow, Margin, MT, MX } from "../common/Display";
-import { BackIcon, CloseIcon, CopyIcon, ExploreIcon, ReefAddressIcon } from "../common/Icons";
-import { ListItem } from "../common/List";
-import {Modal, ModalBody, ModalClose, ModalHeader} from "../common/Modal";
-import { LeadText, MiniText, MutedText, Title } from "../common/Text";
-import AccountInlineInfo from "./AccountInlineInfo";
+import { ReefSigner } from '../../state';
+import { trim } from '../../utils';
+import {
+  Border, ContentBetween, FlexRow, Margin, MT, MX,
+} from '../common/Display';
+import {
+  BackIcon, CloseIcon, CopyIcon, ExploreIcon, ReefAddressIcon,
+} from '../common/Icons';
+import { ListItem } from '../common/List';
+import {
+  Modal, ModalBody, ModalClose, ModalHeader,
+} from '../common/Modal';
+import {
+  LeadText, MiniText, MutedText, Title,
+} from '../common/Text';
+import AccountInlineInfo from './AccountInlineInfo';
 
 interface AccountSelector {
   reefscanUrl: string;
@@ -16,11 +24,13 @@ interface AccountSelector {
   selectAccount: (index: number) => void;
 }
 
-export const AccountSelector = ({selectedSigner, accounts, reefscanUrl, selectAccount} : AccountSelector): JSX.Element => {
-  const name = selectedSigner ? selectedSigner.name : "";
-  const address = selectedSigner ? selectedSigner.address : "";
-  const balance = selectedSigner ? selectedSigner.balance : "- REEF";
-  const evmAddress = selectedSigner ? selectedSigner.evmAddress : "";
+export const AccountSelector = ({
+  selectedSigner, accounts, reefscanUrl, selectAccount,
+} : AccountSelector): JSX.Element => {
+  const name = selectedSigner ? selectedSigner.name : '';
+  const address = selectedSigner ? selectedSigner.address : '';
+  const balance = selectedSigner ? selectedSigner.balance : '- REEF';
+  const evmAddress = selectedSigner ? selectedSigner.evmAddress : '';
 
   const accountsView = accounts
     .map(({ address, evmAddress, name }, index) => (
@@ -43,7 +53,7 @@ export const AccountSelector = ({selectedSigner, accounts, reefscanUrl, selectAc
         type="button"
         className="btn btn-reef border-rad"
         data-bs-toggle="modal"
-        data-bs-target='#account-modal'
+        data-bs-target="#account-modal"
       >
         {trim(name)}
       </button>
@@ -94,7 +104,7 @@ export const AccountSelector = ({selectedSigner, accounts, reefscanUrl, selectAc
       </Modal>
       <Modal id="select-account-modal">
         <ModalHeader>
-         <button type="button" className="btn ms-0 me-auto py-0" data-bs-target="#account-modal" data-bs-toggle="modal" data-bs-dismiss="modal">
+          <button type="button" className="btn ms-0 me-auto py-0" data-bs-target="#account-modal" data-bs-toggle="modal" data-bs-dismiss="modal">
             <BackIcon />
           </button>
           <Title>Select account</Title>
@@ -110,4 +120,4 @@ export const AccountSelector = ({selectedSigner, accounts, reefscanUrl, selectAc
       </Modal>
     </div>
   );
-}
+};

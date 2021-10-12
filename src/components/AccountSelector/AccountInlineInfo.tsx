@@ -1,7 +1,7 @@
-import React from "react"
+import React from 'react';
 import Identicon from '@polkadot/react-identicon';
-import { FlexRow, MX, PY } from "../common/Display";
-import { trim } from "../../utils";
+import { FlexRow, MX, PY } from '../common/Display';
+import { trim } from '../../utils';
 
 interface AccountInlineInfo {
   name: string;
@@ -11,7 +11,9 @@ interface AccountInlineInfo {
   onClick: () => void;
 }
 
-const AccountInlineInfo = ({name, address, evmAddress, toggle="modal-toggle", onClick} : AccountInlineInfo): JSX.Element => (
+const AccountInlineInfo = ({
+  name, address, evmAddress, toggle = 'modal-toggle', onClick,
+} : AccountInlineInfo): JSX.Element => (
   <FlexRow>
     <MX size="2" />
     <PY size="auto">
