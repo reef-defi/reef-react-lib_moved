@@ -149,3 +149,12 @@ input[type=range]::-webkit-slider-thumb {
 .pointer {
   cursor: pointer;
 }
+
+.bg-white, .nav-account {
+  background-color: #FFF;
+}
+
+.nav-account {
+  display: flex;
+  padding: 2px;
+}
