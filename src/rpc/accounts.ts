@@ -9,8 +9,13 @@ export const accountToSigner = async (account: InjectedAccountWithMeta, provider
   const evmAddress = await signer.getAddress();
   const isEvmClaimed = await signer.isClaimed();
 
+  const balance = await provider.api.derive.balances.all(account.address)
+    .then((res) => res.freeBalance.toHuman())
+    .then((res) => res === '0' ? '- REEF' : res);
+
   return {
     signer,
+    balance,
     evmAddress,
     isEvmClaimed,
     name: account.meta.name || '',
