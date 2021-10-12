@@ -8,7 +8,7 @@ import {
 } from '../common/Display';
 import { TokenIcon, DownIcon } from '../common/Icons';
 import { Input } from '../common/Input';
-import List, { ListEmptyItem, ListItemDismissModal } from '../common/List';
+import { List, ListEmptyItem, ListItemDismissModal } from '../common/List';
 import { Loading } from '../common/Loading';
 import {
   Modal, ModalBody, ModalClose, ModalHeader,
