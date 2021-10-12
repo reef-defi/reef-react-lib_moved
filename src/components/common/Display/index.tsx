@@ -1,6 +1,12 @@
 import React from 'react';
 
 export const FlexRow: React.FC<unknown> = ({ children }): JSX.Element => (
+  <div className="d-flex flex-row">
+    {children}
+  </div>
+);
+
+export const FullRow: React.FC<unknown> = ({ children }): JSX.Element => (
   <div className="d-flex flex-row w-100">
     {children}
   </div>
@@ -8,6 +14,12 @@ export const FlexRow: React.FC<unknown> = ({ children }): JSX.Element => (
 
 export const FlexColumn: React.FC<unknown> = ({ children }): JSX.Element => (
   <div className="d-flex flex-column">
+    {children}
+  </div>
+);
+
+export const FullColumn: React.FC<unknown> = ({ children }): JSX.Element => (
+  <div className="d-flex flex-column w-100">
     {children}
   </div>
 );
@@ -25,13 +37,23 @@ export const CenterColumn: React.FC<unknown> = ({ children }): JSX.Element => (
 );
 
 export const ContentBetween: React.FC<unknown> = ({ children }): JSX.Element => (
-  <div className="d-flex justify-content-between">
+  <div className="d-flex justify-content-between w-100">
     {children}
   </div>
 );
 
 export const ContentEnd: React.FC<unknown> = ({ children }): JSX.Element => (
   <div className="d-flex justify-content-end w-100">
+    {children}
+  </div>
+);
+
+interface MinWidth {
+  size: number;
+}
+
+export const MinWidth: React.FC<MinWidth> = ({ children, size }): JSX.Element => (
+  <div style={{ minWidth: `${size}px` }}>
     {children}
   </div>
 );
@@ -96,6 +118,12 @@ export const PB: React.FC<Size> = ({ children, size = '1' }): JSX.Element => (
 );
 export const PS: React.FC<Size> = ({ children, size = '1' }): JSX.Element => (
   <div className={`ps-${size}`}>
+    {children}
+  </div>
+);
+
+export const Border: React.FC<Size> = ({ children, size = '1' }): JSX.Element => (
+  <div className={`border border-rad p-${size}`}>
     {children}
   </div>
 );
