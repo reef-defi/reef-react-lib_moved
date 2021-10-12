@@ -1,5 +1,6 @@
 export * as Card from './Card';
 export * as Text from './Text';
+export * as List from './List';
 export * as Alert from './Alert';
 export * as Icons from './Icons';
 export * as Input from './Input';

@@ -145,3 +145,16 @@ input[type=range]::-webkit-slider-thumb {
   width: 20px;
   height: 20px;
 }
+
+.pointer {
+  cursor: pointer;
+}
+
+.bg-white, .nav-account {
+  background-color: #FFF;
+}
+
+.nav-account {
+  display: flex;
+  padding: 2px;
+}
