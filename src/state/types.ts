@@ -1,8 +1,9 @@
 import { Signer } from '@reef-defi/evm-provider';
 
 export interface ReefSigner {
-  signer: Signer;
   name: string;
+  signer: Signer;
+  balance: string;
   address: string;
   evmAddress: string;
   isEvmClaimed: boolean;

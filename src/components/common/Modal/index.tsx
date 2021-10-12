@@ -65,6 +65,7 @@ export const OpenModalButton: React.FC<OpenModalButton> = ({ children, id = 'ope
     {children}
   </button>
 );
+
 interface ConfirmationModal {
   id?: string;
   title: string;

@@ -31,5 +31,5 @@ export const ListItemDismissModal: React.FC<ListItem> = ({children, onClick}): J
 );
 
 export const ListEmptyItem = (): JSX.Element => (
-  <li className="list-group-item border-rad px-2" />
+  <li className="list-group-item px-2" />
 );

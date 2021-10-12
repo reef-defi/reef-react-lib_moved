@@ -87,7 +87,12 @@ const SelectToken = ({
 
   return (
     <div>
-      <button type="button" className={`btn btn-select border-rad ${fullWidth && 'w-100'} ${isEmpty ? 'btn-reef' : 'btn-token-select'}`} data-bs-toggle="modal" data-bs-target={`#${id}`}>
+      <button
+        type="button"
+        className={`btn btn-select border-rad ${fullWidth && 'w-100'} ${isEmpty ? 'btn-reef' : 'btn-token-select'}`}
+        data-bs-toggle="modal"
+        data-bs-target={`#${id}`}
+      >
         {!isEmpty && <TokenIcon src={iconUrl} />}
         <div className={`my-auto ${!isEmpty ? 'mx-2' : 'me-2'}`}>
           {selectedTokenName}
