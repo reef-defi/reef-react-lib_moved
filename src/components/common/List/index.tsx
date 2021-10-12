@@ -4,12 +4,11 @@ interface ListItem {
   onClick?: () => void;
 }
 
-const List: React.FC<unknown> = ({ children }): JSX.Element => (
+export const List: React.FC<unknown> = ({ children }): JSX.Element => (
   <ul className="list-group list-group-flush list-group-full px-0 border-rad">
     {children}
   </ul>
 );
-export default List;
 
 export const ListItem: React.FC<ListItem> = ({ children, onClick }): JSX.Element => (
   <li
