@@ -127,3 +127,11 @@ export const Border: React.FC<Size> = ({ children, size = '1' }): JSX.Element =>
     {children}
   </div>
 );
+
+export const ContentCenter: React.FC<unknown> = ({children}): JSX.Element => (
+  <CenterColumn>
+    <MinWidth size={500}>
+      {children}
+    </MinWidth>
+  </CenterColumn>
+);
