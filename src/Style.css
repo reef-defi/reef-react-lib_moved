@@ -4,10 +4,7 @@
 .btn:focus {
   box-shadow: none;
 }
-.field-size {
-  max-width: 600px;
-  min-width: 500px;
-}
+
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
@@ -157,4 +154,9 @@ input[type=range]::-webkit-slider-thumb {
 .nav-account {
   display: flex;
   padding: 2px;
+}
+
+.card {
+  border: 1px solid rgba(0,0,0,.125);
+  box-shadow: 0 8px 20px 0 rgb(40 133 208 / 15%);
 }
