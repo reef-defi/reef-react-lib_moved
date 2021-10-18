@@ -1,6 +1,5 @@
 import React from 'react';
 import { BackIcon } from '../Icons';
-import './Card.css';
 
 export const Card: React.FC = ({ children }): JSX.Element => (
   <div className="card border-rad">

@@ -19,7 +19,7 @@ import {
 import { TokenAmountFieldImpactPrice, TokenAmountFieldMax } from '../TokenFields';
 import { SwitchTokenButton } from '../common/Button';
 import SwapConfirmationModal from './SwapConfirmationModal';
-import { CenterColumn, ContentCenter, MinWidth, MT } from '../common/Display';
+import { CenterColumn, ContentCenter, MT } from '../common/Display';
 import { OpenModalButton } from '../common/Modal';
 import { LoadingButtonIconWithText } from '../common/Loading';
 import { TransactionSettings } from '../TransactionSettings';

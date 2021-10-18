@@ -48,12 +48,12 @@ export const ContentEnd: React.FC<unknown> = ({ children }): JSX.Element => (
   </div>
 );
 
-interface MinWidth {
+interface Width {
   size: number;
 }
 
-export const MinWidth: React.FC<MinWidth> = ({ children, size }): JSX.Element => (
-  <div style={{ minWidth: `${size}px` }}>
+export const Width: React.FC<Width> = ({ children, size }): JSX.Element => (
+  <div style={{ minWidth: `${size}px`, maxWidth: `${size}px` }}>
     {children}
   </div>
 );
@@ -130,8 +130,8 @@ export const Border: React.FC<Size> = ({ children, size = '1' }): JSX.Element =>
 
 export const ContentCenter: React.FC<unknown> = ({children}): JSX.Element => (
   <CenterColumn>
-    <MinWidth size={500}>
+    <Width size={500}>
       {children}
-    </MinWidth>
+    </Width>
   </CenterColumn>
 );
