@@ -4,9 +4,8 @@ import { useLoadPool } from "../../hooks/useLoadPool";
 import { useUpdateBalance } from "../../hooks/useUpdateBalance";
 import { useUpdateLiquidityAmount } from "../../hooks/useUpdateAmount";
 import { useUpdateTokensPrice } from "../../hooks/useUpdateTokensPrice";
-import { Token, Network, ReefSigner, Notify, TokenWithAmount, defaultSettings, createEmptyTokenWithAmount, reefTokenWithAmount, resolveSettings, rpc } from "../..";
-import { ButtonStatus, ensure, calculateAmount, assertAmount, ensureAmount, calculateAmountWithPercentage, calculateDeadline, errorHandler, calculatePoolSupply } from "../../utils";
-import { ContentCenter, Margin, MT } from "../common/Display";
+import { ButtonStatus, ensure, calculateAmount, assertAmount, ensureAmount, calculateAmountWithPercentage, calculateDeadline, errorHandler } from "../../utils";
+import { CenterColumn, ContentCenter, MT } from "../common/Display";
 import { Card, CardBack, CardHeader, CardTitle } from "../common/Card";
 import { TransactionSettings } from "../TransactionSettings";
 import { DangerAlert } from "../common/Alert";
@@ -15,6 +14,8 @@ import { SwitchTokenButton } from "../common/Button";
 import { OpenModalButton } from "../common/Modal";
 import { LoadingButtonIconWithText } from "../common/Loading";
 import ConfirmAddLiquidity from "./ConfirmAddLiquidity";
+import { createEmptyTokenWithAmount, defaultSettings, Network, Notify, ReefSigner, reefTokenWithAmount, resolveSettings, Token, TokenWithAmount } from "../../state";
+import { approveTokenAmount, getReefswapRouter } from "../../rpc";
 
 
 interface AddLiquidityComponent {
@@ -55,7 +56,7 @@ const loadingStatus = (status: string, isPoolLoading: boolean, isPriceLoading: b
   return '';
 };
 
-const AddLiquidityComponent = ({
+export const AddLiquidityComponent = ({
   tokens, network, signer, back, notify, reloadTokens, onAddressChangeLoad
 } : AddLiquidityComponent): JSX.Element => {
 
@@ -68,7 +69,6 @@ const AddLiquidityComponent = ({
   const { deadline, percentage } = resolveSettings(settings);
 
   const [pool, isPoolLoading] = useLoadPool(token1, token2, network.factoryAddress, signer?.signer);
-  const newPoolSupply = calculatePoolSupply(token1, token2, pool);
 
   const { text, isValid } = useMemo(
     () => liquidityStatus(token1, token2, signer?.isEvmClaimed),
@@ -127,12 +127,12 @@ const AddLiquidityComponent = ({
       ensureAmount(token2);
 
       setStatus(`Approving ${token1.name} token`);
-      await rpc.approveTokenAmount(token1, network.routerAddress, signer.signer);
+      await approveTokenAmount(token1, network.routerAddress, signer.signer);
       setStatus(`Approving ${token2.name} token`);
-      await rpc.approveTokenAmount(token2, network.routerAddress, signer.signer);
+      await approveTokenAmount(token2, network.routerAddress, signer.signer);
 
       setStatus('Adding supply');
-      const reefswapRouter = rpc.getReefswapRouter(network.routerAddress, signer.signer);
+      const reefswapRouter = getReefswapRouter(network.routerAddress, signer.signer);
 
       await reefswapRouter.addLiquidity(
         token1.address,
@@ -191,18 +191,19 @@ const AddLiquidityComponent = ({
           onTokenSelect={changeToken2}
           onAddressChange={onAddressChangeLoad}
         />
-        <MT size="2" />
-        <ContentCenter>
-          <OpenModalButton
-            id="swap-modal-toggle"
-            disabled={!isValid || isLoading}
-          >
-            {isLoading
-              ? <LoadingButtonIconWithText text={loadingStatus(status, isPoolLoading, isPriceLoading)} />
-              : text
-            }
-          </OpenModalButton>
-        </ContentCenter>
+        <MT size="2">
+          <CenterColumn>
+            <OpenModalButton
+              id="swap-modal-toggle"
+              disabled={!isValid || isLoading}
+            >
+              {isLoading
+                ? <LoadingButtonIconWithText text={loadingStatus(status, isPoolLoading, isPriceLoading)} />
+                : text
+              }
+            </OpenModalButton>
+          </CenterColumn>
+        </MT>
         <ConfirmAddLiquidity
           pool={pool}
           token1={token1}
@@ -216,4 +217,3 @@ const AddLiquidityComponent = ({
   );
 }
 
-export default AddLiquidityComponent;
