@@ -1,8 +1,10 @@
 import { Signer } from '@reef-defi/evm-provider';
 import { BigNumber, Contract } from 'ethers';
+import axios from 'axios';
 import { ERC20 } from '../assets/abi/ERC20';
 import { ReefswapFactory } from '../assets/abi/ReefswapFactory';
 import { ReefswapRouter } from '../assets/abi/ReefswapRouter';
+import { Network, Token } from '../state';
 
 export const checkIfERC20ContractExist = async (
   address: string,
@@ -39,3 +41,12 @@ export const balanceOf = async (
 
 export const getReefswapRouter = (address: string, signer: Signer): Contract => new Contract(address, ReefswapRouter, signer);
 export const getReefswapFactory = (address: string, signer: Signer): Contract => new Contract(address, ReefswapFactory, signer);
+
+export const loadAccountTokens = async (address: string, network: Network): Promise<Token[]> => {
+  try {
+    return axios.post(`${network.reefscanUrl}/api/account/tokens`, { account: address });
+  } catch (err) {
+    console.log('loadAccountTokens error = ', err);
+    return Promise.resolve([]);
+  }
+};
