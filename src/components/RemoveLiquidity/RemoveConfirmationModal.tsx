@@ -1,12 +1,14 @@
-import React from "react"
-import { Pool } from "../../state";
-import { calculatePoolRatio, calculatePoolShare, removePoolTokenShare, removeUserPoolSupply } from "../../utils";
-import { SubCard } from "../common/Card";
-import { Margin, MT, MX } from "../common/Display";
-import { PlusIcon } from "../common/Icons";
-import { ConfirmLabel } from "../common/Label";
-import ConfirmationModal from "../common/Modal";
-import { MiniText, MutedText } from "../common/Text";
+import React from 'react';
+import { Pool } from '../../state';
+import {
+  calculatePoolRatio, calculatePoolShare, removePoolTokenShare, removeUserPoolSupply,
+} from '../../utils';
+import { SubCard } from '../common/Card';
+import { Margin, MT, MX } from '../common/Display';
+import { PlusIcon } from '../common/Icons';
+import { ConfirmLabel } from '../common/Label';
+import ConfirmationModal from '../common/Modal';
+import { MiniText, MutedText } from '../common/Text';
 
 interface RemoveConfirmationModal {
   id: string;
@@ -17,10 +19,10 @@ interface RemoveConfirmationModal {
 }
 
 const RemoveConfirmationModal = ({
-  id, pool, slipperage, percentageAmount, onRemove
+  id, pool, slipperage, percentageAmount, onRemove,
 } : RemoveConfirmationModal): JSX.Element => {
-  const name1 = pool ? pool.token1.name : "";
-  const name2 = pool ? pool.token2.name : "";
+  const name1 = pool ? pool.token1.name : '';
+  const name2 = pool ? pool.token2.name : '';
   return (
     <ConfirmationModal
       id={id}
@@ -35,7 +37,7 @@ const RemoveConfirmationModal = ({
             valueSize="h6"
             title={removePoolTokenShare(percentageAmount, pool?.token1).toFixed(8)}
             value={name1}
-            />
+          />
           <PlusIcon />
           <ConfirmLabel
             titleSize="h4"
@@ -73,6 +75,6 @@ const RemoveConfirmationModal = ({
       </MX>
     </ConfirmationModal>
   );
-}
+};
 
 export default RemoveConfirmationModal;

@@ -21,7 +21,6 @@ export const CardTitle: React.FC<Title> = ({ title }): JSX.Element => (
   <h5 className="h5 my-2 text-center">{title}</h5>
 );
 
-
 interface CardBack {
   onBack: () => void;
 }
@@ -31,7 +30,6 @@ export const CardBack = ({ onBack }: CardBack): JSX.Element => (
     <BackIcon />
   </button>
 );
-
 
 interface ErrorCardProps {
   title: string;

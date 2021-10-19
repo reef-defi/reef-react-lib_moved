@@ -1,14 +1,18 @@
-import React, { useEffect, useState } from "react";
-import { Pool } from "../../state";
-import { calculatePoolShare, convert2Normal, toBalance } from "../../utils";
-import { Button, EmptyButton } from "../common/Button";
-import { Card, CardHeader, CardTitle, SubCard } from "../common/Card";
-import { CenterColumn, CenterRow, ContentBetween, ContentEnd, FlexColumn, FlexRow, FullColumn, MS, MT, Width } from "../common/Display";
-import { TokenIcon, DownIcon, UpIcon } from "../common/Icons";
-import { ConfirmLabel } from "../common/Label";
-import { ListItem, List, ListEmptyItem } from "../common/List";
-import { Loading } from "../common/Loading";
-import { Text, MiniText, MutedText } from "../common/Text";
+import React, { useEffect, useState } from 'react';
+import { Pool } from '../../state';
+import { calculatePoolShare, convert2Normal, toBalance } from '../../utils';
+import { Button, EmptyButton } from '../common/Button';
+import {
+  Card, CardHeader, CardTitle, SubCard,
+} from '../common/Card';
+import {
+  CenterColumn, CenterRow, ContentBetween, ContentEnd, FlexColumn, FlexRow, FullColumn, MS, MT, Width,
+} from '../common/Display';
+import { TokenIcon, DownIcon, UpIcon } from '../common/Icons';
+import { ConfirmLabel } from '../common/Label';
+import { ListItem, List, ListEmptyItem } from '../common/List';
+import { Loading } from '../common/Loading';
+import { Text, MiniText, MutedText } from '../common/Text';
 
 interface DefaultState {
   pool: Pool;
@@ -112,7 +116,9 @@ interface PoolsComponent {
   openRemoveLiquidity: (address1: string, address2: string) => void;
 }
 
-export const PoolsComponent = ({pools, isLoading, openAddLiquidity, openRemoveLiquidity}: PoolsComponent): JSX.Element => {
+export const PoolsComponent = ({
+  pools, isLoading, openAddLiquidity, openRemoveLiquidity,
+}: PoolsComponent): JSX.Element => {
   const [isOpen, setIsOpen] = useState<boolean[]>([]);
 
   const closeAll = (): void => {
@@ -129,8 +135,7 @@ export const PoolsComponent = ({pools, isLoading, openAddLiquidity, openRemoveLi
 
   useEffect(() => {
     closeAll();
-  }, [pools])
-
+  }, [pools]);
 
   const poolsView = pools
     .map((pool, index) => (

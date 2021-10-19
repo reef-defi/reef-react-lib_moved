@@ -88,7 +88,7 @@ interface PercentageRangeAmount {
   onChange: (value: number) => void;
 }
 
-export const PercentageRangeAmount = ({value, disabled, onChange}: PercentageRangeAmount) => (
+export const PercentageRangeAmount = ({ value, disabled, onChange }: PercentageRangeAmount): JSX.Element => (
   <input
     min={0}
     max={100}
@@ -97,5 +97,5 @@ export const PercentageRangeAmount = ({value, disabled, onChange}: PercentageRan
     value={value}
     disabled={disabled}
     onChange={(event) => onChange(parseInt(event.target.value, 10))}
-/>
-)
+  />
+);

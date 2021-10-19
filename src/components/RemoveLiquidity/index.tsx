@@ -1,20 +1,28 @@
-import React, { useEffect, useRef, useState } from "react"
-import { useLoadPool } from "../../hooks/useLoadPool";
-import { approveAmount, getReefswapRouter } from "../../rpc";
-import { defaultSettings, Network, Notify, Pool, ReefSigner, REMOVE_DEFAULT_SLIPPAGE_TOLERANCE, resolveSettings, Token } from "../../state";
-import { ButtonStatus, calculateDeadline, calculatePoolRatio, ensure, ensureVoidRun, errorHandler, removePoolTokenShare, removeSupply, transformAmount } from "../../utils";
-import { DangerAlert } from "../common/Alert";
-import { Button } from "../common/Button";
-import { Card, CardBack, CardHeader, CardTitle, SubCard } from "../common/Card";
-import { ContentBetween, ComponentCenter, MT, MX, ContentCenter, Margin } from "../common/Display";
-import { DownIcon } from "../common/Icons";
-import { PercentageRangeAmount } from "../common/Input";
-import { ConfirmLabel } from "../common/Label";
-import { LoadingButtonIconWithText } from "../common/Loading";
-import { OpenModalButton } from "../common/Modal";
-import { LargeTitle } from "../common/Text";
-import { TransactionSettings } from "../TransactionSettings";
-import RemoveConfirmationModal from "./RemoveConfirmationModal";
+import React, { useEffect, useRef, useState } from 'react';
+import { useLoadPool } from '../../hooks/useLoadPool';
+import { approveAmount, getReefswapRouter } from '../../rpc';
+import {
+  defaultSettings, Network, Notify, Pool, ReefSigner, REMOVE_DEFAULT_SLIPPAGE_TOLERANCE, resolveSettings, Token,
+} from '../../state';
+import {
+  ButtonStatus, calculateDeadline, calculatePoolRatio, ensure, ensureVoidRun, errorHandler, removePoolTokenShare, removeSupply, transformAmount,
+} from '../../utils';
+import { DangerAlert } from '../common/Alert';
+import { Button } from '../common/Button';
+import {
+  Card, CardBack, CardHeader, CardTitle, SubCard,
+} from '../common/Card';
+import {
+  ContentBetween, ComponentCenter, MT, MX, ContentCenter, Margin,
+} from '../common/Display';
+import { DownIcon } from '../common/Icons';
+import { PercentageRangeAmount } from '../common/Input';
+import { ConfirmLabel } from '../common/Label';
+import { LoadingButtonIconWithText } from '../common/Loading';
+import { OpenModalButton } from '../common/Modal';
+import { LargeTitle } from '../common/Text';
+import { TransactionSettings } from '../TransactionSettings';
+import RemoveConfirmationModal from './RemoveConfirmationModal';
 
 interface RemoveLiquidityComponent {
   token1: Token;
@@ -33,20 +41,19 @@ const status = (percentageAmount: number, pool?: Pool): ButtonStatus => {
     ensure(percentageAmount > 0, 'Enter an amount');
     return {
       isValid: true,
-      text: 'Confirm remove'
-    }
+      text: 'Confirm remove',
+    };
   } catch (e) {
     return {
       isValid: false,
       text: e.message,
-    }
+    };
   }
 };
 
 export const RemoveLiquidityComponent = ({
   token1, token2, network, signer, back, notify, reloadTokens,
 } : RemoveLiquidityComponent): JSX.Element => {
-
   const mounted = useRef(true);
   const [isRemoving, setIsRemoving] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState('');
@@ -57,7 +64,7 @@ export const RemoveLiquidityComponent = ({
     token1,
     token2,
     network.factoryAddress,
-    signer?.signer
+    signer?.signer,
   );
   const { isValid, text } = status(percentageAmount, pool);
   const { percentage, deadline } = resolveSettings(settings, REMOVE_DEFAULT_SLIPPAGE_TOLERANCE);
@@ -98,7 +105,7 @@ export const RemoveLiquidityComponent = ({
       .then(() => notify('Liquidity successfully removed', 'success'))
       .then(() => mounted.current && back())
       .catch((e) => {
-        notify(errorHandler(e.message), "error");
+        notify(errorHandler(e.message), 'error');
       })
       .finally(() => {
         ensureMount(setIsRemoving, false);
@@ -106,7 +113,6 @@ export const RemoveLiquidityComponent = ({
         reloadTokens();
       });
   };
-
 
   return (
     <ComponentCenter>
@@ -173,4 +179,4 @@ export const RemoveLiquidityComponent = ({
       </Card>
     </ComponentCenter>
   );
-}
+};

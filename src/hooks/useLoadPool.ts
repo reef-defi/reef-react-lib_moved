@@ -9,7 +9,6 @@ export const useLoadPool = (token1: Token, token2: Token, factoryAddress: string
   const [pool, setPool] = useState<Pool>();
   const [isLoading, setIsLoading] = useState(false);
 
-
   useEffect(() => {
     const load = async (): Promise<void> => {
       if (!token1.address || !token2.address || !signer) { return; }

@@ -36,8 +36,7 @@ export const CenterColumn: React.FC<unknown> = ({ children }): JSX.Element => (
   </div>
 );
 
-
-export const ContentCenter: React.FC<unknown> = ({children}): JSX.Element => (
+export const ContentCenter: React.FC<unknown> = ({ children }): JSX.Element => (
   <div className="d-flex justify-content-center">
     {children}
   </div>
@@ -135,7 +134,7 @@ export const Border: React.FC<Size> = ({ children, size = '1' }): JSX.Element =>
   </div>
 );
 
-export const ComponentCenter: React.FC<unknown> = ({children}): JSX.Element => (
+export const ComponentCenter: React.FC<unknown> = ({ children }): JSX.Element => (
   <CenterColumn>
     <Width size={500}>
       {children}

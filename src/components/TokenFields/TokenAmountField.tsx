@@ -2,7 +2,9 @@ import React from 'react';
 import { TokenWithAmount, Token, Color } from '../../state';
 import { showBalance, toBalance } from '../../utils/math';
 import { SubCard } from '../common/Card';
-import { CenterColumn, ContentBetween, FlexRow, MT } from '../common/Display';
+import {
+  CenterColumn, ContentBetween, FlexRow, MT,
+} from '../common/Display';
 import { InputAmount } from '../common/Input';
 import { ColorText, MiniText } from '../common/Text';
 import SelectToken from '../SelectToken';

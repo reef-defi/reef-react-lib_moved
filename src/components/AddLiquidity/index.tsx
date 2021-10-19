@@ -1,22 +1,27 @@
-import React, { useMemo, useState } from "react"
-import {BigNumber} from "ethers";
-import { useLoadPool } from "../../hooks/useLoadPool";
-import { useUpdateBalance } from "../../hooks/useUpdateBalance";
-import { useUpdateLiquidityAmount } from "../../hooks/useUpdateAmount";
-import { useUpdateTokensPrice } from "../../hooks/useUpdateTokensPrice";
-import { ButtonStatus, ensure, calculateAmount, assertAmount, ensureAmount, calculateAmountWithPercentage, calculateDeadline, errorHandler } from "../../utils";
-import { CenterColumn, ComponentCenter, MT } from "../common/Display";
-import { Card, CardBack, CardHeader, CardTitle } from "../common/Card";
-import { TransactionSettings } from "../TransactionSettings";
-import { DangerAlert } from "../common/Alert";
-import { TokenAmountField } from "../TokenFields";
-import { SwitchTokenButton } from "../common/Button";
-import { OpenModalButton } from "../common/Modal";
-import { LoadingButtonIconWithText } from "../common/Loading";
-import ConfirmAddLiquidity from "./ConfirmAddLiquidity";
-import { createEmptyTokenWithAmount, defaultSettings, Network, Notify, ReefSigner, reefTokenWithAmount, resolveSettings, Token, TokenWithAmount } from "../../state";
-import { approveTokenAmount, getReefswapRouter } from "../../rpc";
-
+import React, { useMemo, useState } from 'react';
+import { BigNumber } from 'ethers';
+import { useLoadPool } from '../../hooks/useLoadPool';
+import { useUpdateBalance } from '../../hooks/useUpdateBalance';
+import { useUpdateLiquidityAmount } from '../../hooks/useUpdateAmount';
+import { useUpdateTokensPrice } from '../../hooks/useUpdateTokensPrice';
+import {
+  ButtonStatus, ensure, calculateAmount, assertAmount, ensureAmount, calculateAmountWithPercentage, calculateDeadline, errorHandler,
+} from '../../utils';
+import { CenterColumn, ComponentCenter, MT } from '../common/Display';
+import {
+  Card, CardBack, CardHeader, CardTitle,
+} from '../common/Card';
+import { TransactionSettings } from '../TransactionSettings';
+import { DangerAlert } from '../common/Alert';
+import { TokenAmountField } from '../TokenFields';
+import { SwitchTokenButton } from '../common/Button';
+import { OpenModalButton } from '../common/Modal';
+import { LoadingButtonIconWithText } from '../common/Loading';
+import ConfirmAddLiquidity from './ConfirmAddLiquidity';
+import {
+  createEmptyTokenWithAmount, defaultSettings, Network, Notify, ReefSigner, reefTokenWithAmount, resolveSettings, Token, TokenWithAmount,
+} from '../../state';
+import { approveTokenAmount, getReefswapRouter } from '../../rpc';
 
 interface AddLiquidityComponent {
   tokens: Token[];
@@ -39,15 +44,15 @@ const liquidityStatus = (token1: TokenWithAmount, token2: TokenWithAmount, isEvm
     ensure(BigNumber.from(calculateAmount(token2)).lte(token2.balance), `Insufficient ${token2.name} balance`);
     return {
       isValid: true,
-      text: 'Supply'
+      text: 'Supply',
     };
   } catch (e) {
     return {
       isValid: false,
-      text: e.message
+      text: e.message,
     };
   }
-}
+};
 
 const loadingStatus = (status: string, isPoolLoading: boolean, isPriceLoading: boolean): string => {
   if (status) { return status; }
@@ -57,9 +62,8 @@ const loadingStatus = (status: string, isPoolLoading: boolean, isPriceLoading: b
 };
 
 export const AddLiquidityComponent = ({
-  tokens, network, signer, back, notify, reloadTokens, onAddressChangeLoad
+  tokens, network, signer, back, notify, reloadTokens, onAddressChangeLoad,
 } : AddLiquidityComponent): JSX.Element => {
-
   const [status, setStatus] = useState('');
   const [settings, setSettings] = useState(defaultSettings());
   const [isLiquidityLoading, setIsLiquidityLoading] = useState(false);
@@ -96,7 +100,6 @@ export const AddLiquidityComponent = ({
   });
 
   const isLoading = isLiquidityLoading || isPoolLoading || isPriceLoading;
-  const { } = liquidityStatus(token1, token2, signer?.isEvmClaimed);
 
   const changeToken1 = (newToken: Token): void => setToken1({
     ...newToken, amount: '', price: 0, isEmpty: false,
@@ -119,8 +122,8 @@ export const AddLiquidityComponent = ({
   };
 
   const addLiquidityClick = async (): Promise<void> => {
-    if (!signer) { return };
-    const {evmAddress} = signer;
+    if (!signer) { return; }
+    const { evmAddress } = signer;
     try {
       setIsLiquidityLoading(true);
       ensureAmount(token1);
@@ -161,7 +164,7 @@ export const AddLiquidityComponent = ({
     <ComponentCenter>
       <Card>
         <CardHeader>
-          <CardBack onBack={back}/>
+          <CardBack onBack={back} />
           <CardTitle title="Add liquidity" />
           <TransactionSettings
             settings={settings}
@@ -199,8 +202,7 @@ export const AddLiquidityComponent = ({
             >
               {isLoading
                 ? <LoadingButtonIconWithText text={loadingStatus(status, isPoolLoading, isPriceLoading)} />
-                : text
-              }
+                : text}
             </OpenModalButton>
           </CenterColumn>
         </MT>
@@ -215,5 +217,4 @@ export const AddLiquidityComponent = ({
       </Card>
     </ComponentCenter>
   );
-}
-
+};

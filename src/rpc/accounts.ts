@@ -11,7 +11,7 @@ export const accountToSigner = async (account: InjectedAccountWithMeta, provider
 
   const balance = await provider.api.derive.balances.all(account.address)
     .then((res) => res.freeBalance.toHuman())
-    .then((res) => res === '0' ? '- REEF' : res);
+    .then((res) => (res === '0' ? '- REEF' : res));
 
   return {
     signer,
