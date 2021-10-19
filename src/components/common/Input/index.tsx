@@ -81,3 +81,21 @@ export const NumberInput = ({
     className={`form-control field-input border-rad text-end ${className}`}
   />
 );
+
+interface PercentageRangeAmount {
+  value: number;
+  disabled?: boolean;
+  onChange: (value: number) => void;
+}
+
+export const PercentageRangeAmount = ({value, disabled, onChange}: PercentageRangeAmount) => (
+  <input
+    min={0}
+    max={100}
+    type="range"
+    className="form-range"
+    value={value}
+    disabled={disabled}
+    onChange={(event) => onChange(parseInt(event.target.value, 10))}
+/>
+)

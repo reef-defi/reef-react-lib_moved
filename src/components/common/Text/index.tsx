@@ -1,6 +1,13 @@
 import React from 'react';
 import { Color } from '../../../state/types';
 
+
+export const LargeTitle: React.FC<unknown> = ({children}): JSX.Element => (
+  <h1 className="display-3 user-select-none">
+    {children}
+  </h1>
+);
+
 export const Title: React.FC<unknown> = ({ children }): JSX.Element => (
   <h5 className="title-text user-select-none">
     {children}

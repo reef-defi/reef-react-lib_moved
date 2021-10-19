@@ -5,7 +5,7 @@ import { useUpdateBalance } from "../../hooks/useUpdateBalance";
 import { useUpdateLiquidityAmount } from "../../hooks/useUpdateAmount";
 import { useUpdateTokensPrice } from "../../hooks/useUpdateTokensPrice";
 import { ButtonStatus, ensure, calculateAmount, assertAmount, ensureAmount, calculateAmountWithPercentage, calculateDeadline, errorHandler } from "../../utils";
-import { CenterColumn, ContentCenter, MT } from "../common/Display";
+import { CenterColumn, ComponentCenter, MT } from "../common/Display";
 import { Card, CardBack, CardHeader, CardTitle } from "../common/Card";
 import { TransactionSettings } from "../TransactionSettings";
 import { DangerAlert } from "../common/Alert";
@@ -158,7 +158,7 @@ export const AddLiquidityComponent = ({
   };
 
   return (
-    <ContentCenter>
+    <ComponentCenter>
       <Card>
         <CardHeader>
           <CardBack onBack={back}/>
@@ -213,7 +213,7 @@ export const AddLiquidityComponent = ({
           id="swap-modal-toggle"
         />
       </Card>
-    </ContentCenter>
+    </ComponentCenter>
   );
 }
 
