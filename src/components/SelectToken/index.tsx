@@ -4,11 +4,11 @@ import { Token } from '../../state';
 import { toBalance, trim } from '../../utils';
 import { IconButton } from '../common/Button';
 import {
-  CenterRow, ContentEnd, FlexColumn, FlexRow, Margin, MS,
+  CenterRow, ContentEnd, FlexColumn, FlexRow, FullRow, Margin, MS,
 } from '../common/Display';
 import { TokenIcon, DownIcon } from '../common/Icons';
 import { Input } from '../common/Input';
-import { List, ListEmptyItem, ListItem } from '../common/List';
+import { List, ListEmptyItem, ListItemDismissModal } from '../common/List';
 import { Loading } from '../common/Loading';
 import {
   Modal, ModalBody, ModalClose, ModalHeader,
@@ -43,8 +43,8 @@ const SelectToken = ({
   const tokensView = tokens
     .filter((token) => token.name.startsWith(address) || token.address.startsWith(address))
     .map((token) => (
-      <ListItem key={token.address} onClick={() => onTokenSelect(token)}>
-        <FlexRow>
+      <ListItemDismissModal key={token.address} onClick={() => onTokenSelect(token)}>
+        <FullRow>
           <CenterRow>
             <TokenIcon src={token.iconUrl} />
           </CenterRow>
@@ -63,8 +63,8 @@ const SelectToken = ({
               </Text>
             </CenterRow>
           </ContentEnd>
-        </FlexRow>
-      </ListItem>
+        </FullRow>
+      </ListItemDismissModal>
     ));
 
   const commonBasesView = tokens
@@ -87,7 +87,12 @@ const SelectToken = ({
 
   return (
     <div>
-      <button type="button" className={`btn btn-select border-rad ${fullWidth && 'w-100'} ${isEmpty ? 'btn-reef' : 'btn-token-select'}`} data-bs-toggle="modal" data-bs-target={`#${id}`}>
+      <button
+        type="button"
+        className={`btn btn-select border-rad ${fullWidth && 'w-100'} ${isEmpty ? 'btn-reef' : 'btn-token-select'}`}
+        data-bs-toggle="modal"
+        data-bs-target={`#${id}`}
+      >
         {!isEmpty && <TokenIcon src={iconUrl} />}
         <div className={`my-auto ${!isEmpty ? 'mx-2' : 'me-2'}`}>
           {selectedTokenName}

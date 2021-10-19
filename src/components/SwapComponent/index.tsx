@@ -19,7 +19,7 @@ import {
 import { TokenAmountFieldImpactPrice, TokenAmountFieldMax } from '../TokenFields';
 import { SwitchTokenButton } from '../common/Button';
 import SwapConfirmationModal from './SwapConfirmationModal';
-import { CenterColumn, MT } from '../common/Display';
+import { CenterColumn, MinWidth, MT } from '../common/Display';
 import { OpenModalButton } from '../common/Modal';
 import { LoadingButtonIconWithText } from '../common/Loading';
 import { TransactionSettings } from '../TransactionSettings';
@@ -193,7 +193,7 @@ export const SwapComponent = ({
 
   return (
     <CenterColumn>
-      <div style={{ minWidth: '500px' }}>
+      <MinWidth size={500}>
         <Card>
           <CardHeader>
             <CardHeaderBlank />
@@ -232,7 +232,7 @@ export const SwapComponent = ({
             confirmFun={onSwap}
           />
         </Card>
-      </div>
+      </MinWidth>
     </CenterColumn>
   );
 };
