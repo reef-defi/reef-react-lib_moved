@@ -1,6 +1,7 @@
 import { Signer, Provider } from '@reef-defi/evm-provider';
 import type { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 import type { Signer as InjectedSigner } from '@polkadot/api/types';
+import { DeriveBalancesAccountData } from '@polkadot/api-derive/balances/types';
 import { ensure } from '../utils/utils';
 import { ReefSigner } from '../state/types';
 
@@ -10,7 +11,7 @@ export const accountToSigner = async (account: InjectedAccountWithMeta, provider
   const isEvmClaimed = await signer.isClaimed();
 
   const balance = await provider.api.derive.balances.all(account.address)
-    .then((res) => res.freeBalance.toHuman())
+    .then((res:DeriveBalancesAccountData) => res.freeBalance.toHuman() as string)
     .then((res) => (res === '0' ? '- REEF' : res));
 
   return {
