@@ -1,141 +1,83 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { BigNumber } from 'ethers';
-import { SwitchTokenButton } from '../common/Button';
+import { useLoadPool } from '../../hooks/useLoadPool';
+import { useUpdateBalance } from '../../hooks/useUpdateBalance';
+import { useUpdateLiquidityAmount } from '../../hooks/useUpdateAmount';
+import { useUpdateTokensPrice } from '../../hooks/useUpdateTokensPrice';
+import {
+  ButtonStatus, ensure, calculateAmount, assertAmount, ensureAmount, calculateAmountWithPercentage, calculateDeadline, errorHandler,
+} from '../../utils';
+import { CenterColumn, ComponentCenter, MT } from '../common/Display';
 import {
   Card, CardBack, CardHeader, CardTitle,
 } from '../common/Card';
-import { TokenAmountField } from '../TokenFields';
-import { LoadingButtonIconWithText } from '../common/Loading';
-import { approveTokenAmount, getReefswapRouter } from '../../rpc';
-import {
-  assertAmount,
-  calculateAmount,
-  calculateAmountWithPercentage,
-  calculateDeadline,
-  calculatePoolShare,
-  calculatePoolSupply,
-  ensureAmount,
-} from '../../utils/math';
-import { useUpdateBalance } from '../../hooks/useUpdateBalance';
-import { useLoadPool } from '../../hooks/useLoadPool';
-import { useUpdateTokensPrice } from '../../hooks/useUpdateTokensPrice';
-import { useUpdateLiquidityAmount } from '../../hooks/useUpdateAmount';
-import {
-  createEmptyTokenWithAmount,
-  DefaultOptions,
-  defaultOptions,
-  defaultSettings,
-  Network,
-  // PartialOptions,
-  ReefSigner,
-  resolveSettings,
-  Token,
-  TokenSelector,
-  TokenWithAmount,
-} from '../../state';
-import {
-  ButtonStatus,
-  errorHandler,
-} from '../../utils';
 import { TransactionSettings } from '../TransactionSettings';
-import ConfirmationModal from '../common/Modal';
-import { ConfirmLabel } from '../common/Label';
-import { ComponentCenter } from '../common/Display';
-
-const errorStatus = (text: string): ButtonStatus => ({
-  isValid: false,
-  text,
-});
-
-const buttonStatus = (
-  token1: TokenWithAmount,
-  token2: TokenWithAmount,
-  isEvmClaimed: boolean,
-): ButtonStatus => {
-  if (!isEvmClaimed) {
-    return errorStatus('Bind account');
-  }
-  if (token1.isEmpty || token2.isEmpty) {
-    return errorStatus('Invalid pair');
-  }
-  if (token1.amount.length === 0) {
-    return errorStatus('Missing first token amount');
-  }
-  if (token2.amount.length === 0) {
-    return errorStatus('Missing second token amount');
-  }
-  if (BigNumber.from(calculateAmount(token1)).gt(token1.balance)) {
-    return errorStatus(`Insufficient ${token1.name} balance`);
-  }
-  if (BigNumber.from(calculateAmount(token2)).gt(token2.balance)) {
-    return errorStatus(`Insufficient ${token2.name} balance`);
-  }
-  return { isValid: true, text: 'Supply' };
-};
-
-const loadingStatus = (
-  status: string,
-  isPoolLoading: boolean,
-  isPriceLoading: boolean,
-): string => {
-  if (status) {
-    return status;
-  }
-  if (isPoolLoading) {
-    return 'Loading pool';
-  }
-  if (isPriceLoading) {
-    return 'Loading prices';
-  }
-  return '';
-};
+import { DangerAlert } from '../common/Alert';
+import { TokenAmountField } from '../TokenFields';
+import { SwitchTokenButton } from '../common/Button';
+import { OpenModalButton } from '../common/Modal';
+import { LoadingButtonIconWithText } from '../common/Loading';
+import ConfirmAddLiquidity from './ConfirmAddLiquidity';
+import {
+  createEmptyTokenWithAmount, defaultSettings, Network, Notify, ReefSigner, reefTokenWithAmount, resolveSettings, Token, TokenWithAmount,
+} from '../../state';
+import { approveTokenAmount, getReefswapRouter } from '../../rpc';
 
 interface AddLiquidityComponent {
   tokens: Token[];
   network: Network;
-  tokenValue1: TokenWithAmount;
-  tokenValue2: TokenWithAmount;
-  signer: ReefSigner;
-  options?: Partial<DefaultOptions>;
+  signer?: ReefSigner;
+  back: () => void;
+  reloadTokens: () => void;
+  notify: (message: string, type: Notify) => void;
+  onAddressChangeLoad?: (address: string) => Promise<void>;
 }
 
-export const AddLiquidity = ({
-  tokens,
-  network,
-  tokenValue1,
-  tokenValue2,
-  signer,
-  options,
-}: AddLiquidityComponent): JSX.Element => {
-  const { signer: sgnr, evmAddress, isEvmClaimed } = signer;
-  const {
-    back, notify, onTokenSelect, updateTokenState, onAddressChange,
-  } = { ...defaultOptions, ...options };
+const liquidityStatus = (token1: TokenWithAmount, token2: TokenWithAmount, isEvmClaimed?: boolean): ButtonStatus => {
+  try {
+    ensure(isEvmClaimed === true, 'Bind account');
+    ensure(!token1.isEmpty, 'Select first token');
+    ensure(!token2.isEmpty, 'Select second token');
+    ensure(token1.amount.length !== 0, 'Missing first token amount');
+    ensure(token2.amount.length !== 0, 'Missing second token amount');
+    ensure(BigNumber.from(calculateAmount(token1)).lte(token1.balance), `Insufficient ${token1.name} balance`);
+    ensure(BigNumber.from(calculateAmount(token2)).lte(token2.balance), `Insufficient ${token2.name} balance`);
+    return {
+      isValid: true,
+      text: 'Supply',
+    };
+  } catch (e) {
+    return {
+      isValid: false,
+      text: e.message,
+    };
+  }
+};
 
+const loadingStatus = (status: string, isPoolLoading: boolean, isPriceLoading: boolean): string => {
+  if (status) { return status; }
+  if (isPoolLoading) { return 'Loading pool'; }
+  if (isPriceLoading) { return 'Loading prices'; }
+  return '';
+};
+
+export const AddLiquidityComponent = ({
+  tokens, network, signer, back, notify, reloadTokens, onAddressChangeLoad,
+} : AddLiquidityComponent): JSX.Element => {
   const [status, setStatus] = useState('');
   const [settings, setSettings] = useState(defaultSettings());
   const [isLiquidityLoading, setIsLiquidityLoading] = useState(false);
 
-  const [token1, setToken1] = useState(tokenValue1);
-  const [token2, setToken2] = useState(tokenValue2);
-
+  const [token2, setToken2] = useState(createEmptyTokenWithAmount());
+  const [token1, setToken1] = useState(reefTokenWithAmount());
   const { deadline, percentage } = resolveSettings(settings);
-  useEffect(
-    () => setToken1(tokenValue1),
-    [tokenValue1.address],
-  );
-  useEffect(
-    () => setToken2(tokenValue2),
-    [tokenValue2.address],
-  );
 
-  const [pool, isPoolLoading] = useLoadPool(
-    token1,
-    token2,
-    network.factoryAddress,
-    sgnr,
+  const [pool, isPoolLoading] = useLoadPool(token1, token2, network.factoryAddress, signer?.signer);
+
+  const { text, isValid } = useMemo(
+    () => liquidityStatus(token1, token2, signer?.isEvmClaimed),
+    [token1, token2, signer?.isEvmClaimed],
   );
-  const newPoolSupply = calculatePoolSupply(token1, token2, pool);
 
   useUpdateBalance(token1, tokens, setToken1);
   useUpdateBalance(token2, tokens, setToken2);
@@ -144,9 +86,9 @@ export const AddLiquidity = ({
     token1,
     token2,
     tokens,
-    signer: sgnr,
     setToken1,
     setToken2,
+    signer: signer?.signer,
     factoryAddress: network.factoryAddress,
   });
   useUpdateLiquidityAmount({
@@ -158,89 +100,62 @@ export const AddLiquidity = ({
   });
 
   const isLoading = isLiquidityLoading || isPoolLoading || isPriceLoading;
-  const { text, isValid } = buttonStatus(token1, token2, isEvmClaimed);
 
-  // eslint-disable-next-line
-  const changeToken = (type: TokenSelector) => (newToken: Token): void => {
-    onTokenSelect(newToken.address, type);
-    const tokenWithamo: TokenWithAmount = {
-      ...createEmptyTokenWithAmount(false),
-      ...newToken,
-    };
-    switch (type) {
-      case 'token1': return setToken1(tokenWithamo);
-      case 'token2': return setToken2(tokenWithamo);
-      default:
-    }
-  };
+  const changeToken1 = (newToken: Token): void => setToken1({
+    ...newToken, amount: '', price: 0, isEmpty: false,
+  });
+  const changeToken2 = (newToken: Token): void => setToken2({
+    ...newToken, amount: '', price: 0, isEmpty: false,
+  });
 
   const setAmount1 = (amount: string): void => {
-    if (isLoading) {
-      return;
-    }
+    if (isLoading) { return; }
+    const newAmount = token1.price / token2.price * parseFloat(assertAmount(amount));
     setToken1({ ...token1, amount });
-    if (pool) {
-      const ratio = BigNumber.from(pool.reserve1).mul(10000000).div(pool.reserve2).toNumber() / 10000000;
-      const newAmount = ratio * parseFloat(assertAmount(amount));
-      setToken2({ ...token2, amount: !newAmount ? '' : newAmount.toFixed(4) });
-    }
+    setToken2({ ...token2, amount: !amount ? '' : newAmount.toFixed(4) });
   };
   const setAmount2 = (amount: string): void => {
-    if (isLoading) {
-      return;
-    }
+    if (isLoading) { return; }
+    const newAmount = token2.price / token1.price * parseFloat(assertAmount(amount));
     setToken2({ ...token2, amount });
-    if (pool) {
-      const ratio = BigNumber.from(pool.reserve2).mul(10000000).div(pool.reserve1).toNumber() / 10000000;
-      const newAmount = ratio * parseFloat(assertAmount(amount));
-      setToken1({ ...token1, amount: !newAmount ? '' : newAmount.toFixed(4) });
-    }
+    setToken1({ ...token1, amount: !amount ? '' : newAmount.toFixed(4) });
   };
 
   const addLiquidityClick = async (): Promise<void> => {
+    if (!signer) { return; }
+    const { evmAddress } = signer;
     try {
       setIsLiquidityLoading(true);
       ensureAmount(token1);
       ensureAmount(token2);
 
-      const amount1 = calculateAmount(token1);
-      const amount2 = calculateAmount(token2);
-      const percentage1 = calculateAmountWithPercentage(token1, percentage);
-      const percentage2 = calculateAmountWithPercentage(token2, percentage);
-
       setStatus(`Approving ${token1.name} token`);
-      await approveTokenAmount(token1, network.routerAddress, sgnr);
+      await approveTokenAmount(token1, network.routerAddress, signer.signer);
       setStatus(`Approving ${token2.name} token`);
-      await approveTokenAmount(token2, network.routerAddress, sgnr);
+      await approveTokenAmount(token2, network.routerAddress, signer.signer);
 
       setStatus('Adding supply');
-      const reefswapRouter = getReefswapRouter(network.routerAddress, sgnr);
+      const reefswapRouter = getReefswapRouter(network.routerAddress, signer.signer);
 
       await reefswapRouter.addLiquidity(
         token1.address,
         token2.address,
-        amount1,
-        amount2,
-        percentage1,
-        percentage2,
+        calculateAmount(token1),
+        calculateAmount(token2),
+        calculateAmountWithPercentage(token1, percentage), // min amount token1
+        calculateAmountWithPercentage(token2, percentage), // min amount token2
         evmAddress,
         calculateDeadline(deadline),
       );
-      notify('Balances will reload after blocks are finalized.', 'info');
-      notify('Liquidity added successfully!');
+      notify(`${token1.name}/${token2.name} supply added successfully!`, 'success');
     } catch (error) {
       const message = errorHandler(error.message)
         .replace('first', token1.name)
         .replace('second', token2.name);
 
       notify(message, 'error');
-      // toast.error(errorHandler(message));
     } finally {
-      /* TODO const newTokens = await loadTokens(tokens, sgnr);
-      dispatch(setAllTokensAction(newTokens)); */
-      await updateTokenState()
-        .catch(() => notify('Failed to reload token balances, please reload the page to see correct balances.', 'warning'));
-      setIsLiquidityLoading(false);
+      reloadTokens();
       setStatus('');
     }
   };
@@ -251,120 +166,54 @@ export const AddLiquidity = ({
         <CardHeader>
           <CardBack onBack={back} />
           <CardTitle title="Add liquidity" />
-          <TransactionSettings settings={settings} setSettings={setSettings} />
+          <TransactionSettings
+            settings={settings}
+            setSettings={setSettings}
+          />
         </CardHeader>
 
-        <div className="alert alert-danger mt-2 border-rad" role="alert">
+        <DangerAlert>
           <b>Tip: </b>
-          When you add liquidity, you will receive pool tokens representing your
-          position. These tokens automatically earn fees proportional to your
-          share of the pool, and can be redeemed at any time.
-        </div>
+          When you add liquidity, you will receive pool tokens representing your position. These tokens automatically earn fees proportional to your share of the pool, and can be redeemed at any time.
+        </DangerAlert>
 
         <TokenAmountField
           token={token1}
           tokens={tokens}
-          signer={signer}
           id="add-liquidity-token-1"
           onAmountChange={setAmount1}
-          onTokenSelect={changeToken('token1')}
-          onAddressChange={onAddressChange}
+          onTokenSelect={changeToken1}
+          onAddressChange={onAddressChangeLoad}
         />
         <SwitchTokenButton disabled addIcon />
-
         <TokenAmountField
           token={token2}
           tokens={tokens}
-          signer={signer}
           id="add-liquidity-token-2"
           onAmountChange={setAmount2}
-          onTokenSelect={changeToken('token2')}
-          onAddressChange={onAddressChange}
+          onTokenSelect={changeToken2}
+          onAddressChange={onAddressChangeLoad}
         />
-
-        <button
-          type="button"
-          className="btn btn-reef btn-lg border-rad w-100 mt-2"
-          disabled={!isValid || isLoading}
-          data-bs-toggle="modal"
-          data-bs-target="#supplyModalToggle"
-        >
-          <span>
-            {isLoading ? (
-              <LoadingButtonIconWithText
-                text={loadingStatus(status, isPoolLoading, isPriceLoading)}
-              />
-            ) : (
-              text
-            )}
-          </span>
-        </button>
-
-        <ConfirmationModal
-          id="supplyModalToggle"
-          title="Confirm Supply"
+        <MT size="2">
+          <CenterColumn>
+            <OpenModalButton
+              id="swap-modal-toggle"
+              disabled={!isValid || isLoading}
+            >
+              {isLoading
+                ? <LoadingButtonIconWithText text={loadingStatus(status, isPoolLoading, isPriceLoading)} />
+                : text}
+            </OpenModalButton>
+          </CenterColumn>
+        </MT>
+        <ConfirmAddLiquidity
+          pool={pool}
+          token1={token1}
+          token2={token2}
+          percentage={percentage}
           confirmFun={addLiquidityClick}
-        >
-          <label className="text-muted ms-2">You will recieve</label>
-          <div className="field border-rad p-3">
-            <ConfirmLabel
-              titleSize="h4"
-              valueSize="h6"
-              title={newPoolSupply.toFixed(8)}
-              value={`${token1.name}/${token2.name}`}
-            />
-          </div>
-          <div className="m-3">
-            <span className="mini-text text-muted d-inline-block">
-              Output is estimated. If the price changes by more than
-              {' '}
-              {percentage}
-              % your transaction will revert.
-            </span>
-          </div>
-          <div className="field p-2 border-rad">
-            <ConfirmLabel
-              title="Liquidity Provider Fee"
-              value="1.5 REEF"
-              titleSize="mini-text"
-              valueSize="mini-text"
-            />
-            <ConfirmLabel
-              title={`${token1.name} Deposited`}
-              value={`${token1.amount}`}
-              titleSize="mini-text"
-              valueSize="mini-text"
-            />
-            <ConfirmLabel
-              title={`${token2.name} Deposited`}
-              value={`${token2.amount}`}
-              titleSize="mini-text"
-              valueSize="mini-text"
-            />
-            <ConfirmLabel
-              title="Rates"
-              value={`1 ${token1.name} = ${(
-                token1.price / token2.price
-              ).toFixed(8)} ${token2.name}`}
-              titleSize="mini-text"
-              valueSize="mini-text"
-            />
-            <ConfirmLabel
-              title=""
-              value={`1 ${token2.name} = ${(
-                token2.price / token1.price
-              ).toFixed(8)} ${token1.name}`}
-              titleSize="mini-text"
-              valueSize="mini-text"
-            />
-            <ConfirmLabel
-              title="Share of Pool"
-              value={`${calculatePoolShare(pool).toFixed(8)} %`}
-              titleSize="mini-text"
-              valueSize="mini-text"
-            />
-          </div>
-        </ConfirmationModal>
+          id="swap-modal-toggle"
+        />
       </Card>
     </ComponentCenter>
   );

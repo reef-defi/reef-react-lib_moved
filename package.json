@@ -1,6 +1,6 @@
 {
   "name": "@reef-defi/react-lib",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Reef React Library",
   "author": "Frenkiee",
   "license": "MIT",
@@ -60,9 +60,9 @@
     "README.md"
   ],
   "dependencies": {
-    "@polkadot/extension-dapp": "^0.38.6",
-    "@polkadot/react-identicon": "^0.85.5",
-    "@reef-defi/evm-provider": "^0.1.10",
+    "@polkadot/extension-dapp": "^0.38.5",
+    "@polkadot/react-identicon": "^0.86.2",
+    "@reef-defi/evm-provider": "^1.0.2",
     "@types/react-router-dom": "^5.3.0",
     "axios": "^0.21.4",
     "bootstrap": "^5.1.1",

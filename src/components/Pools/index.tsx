@@ -6,22 +6,13 @@ import {
   Card, CardHeader, CardTitle, SubCard,
 } from '../common/Card';
 import {
-  CenterColumn,
-  CenterRow,
-  ContentBetween,
-  ContentEnd,
-  FlexColumn,
-  FlexRow,
-  FullColumn,
-  MS,
-  MT,
-  Width,
+  CenterColumn, CenterRow, ContentBetween, ContentEnd, FlexColumn, FlexRow, FullColumn, MS, MT, Width,
 } from '../common/Display';
-import { DownIcon, TokenIcon, UpIcon } from '../common/Icons';
+import { TokenIcon, DownIcon, UpIcon } from '../common/Icons';
 import { ConfirmLabel } from '../common/Label';
-import { List, ListItem } from '../common/List';
+import { ListItem, List, ListEmptyItem } from '../common/List';
 import { Loading } from '../common/Loading';
-import { MiniText, MutedText, Text } from '../common/Text';
+import { Text, MiniText, MutedText } from '../common/Text';
 
 interface DefaultState {
   pool: Pool;
@@ -32,7 +23,6 @@ interface State extends DefaultState {
 }
 
 interface OpenState extends State {
-  openChart: (address: string) => void;
   openRemoveLiquidity: (address1: string, address2: string) => void;
 }
 
@@ -59,9 +49,7 @@ const CloseState = ({ pool, toggle }: State): JSX.Element => (
       <MiniText>
         <MutedText>Liquidity:</MutedText>
       </MiniText>
-      <Text>
-        {convert2Normal(pool.decimals, pool.minimumLiquidity).toFixed(4)}
-      </Text>
+      <Text>{convert2Normal(pool.decimals, pool.minimumLiquidity).toFixed(4)}</Text>
     </FlexColumn>
     <FlexColumn>
       <MiniText>
@@ -75,12 +63,7 @@ const CloseState = ({ pool, toggle }: State): JSX.Element => (
   </ContentBetween>
 );
 
-const OpenState = ({
-  pool,
-  toggle,
-  openChart,
-  openRemoveLiquidity,
-}: OpenState): JSX.Element => (
+const OpenState = ({ pool, toggle, openRemoveLiquidity }: OpenState): JSX.Element => (
   <FullColumn>
     <ContentBetween>
       <DefaultState pool={pool} />
@@ -89,8 +72,8 @@ const OpenState = ({
       </EmptyButton>
     </ContentBetween>
     <ContentBetween>
-      {/* <div className="w-50 me-1 p-3 border border-1 border-rad">Basic Chart WIP...</div> */}
-      <div className="w-100 ms-1">
+      <div className="w-50 me-1 p-3 border border-1 border-rad">Basic Chart WIP...</div>
+      <div className="w-50 ms-1">
         <SubCard>
           <ConfirmLabel
             title="Supply: "
@@ -98,9 +81,7 @@ const OpenState = ({
           />
           <ConfirmLabel
             title="Liquidity: "
-            value={convert2Normal(pool.decimals, pool.minimumLiquidity).toFixed(
-              4,
-            )}
+            value={convert2Normal(pool.decimals, pool.minimumLiquidity).toFixed(4)}
           />
           <ConfirmLabel
             title="Locked 1: "
@@ -119,19 +100,11 @@ const OpenState = ({
     </ContentBetween>
     <MT size="2" />
     <ContentEnd>
-      <Button
-        onClick={() => openChart(pool.poolAddress)}
-      >
-        Chart
-      </Button>
-      <MS size="2" />
-      <Button
-        onClick={() => openRemoveLiquidity(pool.token1.address, pool.token2.address)}
-      >
+      <Button onClick={() => openRemoveLiquidity(pool.token1.address, pool.token2.address)}>
         Remove supply
       </Button>
-      {/* <MS size="1" />
-      <Button>Open pool</Button> */}
+      <MS size="1" />
+      <Button>Open pool</Button>
     </ContentEnd>
   </FullColumn>
 );
@@ -140,16 +113,11 @@ interface PoolsComponent {
   pools: Pool[];
   isLoading: boolean;
   openAddLiquidity: () => void;
-  openChart: (address: string) => void;
   openRemoveLiquidity: (address1: string, address2: string) => void;
 }
 
 export const PoolsComponent = ({
-  pools,
-  isLoading,
-  openChart,
-  openAddLiquidity,
-  openRemoveLiquidity,
+  pools, isLoading, openAddLiquidity, openRemoveLiquidity,
 }: PoolsComponent): JSX.Element => {
   const [isOpen, setIsOpen] = useState<boolean[]>([]);
 
@@ -169,46 +137,45 @@ export const PoolsComponent = ({
     closeAll();
   }, [pools]);
 
-  const poolsView = pools.map((pool, index) => (
-    <ListItem key={pool.poolAddress}>
-      {isOpen[index] ? (
-        <OpenState
-          pool={pool}
-          toggle={closeAll}
-          openChart={openChart}
-          openRemoveLiquidity={openRemoveLiquidity}
-        />
-      ) : (
-        <CloseState pool={pool} toggle={() => open(index)} />
-      )}
-    </ListItem>
-  ));
+  const poolsView = pools
+    .map((pool, index) => (
+      <ListItem key={pool.poolAddress}>
+        {isOpen[index]
+          ? (
+            <OpenState
+              pool={pool}
+              toggle={closeAll}
+              openRemoveLiquidity={openRemoveLiquidity}
+            />
+          )
+          : (
+            <CloseState
+              pool={pool}
+              toggle={() => open(index)}
+            />
+          )}
+      </ListItem>
+    ));
 
   return (
     <CenterColumn>
-      <div className="pools-list">
-        <Width size={500}>
-          <Card>
-            <CardHeader>
-              <CardTitle title="Pools" />
-              <FlexRow>
-                <Button onClick={openAddLiquidity}>Add supply</Button>
-              </FlexRow>
-            </CardHeader>
-
-            {isLoading && !pools.length && (
-              <MT size="3">
-                <Loading />
-              </MT>
-            )}
-            {!isLoading && pools.length > 0 && (
-              <MT size="3">
-                <List>{poolsView}</List>
-              </MT>
-            )}
-          </Card>
-        </Width>
-      </div>
+      <Width size={500}>
+        <Card>
+          <CardHeader>
+            <CardTitle title="Pools" />
+            <FlexRow>
+              <Button onClick={openAddLiquidity}>Add supply</Button>
+            </FlexRow>
+          </CardHeader>
+          <MT size="3">
+            <List>
+              <ListEmptyItem />
+              {isLoading ? <Loading /> : poolsView}
+              <ListEmptyItem />
+            </List>
+          </MT>
+        </Card>
+      </Width>
     </CenterColumn>
   );
 };
