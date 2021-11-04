@@ -9,4 +9,5 @@ export * as Modal from './Modal';
 export * as Button from './Button';
 export * as Display from './Display';
 export * as Loading from './Loading';
+export * as Tooltip from './Tooltip';
 export * as Dropdown from './Dropdown';

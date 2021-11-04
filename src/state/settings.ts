@@ -8,6 +8,7 @@ export const DEFAULT_SLIPPAGE_TOLERANCE = 0.8;
 export const MAX_SLIPPAGE_TOLERANCE = 0.5;
 export const DEFAULT_DEADLINE = 1;
 export const DEFAULT_GAS_LIMIT = '300000000';
+export const REMOVE_DEFAULT_SLIPPAGE_TOLERANCE = 5;
 
 export const defaultSettings = (): Settings => ({
   gasLimit: DEFAULT_GAS_LIMIT,

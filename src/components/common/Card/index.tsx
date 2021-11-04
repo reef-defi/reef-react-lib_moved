@@ -1,5 +1,5 @@
 import React from 'react';
-import './Card.css';
+import { BackIcon } from '../Icons';
 
 export const Card: React.FC = ({ children }): JSX.Element => (
   <div className="card border-rad">
@@ -19,6 +19,16 @@ interface Title {
 
 export const CardTitle: React.FC<Title> = ({ title }): JSX.Element => (
   <h5 className="h5 my-2 text-center">{title}</h5>
+);
+
+interface CardBack {
+  onBack: () => void;
+}
+
+export const CardBack = ({ onBack }: CardBack): JSX.Element => (
+  <button type="button" className="btn" onClick={onBack}>
+    <BackIcon />
+  </button>
 );
 
 interface ErrorCardProps {

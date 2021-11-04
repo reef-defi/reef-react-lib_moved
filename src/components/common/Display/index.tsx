@@ -36,6 +36,12 @@ export const CenterColumn: React.FC<unknown> = ({ children }): JSX.Element => (
   </div>
 );
 
+export const ContentCenter: React.FC<unknown> = ({ children }): JSX.Element => (
+  <div className="d-flex justify-content-center">
+    {children}
+  </div>
+);
+
 export const ContentBetween: React.FC<unknown> = ({ children }): JSX.Element => (
   <div className="d-flex justify-content-between w-100">
     {children}
@@ -48,12 +54,12 @@ export const ContentEnd: React.FC<unknown> = ({ children }): JSX.Element => (
   </div>
 );
 
-interface MinWidth {
+interface Width {
   size: number;
 }
 
-export const MinWidth: React.FC<MinWidth> = ({ children, size }): JSX.Element => (
-  <div style={{ minWidth: `${size}px` }}>
+export const Width: React.FC<Width> = ({ children, size }): JSX.Element => (
+  <div style={{ minWidth: `${size}px`, maxWidth: `${size}px` }}>
     {children}
   </div>
 );
@@ -126,4 +132,12 @@ export const Border: React.FC<Size> = ({ children, size = '1' }): JSX.Element =>
   <div className={`border border-rad p-${size}`}>
     {children}
   </div>
+);
+
+export const ComponentCenter: React.FC<unknown> = ({ children }): JSX.Element => (
+  <CenterColumn>
+    <Width size={500}>
+      {children}
+    </Width>
+  </CenterColumn>
 );

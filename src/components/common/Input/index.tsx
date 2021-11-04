@@ -38,7 +38,7 @@ export const InputAmount = ({
     type="number"
     min={0.0}
     disabled={disabled}
-    value={disabled ? '' : amount.replaceAll(',', '.')}
+    value={amount ? '' : amount.replaceAll(',', '.')}
     placeholder={placeholder}
     className="field-input ms-2 flex-grow-1 text-end"
     onChange={(event) => onAmountChange(event.target.value)}
@@ -79,5 +79,23 @@ export const NumberInput = ({
     placeholder={placeholder}
     onChange={(event) => onChange(event.target.value)}
     className={`form-control field-input border-rad text-end ${className}`}
+  />
+);
+
+interface PercentageRangeAmount {
+  value: number;
+  disabled?: boolean;
+  onChange: (value: number) => void;
+}
+
+export const PercentageRangeAmount = ({ value, disabled, onChange }: PercentageRangeAmount): JSX.Element => (
+  <input
+    min={0}
+    max={100}
+    type="range"
+    className="form-range"
+    value={value}
+    disabled={disabled}
+    onChange={(event) => onChange(parseInt(event.target.value, 10))}
   />
 );
