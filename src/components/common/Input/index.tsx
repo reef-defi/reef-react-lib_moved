@@ -38,7 +38,7 @@ export const InputAmount = ({
     type="number"
     min={0.0}
     disabled={disabled}
-    value={amount ? '' : amount.replaceAll(',', '.')}
+    value={amount}
     placeholder={placeholder}
     className="field-input ms-2 flex-grow-1 text-end"
     onChange={(event) => onAmountChange(event.target.value)}
