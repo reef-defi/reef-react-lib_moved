@@ -37,8 +37,9 @@ export const InputAmount = ({
   const mathDecimals = amount ? '' : amount.replaceAll(',', '.');
   const [amt, setAmt] = useState(mathDecimals);
   const inputChange = (event: any): void => {
-    setAmt(event.target.value);
-    onAmountChange(amt);
+    const newVal = event.target.value;
+    setAmt(newVal);
+    onAmountChange(newVal);
   };
   return (
     <input
