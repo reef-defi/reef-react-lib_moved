@@ -3,16 +3,13 @@ import { BackIcon, DownArrowIcon, PlusIcon } from '../Icons';
 
 interface ButtonProps {
   onClick?: () => void;
-  closeModal?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
   children,
   onClick = () => {},
-  closeModal,
 }): JSX.Element => (
-  // eslint-disable-next-line react/jsx-props-no-spreading
-  <button type="button" className="btn btn-reef border-rad" onClick={onClick} data-bs-dismiss={closeModal ? 'modal' : undefined}>
+  <button type="button" className="btn btn-reef border-rad" onClick={onClick}>
     {children}
   </button>
 );

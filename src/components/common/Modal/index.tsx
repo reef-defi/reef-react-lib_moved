@@ -1,5 +1,4 @@
 import React from 'react';
-import { Button } from '../Button';
 import { Title } from '../Text';
 
 interface Modal {
@@ -40,13 +39,17 @@ export const ModalFooter: React.FC<unknown> = ({ children }): JSX.Element => (
   </div>
 );
 
-export const ModalClose = (): JSX.Element => (
-  <button
-    type="button"
-    className="btn-close"
-    data-bs-dismiss="modal"
-    aria-label="Close"
-  />
+interface ModalClose {
+  onClick?: () => void;
+  className?: string[];
+}
+
+export const ModalClose: React.FC<ModalClose> = (
+  { children, onClick = () => {}, className },
+): JSX.Element => (
+  <button type="button" className={!className || !className.length ? 'btn-close' : className.join(' ')} onClick={onClick} data-bs-dismiss="modal" aria-label="Close">
+    {children}
+  </button>
 );
 
 interface OpenModalButton {
@@ -70,14 +73,14 @@ interface ConfirmationModal {
   id?: string;
   title: string;
   confirmFun: () => void;
-  closeOnConfirm?: boolean;
+  confirmLabel?: string;
 }
 
 const ConfirmationModal: React.FC<ConfirmationModal> = ({
   id = 'exampleModal',
   title,
   confirmFun,
-  closeOnConfirm,
+  confirmLabel,
   children,
 }): JSX.Element => (
   <Modal id={id}>
@@ -87,9 +90,7 @@ const ConfirmationModal: React.FC<ConfirmationModal> = ({
     </ModalHeader>
     <ModalBody>{children}</ModalBody>
     <ModalFooter>
-      <Button onClick={confirmFun} closeModal={closeOnConfirm}>
-        {title}
-      </Button>
+      <ModalClose onClick={confirmFun} className={['btn btn-reef border-rad']}>{confirmLabel}</ModalClose>
     </ModalFooter>
   </Modal>
 );
