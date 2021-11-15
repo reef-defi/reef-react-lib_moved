@@ -41,13 +41,13 @@ export const ModalFooter: React.FC<unknown> = ({ children }): JSX.Element => (
 
 interface ModalClose {
   onClick?: () => void;
-  className?: string[];
+  className?: string;
 }
 
 export const ModalClose: React.FC<ModalClose> = (
   { children, onClick = () => {}, className },
 ): JSX.Element => (
-  <button type="button" className={!className || !className.length ? 'btn-close' : className.join(' ')} onClick={onClick} data-bs-dismiss="modal" aria-label="Close">
+  <button type="button" className={className || 'btn-close'} onClick={onClick} data-bs-dismiss="modal" aria-label="Close">
     {children}
   </button>
 );
@@ -90,7 +90,7 @@ const ConfirmationModal: React.FC<ConfirmationModal> = ({
     </ModalHeader>
     <ModalBody>{children}</ModalBody>
     <ModalFooter>
-      <ModalClose onClick={confirmFun} className={['btn btn-reef border-rad']}>{confirmLabel}</ModalClose>
+      <ModalClose onClick={confirmFun} className="btn btn-reef border-rad">{confirmLabel}</ModalClose>
     </ModalFooter>
   </Modal>
 );
