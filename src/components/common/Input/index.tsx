@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface Input {
   value?: string
@@ -33,17 +33,25 @@ export const InputAmount = ({
   onAmountChange,
   placeholder = '',
   disabled = false,
-}: InputAmount): JSX.Element => (
-  <input
-    type="number"
-    min={0.0}
-    disabled={disabled}
-    value={amount}
-    placeholder={placeholder}
-    className="field-input ms-2 flex-grow-1 text-end"
-    onChange={(event) => onAmountChange(event.target.value)}
-  />
-);
+}: InputAmount): JSX.Element => {
+  const mathDecimals = amount ? '' : amount.replaceAll(',', '.');
+  const [amt, setAmt] = useState(mathDecimals);
+  const inputChange = (event: any): void => {
+    setAmt(event.target.value);
+    onAmountChange(amt);
+  };
+  return (
+    <input
+      type="number"
+      min={0.0}
+      disabled={disabled}
+      value={amt}
+      placeholder={placeholder}
+      className="field-input ms-2 flex-grow-1 text-end"
+      onChange={inputChange}
+    />
+  );
+};
 
 export const InputGroup: React.FC<unknown> = ({ children }): JSX.Element => (
   <div className="input-group">
