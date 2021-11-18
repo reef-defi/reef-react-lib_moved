@@ -5,14 +5,23 @@ import { DeriveBalancesAccountData } from '@polkadot/api-derive/balances/types';
 import { ensure } from '../utils/utils';
 import { ReefSigner } from '../state/types';
 
+export const getReefCoinBalance = async (address: string, provider?: Provider): Promise<string> => {
+  const noValStr = '- REEF';
+  if (!provider) {
+    return noValStr;
+  }
+  const balance = await provider.api.derive.balances.all(address)
+    .then((res: DeriveBalancesAccountData) => res.freeBalance.toHuman() as string)
+    .then((res) => (res === '0' ? noValStr : res));
+  return balance;
+};
+
 export const accountToSigner = async (account: InjectedAccountWithMeta, provider: Provider, sign: InjectedSigner): Promise<ReefSigner> => {
   const signer = new Signer(provider, account.address, sign);
   const evmAddress = await signer.getAddress();
   const isEvmClaimed = await signer.isClaimed();
 
-  const balance = await provider.api.derive.balances.all(account.address)
-    .then((res:DeriveBalancesAccountData) => res.freeBalance.toHuman() as string)
-    .then((res) => (res === '0' ? '- REEF' : res));
+  const balance = await getReefCoinBalance(account.address, provider);
 
   return {
     signer,

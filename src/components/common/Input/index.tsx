@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { BaseSyntheticEvent, useState } from 'react';
 
 interface Input {
   value?: string
@@ -74,22 +74,36 @@ interface NumberInput {
   className?: string;
   placeholder?: string;
   onChange: (value: string) => void;
+  disableDecimals?: boolean;
 }
 
 export const NumberInput = ({
-  value, min, max, step, placeholder, onChange, className = '',
-}: NumberInput): JSX.Element => (
-  <input
-    min={min}
-    max={max}
-    step={step}
-    type="number"
-    value={value}
-    placeholder={placeholder}
-    onChange={(event) => onChange(event.target.value)}
-    className={`form-control field-input border-rad text-end ${className}`}
-  />
-);
+  value, min, max, step, placeholder, onChange, disableDecimals, className = '',
+}: NumberInput): JSX.Element => {
+  const keyDown = (e: BaseSyntheticEvent): void => {
+    if (!disableDecimals) {
+      return;
+    }
+    if ((e.nativeEvent as KeyboardEvent).key === '.' || (e.nativeEvent as KeyboardEvent).key === ',') {
+      e.preventDefault();
+      (e.nativeEvent as any).stopImmediatePropagation();
+    }
+  };
+
+  return (
+    <input
+      min={min}
+      max={max}
+      step={step}
+      type="number"
+      value={value}
+      placeholder={placeholder}
+      onChange={(event) => onChange(event.target.value)}
+      onKeyDown={keyDown}
+      className={className || 'form-control field-input border-rad text-end'}
+    />
+  );
+};
 
 interface PercentageRangeAmount {
   value: number;
