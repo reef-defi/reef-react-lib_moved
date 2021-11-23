@@ -1,4 +1,4 @@
-import React, { BaseSyntheticEvent, useState } from 'react';
+import React, { BaseSyntheticEvent, useEffect, useState } from 'react';
 
 interface Input {
   value?: string
@@ -34,8 +34,9 @@ export const InputAmount = ({
   placeholder = '',
   disabled = false,
 }: InputAmount): JSX.Element => {
-  const mathDecimals = amount ? '' : amount.replaceAll(',', '.');
+  const mathDecimals = !amount ? '' : amount.replaceAll(',', '.');
   const [amt, setAmt] = useState(mathDecimals);
+  useEffect(() => setAmt(amount), [amount]);
   const inputChange = (event: any): void => {
     const newVal = event.target.value;
     setAmt(newVal);
