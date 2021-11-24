@@ -2,9 +2,19 @@ import { Signer, Provider } from '@reef-defi/evm-provider';
 import type { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 import type { Signer as InjectedSigner } from '@polkadot/api/types';
 import { DeriveBalancesAccountData } from '@polkadot/api-derive/balances/types';
+import { BigNumber } from 'ethers';
 import { ensure } from '../utils/utils';
 import { ReefSigner } from '../state/types';
 
+export const getReefCoinBalance = async (address: string, provider?: Provider): Promise<BigNumber> => {
+  if (!provider) {
+    return BigNumber.from('0');
+  }
+  const balance = await provider.api.derive.balances.all(address)
+    .then((res: DeriveBalancesAccountData) => BigNumber.from(res.freeBalance.toString(10)));
+  return balance;
+};
+/*
 export const getReefCoinBalance = async (address: string, provider?: Provider): Promise<string> => {
   const noValStr = '- REEF';
   if (!provider) {
@@ -15,6 +25,7 @@ export const getReefCoinBalance = async (address: string, provider?: Provider): 
     .then((res) => (res === '0' ? noValStr : res));
   return balance;
 };
+*/
 
 export const accountToSigner = async (account: InjectedAccountWithMeta, provider: Provider, sign: InjectedSigner): Promise<ReefSigner> => {
   const signer = new Signer(provider, account.address, sign);
