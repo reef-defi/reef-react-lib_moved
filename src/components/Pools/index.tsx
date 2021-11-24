@@ -103,8 +103,8 @@ const OpenState = ({ pool, toggle, openRemoveLiquidity }: OpenState): JSX.Elemen
       <Button onClick={() => openRemoveLiquidity(pool.token1.address, pool.token2.address)}>
         Remove supply
       </Button>
-      <MS size="1" />
-      <Button>Open pool</Button>
+      {/* <MS size="1" />
+      <Button>Open pool</Button> */}
     </ContentEnd>
   </FullColumn>
 );
