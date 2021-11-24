@@ -1,7 +1,7 @@
 import React from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { ReefSigner } from '../../state';
-import { trim } from '../../utils';
+import { toReefBalanceDisplay, trim } from '../../utils';
 import {
   Border, ContentBetween, FlexRow, Margin, MT, MX,
 } from '../common/Display';
@@ -29,7 +29,7 @@ export const AccountSelector = ({
 } : AccountSelector): JSX.Element => {
   const name = selectedSigner ? selectedSigner.name : '';
   const address = selectedSigner ? selectedSigner.address : '';
-  const balance = selectedSigner ? selectedSigner.balance : '- REEF';
+  const balance = selectedSigner ? toReefBalanceDisplay(selectedSigner.balance) : toReefBalanceDisplay(undefined);
   const evmAddress = selectedSigner ? selectedSigner.evmAddress : '';
 
   const accountsView = accounts

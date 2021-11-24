@@ -1,3 +1,4 @@
+import { ethers, BigNumber } from 'ethers';
 import { Networks } from '../state';
 
 export interface ButtonStatus {
@@ -13,6 +14,13 @@ export const ensure = (condition: boolean, message: string): void => {
   if (!condition) {
     throw new Error(message);
   }
+};
+
+export const toReefBalanceDisplay = (value?: BigNumber): string => {
+  if (value && value.gt(0)) {
+    return `${ethers.utils.formatEther(value)} REEF`;
+  }
+  return '- REEF';
 };
 
 export const uniqueCombinations = <T>(array: T[]): [T, T][] => {

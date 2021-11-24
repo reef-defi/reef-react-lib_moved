@@ -1,9 +1,10 @@
 import { Signer } from '@reef-defi/evm-provider';
+import { BigNumber } from 'ethers';
 
 export interface ReefSigner {
   name: string;
   signer: Signer;
-  balance: string;
+  balance: BigNumber;
   address: string;
   evmAddress: string;
   isEvmClaimed: boolean;
