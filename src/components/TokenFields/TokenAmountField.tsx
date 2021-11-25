@@ -1,6 +1,6 @@
 import React from 'react';
-import { TokenWithAmount, Token, Color } from '../../state';
-import { showBalance, toBalance } from '../../utils/math';
+import { Color, Token, TokenWithAmount } from '../../state';
+import { showBalance, toUnits } from '../../utils/math';
 import { SubCard } from '../common/Card';
 import {
   CenterColumn, ContentBetween, FlexRow, MT,
@@ -98,7 +98,7 @@ export const TokenAmountFieldMax = ({
       <MiniText>
         {!isEmpty && `Balance: ${showBalance(token)}`}
 
-        {!isEmpty && <span className="text-primary text-decoration-none" role="button" onClick={() => onAmountChange(`${toBalance(token)}`)}>(Max)</span>}
+        {!isEmpty && <span className="text-primary text-decoration-none" role="button" onClick={() => onAmountChange(`${toUnits(token)}`)}>(Max)</span>}
       </MiniText>
       <MiniText>
         {!isEmpty && price !== 0 && amount !== '' && `~$ ${(amo * price).toFixed(4)}`}

@@ -1,4 +1,4 @@
-import { BigNumber } from 'ethers';
+import { BigNumber, utils } from 'ethers';
 import { ensure } from './utils';
 import { Pool, Token, TokenWithAmount } from '../state';
 
@@ -125,6 +125,8 @@ export const toBalance = ({ balance, decimals }: ToBalance): number => {
     : num.slice(0, diff);
   return parseFloat(`${fullNum}.${num.slice(diff, num.length)}`);
 };
+
+export const toUnits = ({ balance, decimals }: ToBalance): string => utils.formatUnits(balance.toString(), decimals);
 
 export const poolRatio = ({ token1, token2 }: Pool): number => toBalance(token2) / toBalance(token1);
 

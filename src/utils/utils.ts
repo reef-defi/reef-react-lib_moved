@@ -18,7 +18,9 @@ export const ensure = (condition: boolean, message: string): void => {
 
 export const toReefBalanceDisplay = (value?: BigNumber): string => {
   if (value && value.gt(0)) {
-    return `${ethers.utils.formatEther(value)} REEF`;
+    const stringValue = ethers.utils.formatEther(value);
+    const delimiterIndex = stringValue.indexOf('.');
+    return `${stringValue.substring(0, delimiterIndex)} REEF`;
   }
   return '- REEF';
 };

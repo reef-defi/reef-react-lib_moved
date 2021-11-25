@@ -40,8 +40,7 @@ const SelectToken = ({
 
   const isEmpty = selectedTokenName === 'Select token';
 
-  const tokensView = tokens
-    .filter((token) => token.name.startsWith(address) || token.address.startsWith(address))
+  const tokensView = tokens.filter((token) => token.name.startsWith(address) || token.address.startsWith(address))
     .map((token) => (
       <ListItemDismissModal key={token.address} onClick={() => onTokenSelect(token)}>
         <FullRow>
@@ -68,7 +67,7 @@ const SelectToken = ({
     ));
 
   const commonBasesView = tokens
-    .filter((token) => COMMON_BASES.includes(token.name))
+    ?.filter((token) => COMMON_BASES.includes(token.name))
     .map((token) => (
       <IconButton onClick={() => onTokenSelect(token)} key={token.address}>
         <TokenIcon src={token.iconUrl} />

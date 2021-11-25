@@ -5,23 +5,20 @@ import { toReefBalanceDisplay, trim } from '../../utils';
 import {
   Border, ContentBetween, FlexRow, Margin, MT, MX,
 } from '../common/Display';
-import {
-  BackIcon, CloseIcon, CopyIcon, ExploreIcon, ReefAddressIcon,
-} from '../common/Icons';
-import { ListItem } from '../common/List';
+import { CopyIcon, ExploreIcon, ReefAddressIcon } from '../common/Icons';
 import {
   Modal, ModalBody, ModalClose, ModalHeader,
 } from '../common/Modal';
 import {
   LeadText, MiniText, MutedText, Title,
 } from '../common/Text';
-import AccountInlineInfo from './AccountInlineInfo';
+import { AccountListModal } from './AccountListModal';
 
 interface AccountSelector {
   reefscanUrl: string;
   accounts: ReefSigner[];
   selectedSigner?: ReefSigner;
-  selectAccount: (index: number) => void;
+  selectAccount: (index: number, signer: ReefSigner) => void;
 }
 
 export const AccountSelector = ({
@@ -31,18 +28,6 @@ export const AccountSelector = ({
   const address = selectedSigner ? selectedSigner.address : '';
   const balance = selectedSigner ? toReefBalanceDisplay(selectedSigner.balance) : toReefBalanceDisplay(undefined);
   const evmAddress = selectedSigner ? selectedSigner.evmAddress : '';
-
-  const accountsView = accounts
-    .map(({ address, evmAddress, name }, index) => (
-      <ListItem key={address}>
-        <AccountInlineInfo
-          name={name}
-          address={address}
-          evmAddress={evmAddress}
-          onClick={() => selectAccount(index)}
-        />
-      </ListItem>
-    ));
 
   return (
     <div className="nav-account border-rad">
@@ -102,22 +87,7 @@ export const AccountSelector = ({
           <MT size="2" />
         </ModalBody>
       </Modal>
-      <Modal id="select-account-modal">
-        <ModalHeader>
-          <button type="button" className="btn ms-0 me-auto py-0" data-bs-target="#account-modal" data-bs-toggle="modal" data-bs-dismiss="modal">
-            <BackIcon />
-          </button>
-          <Title>Select account</Title>
-          <button type="button" className="btn py-0 ms-auto" data-bs-dismiss="modal">
-            <CloseIcon />
-          </button>
-        </ModalHeader>
-        <div className="modal-body px-0">
-          <ul className="list-group overflow-scroll" style={{ height: '300px' }}>
-            {accountsView}
-          </ul>
-        </div>
-      </Modal>
+      <AccountListModal id="select-account-modal" accounts={accounts} selectAccount={selectAccount} backButtonModalId="#account-modal" />
     </div>
   );
 };
