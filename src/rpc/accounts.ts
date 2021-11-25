@@ -14,18 +14,6 @@ export const getReefCoinBalance = async (address: string, provider?: Provider): 
     .then((res: DeriveBalancesAccountData) => BigNumber.from(res.freeBalance.toString(10)));
   return balance;
 };
-/*
-export const getReefCoinBalance = async (address: string, provider?: Provider): Promise<string> => {
-  const noValStr = '- REEF';
-  if (!provider) {
-    return noValStr;
-  }
-  const balance = await provider.api.derive.balances.all(address)
-    .then((res: DeriveBalancesAccountData) => res.freeBalance.toHuman() as string)
-    .then((res) => (res === '0' ? noValStr : res));
-  return balance;
-};
-*/
 
 export const accountToSigner = async (account: InjectedAccountWithMeta, provider: Provider, sign: InjectedSigner): Promise<ReefSigner> => {
   const signer = new Signer(provider, account.address, sign);

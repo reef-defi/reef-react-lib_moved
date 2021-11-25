@@ -4,7 +4,7 @@ import { WsProvider } from '@polkadot/api';
 import { useAsyncEffect } from './useAsyncEffect';
 
 type UseProvider = [Provider|undefined, boolean, string];
-
+// should be used only once per url in app
 export const useProvider = (providerUrl: string): UseProvider => {
   const [provider, setProvider] = useState<Provider>();
   const [isLoading, setIsLoading] = useState(false);

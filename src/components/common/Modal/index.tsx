@@ -55,15 +55,18 @@ export const ModalClose: React.FC<ModalClose> = (
 interface OpenModalButton {
   id?: string;
   disabled?: boolean;
+  className?: string;
 }
 
-export const OpenModalButton: React.FC<OpenModalButton> = ({ children, id = 'open-modal-button', disabled }): JSX.Element => (
+export const OpenModalButton: React.FC<OpenModalButton> = ({
+  children, id = 'open-modal-button', disabled, className,
+}): JSX.Element => (
   <button
     type="button"
     disabled={disabled}
     data-bs-toggle="modal"
     data-bs-target={`#${id}`}
-    className="btn btn-reef btn-lg border-rad w-100"
+    className={className || 'btn btn-reef btn-lg border-rad w-100'}
   >
     {children}
   </button>
