@@ -26,6 +26,7 @@ interface SelectToken {
   tokens: Token[],
   onTokenSelect: (newToken: Token) => void;
   onAddressChange?: (address: string) => Promise<void>;
+  hideCommonBaseView?: boolean;
 }
 
 const COMMON_BASES = ['REEF'];
@@ -33,14 +34,14 @@ const COMMON_BASES = ['REEF'];
 const emptyFunction = async (): Promise<void> => {};
 
 const SelectToken = ({
-  id = 'exampleModal', tokens, selectedTokenName, onTokenSelect, fullWidth = false, iconUrl, onAddressChange = emptyFunction,
+  id = 'exampleModal', tokens, selectedTokenName, onTokenSelect, fullWidth = false, iconUrl, onAddressChange = emptyFunction, hideCommonBaseView,
 } : SelectToken): JSX.Element => {
   const [isLoading, setIsLoading] = useState(false);
   const [address, setAddress] = useState('');
 
   const isEmpty = selectedTokenName === 'Select token';
 
-  const tokensView = tokens.filter((token) => token.name.startsWith(address) || token.address.startsWith(address))
+  const tokensView = tokens.filter((token) => token.name.toLowerCase().startsWith(address.toLowerCase()) || token.address.toLowerCase().startsWith(address.toLowerCase()))
     .map((token) => (
       <ListItemDismissModal key={token.address} onClick={() => onTokenSelect(token)}>
         <FullRow>
@@ -110,20 +111,25 @@ const SelectToken = ({
             onChange={setAddress}
             placeholder="Search token name or address"
           />
-          <Margin size="3">
-            <FlexRow>
-              Common bases
-              <QuestionTooltip>
-                These tokens are commonly
-                {' '}
-                <br />
-                paired with other tokens.
-              </QuestionTooltip>
-            </FlexRow>
-          </Margin>
-          <Margin>
-            {commonBasesView}
-          </Margin>
+          {!hideCommonBaseView
+          && (
+          <div>
+            <Margin size="3">
+              <FlexRow>
+                Common bases
+                <QuestionTooltip>
+                  These tokens are commonly
+                  {' '}
+                  <br />
+                  paired with other tokens.
+                </QuestionTooltip>
+              </FlexRow>
+            </Margin>
+            <Margin>
+              {commonBasesView}
+            </Margin>
+          </div>
+          )}
           <List>
             <ListEmptyItem />
             {isLoading ? <Loading /> : tokensView}
