@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { Color, Token, TokenWithAmount } from '../../state';
 import { showBalance, toUnits } from '../../utils/math';
 import { SubCard } from '../common/Card';
@@ -17,10 +17,11 @@ interface TokenAmountFieldProps {
   onTokenSelect: (newToken: Token) => void;
   onAmountChange: (amount: string) => void;
   onAddressChange?: (address: string) => Promise<void>;
+  hideSelectTokenCommonBaseView?: boolean;
 }
 
 const TokenAmountFieldBase: React.FC<TokenAmountFieldProps> = ({
-  id = 'exampleModal', token, tokens, onTokenSelect, onAmountChange, placeholder = '0.0', children, onAddressChange = async () => {},
+  id = 'exampleModal', token, tokens, onTokenSelect, onAmountChange, placeholder = '0.0', children, onAddressChange = async () => {}, hideSelectTokenCommonBaseView,
 }): JSX.Element => {
   const {
     name, isEmpty, amount, iconUrl,
@@ -36,6 +37,7 @@ const TokenAmountFieldBase: React.FC<TokenAmountFieldProps> = ({
           selectedTokenName={name}
           onTokenSelect={onTokenSelect}
           onAddressChange={onAddressChange}
+          hideCommonBaseView={hideSelectTokenCommonBaseView}
         />
         <InputAmount
           amount={amount}
@@ -79,9 +81,13 @@ export const TokenAmountField = ({
   );
 };
 
+interface TokenAmountFieldMax extends TokenAmountFieldProps{
+  afterBalanceEl?: ReactElement;
+  hideSelectTokenCommonBaseView?: boolean;
+}
 export const TokenAmountFieldMax = ({
-  id, token, tokens, placeholder, onTokenSelect, onAmountChange, onAddressChange,
-}: TokenAmountFieldProps): JSX.Element => {
+  id, token, tokens, placeholder, onTokenSelect, onAmountChange, onAddressChange, afterBalanceEl, hideSelectTokenCommonBaseView,
+}: TokenAmountFieldMax): JSX.Element => {
   const { amount, price, isEmpty } = token;
   const amo = parseFloat(amount);
 
@@ -94,11 +100,12 @@ export const TokenAmountFieldMax = ({
       onTokenSelect={onTokenSelect}
       onAmountChange={onAmountChange}
       onAddressChange={onAddressChange}
+      hideSelectTokenCommonBaseView={hideSelectTokenCommonBaseView}
     >
       <MiniText>
         {!isEmpty && `Balance: ${showBalance(token)}`}
 
-        {!isEmpty && <span className="text-primary text-decoration-none" role="button" onClick={() => onAmountChange(`${toUnits(token)}`)}>(Max)</span>}
+        {!isEmpty && (afterBalanceEl || <span className="text-primary text-decoration-none" role="button" onClick={() => onAmountChange(`${toUnits(token)}`)}>(Max)</span>)}
       </MiniText>
       <MiniText>
         {!isEmpty && price !== 0 && amount !== '' && `~$ ${(amo * price).toFixed(4)}`}
