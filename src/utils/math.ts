@@ -128,6 +128,14 @@ export const toBalance = ({ balance, decimals }: ToBalance): number => {
 
 export const toUnits = ({ balance, decimals }: ToBalance): string => utils.formatUnits(balance.toString(), decimals);
 
+export const toDecimalPlaces = (value: string, maxDecimalPlaces: number): string => {
+  const decimalDelim = value.indexOf('.');
+  if (!value || decimalDelim < 1 || value.length - decimalDelim < maxDecimalPlaces) {
+    return value;
+  }
+  return value.substring(0, decimalDelim + 1 + maxDecimalPlaces);
+};
+
 export const poolRatio = ({ token1, token2 }: Pool): number => toBalance(token2) / toBalance(token1);
 
 export const ensureAmount = (token: TokenWithAmount): void => ensure(BigNumber.from(calculateAmount(token)).lte(token.balance), `Insufficient ${token.name} balance`);
