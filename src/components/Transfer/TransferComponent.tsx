@@ -7,7 +7,7 @@ import { calculateUsdAmount, toDecimalPlaces, toUnits } from '../../utils';
 import {
   ensureTokenAmount, ReefSigner, reefTokenWithAmount, Token, TokenWithAmount,
 } from '../../state';
-import { getContract } from '../../rpc';
+import { getREEF20Contract } from '../../rpc';
 import {
   CenterColumn, ComponentCenter, Margin, MT,
 } from '../common/Display';
@@ -74,7 +74,7 @@ function handleErr(e: any, txIdent:string, txHash: string, txHandler: TxStatusHa
 }
 
 async function sendToEvmAddress(txToken: TokenWithAmount, signer: ReefSigner, to: string, txHandler: TxStatusHandler): Promise<string> {
-  const contract = await getContract(txToken.address, signer.signer);
+  const contract = await getREEF20Contract(txToken.address, signer.signer);
   const decimals = await contract.decimals();
   const toAmt = utils.parseUnits(txToken.amount, decimals);
   const txIdent = Math.random().toString(10);
@@ -336,6 +336,7 @@ export const TransferComponent = ({
           <TokenAmountFieldMax
             token={txToken}
             tokens={tokens}
+            signer={currentAccount}
             id="transfer-token"
             onAmountChange={amountChanged}
             onTokenSelect={tokenSelected}
