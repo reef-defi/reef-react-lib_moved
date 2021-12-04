@@ -62,6 +62,10 @@ const loadingStatus = (status: string, isPoolLoading: boolean, isPriceLoading: b
   return '';
 };
 
+function isPriceSet(token2: TokenWithAmount, token1: TokenWithAmount): boolean {
+  return !!token2.price || !!token1.price;
+}
+
 export const AddLiquidityComponent = ({
   tokens, network, signer, back, notify, reloadTokens, onAddressChangeLoad,
 } : AddLiquidityComponent): JSX.Element => {
@@ -111,15 +115,19 @@ export const AddLiquidityComponent = ({
 
   const setAmount1 = (amount: string): void => {
     if (isLoading) { return; }
-    const newAmount = token1.price / token2.price * parseFloat(assertAmount(amount));
     setToken1({ ...token1, amount });
-    setToken2({ ...token2, amount: !amount ? '' : newAmount.toFixed(4) });
+    if (isPriceSet(token1, token2)) {
+      const newAmount = token1.price / token2.price * parseFloat(assertAmount(amount));
+      setToken2({ ...token2, amount: !amount ? '' : newAmount.toFixed(4) });
+    }
   };
   const setAmount2 = (amount: string): void => {
     if (isLoading) { return; }
-    const newAmount = token2.price / token1.price * parseFloat(assertAmount(amount));
     setToken2({ ...token2, amount });
-    setToken1({ ...token1, amount: !amount ? '' : newAmount.toFixed(4) });
+    if (isPriceSet(token2, token1)) {
+      const newAmount = token2.price / token1.price * parseFloat(assertAmount(amount));
+      setToken1({ ...token1, amount: !amount ? '' : newAmount.toFixed(4) });
+    }
   };
 
   const addLiquidityClick = async (): Promise<void> => {
