@@ -2,7 +2,9 @@ import { Signer } from '@reef-defi/evm-provider';
 import { useEffect, useRef, useState } from 'react';
 import { retrieveReefCoingeckoPrice } from '../api';
 import { loadPool } from '../rpc';
-import { Pool, Token, TokenWithAmount } from '../state';
+import {
+  Pool, reefTokenWithAmount, Token, TokenWithAmount,
+} from '../state';
 import { ensureVoidRun } from '../utils';
 import { poolRatio } from '../utils/math';
 
@@ -16,6 +18,8 @@ interface UpdateTokensPriceHook {
   setToken1: (token: TokenWithAmount) => void;
   setToken2: (token: TokenWithAmount) => void;
 }
+
+const REEF_TOKEN = reefTokenWithAmount();
 
 export const useUpdateTokensPrice = ({
   pool, token1, token2, tokens, signer, factoryAddress, setToken1, setToken2,
@@ -37,10 +41,9 @@ export const useUpdateTokensPrice = ({
         setIsLoading(true);
         const reefPrice = await retrieveReefCoingeckoPrice();
         const baseRatio = poolRatio(pool);
-
-        if (token1.name === 'REEF') {
+        if (token1.address === REEF_TOKEN.address) {
           updateTokens(reefPrice, reefPrice / baseRatio);
-        } else if (token2.name === 'REEF') {
+        } else if (token2.address === REEF_TOKEN.address) {
           updateTokens(reefPrice, reefPrice * baseRatio);
         } else {
           // const sellPool = await poolContract(tokens[0], token1, signer, settings);
