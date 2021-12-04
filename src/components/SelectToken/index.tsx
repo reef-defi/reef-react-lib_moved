@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Contract, utils } from 'ethers';
 import { useAsyncEffect } from '../../hooks';
-import { Token } from '../../state';
-import { toBalance, trim } from '../../utils';
+import { createEmptyToken, ReefSigner, Token } from '../../state';
+import {
+  DataProgress, DataWithProgress, getData, getProgress, toBalance, trim,
+} from '../../utils';
 import { IconButton } from '../common/Button';
 import {
   CenterRow, ContentEnd, FlexColumn, FlexRow, FullRow, Margin, MS,
 } from '../common/Display';
-import { TokenIcon, DownIcon } from '../common/Icons';
+import { DownIcon, TokenIcon } from '../common/Icons';
 import { Input } from '../common/Input';
 import { List, ListEmptyItem, ListItemDismissModal } from '../common/List';
 import { Loading } from '../common/Loading';
@@ -14,9 +17,10 @@ import {
   Modal, ModalBody, ModalClose, ModalHeader,
 } from '../common/Modal';
 import {
-  Title, Text, LeadText, MiniText, MutedText,
+  LeadText, MiniText, MutedText, Text, Title,
 } from '../common/Text';
 import { QuestionTooltip } from '../common/Tooltip';
+import { getREEF20Contract } from '../../rpc';
 
 interface SelectToken {
   id?: string;
@@ -27,6 +31,7 @@ interface SelectToken {
   onTokenSelect: (newToken: Token) => void;
   onAddressChange?: (address: string) => Promise<void>;
   hideCommonBaseView?: boolean;
+  signer: ReefSigner;
 }
 
 const COMMON_BASES = ['REEF'];
@@ -34,38 +39,69 @@ const COMMON_BASES = ['REEF'];
 const emptyFunction = async (): Promise<void> => {};
 
 const SelectToken = ({
-  id = 'exampleModal', tokens, selectedTokenName, onTokenSelect, fullWidth = false, iconUrl, onAddressChange = emptyFunction, hideCommonBaseView,
+  id = 'exampleModal', tokens, selectedTokenName, onTokenSelect, fullWidth = false, iconUrl, onAddressChange = emptyFunction, hideCommonBaseView, signer,
 } : SelectToken): JSX.Element => {
   const [isLoading, setIsLoading] = useState(false);
   const [address, setAddress] = useState('');
+  const [foundSearchTokens, setFoundSearchTokens] = useState<DataWithProgress<Token[]>>([...tokens]);
 
   const isEmpty = selectedTokenName === 'Select token';
 
-  const tokensView = tokens.filter((token) => token.name.toLowerCase().startsWith(address.toLowerCase()) || token.address.toLowerCase().startsWith(address.toLowerCase()))
-    .map((token) => (
-      <ListItemDismissModal key={token.address} onClick={() => onTokenSelect(token)}>
-        <FullRow>
+  useEffect(() => {
+    if (!signer) {
+      return;
+    }
+    async function searchTokens(): Promise<void> {
+      // test tkn= 0x225C1016d8796Efea1ADF35a2e5f6C01Db617EaB
+      let tokenSearchRes = [...tokens].filter((token) => token.name.toLowerCase().startsWith(address.toLowerCase()) || token.address.toLowerCase().startsWith(address.toLowerCase()));
+      if (!tokenSearchRes.length && utils.isAddress(address)) {
+        setFoundSearchTokens(DataProgress.LOADING);
+        let tokenContract: Contract | undefined;
+        try {
+          tokenContract = await getREEF20Contract(address, signer.signer);
+        } catch (err) {
+          console.log('searchTokens contract err=', err);
+        }
+        if (tokenContract) {
+          const contractToken = createEmptyToken();
+          contractToken.address = tokenContract.address;
+          contractToken.name = await tokenContract.name();
+          contractToken.balance = await tokenContract.balanceOf(signer.evmAddress);
+          contractToken.decimals = await tokenContract.decimals();
+          tokenSearchRes = [contractToken];
+        }
+      }
+      setFoundSearchTokens(tokenSearchRes);
+    }
+
+    searchTokens();
+  }, [address, tokens]);
+
+  // let foundAvailableTokens = tokens.filter((token) => token.name.toLowerCase().startsWith(address.toLowerCase()) || token.address.toLowerCase().startsWith(address.toLowerCase()));
+  const tokensView = getData(foundSearchTokens)?.map((token) => (
+    <ListItemDismissModal key={token.address} onClick={() => onTokenSelect(token)}>
+      <FullRow>
+        <CenterRow>
+          <TokenIcon src={token.iconUrl} />
+        </CenterRow>
+        <MS size="3">
+          <FlexColumn>
+            <LeadText>{token.name}</LeadText>
+            <MutedText>
+              <MiniText>{trim(token.address, 20)}</MiniText>
+            </MutedText>
+          </FlexColumn>
+        </MS>
+        <ContentEnd>
           <CenterRow>
-            <TokenIcon src={token.iconUrl} />
+            <Text>
+              {toBalance(token).toFixed(4)}
+            </Text>
           </CenterRow>
-          <MS size="3">
-            <FlexColumn>
-              <LeadText>{token.name}</LeadText>
-              <MutedText>
-                <MiniText>{trim(token.address, 20)}</MiniText>
-              </MutedText>
-            </FlexColumn>
-          </MS>
-          <ContentEnd>
-            <CenterRow>
-              <Text>
-                {toBalance(token).toFixed(4)}
-              </Text>
-            </CenterRow>
-          </ContentEnd>
-        </FullRow>
-      </ListItemDismissModal>
-    ));
+        </ContentEnd>
+      </FullRow>
+    </ListItemDismissModal>
+  ));
 
   const commonBasesView = tokens
     ?.filter((token) => COMMON_BASES.includes(token.name))
@@ -132,7 +168,7 @@ const SelectToken = ({
           )}
           <List>
             <ListEmptyItem />
-            {isLoading ? <Loading /> : tokensView}
+            {isLoading || getProgress(foundSearchTokens) === DataProgress.LOADING ? <Loading /> : tokensView}
             <ListEmptyItem />
           </List>
         </ModalBody>

@@ -27,7 +27,7 @@ import { TransactionSettings } from '../TransactionSettings';
 interface SwapComponent {
   tokens: Token[];
   network: Network;
-  account?: ReefSigner;
+  account: ReefSigner;
   reloadTokens: () => void;
   notify: (message: string, type: Notify) => void;
 }
@@ -37,7 +37,8 @@ const swapStatus = (sell: TokenWithAmount, buy: TokenWithAmount, isEvmClaimed?: 
     ensure(isEvmClaimed === true, 'Bind account');
     ensure(!sell.isEmpty, 'Select sell token');
     ensure(!buy.isEmpty, 'Select buy token');
-    ensure(!!pool, 'Invalid pair');
+    ensure(buy.address !== sell.address, 'Tokens must be different');
+    ensure(!!pool, 'Pool does not exist');
     ensure(sell.amount.length !== 0, `Missing ${sell.name} amount`);
     ensure(buy.amount.length !== 0, `Missing ${buy.name} amount`);
     ensure(parseFloat(sell.amount) > 0, `Missing ${sell.name} amount`);
@@ -203,6 +204,7 @@ export const SwapComponent = ({
         <TokenAmountFieldMax
           token={sell}
           tokens={tokens}
+          signer={account}
           id="sell-token-field"
           onAmountChange={setSellAmount}
           onTokenSelect={changeSellToken}
@@ -211,6 +213,7 @@ export const SwapComponent = ({
         <TokenAmountFieldImpactPrice
           token={buy}
           tokens={tokens}
+          signer={account}
           id="buy-token-field"
           percentage={calculateImpactPercentage(sell, buy)}
           onAmountChange={setBuyAmount}

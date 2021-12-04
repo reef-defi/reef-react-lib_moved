@@ -19,7 +19,7 @@ export const checkIfERC20ContractExist = async (
   }
 };
 
-export const getContract = async (
+export const getREEF20Contract = async (
   address: string,
   signer: Signer,
 ): Promise<Contract> => {
@@ -32,7 +32,7 @@ export const balanceOf = async (
   balanceAddress: string,
   signer: Signer,
 ): Promise<BigNumber> => {
-  const contract = await getContract(address, signer);
+  const contract = await getREEF20Contract(address, signer);
   const balance = await contract.balanceOf(balanceAddress);
   return balance;
 };

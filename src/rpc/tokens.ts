@@ -1,23 +1,23 @@
 import { Signer } from '@reef-defi/evm-provider';
 import { calculateAmount } from '../utils/math';
-import { getContract } from './rpc';
+import { getREEF20Contract } from './rpc';
 import { BasicToken, Token, TokenWithAmount } from '../state';
 
 export const retrieveTokenAddresses = (tokens: Token[]): string[] => tokens.map((token) => token.address);
 
 export const approveTokenAmount = async (token: TokenWithAmount, routerAddress: string, signer: Signer): Promise<void> => {
-  const contract = await getContract(token.address, signer);
+  const contract = await getREEF20Contract(token.address, signer);
   const bnAmount = calculateAmount(token);
   await contract.approve(routerAddress, bnAmount);
 };
 
 export const approveAmount = async (from: string, to: string, amount: string, signer: Signer): Promise<void> => {
-  const contract = await getContract(from, signer);
+  const contract = await getREEF20Contract(from, signer);
   await contract.approve(to, amount);
 };
 
 export const loadToken = async (address: string, signer: Signer, iconUrl: string): Promise<Token> => {
-  const token = await getContract(address, signer);
+  const token = await getREEF20Contract(address, signer);
 
   const signerAddress = await signer.getAddress();
   const balance = await token.balanceOf(signerAddress);

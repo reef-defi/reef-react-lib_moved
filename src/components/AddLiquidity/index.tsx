@@ -26,7 +26,7 @@ import { approveTokenAmount, getReefswapRouter } from '../../rpc';
 interface AddLiquidityComponent {
   tokens: Token[];
   network: Network;
-  signer?: ReefSigner;
+  signer: ReefSigner;
   back: () => void;
   reloadTokens: () => void;
   notify: (message: string, type: Notify) => void;
@@ -38,9 +38,9 @@ const liquidityStatus = (token1: TokenWithAmount, token2: TokenWithAmount, isEvm
     ensure(isEvmClaimed === true, 'Bind account');
     ensure(!token1.isEmpty, 'Select first token');
     ensure(!token2.isEmpty, 'Select second token');
+    ensure(token2.address !== token1.address, 'Tokens must be different');
     ensure(token1.amount.length !== 0, 'Missing first token amount');
     ensure(token2.amount.length !== 0, 'Missing second token amount');
-    ensure(token2.address !== token1.address, 'Select different tokens');
     ensure(BigNumber.from(calculateAmount(token1)).lte(token1.balance), `Insufficient ${token1.name} balance`);
     ensure(BigNumber.from(calculateAmount(token2)).lte(token2.balance), `Insufficient ${token2.name} balance`);
     return {
@@ -181,6 +181,7 @@ export const AddLiquidityComponent = ({
         <TokenAmountField
           token={token1}
           tokens={tokens}
+          signer={signer}
           id="add-liquidity-token-1"
           onAmountChange={setAmount1}
           onTokenSelect={changeToken1}
@@ -190,6 +191,7 @@ export const AddLiquidityComponent = ({
         <TokenAmountField
           token={token2}
           tokens={tokens}
+          signer={signer}
           id="add-liquidity-token-2"
           onAmountChange={setAmount2}
           onTokenSelect={changeToken2}
