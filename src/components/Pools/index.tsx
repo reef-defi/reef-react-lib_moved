@@ -72,8 +72,8 @@ const OpenState = ({ pool, toggle, openRemoveLiquidity }: OpenState): JSX.Elemen
       </EmptyButton>
     </ContentBetween>
     <ContentBetween>
-      <div className="w-50 me-1 p-3 border border-1 border-rad">Basic Chart WIP...</div>
-      <div className="w-50 ms-1">
+      {/* <div className="w-50 me-1 p-3 border border-1 border-rad">Basic Chart WIP...</div> */}
+      <div className="w-100 ms-1">
         <SubCard>
           <ConfirmLabel
             title="Supply: "
