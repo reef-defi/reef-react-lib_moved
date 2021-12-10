@@ -2,6 +2,7 @@ import React from 'react';
 import Identicon from '@polkadot/react-identicon';
 import { FlexRow, MX, PY } from '../common/Display';
 import { trim } from '../../utils';
+import { MiniText, MutedText } from '../common/Text';
 
 interface AccountInlineInfo {
   name: string;
@@ -37,7 +38,9 @@ const AccountInlineInfo = ({
     >
       <span className="lead-text">
         {trim(name, 30)}
-        <small>{`from ${source} extension`}</small>
+        <MutedText>
+          <MiniText>{` ${source} extension`}</MiniText>
+        </MutedText>
       </span>
       <span className="sub-text">{trim(evmAddress, 30)}</span>
     </div>
