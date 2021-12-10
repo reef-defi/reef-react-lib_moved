@@ -6,42 +6,10 @@ import { ReefSigner } from '../state';
 import { useAsyncEffect } from './useAsyncEffect';
 import { getExtensionSigners } from '../rpc';
 
-function getBrowserExtensionUrl(): string | undefined {
-  const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
-  if (isFirefox) {
-    return 'https://addons.mozilla.org/en-US/firefox/addon/reef-js-extension/';
-  }
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  const isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
-  if (isChrome) {
-    return 'https://chrome.google.com/webstore/detail/reefjs-extension/mjgkpalnahacmhkikiommfiomhjipgjn';
-  }
-  return undefined;
-}
-
-function getInstallExtensionMessage(): { message: string; url?: string } {
-  const extensionUrl = getBrowserExtensionUrl();
-  const installText = extensionUrl
-    ? 'Please install Reef chain or some other Solidity browser extension and refresh the page.'
-    : 'Please use Chrome or Firefox browser.';
-  return {
-    message: `App uses browser extension to get accounts and securely sign transactions. ${installText}`,
-    url: extensionUrl,
-  };
-}
-
-export const useLoadSigners = (
-  appDisplayName: string,
-  provider?: Provider,
-): [
-  ReefSigner[],
-  boolean,
-  { code?: number; message: string; url?: string } | undefined
-] => {
+export const useLoadSigners = (appDisplayName: string, provider?: Provider): [ReefSigner[], boolean, {code?: number, message:string}|undefined] => {
   const [signers, setSigners] = useState<ReefSigner[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<{ message: string; code?: number; url?: string }>();
+  const [error, setError] = useState<{message: string, code?:number}>();
 
   useAsyncEffect(async () => {
     if (!provider) {
@@ -52,23 +20,18 @@ export const useLoadSigners = (
       setIsLoading(true);
       const extensions: InjectedExtension[] = await web3Enable(appDisplayName);
       if (extensions.length < 1) {
-        const installExtensionMessage = getInstallExtensionMessage();
         setError({
           code: 1,
-          ...installExtensionMessage,
+          message: 'Reef-App is used with Reef Wallet browser extension or some other substrate extension. Please install <a href="https://chrome.google.com/webstore/detail/reefjs-extension/mjgkpalnahacmhkikiommfiomhjipgjn" target="_blank">Polkadot-Extension</a> in your browser and refresh the page.',
         });
-        setIsLoading(false);
         return;
       }
-
       const web3accounts = await web3Accounts();
       if (web3accounts.length < 1) {
         setError({
           code: 2,
-          message:
-            'App requires at least one account in browser extension. Please create or import account/s and refresh the page.',
+          message: 'Reef-App requires at least one account in browser extension. Please create or import account/s and refresh the page.',
         });
-        setIsLoading(false);
         return;
       }
 
@@ -77,7 +40,7 @@ export const useLoadSigners = (
       setSigners(sgnrs);
     } catch (e) {
       console.log('Error when loading signers!', e);
-      setError(e as { message: string });
+      setError(e as {message: string});
     } finally {
       setIsLoading(false);
     }

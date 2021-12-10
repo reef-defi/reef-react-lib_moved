@@ -7,12 +7,13 @@ interface AccountInlineInfo {
   name: string;
   address: string;
   evmAddress: string;
+  source: string;
   toggle?: string;
   onClick: () => void;
 }
 
 const AccountInlineInfo = ({
-  name, address, evmAddress, toggle = 'modal-toggle', onClick,
+  name, address, evmAddress, source, toggle = 'modal-toggle', onClick,
 } : AccountInlineInfo): JSX.Element => (
   <FlexRow>
     <MX size="2" />
@@ -34,7 +35,10 @@ const AccountInlineInfo = ({
       data-bs-target={`#${toggle}`}
       className="d-flex flex-column align-start ps-2 pe-4"
     >
-      <span className="lead-text">{trim(name, 30)}</span>
+      <span className="lead-text">
+        {trim(name, 30)}
+        <small>{`from ${source} extension`}</small>
+      </span>
       <span className="sub-text">{trim(evmAddress, 30)}</span>
     </div>
   </FlexRow>

@@ -25,6 +25,7 @@ export const AccountListModal = ({
           name={acc.name}
           address={acc.address}
           evmAddress={acc.evmAddress}
+          source={acc.source}
           onClick={() => selectAccount(index, acc)}
         />
       </ListItem>
