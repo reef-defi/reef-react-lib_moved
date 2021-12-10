@@ -5,6 +5,7 @@ import { ListItem } from '../common/List';
 import { Modal, ModalHeader } from '../common/Modal';
 import { Title } from '../common/Text';
 import AccountInlineInfo from './AccountInlineInfo';
+import { getSignerIdent } from '../../rpc';
 
 interface AccountListModal {
   id: string;
@@ -19,7 +20,7 @@ export const AccountListModal = ({
 } : AccountListModal): JSX.Element => {
   const accountsView = accounts
     .map((acc, index) => (
-      <ListItem key={acc.address}>
+      <ListItem key={getSignerIdent(acc)}>
         <AccountInlineInfo
           name={acc.name}
           address={acc.address}

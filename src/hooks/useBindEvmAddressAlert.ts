@@ -17,7 +17,7 @@ export const useBindEvmAddressAlert = (currentSigner: ReefSigner|undefined, prov
         if (isDefault) {
           try {
             await currentSigner.signer.claimDefaultAccount();
-          } catch (err: any) {
+          } catch (err) {
             if (err && (typeof err === 'string') && err.startsWith('1010')) {
               alert('Add some Reef coins\nto this account\nand try again.');
             } else {
