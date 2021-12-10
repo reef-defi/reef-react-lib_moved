@@ -52,7 +52,8 @@ export const AccountSelector = ({
             <ContentBetween>
               <MutedText>
                 <MiniText>
-                  Connected with polkadot-extension
+                  {`Connected with ${selectedSigner?.source} extension`}
+                  extension
                 </MiniText>
               </MutedText>
               <button
