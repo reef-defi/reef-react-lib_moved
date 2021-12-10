@@ -53,7 +53,6 @@ export const AccountSelector = ({
               <MutedText>
                 <MiniText>
                   {`Connected with ${selectedSigner?.source} extension`}
-                  extension
                 </MiniText>
               </MutedText>
               <button
