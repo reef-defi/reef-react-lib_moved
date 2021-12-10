@@ -1,5 +1,5 @@
-import { Signer, Provider } from '@reef-defi/evm-provider';
-import type { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
+import { Provider, Signer } from '@reef-defi/evm-provider';
+import type { InjectedAccount, InjectedAccountWithMeta, InjectedExtension } from '@polkadot/extension-inject/types';
 import type { Signer as InjectedSigner } from '@polkadot/api/types';
 import { DeriveBalancesAccountData } from '@polkadot/api-derive/balances/types';
 import { BigNumber } from 'ethers';
@@ -29,10 +29,21 @@ export const accountToSigner = async (account: InjectedAccountWithMeta, provider
     isEvmClaimed,
     name: account.meta.name || '',
     address: account.address,
+    source: account.meta.source,
   };
 };
 
 export const accountsToSigners = async (accounts: InjectedAccountWithMeta[], provider: Provider, sign: InjectedSigner): Promise<ReefSigner[]> => Promise.all(accounts.map((account) => accountToSigner(account, provider, sign)));
+
+function toAccountWithMeta(sourceExtension: InjectedExtension, accounts: InjectedAccount[]): InjectedAccountWithMeta[] {
+  return accounts.map((acc) => ({ address: acc.address, type: acc.type, meta: { source: sourceExtension.name, name: acc.name, genesisHash: acc.genesisHash } }));
+}
+
+export const getExtensionSigners = async (extensions: InjectedExtension[], provider: Provider): Promise<ReefSigner[]> => {
+  const extensionAccountPromises = extensions.map((ext) => ext.accounts.get()
+    .then((extAccounts) => accountsToSigners(toAccountWithMeta(ext, extAccounts), provider, (ext.signer as any))));
+  return Promise.all(extensionAccountPromises).then((signersByExt) => signersByExt.reduce((all, curr) => all.concat(curr), []));
+};
 
 export const bindSigner = async (signer: Signer): Promise<void> => {
   const hasEvmAddress = await signer.isClaimed();

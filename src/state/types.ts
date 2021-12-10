@@ -8,6 +8,7 @@ export interface ReefSigner {
   address: string;
   evmAddress: string;
   isEvmClaimed: boolean;
+  source: string;
 }
 
 export type Color = 'success' | 'danger' | 'warning';
