@@ -87,7 +87,7 @@ async function sendToEvmAddress(txToken: TokenWithAmount, signer: ReefSigner, to
       console.log('sendToEvmAddress error=', e);
       handleErr(e, txIdent, '', txHandler);
     });
-  } catch (e: any) {
+  } catch (e) {
     console.log('sendToEvmAddress err =', e);
     handleErr(e, txIdent, '', txHandler);
   }
@@ -247,7 +247,7 @@ export const TransferComponent = ({
         setLastTxIdentInProgress(txIdent);
         setTxUpdateData({ txIdent });
       }
-    } catch (err: any) {
+    } catch (err) {
       console.log('onSendTxConfirmed error =', err);
       setLastTxIdentInProgress(TX_IDENT_ANY);
       setTxUpdateData({ txIdent: TX_IDENT_ANY, error: err.message || err });
