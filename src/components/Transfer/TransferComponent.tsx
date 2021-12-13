@@ -132,6 +132,11 @@ function toAmountInputValue(amt: string): string {
   return toDecimalPlaces(amt, 8);
 }
 
+// need to call onTxUpdate even if component is destroyed
+const getUpdateTxCallback = (fns: TxStatusHandler[]): TxStatusHandler => (val) => {
+  fns.forEach((fn) => fn(val));
+};
+
 export const TransferComponent = ({
   tokens, from, token, provider, onTxUpdate, currentAccount, accounts,
 }: TransferComponent): JSX.Element => {
@@ -194,12 +199,12 @@ export const TransferComponent = ({
     }
   }, [txUpdateData, lastTxIdentInProgress]);
 
-  useEffect(() => {
+  /* useEffect(() => {
     if (txUpdateData) {
       onTxUpdate(txUpdateData);
     }
   }, [txUpdateData]);
-
+*/
   useEffect(() => {
     // eslint-disable-next-line no-param-reassign
     token.amount = txToken.amount;
@@ -239,18 +244,18 @@ export const TransferComponent = ({
       setIsLoading(true);
       ensureTokenAmount(txToken);
       if (utils.isAddress(to)) {
-        const txIdent = await sendToEvmAddress(txToken, from, to, setTxUpdateData);
+        const txIdent = await sendToEvmAddress(txToken, from, to, getUpdateTxCallback([onTxUpdate, setTxUpdateData]));
         setLastTxIdentInProgress(txIdent);
-        setTxUpdateData({ txIdent });
+        getUpdateTxCallback([onTxUpdate, setTxUpdateData])({ txIdent });
       } else if (isSubstrateAddress(to)) {
-        const txIdent = await sendToNativeAddress(provider, from, utils.parseEther(txToken.amount), to, setTxUpdateData);
+        const txIdent = await sendToNativeAddress(provider, from, utils.parseEther(txToken.amount), to, getUpdateTxCallback([onTxUpdate, setTxUpdateData]));
         setLastTxIdentInProgress(txIdent);
-        setTxUpdateData({ txIdent });
+        getUpdateTxCallback([onTxUpdate, setTxUpdateData])({ txIdent });
       }
     } catch (err) {
       console.log('onSendTxConfirmed error =', err);
       setLastTxIdentInProgress(TX_IDENT_ANY);
-      setTxUpdateData({ txIdent: TX_IDENT_ANY, error: err.message || err });
+      getUpdateTxCallback([onTxUpdate, setTxUpdateData])({ txIdent: TX_IDENT_ANY, error: err.message || err });
     }
     setIsLoading(false);
   };
