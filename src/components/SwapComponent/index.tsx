@@ -1,11 +1,27 @@
 import React, { useMemo, useState } from 'react';
 import { BigNumber } from 'ethers';
 import {
-  createEmptyTokenWithAmount, defaultSettings, ensureTokenAmount, Network, Notify, Pool, ReefSigner, reefTokenWithAmount, resolveSettings, Token, TokenWithAmount,
+  availableNetworks,
+  createEmptyTokenWithAmount,
+  defaultSettings,
+  ensureTokenAmount,
+  Network,
+  Pool,
+  ReefSigner,
+  reefTokenWithAmount,
+  resolveSettings,
+  Token,
+  TokenWithAmount,
 } from '../../state';
 import { ButtonStatus, ensure } from '../../utils';
 import {
-  convert2Normal, calculateAmount, getOutputAmount, getInputAmount, calculateAmountWithPercentage, calculateDeadline, calculateImpactPercentage,
+  calculateAmount,
+  calculateAmountWithPercentage,
+  calculateDeadline,
+  calculateImpactPercentage,
+  convert2Normal,
+  getInputAmount,
+  getOutputAmount,
 } from '../../utils/math';
 import { useLoadPool } from '../../hooks/useLoadPool';
 import { getReefswapRouter } from '../../rpc';
@@ -23,13 +39,13 @@ import { CenterColumn, ComponentCenter, MT } from '../common/Display';
 import { OpenModalButton } from '../common/Modal';
 import { LoadingButtonIconWithText } from '../common/Loading';
 import { TransactionSettings } from '../TransactionSettings';
+import { TX_TYPE_EVM, TxStatusHandler } from '../../utils/transactionUtil';
 
 interface SwapComponent {
   tokens: Token[];
   network: Network;
   account: ReefSigner;
-  reloadTokens: () => void;
-  notify: (message: string, type: Notify) => void;
+  onTxUpdate?: TxStatusHandler;
 }
 
 const swapStatus = (sell: TokenWithAmount, buy: TokenWithAmount, isEvmClaimed?: boolean, pool?: Pool): ButtonStatus => {
@@ -88,7 +104,7 @@ const loadingStatus = (status: string, isPoolLoading: boolean, isPriceLoading: b
 };
 
 export const SwapComponent = ({
-  tokens, network, account, notify, reloadTokens,
+  tokens, network, account, onTxUpdate,
 } : SwapComponent): JSX.Element => {
   const [buy, setBuy] = useState(createEmptyTokenWithAmount());
   const [sell, setSell] = useState(reefTokenWithAmount());
@@ -162,6 +178,7 @@ export const SwapComponent = ({
   const onSwap = async (): Promise<void> => {
     if (!isValid || !account) { return; }
     const { signer, evmAddress } = account;
+    const txIdent = Math.random().toString(10);
     try {
       setIsSwapLoading(true);
       ensureTokenAmount(sell);
@@ -173,20 +190,38 @@ export const SwapComponent = ({
       await approveTokenAmount(sell, network.routerAddress, signer);
 
       setStatus('Executing swap');
+      if (onTxUpdate) {
+        onTxUpdate({
+          txIdent,
+        });
+      }
       await reefswapRouter.swapExactTokensForTokensSupportingFeeOnTransferTokens(
         sellAmount,
         minBuyAmount,
         [sell.address, buy.address],
         evmAddress,
         calculateDeadline(deadline),
-
-      );
-      notify('Swap complete!', 'success');
+      ).then((contractCall: any) => {
+        if (onTxUpdate) {
+          onTxUpdate({
+            txIdent,
+            txHash: contractCall.hash,
+            isInBlock: true,
+            type: TX_TYPE_EVM,
+            url: `https://${network === availableNetworks.mainnet ? '' : `${network.name}.`}reefscan.com/extrinsic/${contractCall.hash}`,
+          });
+        }
+        return contractCall;
+      });
     } catch (error) {
-      notify(error.message, 'error');
+      if (onTxUpdate) {
+        onTxUpdate({
+          txIdent,
+          error: error.message,
+          type: TX_TYPE_EVM,
+        });
+      }
     } finally {
-      // TODO move this out!
-      reloadTokens();
       setIsSwapLoading(false);
       setStatus('');
     }

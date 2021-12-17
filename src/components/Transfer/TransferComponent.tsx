@@ -22,6 +22,7 @@ import { Loading, LoadingButtonIconWithText } from '../common/Loading';
 import { AccountListModal } from '../AccountSelector/AccountListModal';
 import { ConfirmLabel } from '../common/Label';
 import { Button } from '../common/Button';
+import { TX_TYPE_EVM, TxStatusHandler, TxStatusUpdate } from '../../utils/transactionUtil';
 
 interface TransferComponent {
     tokens: Token[];
@@ -33,18 +34,7 @@ interface TransferComponent {
     currentAccount: ReefSigner;
 }
 
-export interface TxStatusUpdate {
-  txIdent: string;
-  txHash?: string;
-  error?: string;
-  isInBlock?: boolean;
-  isComplete?: boolean;
-  type?: string;
-  url?: string;
-}
-
 const TX_IDENT_ANY = 'TX_HASH_ANY';
-export const TX_TYPE_EVM = 'TX_TYPE_EVM';
 const REEF_TOKEN = reefTokenWithAmount();
 
 const isSubstrateAddress = (to: string): boolean => {
@@ -57,8 +47,6 @@ const isSubstrateAddress = (to: string): boolean => {
   }
   return false;
 };
-
-type TxStatusHandler = (status: TxStatusUpdate)=>void;
 
 function handleErr(e: any, txIdent:string, txHash: string, txHandler: TxStatusHandler): void {
   let reason = e.message || e;
@@ -401,7 +389,7 @@ export const TransferComponent = ({
         )}
       />
 
-      <ConfirmationModal id="txModalToggle" title="Confirm Transaction" confirmFun={onSendTxConfirmed} confirmLabel="Send">
+      <ConfirmationModal id="txModalToggle" title="Send tokens" confirmFun={onSendTxConfirmed} confirmBtnLabel="Confirm and continue">
         <TokenAmountView
           name={txToken.name}
           amount={txToken.amount}
