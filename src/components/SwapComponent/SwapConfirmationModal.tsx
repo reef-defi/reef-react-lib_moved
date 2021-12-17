@@ -20,7 +20,7 @@ interface SwapConfirmationModal {
 const SwapConfirmationModal = ({
   id, buy, sell, percentage, confirmFun,
 } : SwapConfirmationModal): JSX.Element => (
-  <ConfirmationModal id={id} title="Confirm Swap" confirmFun={confirmFun}>
+  <ConfirmationModal id={id} title="Swap Tokens" confirmFun={confirmFun} confirmBtnLabel="Confirm and continue">
     <TokenAmountView name={sell.name} amount={sell.amount} usdAmount={calculateUsdAmount(sell)} placeholder="From" />
     <SwitchTokenButton disabled />
     <TokenAmountView name={buy.name} amount={buy.amount} usdAmount={calculateUsdAmount(buy)} placeholder="To" />

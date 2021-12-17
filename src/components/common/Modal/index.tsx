@@ -76,14 +76,14 @@ interface ConfirmationModal {
   id?: string;
   title: string;
   confirmFun: () => void;
-  confirmLabel?: string;
+  confirmBtnLabel?: string;
 }
 
 const ConfirmationModal: React.FC<ConfirmationModal> = ({
   id = 'exampleModal',
   title,
   confirmFun,
-  confirmLabel,
+  confirmBtnLabel = 'Confirm',
   children,
 }): JSX.Element => (
   <Modal id={id}>
@@ -93,7 +93,7 @@ const ConfirmationModal: React.FC<ConfirmationModal> = ({
     </ModalHeader>
     <ModalBody>{children}</ModalBody>
     <ModalFooter>
-      <ModalClose onClick={confirmFun} className="btn btn-reef border-rad">{confirmLabel}</ModalClose>
+      <ModalClose onClick={confirmFun} className="btn btn-reef border-rad">{confirmBtnLabel}</ModalClose>
     </ModalFooter>
   </Modal>
 );

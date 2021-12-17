@@ -23,8 +23,9 @@ const ConfirmAddLiquidity = ({
   return (
     <ConfirmationModal
       id={id}
-      title="Confirm Supply"
+      title="Add Supply"
       confirmFun={confirmFun}
+      confirmBtnLabel="Confirm and continue"
     >
       <MutedText>You will recieve</MutedText>
       <SubCard>

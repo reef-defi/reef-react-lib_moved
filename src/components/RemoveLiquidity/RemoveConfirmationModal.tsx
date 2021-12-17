@@ -28,6 +28,7 @@ const RemoveConfirmationModal = ({
       id={id}
       title="Remove supply"
       confirmFun={onRemove}
+      confirmBtnLabel="Confirm and continue"
     >
       <MX size="2">
         <MutedText>You will recieve</MutedText>

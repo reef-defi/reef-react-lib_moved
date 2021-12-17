@@ -1,5 +1,10 @@
+import { BigNumber, utils } from 'ethers';
 import { DataProgress, DataWithProgress, isDataSet } from './dataWithProgress';
-import { Pool, reefTokenWithAmount, Token } from '../state';
+import {
+  Pool, reefTokenWithAmount, Token, TokenWithAmount,
+} from '../state';
+
+const { parseUnits, formatEther } = utils;
 
 const getReefTokenPoolReserves = (reefTokenPool: Pool, reefAddress: string): {reefReserve:number, tokenReserve: number} => {
   let reefReserve: number;
@@ -32,3 +37,16 @@ export const calculateTokenPrice = (token: Token, pools: Pool[], reefPrice: Data
   }
   return reefPrice || DataProgress.NO_DATA;
 };
+
+export const calculateBalanceValue = ({ price, balance }:{price:DataWithProgress<number>, balance: BigNumber}|TokenWithAmount): DataWithProgress<number> => {
+  if (!isDataSet(price)) {
+    return price;
+  }
+  const priceBN = BigNumber.from(parseUnits(price.toString()));
+  const balanceFixed = parseInt(formatEther(balance.toString()), 10);
+  return parseFloat(formatEther(priceBN.mul(BigNumber.from(balanceFixed)).toString()));
+};
+
+export const toCurrencyFormat = (value: number, options?: any): string => Intl.NumberFormat(navigator.language, {
+  style: 'currency', currency: 'USD', currencyDisplay: 'symbol', ...options,
+}).format(value);
