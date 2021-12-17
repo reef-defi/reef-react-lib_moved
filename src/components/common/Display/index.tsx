@@ -1,7 +1,11 @@
 import React from 'react';
 
-export const FlexRow: React.FC<unknown> = ({ children }): JSX.Element => (
-  <div className="d-flex flex-row">
+interface FlexRow {
+  className?: string;
+  children?: any;
+}
+export const FlexRow: React.FC<FlexRow> = ({ children, className = '' }): JSX.Element => (
+  <div className={`d-flex flex-row ${className}`}>
     {children}
   </div>
 );

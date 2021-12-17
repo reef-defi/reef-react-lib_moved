@@ -9,10 +9,10 @@ import {
 } from '../../state';
 import { getREEF20Contract } from '../../rpc';
 import {
-  CenterColumn, ComponentCenter, Margin, MT,
+  CenterColumn, ComponentCenter, FlexRow, Margin, MT,
 } from '../common/Display';
 import {
-  Card, CardHeader, CardHeaderBlank, CardTitle,
+  Card, CardHeader, CardHeaderBlank, CardTitle, SubCard,
 } from '../common/Card';
 import { TokenAmountFieldMax, TokenAmountView } from '../TokenFields';
 import { Input } from '../common/Input';
@@ -326,6 +326,35 @@ export const TransferComponent = ({
             <CardTitle title="Send Tokens" />
             <CardHeaderBlank />
           </CardHeader>
+          <SubCard>
+            <Input
+              value={to}
+              maxLength={70}
+              onChange={(toVal:string) => setTo(toVal.trim())}
+              placeholder="Send to address"
+              disabled={isLoading}
+            />
+            <MT size="2" />
+            <FlexRow className="d-flex-vert-base">
+              {foundToAccountAddress && (
+                <span className="pl-1rem">
+                  <MiniText>
+                    Selected account:&nbsp;
+                    {foundToAccountAddress?.name}
+                  </MiniText>
+                </span>
+              )}
+              <OpenModalButton
+                id="selectMyAddress"
+                disabled={isLoading}
+                className="btn-empty link-text text-xs text-primary pl-1rem"
+              >
+                Select account
+              </OpenModalButton>
+            </FlexRow>
+          </SubCard>
+
+          <MT size="2" />
           <TokenAmountFieldMax
             token={txToken}
             tokens={tokens}
@@ -342,26 +371,7 @@ export const TransferComponent = ({
               </span>
             ) : <span />}
           />
-          <MT size="2">
-            <Input
-              value={to}
-              maxLength={70}
-              onChange={(toVal:string) => setTo(toVal.trim())}
-              placeholder="Send to address"
-              disabled={isLoading}
-            />
-            {foundToAccountAddress && (
-              <span className="pl-1rem">
-                <MiniText>
-                  Selected account:&nbsp;
-                  {foundToAccountAddress?.name}
-                </MiniText>
-              </span>
-            )}
-            <OpenModalButton id="selectMyAddress" disabled={isLoading} className="btn-empty link-text text-xs text-primary pl-1rem">
-              Select account
-            </OpenModalButton>
-          </MT>
+
           <MT size="2">
             <CenterColumn>
               <OpenModalButton id="txModalToggle" disabled={!!validationError || isLoading}>
