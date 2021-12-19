@@ -1,64 +1,28 @@
 import { Provider } from '@reef-defi/evm-provider';
-import { utils } from 'ethers';
 import { ReefSigner } from '../state';
-import { handleErr, TxStatusHandler, TxStatusUpdate } from './transactionUtil';
 
-const displayedPopup: string[] = [];
-
-export const bindEvmAddress = (
-  signer: ReefSigner,
-  provider: Provider,
-  onTxChange?: TxStatusHandler,
-  generateDefault?: boolean,
-): string => {
-  let txIdent = '';
+export const alertEvmAddressBind = async (signer: ReefSigner, provider: Provider): Promise<void> => {
   if (!provider) {
-    return txIdent;
+    return Promise.resolve();
   }
-
-  const existentialDeposit = 1;
-  if (utils.parseEther(signer.balance.toString()).lte(existentialDeposit)) {
-    const index = displayedPopup.indexOf(signer.address);
-    if (index > -1) {
-      displayedPopup.splice(index, 1);
-    }
-  }
-
-  if (
-    signer
-    && displayedPopup.indexOf(signer.address) < 0
-    && !signer?.isEvmClaimed
-  ) {
+  if (signer && !signer?.isEvmClaimed) {
     // eslint-disable-next-line no-restricted-globals,no-alert
-    const isDefault = generateDefault
-      // eslint-disable-next-line no-restricted-globals
-      || confirm('Enable Reef chain with Ethereum VM capabilities.');
-    if (displayedPopup.indexOf(signer.address) < 0) {
-      displayedPopup.push(signer.address);
-    }
+    const isDefault = confirm('Create default Ethereum VM address for this account on Reef chain.');
     if (isDefault) {
-      txIdent = Math.random().toString(10);
-      signer.signer
-        .claimDefaultAccount()
-        .then(() => {
-          if (!onTxChange) {
-            alert(`Success, Ethereum VM address is ${signer.evmAddress}. Use this address ONLY on Reef chain.`);
-          } else {
-            onTxChange({
-              txIdent,
-              isInBlock: true,
-              addresses: [signer.address],
-            });
-          }
-        })
-        .catch((err) => {
-          const errHandler = onTxChange
-            || ((txStat: TxStatusUpdate) => alert(txStat.error?.message));
-          handleErr(err, txIdent, '', errHandler, signer);
-        });
+      try {
+        await signer.signer.claimDefaultAccount();
+      } catch (err) {
+        if (err && (typeof err === 'string') && err.startsWith('1010')) {
+          alert('Add some Reef coins\nto this account\nand try again.');
+        } else {
+          alert(`Transaction failed, err= ${err.toString()}`);
+        }
+        return Promise.resolve();
+      }
+      alert(`Created Ethereum VM address is ${signer.evmAddress}.\nNow you're ready to use full functionality of Reef chain.`);
     } else {
       // TODO return claimEvmAccount(currentSigner, provider);
     }
   }
-  return txIdent;
+  return Promise.resolve();
 };
