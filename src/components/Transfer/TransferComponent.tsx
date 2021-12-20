@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { BigNumber, utils } from 'ethers';
+import { utils } from 'ethers';
 import { decodeAddress } from '@polkadot/util-crypto';
 import { Provider } from '@reef-defi/evm-provider';
-import { handleTxResponse } from '@reef-defi/evm-provider/utils';
-import { calculateUsdAmount, toDecimalPlaces, toUnits } from '../../utils';
+import {
+  calculateUsdAmount, handleErr, sendToNativeAddress, toDecimalPlaces, toUnits,
+} from '../../utils';
 import {
   ensureTokenAmount, ReefSigner, reefTokenWithAmount, Token, TokenWithAmount,
 } from '../../state';
@@ -48,19 +49,6 @@ const isSubstrateAddress = (to: string): boolean => {
   return false;
 };
 
-function handleErr(e: any, txIdent:string, txHash: string, txHandler: TxStatusHandler): void {
-  let reason = e.message || e;
-  if (e && (e.message.indexOf('-32603: execution revert: 0x') > -1 || e.message?.indexOf('InsufficientBalance') > -1)) {
-    reason = 'You must allow minimum 60 REEF on account for Ethereum VM transaction even if transaction fees will be much lower.';
-  }
-  if (e && (e.message?.startsWith('1010'))) {
-    reason = 'Balance too low.';
-  }
-  txHandler({
-    txIdent, txHash, error: reason,
-  });
-}
-
 async function sendToEvmAddress(txToken: TokenWithAmount, signer: ReefSigner, to: string, txHandler: TxStatusHandler): Promise<string> {
   const contract = await getREEF20Contract(txToken.address, signer.signer);
   const decimals = await contract.decimals();
@@ -79,31 +67,6 @@ async function sendToEvmAddress(txToken: TokenWithAmount, signer: ReefSigner, to
     console.log('sendToEvmAddress err =', e);
     handleErr(e, txIdent, '', txHandler);
   }
-  return Promise.resolve(txIdent);
-}
-
-async function sendToNativeAddress(provider: Provider, signer: ReefSigner, toAmt: BigNumber, to: string, txHandler: TxStatusHandler): Promise<string> {
-  const transfer = provider.api.tx.balances.transfer(to, toAmt.toString());
-  const substrateAddress = await signer.signer.getSubstrateAddress();
-  const txIdent = Math.random().toString(10);
-  transfer.signAndSend(substrateAddress, { signer: signer.signer.signingKey },
-    (res) => handleTxResponse(res, provider.api).then(
-      (txRes: any): void => {
-        const txHash = transfer.hash.toHex();
-        txHandler({
-          txIdent, txHash, isInBlock: txRes.result.status.isInBlock, isComplete: txRes.result.status.isFinalized,
-        });
-      },
-    ).catch((rej: any) => {
-      // finalized error is ignored
-      if (rej.result.status.isInBlock) {
-        const txHash = transfer.hash.toHex();
-        handleErr(rej.message, txIdent, txHash, txHandler);
-      }
-    })).catch((e) => {
-    console.log('sendToNativeAddress err=', e);
-    handleErr(e, txIdent, '', txHandler);
-  });
   return Promise.resolve(txIdent);
 }
 
