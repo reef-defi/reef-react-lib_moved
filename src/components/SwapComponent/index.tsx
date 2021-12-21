@@ -13,7 +13,7 @@ import {
   Token,
   TokenWithAmount,
 } from '../../state';
-import { ButtonStatus, ensure } from '../../utils';
+import { ButtonStatus, ensure, TX_STATUS_ERROR_CODE } from '../../utils';
 import {
   calculateAmount,
   calculateAmountWithPercentage,
@@ -217,7 +217,7 @@ export const SwapComponent = ({
       if (onTxUpdate) {
         onTxUpdate({
           txIdent,
-          error: error.message,
+          error: { message: error.message, code: TX_STATUS_ERROR_CODE.ERROR_UNDEFINED },
           type: TX_TYPE_EVM,
         });
       }
