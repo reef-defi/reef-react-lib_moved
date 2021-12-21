@@ -3,7 +3,12 @@ import { utils } from 'ethers';
 import { decodeAddress } from '@polkadot/util-crypto';
 import { Provider } from '@reef-defi/evm-provider';
 import {
-  calculateUsdAmount, handleErr, sendToNativeAddress, toDecimalPlaces, toUnits,
+  calculateUsdAmount,
+  handleErr,
+  sendToNativeAddress,
+  toDecimalPlaces,
+  toUnits,
+  TX_STATUS_ERROR_CODE,
 } from '../../utils';
 import {
   ensureTokenAmount, ReefSigner, reefTokenWithAmount, Token, TokenWithAmount,
@@ -108,11 +113,10 @@ export const TransferComponent = ({
     }
     if (lastTxIdentInProgress === txUpdateData?.txIdent || txUpdateData?.txIdent === TX_IDENT_ANY) {
       if (txUpdateData?.error) {
-        const errMessage = txUpdateData.error === 'balances.InsufficientBalance' ? 'Balance too low for transfer and fees.' : txUpdateData.error;
         setResultMessage({
           complete: true,
           title: 'Transaction failed',
-          message: errMessage || '',
+          message: txUpdateData.error.message || '',
         });
         return;
       }
@@ -199,14 +203,14 @@ export const TransferComponent = ({
         setLastTxIdentInProgress(txIdent);
         getUpdateTxCallback([onTxUpdate, setTxUpdateData])({ txIdent });
       } else if (isSubstrateAddress(to)) {
-        const txIdent = await sendToNativeAddress(provider, from, utils.parseEther(txToken.amount), to, getUpdateTxCallback([onTxUpdate, setTxUpdateData]));
+        const txIdent = sendToNativeAddress(provider, from, utils.parseEther(txToken.amount), to, getUpdateTxCallback([onTxUpdate, setTxUpdateData]));
         setLastTxIdentInProgress(txIdent);
         getUpdateTxCallback([onTxUpdate, setTxUpdateData])({ txIdent });
       }
     } catch (err) {
       console.log('onSendTxConfirmed error =', err);
       setLastTxIdentInProgress(TX_IDENT_ANY);
-      getUpdateTxCallback([onTxUpdate, setTxUpdateData])({ txIdent: TX_IDENT_ANY, error: err.message || err });
+      getUpdateTxCallback([onTxUpdate, setTxUpdateData])({ txIdent: TX_IDENT_ANY, error: { message: (err.message || err), code: TX_STATUS_ERROR_CODE.ERROR_UNDEFINED } });
     }
     setIsLoading(false);
   };
