@@ -28,14 +28,14 @@ import { Loading, LoadingButtonIconWithText } from '../common/Loading';
 import { AccountListModal } from '../AccountSelector/AccountListModal';
 import { ConfirmLabel } from '../common/Label';
 import { Button } from '../common/Button';
-import { TX_TYPE_EVM, TxStatusHandler, TxStatusUpdate } from '../../utils/transactionUtil';
+import { TxStatusHandler, TxStatusUpdate } from '../../utils/transactionUtil';
 
 interface TransferComponent {
     tokens: Token[];
     from: ReefSigner;
     token: TokenWithAmount;
     provider: Provider;
-    onTxUpdate: (value:TxStatusUpdate)=> void;
+    onTxUpdate: TxStatusHandler;
     accounts: ReefSigner[];
     currentAccount: ReefSigner;
 }
@@ -62,7 +62,7 @@ async function sendToEvmAddress(txToken: TokenWithAmount, signer: ReefSigner, to
   try {
     contract.transfer(to, toAmt.toString()).then((contractCall: any) => {
       txHandler({
-        txIdent, txHash: contractCall.hash, isInBlock: true, type: TX_TYPE_EVM, url: `https://reefscan.com/extrinsic/${contractCall.hash}`,
+        txIdent, txHash: contractCall.hash, isInBlock: true, txTypeEvm: true, url: `https://reefscan.com/extrinsic/${contractCall.hash}`,
       });
     }).catch(async (e:any) => {
       console.log('sendToEvmAddress error=', e);
@@ -131,7 +131,7 @@ export const TransferComponent = ({
       }
       if (txUpdateData?.isInBlock) {
         let message = 'Transaction was accepted in latest block.';
-        if (txUpdateData.type !== TX_TYPE_EVM) {
+        if (!txUpdateData.txTypeEvm) {
           message += ' For maximum reliability you can wait block finality ~30sec.';
         }
         setResultMessage({
@@ -139,7 +139,7 @@ export const TransferComponent = ({
           title: 'Transaction successfull',
           message,
           url: txUpdateData.url || `https://reefscan.com/transfer/${txUpdateData.txHash}`,
-          loading: txUpdateData.type !== TX_TYPE_EVM,
+          loading: !txUpdateData.txTypeEvm,
         });
         return;
       }

@@ -8,7 +8,9 @@ export interface ButtonStatus {
 
 export const trim = (value: string, size = 19): string => (value.length < size
   ? value
-  : `${value.slice(0, size - 5)}...${value.slice(value.length - 4)}`);
+  : `${value.slice(0, size - 5)}...${value.slice(value.length - 5)}`);
+
+export const toAddressShortDisplay = (address: string): string => trim(address, 7);
 
 export const ensure = (condition: boolean, message: string): void => {
   if (!condition) {

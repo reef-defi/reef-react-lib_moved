@@ -39,7 +39,7 @@ import { CenterColumn, ComponentCenter, MT } from '../common/Display';
 import { OpenModalButton } from '../common/Modal';
 import { LoadingButtonIconWithText } from '../common/Loading';
 import { TransactionSettings } from '../TransactionSettings';
-import { TX_TYPE_EVM, TxStatusHandler } from '../../utils/transactionUtil';
+import { TxStatusHandler } from '../../utils/transactionUtil';
 
 interface SwapComponent {
   tokens: Token[];
@@ -207,7 +207,7 @@ export const SwapComponent = ({
             txIdent,
             txHash: contractCall.hash,
             isInBlock: true,
-            type: TX_TYPE_EVM,
+            txTypeEvm: true,
             url: `https://${network === availableNetworks.mainnet ? '' : `${network.name}.`}reefscan.com/extrinsic/${contractCall.hash}`,
           });
         }
@@ -218,7 +218,7 @@ export const SwapComponent = ({
         onTxUpdate({
           txIdent,
           error: { message: error.message, code: TX_STATUS_ERROR_CODE.ERROR_UNDEFINED },
-          type: TX_TYPE_EVM,
+          txTypeEvm: true,
         });
       }
     } finally {

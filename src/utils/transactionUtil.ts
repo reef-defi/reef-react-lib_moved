@@ -3,8 +3,6 @@ import { BigNumber } from 'ethers';
 import { handleTxResponse } from '@reef-defi/evm-provider/utils';
 import { ReefSigner } from '../state';
 
-export const TX_TYPE_EVM = 'TX_TYPE_EVM';
-
 export type TxStatusHandler = (status: TxStatusUpdate)=>void;
 
 export enum TX_STATUS_ERROR_CODE {
@@ -19,8 +17,10 @@ export interface TxStatusUpdate {
   error?: { message: string, code: TX_STATUS_ERROR_CODE };
   isInBlock?: boolean;
   isComplete?: boolean;
-  type?: string;
+  txTypeEvm?: boolean;
   url?: string;
+  componentTxType?: string;
+  address?: string;
 }
 
 export const handleErr = (e: {message: string}|string, txIdent:string, txHash: string, txHandler: TxStatusHandler): void => {
