@@ -20,10 +20,10 @@ export interface TxStatusUpdate {
   txTypeEvm?: boolean;
   url?: string;
   componentTxType?: string;
-  address?: string;
+  addresses?: string[];
 }
 
-export const handleErr = (e: {message: string}|string, txIdent:string, txHash: string, txHandler: TxStatusHandler): void => {
+export const handleErr = (e: {message: string}|string, txIdent:string, txHash: string, txHandler: TxStatusHandler, signer: ReefSigner): void => {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   let message = e.message || e;
@@ -44,7 +44,7 @@ export const handleErr = (e: {message: string}|string, txIdent:string, txHash: s
     message = `Transaction error: ${message}`;
   }
   txHandler({
-    txIdent, txHash, error: { message, code },
+    txIdent, txHash, error: { message, code }, addresses: [signer.address],
   });
 };
 
@@ -57,18 +57,22 @@ export const sendToNativeAddress = (provider: Provider, signer: ReefSigner, toAm
         (txRes: any): void => {
           const txHash = transfer.hash.toHex();
           txHandler({
-            txIdent, txHash, isInBlock: txRes.result.status.isInBlock, isComplete: txRes.result.status.isFinalized,
+            txIdent,
+            txHash,
+            isInBlock: txRes.result.status.isInBlock,
+            isComplete: txRes.result.status.isFinalized,
+            addresses: [signer.address, to],
           });
         },
       ).catch((rej: any) => {
         // finalized error is ignored
         if (rej.result.status.isInBlock) {
           const txHash = transfer.hash.toHex();
-          handleErr(rej.message, txIdent, txHash, txHandler);
+          handleErr(rej.message, txIdent, txHash, txHandler, signer);
         }
       })).catch((e) => {
       console.log('sendToNativeAddress err=', e);
-      handleErr(e, txIdent, '', txHandler);
+      handleErr(e, txIdent, '', txHandler, signer);
     });
   });
 
