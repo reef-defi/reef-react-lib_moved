@@ -62,15 +62,20 @@ async function sendToEvmAddress(txToken: TokenWithAmount, signer: ReefSigner, to
   try {
     contract.transfer(to, toAmt.toString()).then((contractCall: any) => {
       txHandler({
-        txIdent, txHash: contractCall.hash, isInBlock: true, txTypeEvm: true, url: `https://reefscan.com/extrinsic/${contractCall.hash}`,
+        txIdent,
+        txHash: contractCall.hash,
+        isInBlock: true,
+        txTypeEvm: true,
+        url: `https://reefscan.com/extrinsic/${contractCall.hash}`,
+        addresses: [signer.address],
       });
     }).catch(async (e:any) => {
       console.log('sendToEvmAddress error=', e);
-      handleErr(e, txIdent, '', txHandler);
+      handleErr(e, txIdent, '', txHandler, signer);
     });
   } catch (e) {
     console.log('sendToEvmAddress err =', e);
-    handleErr(e, txIdent, '', txHandler);
+    handleErr(e, txIdent, '', txHandler, signer);
   }
   return Promise.resolve(txIdent);
 }
@@ -210,7 +215,7 @@ export const TransferComponent = ({
     } catch (err) {
       console.log('onSendTxConfirmed error =', err);
       setLastTxIdentInProgress(TX_IDENT_ANY);
-      getUpdateTxCallback([onTxUpdate, setTxUpdateData])({ txIdent: TX_IDENT_ANY, error: { message: (err.message || err), code: TX_STATUS_ERROR_CODE.ERROR_UNDEFINED } });
+      getUpdateTxCallback([onTxUpdate, setTxUpdateData])({ txIdent: TX_IDENT_ANY, error: { message: (err.message || err), code: TX_STATUS_ERROR_CODE.ERROR_UNDEFINED }, addresses: [from.address] });
     }
     setIsLoading(false);
   };

@@ -209,6 +209,7 @@ export const SwapComponent = ({
             isInBlock: true,
             txTypeEvm: true,
             url: `https://${network === availableNetworks.mainnet ? '' : `${network.name}.`}reefscan.com/extrinsic/${contractCall.hash}`,
+            addresses: [account.address],
           });
         }
         return contractCall;
@@ -219,6 +220,7 @@ export const SwapComponent = ({
           txIdent,
           error: { message: error.message, code: TX_STATUS_ERROR_CODE.ERROR_UNDEFINED },
           txTypeEvm: true,
+          addresses: [account.address],
         });
       }
     } finally {
