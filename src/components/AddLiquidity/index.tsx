@@ -5,7 +5,15 @@ import { useUpdateBalance } from '../../hooks/useUpdateBalance';
 import { useUpdateLiquidityAmount } from '../../hooks/useUpdateAmount';
 import { useUpdateTokensPrice } from '../../hooks/useUpdateTokensPrice';
 import {
-  ButtonStatus, ensure, calculateAmount, assertAmount, ensureAmount, calculateAmountWithPercentage, calculateDeadline, errorHandler,
+  ButtonStatus,
+  ensure,
+  calculateAmount,
+  assertAmount,
+  ensureAmount,
+  calculateAmountWithPercentage,
+  calculateDeadline,
+  errorHandler,
+  TxStatusHandler, TX_STATUS_ERROR_CODE,
 } from '../../utils';
 import { CenterColumn, ComponentCenter, MT } from '../common/Display';
 import {
@@ -19,7 +27,15 @@ import { OpenModalButton } from '../common/Modal';
 import { LoadingButtonIconWithText } from '../common/Loading';
 import ConfirmAddLiquidity from './ConfirmAddLiquidity';
 import {
-  createEmptyTokenWithAmount, defaultSettings, Network, Notify, ReefSigner, reefTokenWithAmount, resolveSettings, Token, TokenWithAmount,
+  availableNetworks,
+  createEmptyTokenWithAmount,
+  defaultSettings,
+  Network,
+  ReefSigner,
+  reefTokenWithAmount,
+  resolveSettings,
+  Token,
+  TokenWithAmount,
 } from '../../state';
 import { approveTokenAmount, getReefswapRouter } from '../../rpc';
 
@@ -28,8 +44,7 @@ interface AddLiquidityComponent {
   network: Network;
   signer: ReefSigner;
   back: () => void;
-  reloadTokens: () => void;
-  notify: (message: string, type: Notify) => void;
+  onTxUpdate?: TxStatusHandler;
   onAddressChangeLoad?: (address: string) => Promise<void>;
 }
 
@@ -63,7 +78,7 @@ const loadingStatus = (status: string, isPoolLoading: boolean, isPriceLoading: b
 };
 
 export const AddLiquidityComponent = ({
-  tokens, network, signer, back, notify, reloadTokens, onAddressChangeLoad,
+  tokens, network, signer, back, onTxUpdate, onAddressChangeLoad,
 } : AddLiquidityComponent): JSX.Element => {
   const [status, setStatus] = useState('');
   const [settings, setSettings] = useState(defaultSettings());
@@ -125,6 +140,7 @@ export const AddLiquidityComponent = ({
   const addLiquidityClick = async (): Promise<void> => {
     if (!signer) { return; }
     const { evmAddress } = signer;
+    const txIdent = Math.random().toString(10);
     try {
       setIsLiquidityLoading(true);
       ensureAmount(token1);
@@ -137,8 +153,12 @@ export const AddLiquidityComponent = ({
 
       setStatus('Adding supply');
       const reefswapRouter = getReefswapRouter(network.routerAddress, signer.signer);
-
-      await reefswapRouter.addLiquidity(
+      if (onTxUpdate) {
+        onTxUpdate({
+          txIdent,
+        });
+      }
+      const contractCall: any = await reefswapRouter.addLiquidity(
         token1.address,
         token2.address,
         calculateAmount(token1),
@@ -148,15 +168,29 @@ export const AddLiquidityComponent = ({
         evmAddress,
         calculateDeadline(deadline),
       );
-      notify(`${token1.name}/${token2.name} supply added successfully!`, 'success');
+      if (onTxUpdate) {
+        onTxUpdate({
+          txIdent,
+          txHash: contractCall.hash,
+          isInBlock: true,
+          txTypeEvm: true,
+          url: `https://${network === availableNetworks.mainnet ? '' : `${network.name}.`}reefscan.com/extrinsic/${contractCall.hash}`,
+          addresses: [signer.address],
+        });
+      }
     } catch (error) {
       const message = errorHandler(error.message)
         .replace('first', token1.name)
         .replace('second', token2.name);
-
-      notify(message, 'error');
+      if (onTxUpdate) {
+        onTxUpdate({
+          txIdent,
+          error: { message, code: TX_STATUS_ERROR_CODE.ERROR_UNDEFINED },
+          txTypeEvm: true,
+          addresses: [signer.address],
+        });
+      }
     } finally {
-      reloadTokens();
       setStatus('');
     }
   };
