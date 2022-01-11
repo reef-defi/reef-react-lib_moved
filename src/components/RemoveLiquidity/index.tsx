@@ -2,10 +2,26 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useLoadPool } from '../../hooks/useLoadPool';
 import { approveAmount, getReefswapRouter } from '../../rpc';
 import {
-  defaultSettings, Network, Notify, Pool, ReefSigner, REMOVE_DEFAULT_SLIPPAGE_TOLERANCE, resolveSettings, Token,
+  availableNetworks,
+  defaultSettings,
+  Network,
+  Pool,
+  ReefSigner,
+  REMOVE_DEFAULT_SLIPPAGE_TOLERANCE,
+  resolveSettings,
+  Token,
 } from '../../state';
 import {
-  ButtonStatus, calculateDeadline, calculatePoolRatio, ensure, ensureVoidRun, errorHandler, removePoolTokenShare, removeSupply, transformAmount,
+  ButtonStatus,
+  calculateDeadline,
+  calculatePoolRatio,
+  ensure,
+  ensureVoidRun,
+  removePoolTokenShare,
+  removeSupply,
+  transformAmount,
+  TX_STATUS_ERROR_CODE,
+  TxStatusHandler,
 } from '../../utils';
 import { DangerAlert } from '../common/Alert';
 import { Button } from '../common/Button';
@@ -13,7 +29,7 @@ import {
   Card, CardBack, CardHeader, CardTitle, SubCard,
 } from '../common/Card';
 import {
-  ContentBetween, ComponentCenter, MT, MX, ContentCenter, Margin,
+  ComponentCenter, ContentBetween, ContentCenter, Margin, MT, MX,
 } from '../common/Display';
 import { DownIcon } from '../common/Icons';
 import { PercentageRangeAmount } from '../common/Input';
@@ -30,8 +46,7 @@ interface RemoveLiquidityComponent {
   signer?: ReefSigner;
   network: Network;
   back: () => void;
-  notify: (message: string, type: Notify) => void;
-  reloadTokens: () => void;
+  onTxUpdate?: TxStatusHandler;
 }
 
 const status = (percentageAmount: number, pool?: Pool): ButtonStatus => {
@@ -52,7 +67,7 @@ const status = (percentageAmount: number, pool?: Pool): ButtonStatus => {
 };
 
 export const RemoveLiquidityComponent = ({
-  token1, token2, network, signer, back, notify, reloadTokens,
+  token1, token2, network, signer, back, onTxUpdate,
 } : RemoveLiquidityComponent): JSX.Element => {
   const mounted = useRef(true);
   const [isRemoving, setIsRemoving] = useState(false);
@@ -87,12 +102,21 @@ export const RemoveLiquidityComponent = ({
     const minimumTokenAmount1 = removePoolTokenShare(Math.max(percentageAmount - percentage, 0), pool.token1);
     const minimumTokenAmount2 = removePoolTokenShare(Math.max(percentageAmount - percentage, 0), pool.token2);
 
+    const txIdent = Math.random().toString(10);
+
     Promise.resolve()
       .then(() => { mounted.current = true; })
       .then(() => setIsRemoving(true))
       .then(() => setLoadingStatus('Approving remove'))
       .then(() => approveAmount(pool.poolAddress, network.routerAddress, removedLiquidity, signer.signer))
       .then(() => setLoadingStatus('Removing supply'))
+      .then(() => {
+        if (onTxUpdate) {
+          onTxUpdate({
+            txIdent,
+          });
+        }
+      })
       .then(() => reefswapRouter.removeLiquidity(
         pool.token1.address,
         pool.token2.address,
@@ -102,15 +126,32 @@ export const RemoveLiquidityComponent = ({
         signer.evmAddress,
         calculateDeadline(deadline),
       ))
-      .then(() => notify('Liquidity successfully removed', 'success'))
+      .then((contractCall:any) => {
+        if (onTxUpdate) {
+          onTxUpdate({
+            txIdent,
+            txHash: contractCall.hash,
+            isInBlock: true,
+            txTypeEvm: true,
+            url: `https://${network === availableNetworks.mainnet ? '' : `${network.name}.`}reefscan.com/extrinsic/${contractCall.hash}`,
+            addresses: [signer.address],
+          });
+        }
+      })
       .then(() => mounted.current && back())
       .catch((e) => {
-        notify(errorHandler(e.message), 'error');
+        if (onTxUpdate) {
+          onTxUpdate({
+            txIdent,
+            error: { message: e.message, code: TX_STATUS_ERROR_CODE.ERROR_UNDEFINED },
+            txTypeEvm: true,
+            addresses: [signer.address],
+          });
+        }
       })
       .finally(() => {
         ensureMount(setIsRemoving, false);
         ensureMount(setLoadingStatus, '');
-        reloadTokens();
       });
   };
 
