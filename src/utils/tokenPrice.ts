@@ -47,6 +47,6 @@ export const calculateBalanceValue = ({ price, balance }:{price:DataWithProgress
   return parseFloat(formatEther(priceBN.mul(BigNumber.from(balanceFixed)).toString()));
 };
 
-export const toCurrencyFormat = (value: number, options?: any): string => Intl.NumberFormat(navigator.language, {
+export const toCurrencyFormat = (value: number, options = { }): string => Intl.NumberFormat(navigator.language, {
   style: 'currency', currency: 'USD', currencyDisplay: 'symbol', ...options,
 }).format(value);
