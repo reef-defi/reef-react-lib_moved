@@ -9,6 +9,7 @@ export interface BasicToken {
 }
 
 export interface Token extends BasicToken {
+  symbol?: string;
   balance: BigNumber;
   decimals: number;
 }

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { BigNumber } from 'ethers';
 import { useLoadPool } from '../../hooks/useLoadPool';
 import { useUpdateBalance } from '../../hooks/useUpdateBalance';
@@ -86,8 +86,8 @@ export const AddLiquidityComponent = ({
   const [settings, setSettings] = useState(defaultSettings());
   const [isLiquidityLoading, setIsLiquidityLoading] = useState(false);
 
-  const [tkn2, setTkn2] = useState(token2 || createEmptyTokenWithAmount());
-  const [tkn1, setTkn1] = useState(token1 || reefTokenWithAmount());
+  const [tkn2, setTkn2] = useState(createEmptyTokenWithAmount());
+  const [tkn1, setTkn1] = useState(reefTokenWithAmount());
   const { deadline, percentage } = resolveSettings(settings);
 
   const [pool, isPoolLoading] = useLoadPool(tkn1, tkn2, network.factoryAddress, signer?.signer);
@@ -125,6 +125,14 @@ export const AddLiquidityComponent = ({
   const changeToken2 = (newToken: Token): void => setTkn2({
     ...newToken, amount: '', price: 0, isEmpty: false,
   });
+
+  useEffect(() => {
+    changeToken1(token1 || createEmptyTokenWithAmount());
+  }, [token1, signer]);
+
+  useEffect(() => {
+    changeToken2(token2 || createEmptyTokenWithAmount());
+  }, [token2, signer]);
 
   const setAmount1 = (amount: string): void => {
     if (isLoading) { return; }

@@ -178,3 +178,15 @@ export const calculateImpactPercentage = (sell: TokenWithAmount, buy: TokenWithA
 
   return (buyUsd - sellUsd) / sellUsd;
 };
+
+export const getHashSumLastNr = (address: string): number => {
+  const summ = address.split('').reduce((sum, ch) => {
+    const nr = parseInt(ch, 10);
+    if (!Number.isNaN(nr)) {
+      return sum + nr;
+    }
+    return sum;
+  }, 0).toString(10);
+
+  return parseInt(summ.substring(summ.length - 1), 10);
+};
