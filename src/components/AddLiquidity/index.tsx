@@ -42,6 +42,8 @@ import { approveTokenAmount, getReefswapRouter } from '../../rpc';
 interface AddLiquidityComponent {
   tokens: Token[];
   network: Network;
+  token1?: TokenWithAmount;
+  token2?: TokenWithAmount;
   signer: ReefSigner;
   back: () => void;
   onTxUpdate?: TxStatusHandler;
@@ -78,63 +80,63 @@ const loadingStatus = (status: string, isPoolLoading: boolean, isPriceLoading: b
 };
 
 export const AddLiquidityComponent = ({
-  tokens, network, signer, back, onTxUpdate, onAddressChangeLoad,
+  tokens, network, token1, token2, signer, back, onTxUpdate, onAddressChangeLoad,
 } : AddLiquidityComponent): JSX.Element => {
   const [status, setStatus] = useState('');
   const [settings, setSettings] = useState(defaultSettings());
   const [isLiquidityLoading, setIsLiquidityLoading] = useState(false);
 
-  const [token2, setToken2] = useState(createEmptyTokenWithAmount());
-  const [token1, setToken1] = useState(reefTokenWithAmount());
+  const [tkn2, setTkn2] = useState(token2 || createEmptyTokenWithAmount());
+  const [tkn1, setTkn1] = useState(token1 || reefTokenWithAmount());
   const { deadline, percentage } = resolveSettings(settings);
 
-  const [pool, isPoolLoading] = useLoadPool(token1, token2, network.factoryAddress, signer?.signer);
+  const [pool, isPoolLoading] = useLoadPool(tkn1, tkn2, network.factoryAddress, signer?.signer);
 
   const { text, isValid } = useMemo(
-    () => liquidityStatus(token1, token2, signer?.isEvmClaimed),
-    [token1, token2, signer?.isEvmClaimed],
+    () => liquidityStatus(tkn1, tkn2, signer?.isEvmClaimed),
+    [tkn1, tkn2, signer?.isEvmClaimed],
   );
 
-  useUpdateBalance(token1, tokens, setToken1);
-  useUpdateBalance(token2, tokens, setToken2);
+  useUpdateBalance(tkn1, tokens, setTkn1);
+  useUpdateBalance(tkn2, tokens, setTkn2);
   const isPriceLoading = useUpdateTokensPrice({
     pool,
-    token1,
-    token2,
+    token1: tkn1,
+    token2: tkn2,
     tokens,
-    setToken1,
-    setToken2,
+    setToken1: setTkn1,
+    setToken2: setTkn2,
     signer: signer?.signer,
     factoryAddress: network.factoryAddress,
   });
   useUpdateLiquidityAmount({
     pool,
-    token1,
-    token2,
-    setToken1,
-    setToken2,
+    token1: tkn1,
+    token2: tkn2,
+    setToken1: setTkn1,
+    setToken2: setTkn2,
   });
 
   const isLoading = isLiquidityLoading || isPoolLoading || isPriceLoading;
 
-  const changeToken1 = (newToken: Token): void => setToken1({
+  const changeToken1 = (newToken: Token): void => setTkn1({
     ...newToken, amount: '', price: 0, isEmpty: false,
   });
-  const changeToken2 = (newToken: Token): void => setToken2({
+  const changeToken2 = (newToken: Token): void => setTkn2({
     ...newToken, amount: '', price: 0, isEmpty: false,
   });
 
   const setAmount1 = (amount: string): void => {
     if (isLoading) { return; }
-    const newAmount = token1.price / token2.price * parseFloat(assertAmount(amount));
-    setToken1({ ...token1, amount });
-    setToken2({ ...token2, amount: !amount ? '' : newAmount.toFixed(4) });
+    const newAmount = tkn1.price / tkn2.price * parseFloat(assertAmount(amount));
+    setTkn1({ ...tkn1, amount });
+    setTkn2({ ...tkn2, amount: !amount ? '' : newAmount.toFixed(4) });
   };
   const setAmount2 = (amount: string): void => {
     if (isLoading) { return; }
-    const newAmount = token2.price / token1.price * parseFloat(assertAmount(amount));
-    setToken2({ ...token2, amount });
-    setToken1({ ...token1, amount: !amount ? '' : newAmount.toFixed(4) });
+    const newAmount = tkn2.price / tkn1.price * parseFloat(assertAmount(amount));
+    setTkn2({ ...tkn2, amount });
+    setTkn1({ ...tkn1, amount: !amount ? '' : newAmount.toFixed(4) });
   };
 
   const addLiquidityClick = async (): Promise<void> => {
@@ -143,13 +145,13 @@ export const AddLiquidityComponent = ({
     const txIdent = Math.random().toString(10);
     try {
       setIsLiquidityLoading(true);
-      ensureAmount(token1);
-      ensureAmount(token2);
+      ensureAmount(tkn1);
+      ensureAmount(tkn2);
 
-      setStatus(`Approving ${token1.name} token`);
-      await approveTokenAmount(token1, network.routerAddress, signer.signer);
-      setStatus(`Approving ${token2.name} token`);
-      await approveTokenAmount(token2, network.routerAddress, signer.signer);
+      setStatus(`Approving ${tkn1.name} token`);
+      await approveTokenAmount(tkn1, network.routerAddress, signer.signer);
+      setStatus(`Approving ${tkn2.name} token`);
+      await approveTokenAmount(tkn2, network.routerAddress, signer.signer);
 
       setStatus('Adding supply');
       const reefswapRouter = getReefswapRouter(network.routerAddress, signer.signer);
@@ -159,12 +161,12 @@ export const AddLiquidityComponent = ({
         });
       }
       const contractCall: any = await reefswapRouter.addLiquidity(
-        token1.address,
-        token2.address,
-        calculateAmount(token1),
-        calculateAmount(token2),
-        calculateAmountWithPercentage(token1, percentage), // min amount token1
-        calculateAmountWithPercentage(token2, percentage), // min amount token2
+        tkn1.address,
+        tkn2.address,
+        calculateAmount(tkn1),
+        calculateAmount(tkn2),
+        calculateAmountWithPercentage(tkn1, percentage), // min amount token1
+        calculateAmountWithPercentage(tkn2, percentage), // min amount token2
         evmAddress,
         calculateDeadline(deadline),
       );
@@ -180,8 +182,8 @@ export const AddLiquidityComponent = ({
       }
     } catch (error) {
       const message = errorHandler(error.message)
-        .replace('first', token1.name)
-        .replace('second', token2.name);
+        .replace('first', tkn1.name)
+        .replace('second', tkn2.name);
       if (onTxUpdate) {
         onTxUpdate({
           txIdent,
@@ -213,7 +215,7 @@ export const AddLiquidityComponent = ({
         </DangerAlert>
 
         <TokenAmountField
-          token={token1}
+          token={tkn1}
           tokens={tokens}
           signer={signer}
           id="add-liquidity-token-1"
@@ -223,7 +225,7 @@ export const AddLiquidityComponent = ({
         />
         <SwitchTokenButton disabled addIcon />
         <TokenAmountField
-          token={token2}
+          token={tkn2}
           tokens={tokens}
           signer={signer}
           id="add-liquidity-token-2"
@@ -245,8 +247,8 @@ export const AddLiquidityComponent = ({
         </MT>
         <ConfirmAddLiquidity
           pool={pool}
-          token1={token1}
-          token2={token2}
+          token1={tkn1}
+          token2={tkn2}
           percentage={percentage}
           confirmFun={addLiquidityClick}
           id="swap-modal-toggle"
