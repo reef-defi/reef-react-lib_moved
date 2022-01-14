@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Contract, utils } from 'ethers';
+import { utils } from 'ethers';
 import { useAsyncEffect } from '../../hooks';
-import { createEmptyToken, ReefSigner, Token } from '../../state';
+import { ReefSigner, Token } from '../../state';
 import {
   DataProgress, DataWithProgress, getData, getProgress, toBalance, trim,
 } from '../../utils';
@@ -20,7 +20,7 @@ import {
   LeadText, MiniText, MutedText, Text, Title,
 } from '../common/Text';
 import { QuestionTooltip } from '../common/Tooltip';
-import { getREEF20Contract } from '../../rpc';
+import { loadToken } from '../../rpc';
 
 interface SelectToken {
   id?: string;
@@ -52,23 +52,14 @@ const SelectToken = ({
       return;
     }
     async function searchTokens(): Promise<void> {
-      // test tkn= 0x225C1016d8796Efea1ADF35a2e5f6C01Db617EaB
       let tokenSearchRes = [...tokens].filter((token) => token.name.toLowerCase().startsWith(address.toLowerCase()) || token.address.toLowerCase().startsWith(address.toLowerCase()));
       if (!tokenSearchRes.length && utils.isAddress(address)) {
         setFoundSearchTokens(DataProgress.LOADING);
-        let tokenContract: Contract | undefined;
-        try {
-          tokenContract = await getREEF20Contract(address, signer.signer);
-        } catch (err) {
-          console.log('searchTokens contract err=', err);
-        }
-        if (tokenContract) {
-          const contractToken = createEmptyToken();
-          contractToken.address = tokenContract.address;
-          contractToken.name = await tokenContract.name();
-          contractToken.balance = await tokenContract.balanceOf(signer.evmAddress);
-          contractToken.decimals = await tokenContract.decimals();
+        const contractToken: Token | null = await loadToken(address, signer.signer);
+        if (contractToken) {
           tokenSearchRes = [contractToken];
+        } else {
+          console.log('searchTokens contract not found addr=', address);
         }
       }
       setFoundSearchTokens(tokenSearchRes);
