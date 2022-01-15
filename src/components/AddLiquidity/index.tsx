@@ -138,13 +138,17 @@ export const AddLiquidityComponent = ({
     if (isLoading) { return; }
     const newAmount = tkn1.price / tkn2.price * parseFloat(assertAmount(amount));
     setTkn1({ ...tkn1, amount });
-    setTkn2({ ...tkn2, amount: !amount ? '' : newAmount.toFixed(4) });
+    if (!Number.isNaN(newAmount)) {
+      setTkn2({ ...tkn2, amount: !amount ? '' : newAmount.toFixed(4) });
+    }
   };
   const setAmount2 = (amount: string): void => {
     if (isLoading) { return; }
     const newAmount = tkn2.price / tkn1.price * parseFloat(assertAmount(amount));
     setTkn2({ ...tkn2, amount });
-    setTkn1({ ...tkn1, amount: !amount ? '' : newAmount.toFixed(4) });
+    if (!Number.isNaN(newAmount)) {
+      setTkn1({ ...tkn1, amount: !amount ? '' : newAmount.toFixed(4) });
+    }
   };
 
   const addLiquidityClick = async (): Promise<void> => {
