@@ -108,6 +108,9 @@ interface ShowBalance extends ToBalance {
 }
 
 export const showBalance = ({ decimals, balance, name }: ShowBalance, decimalPoints = 4): string => {
+  if (!balance) {
+    return '';
+  }
   const balanceStr = balance.toString();
   if (balanceStr === '0') { return `${balanceStr} ${name}`; }
   const headLength = Math.max(balanceStr.length - decimals, 0);

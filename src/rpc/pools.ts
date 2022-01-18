@@ -1,5 +1,5 @@
 import { Signer } from '@reef-defi/evm-provider';
-import { Contract } from 'ethers';
+import { BigNumber, Contract } from 'ethers';
 import { ensure, uniqueCombinations } from '../utils/utils';
 import { ReefswapPair } from '../assets/abi/ReefswapPair';
 import { balanceOf, getReefswapFactory } from './rpc';
@@ -41,8 +41,8 @@ export const loadPool = async (
 
   const address1 = await contract.token1();
 
-  const tokenBalance1 = await balanceOf(token1.address, address, signer);
-  const tokenBalance2 = await balanceOf(token2.address, address, signer);
+  const tokenBalance1 = (await balanceOf(token1.address, address, signer)) || BigNumber.from('0');
+  const tokenBalance2 = (await balanceOf(token2.address, address, signer)) || BigNumber.from('0');
 
   const [finalToken1, finalToken2] = token1.address === address1
     ? [
