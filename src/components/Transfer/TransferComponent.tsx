@@ -55,12 +55,16 @@ const isSubstrateAddress = (to: string): boolean => {
 };
 
 async function sendToEvmAddress(txToken: TokenWithAmount, signer: ReefSigner, to: string, txHandler: TxStatusHandler): Promise<string> {
-  const contract = await getREEF20Contract(txToken.address, signer.signer);
-  const decimals = await contract.decimals();
-  const toAmt = utils.parseUnits(txToken.amount, decimals);
   const txIdent = Math.random().toString(10);
+  const tokenContract = await getREEF20Contract(txToken.address, signer.signer);
+  if (!tokenContract) {
+    handleErr({ message: 'Contract does not exist.' }, txIdent, '', txHandler, signer);
+    return Promise.resolve(txIdent);
+  }
+
+  const toAmt = utils.parseUnits(txToken.amount, tokenContract.values.decimals);
   try {
-    contract.transfer(to, toAmt.toString()).then((contractCall: any) => {
+    tokenContract.contract.transfer(to, toAmt.toString()).then((contractCall: any) => {
       txHandler({
         txIdent,
         txHash: contractCall.hash,
