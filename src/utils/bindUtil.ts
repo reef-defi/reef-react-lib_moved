@@ -9,12 +9,12 @@ export const bindEvmAddress = (signer: ReefSigner, provider: Provider, onTxChang
   }
   if (signer && !signer?.isEvmClaimed) {
     // eslint-disable-next-line no-restricted-globals,no-alert
-    const isDefault = generateDefault || confirm('Create default Ethereum VM address for this account on Reef chain.');
+    const isDefault = generateDefault || confirm('Use Reef chain with Ethereum VM capabilities.');
     if (isDefault) {
       txIdent = Math.random().toString(10);
       signer.signer.claimDefaultAccount().then(() => {
         if (!onTxChange) {
-          alert(`Created Ethereum VM address is ${signer.evmAddress}.\nNow you're ready to use full functionality of Reef chain.`);
+          alert(`Success, Ethereum VM address is ${signer.evmAddress}.`);
         } else {
           onTxChange({ txIdent, isInBlock: true, addresses: [signer.address] });
         }
