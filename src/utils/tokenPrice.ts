@@ -3,6 +3,7 @@ import { DataProgress, DataWithProgress, isDataSet } from './dataWithProgress';
 import {
   Pool, reefTokenWithAmount, Token, TokenWithAmount,
 } from '../state';
+import { toDecimalPlaces } from './math';
 
 const { parseUnits, formatEther } = utils;
 
@@ -42,7 +43,8 @@ export const calculateBalanceValue = ({ price, balance }:{price:DataWithProgress
   if (!isDataSet(price)) {
     return price;
   }
-  const priceBN = BigNumber.from(parseUnits(price.toString()));
+  const priceStr = price.toString();
+  const priceBN = BigNumber.from(parseUnits(toDecimalPlaces(priceStr, 18)));
   const balanceFixed = parseInt(formatEther(balance.toString()), 10);
   return parseFloat(formatEther(priceBN.mul(BigNumber.from(balanceFixed)).toString()));
 };
