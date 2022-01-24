@@ -30,7 +30,7 @@ function getReefTokenBalance(reefSigner: ReefSigner): Promise<Token[]> {
 export const loadSignerTokens = async (reefSigner: ReefSigner, network: Network): Promise<Token[]> => {
   const reefAddress = reefTokenWithAmount().address;
   try {
-    return axios.post<void, AxiosResponse<AccountTokensRes>>(`${network.reefscanUrl}api/account/tokens`, { address: reefSigner.address })
+    return axios.post<void, AxiosResponse<AccountTokensRes>>(`${network.reefscanUrl}/api/account/tokens`, { address: reefSigner.address })
       .then((res) => {
         if (!res || !res.data || !res.data || !res.data.tokens || !res.data.tokens.length) {
           return getReefTokenBalance(reefSigner);

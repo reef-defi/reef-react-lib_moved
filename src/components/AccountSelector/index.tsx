@@ -78,7 +78,7 @@ export const AccountSelector = ({
                   <MiniText>Copy EVM Address</MiniText>
                 </span>
               </CopyToClipboard>
-              <a href={`${reefscanUrl}account/${address}`} target="_blank" className="form-text text-muted ms-3" style={{ textDecoration: 'none' }} rel="noreferrer">
+              <a href={`${reefscanUrl}/account/${address}`} target="_blank" className="form-text text-muted ms-3" style={{ textDecoration: 'none' }} rel="noreferrer">
                 <ExploreIcon small />
                 <small className="ms-1">View on Explorer</small>
               </a>
