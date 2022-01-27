@@ -108,17 +108,22 @@ interface ShowBalance extends ToBalance {
   symbol?: string;
 }
 
-export const showBalance = ({ decimals, balance, name, symbol }: ShowBalance, decimalPoints = 4): string => {
+export const showBalance = ({
+  decimals, balance, name, symbol,
+}: ShowBalance, decimalPoints = 4): string => {
   if (!balance) {
     return '';
   }
   const balanceStr = balance.toString();
-  if (balanceStr === '0') { return `${balanceStr} ${symbol||name}`; }
+  if (balanceStr === '0') { return `${balanceStr} ${symbol || name}`; }
   const headLength = Math.max(balanceStr.length - decimals, 0);
   const tailLength = Math.max(headLength + decimalPoints, 0);
   const head = balanceStr.length < decimals ? '0' : balanceStr.slice(0, headLength);
-  const tail = balanceStr.slice(headLength, tailLength);
-  return tail.length ? `${head}.${tail} ${symbol||name}` : `${head} ${symbol||name}`;
+  let tail = balanceStr.slice(headLength, tailLength);
+  if (tail.search(/[^0]+/gm) === -1) {
+    tail = '';
+  }
+  return tail.length ? `${head}.${tail} ${symbol || name}` : `${head} ${symbol || name}`;
 };
 
 export const toBalance = ({ balance, decimals }: ToBalance): number => {
