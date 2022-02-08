@@ -35,7 +35,7 @@ interface TransferComponent {
     from: ReefSigner;
     token: TokenWithAmount;
     provider: Provider;
-    onTxUpdate: TxStatusHandler;
+    onTxUpdate?: TxStatusHandler;
     accounts: ReefSigner[];
     currentAccount: ReefSigner;
 }
@@ -98,8 +98,9 @@ function toAmountInputValue(amt: string): string {
 }
 
 // need to call onTxUpdate even if component is destroyed
-const getUpdateTxCallback = (fns: TxStatusHandler[]): TxStatusHandler => (val) => {
-  fns.forEach((fn) => fn(val));
+const getUpdateTxCallback = (fns: (TxStatusHandler|undefined)[]): TxStatusHandler => (val) => {
+  const handlers = fns.filter((v) => !!v) as TxStatusHandler[];
+  handlers.forEach((fn) => fn(val));
 };
 
 export const TransferComponent = ({
