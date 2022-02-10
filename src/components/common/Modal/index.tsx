@@ -68,7 +68,7 @@ export const OpenModalButton: React.FC<OpenModalButton> = ({
     data-bs-target={`#${id}`}
     className={className || 'btn btn-reef btn-lg border-rad w-100'}
   >
-    {children}
+    <span>{children}</span>
   </button>
 );
 
@@ -93,7 +93,7 @@ const ConfirmationModal: React.FC<ConfirmationModal> = ({
     </ModalHeader>
     <ModalBody>{children}</ModalBody>
     <ModalFooter>
-      <ModalClose onClick={confirmFun} className="btn btn-reef border-rad">{confirmBtnLabel}</ModalClose>
+      <ModalClose onClick={confirmFun} className="btn btn-reef border-rad"><span>{confirmBtnLabel}</span></ModalClose>
     </ModalFooter>
   </Modal>
 );

@@ -262,7 +262,7 @@ export const AddLiquidityComponent = ({
           data-bs-toggle="modal"
           data-bs-target="#supplyModalToggle"
         >
-          {isLoading ? <LoadingButtonIconWithText text={loadingStatus(status, isPoolLoading, isPriceLoading)} /> : text}
+          <span>{isLoading ? <LoadingButtonIconWithText text={loadingStatus(status, isPoolLoading, isPriceLoading)} /> : text}</span>
         </button>
 
         <ConfirmationModal id="supplyModalToggle" title="Confirm Supply" confirmFun={addLiquidityClick}>
