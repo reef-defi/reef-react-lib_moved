@@ -52,3 +52,9 @@ export const calculateBalanceValue = ({ price, balance }:{price:DataWithProgress
 export const toCurrencyFormat = (value: number, options = { }): string => Intl.NumberFormat(navigator.language, {
   style: 'currency', currency: 'USD', currencyDisplay: 'symbol', ...options,
 }).format(value);
+
+export const getIconUrl = (address: string): string => {
+// TODO implement with svg
+  console.log('implement getIconUrl=', address);
+  return '';
+};
