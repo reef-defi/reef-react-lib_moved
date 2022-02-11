@@ -40,7 +40,7 @@ export const AccountSelector = ({
         data-bs-toggle="modal"
         data-bs-target="#account-modal"
       >
-        {trim(name)}
+        <span>{trim(name)}</span>
       </button>
       <Modal id="account-modal">
         <ModalHeader>
@@ -61,7 +61,7 @@ export const AccountSelector = ({
                 data-bs-target="#select-account-modal"
                 data-bs-toggle="modal"
               >
-                Switch account
+                <span>Switch account</span>
               </button>
             </ContentBetween>
             <Margin size="2">

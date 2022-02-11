@@ -12,7 +12,7 @@ export const Button: React.FC<ButtonProps> = ({
   disabled,
 }): JSX.Element => (
   <button type="button" className="btn btn-reef border-rad" disabled={disabled} onClick={onClick}>
-    {children}
+    <span>{children}</span>
   </button>
 );
 
@@ -91,7 +91,7 @@ export const PercentageButton: React.FC<PercentageButton> = ({ children, percent
     className={`btn ${Number.isNaN(percentage) ? 'btn-reef' : 'btn-secondary'} border-rad me-1`}
     onClick={onClick}
   >
-    {children}
+    <span>{children}</span>
   </button>
 );
 
