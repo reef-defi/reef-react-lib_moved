@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { DataProgress, DataWithProgress, isDataSet } from '../utils/dataWithProgress';
 import { Token } from '../state/token';
 import { Pool } from '../state';
-import { calculateBalanceValue, calculateTokenPrice } from '../utils/tokenPrice';
+import { calculateBalanceValue, calculateTokenPrice } from '../utils/tokenUtil';
 
 export interface TokenWithPrice extends Token {
   price: DataWithProgress<number>;
