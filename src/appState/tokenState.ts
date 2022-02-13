@@ -10,7 +10,7 @@ import { apolloClientInstance$ } from '../graphql/apollo';
 import { getIconUrl } from '../utils';
 import { getReefCoinBalance, loadPools } from '../rpc';
 import { retrieveReefCoingeckoPrice } from '../api';
-import { reefTokenWithAmount, Token } from '../state/token';
+import { reefTokenWithAmount, Token, TokenWithAmount } from '../state/token';
 import { Pool } from '../state';
 
 // TODO replace with our own from lib and remove
@@ -23,7 +23,7 @@ const toPlainString = (num: number): string => (`${+num}`).replace(/(-?)(\d*)\.?
 
 const validatedTokens = { tokens: [] };
 
-export const reefPrice$ = timer(0, 60000).pipe(
+export const reefPrice$: Observable<number> = timer(0, 60000).pipe(
   switchMap(retrieveReefCoingeckoPrice),
   shareReplay(1),
 );
@@ -83,7 +83,7 @@ const tokenBalancesWithContractDataCache = (apollo: ApolloClient<any>) => (state
   });
 };
 
-export const selectedSignerTokenBalancesWS$ = combineLatest([apolloClientInstance$, selectedSigner$, providerSubj]).pipe(
+export const selectedSignerTokenBalancesWS$: Observable<Token[]> = combineLatest([apolloClientInstance$, selectedSigner$, providerSubj]).pipe(
   switchMap(([apollo, signer, provider]) => (!signer ? []
     : from(apollo.subscribe({
       query: SIGNER_TOKENS_GQL,
@@ -110,7 +110,7 @@ export const selectedSignerTokenBalancesWS$ = combineLatest([apolloClientInstanc
   )),
 );
 
-export const allAvailableSignerTokens$ = combineLatest([selectedSignerTokenBalancesWS$, validatedTokens$]).pipe(
+export const allAvailableSignerTokens$: Observable<Token[]> = combineLatest([selectedSignerTokenBalancesWS$, validatedTokens$]).pipe(
   map(combineTokensDistinct),
   shareReplay(1),
 );
@@ -125,7 +125,7 @@ export const pools$: Observable<Pool[]> = combineLatest([allAvailableSignerToken
 );
 
 // TODO pools and tokens emit events at same time - check how to make 1 event from it
-export const tokenPrices$ = combineLatest([allAvailableSignerTokens$, reefPrice$, pools$]).pipe(
+export const tokenPrices$: Observable<TokenWithAmount[]> = combineLatest([allAvailableSignerTokens$, reefPrice$, pools$]).pipe(
   map(toTokensWithPrice),
   shareReplay(1),
 );
