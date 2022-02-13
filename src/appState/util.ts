@@ -18,9 +18,3 @@ export const onTxUpdateResetSigners = (txUpdateData: TxStatusUpdate, updateActio
     setTimeout(() => reloadSignersSubj.next({ updateActions }), delay);
   }
 };
-
-/*
-export const zenToRx = <T>(zenObservable: ZenObservable<T>): Observable<T> => new Observable(
-  (observer) => zenObservable.subscribe(observer),
-);
-*/

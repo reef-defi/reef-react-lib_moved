@@ -11,7 +11,7 @@ import {
   shareReplay,
   startWith,
   Subject,
-  switchMap,
+  switchMap, take,
   withLatestFrom,
 } from 'rxjs';
 import { Provider } from '@reef-defi/evm-provider';
@@ -100,7 +100,7 @@ subscription query($accountIds: [String!]!){
 }`;
 // eslint-disable-next-line camelcase
 interface AccountEvmAddrData { address: string; evm_address?: string; isEvmClaimed?: boolean }
-export const indexedAccountValues$ = combineLatest([apolloClientInstance$, signersInjected$]).pipe(
+const indexedAccountValues$ = combineLatest([apolloClientInstance$, signersInjected$]).pipe(
   switchMap(([apollo, signers]) => (!signers ? []
     : from(apollo.subscribe({
       query: EVM_ADDRESS_UPDATE_GQL,
@@ -140,10 +140,11 @@ const signersWithUpdatedData$ = combineLatest([signersWithUpdatedBalances$, sign
 
 export const signers$: Observable<ReefSigner[]> = signersWithUpdatedData$;
 
-export const selectAddressSubj = new ReplaySubject<string | undefined>(1);
-selectAddressSubj.next(localStorage.getItem('selected_address_reef') || undefined);
-
-export const selectedSigner$ = combineLatest([selectAddressSubj.pipe(distinctUntilChanged()), signers$]).pipe(
+export const selectAddressSubj: ReplaySubject<string|undefined> = new ReplaySubject<string | undefined>(1);
+signers$.pipe(take(1)).subscribe((signers: any): any => {
+  selectAddressSubj.next(localStorage.getItem('selected_address_reef') || signers[0]);
+});
+export const selectedSigner$: Observable<ReefSigner|undefined> = combineLatest([selectAddressSubj.pipe(distinctUntilChanged()), signers$]).pipe(
   map(([selectedAddress, signers]) => {
     let foundSigner = signers?.find((signer: ReefSigner) => signer.address === selectedAddress);
     if (!foundSigner) {
