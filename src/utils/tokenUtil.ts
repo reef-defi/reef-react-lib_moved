@@ -53,8 +53,8 @@ export const toCurrencyFormat = (value: number, options = { }): string => Intl.N
   style: 'currency', currency: 'USD', currencyDisplay: 'symbol', ...options,
 }).format(value);
 
-export const getIconUrl = (address: string): string => {
 // TODO implement with svg
-  console.log('implement getIconUrl=', address);
-  return '';
-};
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const getIconUrl = (address: string): string => '';
