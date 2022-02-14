@@ -1,8 +1,8 @@
 import {
-  combineLatest, from, map, mergeScan, Observable, of, shareReplay, startWith, switchMap, timer,
+  combineLatest, from, map, mergeScan, Observable, of, shareReplay, startWith, switchMap, tap, timer,
 } from 'rxjs';
 import { BigNumber, utils } from 'ethers';
-import { ApolloClient, gql } from '@apollo/client';
+import { ApolloClient, gql, SubscriptionOptions } from '@apollo/client';
 import { combineTokensDistinct, toTokensWithPrice } from './util';
 import { selectedSigner$ } from './accountState';
 import { providerSubj, selectedNetworkSubj } from './providerState';
@@ -31,7 +31,7 @@ export const reefPrice$: Observable<number> = timer(0, 60000).pipe(
 export const validatedTokens$ = of(validatedTokens.tokens as Token[]);
 
 const SIGNER_TOKENS_GQL = gql`
-  subscription query ($accountId: String!) {
+  subscription tokens_query ($accountId: String!) {
             token_holder(
               order_by: { balance: desc }
               where: {_and: [{token_address: {_is_null: false}}, { signer: { _eq: $accountId }}] }
@@ -41,19 +41,23 @@ const SIGNER_TOKENS_GQL = gql`
             }
           }
 `;
+
 const SIGNER_NFTS_GQL = gql`
-  subscription query ($accountId: String!) {
+subscription query ($accountId: String) {
             token_holder(
               order_by: { balance: desc }
               where: {_and: [{nft_id: {_is_null: false}}, { signer: { _eq: $accountId }}] }
             ) {
               nft_id
               balance
+              info
+              type
+              balance
             }
           }
 `;
 const CONTRACT_DATA_GQL = gql`
-  query query ($addresses: [String!]!) {
+  query contract_data_query ($addresses: [String!]!) {
             verified_contract(
               where: { address: { _in: $addresses } }
             ) {
@@ -94,7 +98,7 @@ const tokenBalancesWithContractDataCache = (apollo: ApolloClient<any>) => (state
   });
 };
 
-export const selectedSignerTokenBalancesWS$: Observable<Token[]> = combineLatest([apolloClientInstance$, selectedSigner$, providerSubj]).pipe(
+export const selectedSignerTokenBalances$: Observable<Token[]> = combineLatest([apolloClientInstance$, selectedSigner$, providerSubj]).pipe(
   switchMap(([apollo, signer, provider]) => (!signer ? []
     : from(apollo.subscribe({
       query: SIGNER_TOKENS_GQL,
@@ -121,18 +125,19 @@ export const selectedSignerTokenBalancesWS$: Observable<Token[]> = combineLatest
   )),
 );
 
-export const selectedSignerNFTsWS$: Observable<Token[]> = combineLatest([apolloClientInstance$, selectedSigner$, providerSubj]).pipe(
+export const selectedSignerNFTs$: Observable<Token[]> = combineLatest([apolloClientInstance$, selectedSigner$, providerSubj]).pipe(
   switchMap(([apollo, signer]) => (!signer ? []
     : from(apollo.subscribe({
       query: SIGNER_NFTS_GQL,
-      variables: { accountId: signer.address },
+      variables: { /* accountId: '' signer.address */ },
       fetchPolicy: 'network-only',
     })).pipe(
       map((res: any) => (res.data && res.data.token_holder ? res.data.token_holder : undefined)),
+      tap((v) => console.log('NFTs=', v)),
     ))),
 );
 
-export const allAvailableSignerTokens$: Observable<Token[]> = combineLatest([selectedSignerTokenBalancesWS$, validatedTokens$]).pipe(
+export const allAvailableSignerTokens$: Observable<Token[]> = combineLatest([selectedSignerTokenBalances$, validatedTokens$]).pipe(
   map(combineTokensDistinct),
   shareReplay(1),
 );
@@ -175,6 +180,7 @@ subscription query($accountId: String!){
       }
   }
 }`;
+
 export const transferHistory$: Observable<null|{ from: string, to: string, token: Token, timestamp: number, inbound: boolean; }[]> = combineLatest([apolloClientInstance$, selectedSigner$]).pipe(
   switchMap(([apollo, signer]) => (!signer ? []
     : from(apollo.subscribe({
@@ -202,8 +208,7 @@ export const transferHistory$: Observable<null|{ from: string, to: string, token
   shareReplay(1),
 );
 
-/* TODO evmEvents observable
-const getGqlContractEventsQuery = (contractAddress: string, methodSignature?: string, perPage = 10, offset = 0): SubscriptionOptions => {
+const getGqlContractEventsQuery = (contractAddress: string, methodSignature?: string, perPage = 1, offset = 0): SubscriptionOptions => {
   const EVM_EVENT_GQL = gql`
     subscription evmEvent($address: String!, $perPage: Int!, $offset: Int!, $topic0: String){
         evm_event(
@@ -237,10 +242,10 @@ const getGqlContractEventsQuery = (contractAddress: string, methodSignature?: st
   };
 };
 
-export const evmEvents$: Observable<any[]> = combineLatest([apolloClientInstance$, selectedSigner$, providerSubj]).pipe(
+export const getEvmEvents$ = (contractAddress: string, methodSignature?: string): Observable<any[]> => combineLatest([apolloClientInstance$, selectedSigner$, providerSubj]).pipe(
   switchMap(([apollo, signer]) => (!signer ? []
-    : from(apollo.subscribe(getGqlContractEventsQuery('0x0230135fDeD668a3F7894966b14F42E65Da322e4'))).pipe(
+    : from(apollo.subscribe(getGqlContractEventsQuery(contractAddress, methodSignature))).pipe(
       map((res: any) => (res.data && res.data.evm_event ? res.data.evm_event : undefined)),
     )
   )),
-); */
+);
