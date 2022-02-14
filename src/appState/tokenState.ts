@@ -34,9 +34,20 @@ const SIGNER_TOKENS_GQL = gql`
   subscription query ($accountId: String!) {
             token_holder(
               order_by: { balance: desc }
-              where: { signer: { _eq: $accountId } }
+              where: {_and: [{token_address: {_is_null: false}}, { signer: { _eq: $accountId }}] }
             ) {
               token_address
+              balance
+            }
+          }
+`;
+const SIGNER_NFTS_GQL = gql`
+  subscription query ($accountId: String!) {
+            token_holder(
+              order_by: { balance: desc }
+              where: {_and: [{nft_id: {_is_null: false}}, { signer: { _eq: $accountId }}] }
+            ) {
+              nft_id
               balance
             }
           }
@@ -110,6 +121,17 @@ export const selectedSignerTokenBalancesWS$: Observable<Token[]> = combineLatest
   )),
 );
 
+export const selectedSignerNFTsWS$: Observable<Token[]> = combineLatest([apolloClientInstance$, selectedSigner$, providerSubj]).pipe(
+  switchMap(([apollo, signer]) => (!signer ? []
+    : from(apollo.subscribe({
+      query: SIGNER_NFTS_GQL,
+      variables: { accountId: signer.address },
+      fetchPolicy: 'network-only',
+    })).pipe(
+      map((res: any) => (res.data && res.data.token_holder ? res.data.token_holder : undefined)),
+    ))),
+);
+
 export const allAvailableSignerTokens$: Observable<Token[]> = combineLatest([selectedSignerTokenBalancesWS$, validatedTokens$]).pipe(
   map(combineTokensDistinct),
   shareReplay(1),
@@ -117,10 +139,7 @@ export const allAvailableSignerTokens$: Observable<Token[]> = combineLatest([sel
 
 // TODO when network changes signer changes as well? this could make 2 requests unnecessary - check
 export const pools$: Observable<Pool[]> = combineLatest([allAvailableSignerTokens$, selectedNetworkSubj, selectedSigner$]).pipe(
-  switchMap(([tkns, network, signer]) => {
-    console.log('LOAD pools=', signer, tkns);
-    return signer ? loadPools(tkns, signer.signer, network.factoryAddress) : [];
-  }),
+  switchMap(([tkns, network, signer]) => (signer ? loadPools(tkns, signer.signer, network.factoryAddress) : [])),
   shareReplay(1),
 );
 
@@ -182,10 +201,6 @@ export const transferHistory$: Observable<null|{ from: string, to: string, token
   startWith(null),
   shareReplay(1),
 );
-
-transferHistory$.subscribe((val): any => {
-  console.log('HISTTT2=', val);
-});
 
 /* TODO evmEvents observable
 const getGqlContractEventsQuery = (contractAddress: string, methodSignature?: string, perPage = 10, offset = 0): SubscriptionOptions => {
