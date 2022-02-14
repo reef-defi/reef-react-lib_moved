@@ -1,5 +1,5 @@
 import {
-  combineLatest, from, map, mergeScan, Observable, of, shareReplay, startWith, switchMap, tap, timer,
+  combineLatest, from, map, mergeScan, Observable, of, shareReplay, skip, startWith, switchMap, tap, timer,
 } from 'rxjs';
 import { BigNumber, utils } from 'ethers';
 import { ApolloClient, gql, SubscriptionOptions } from '@apollo/client';
@@ -215,10 +215,11 @@ const getGqlContractEventsQuery = (contractAddress: string, methodSignature?: st
         limit: $perPage,
         offset: $offset
         order_by: {block_id: desc, extrinsic_index: desc, event_index: desc},
-        where: {
-            contract_address: {_eq: $address},
-            topic_0: {_eq:$topic0},
-            method: {_eq: "Log"}
+        where: { _and:[
+            {contract_address: {_eq: $address}},
+            {topic_0: {_eq:$topic0}},
+            {method: {_eq: "Log"}}
+            ]
             }
         ) {
         contract_address
@@ -248,4 +249,6 @@ export const getEvmEvents$ = (contractAddress: string, methodSignature?: string)
       map((res: any) => (res.data && res.data.evm_event ? res.data.evm_event : undefined)),
     )
   )),
+  skip(1),
+  shareReplay(1),
 );
