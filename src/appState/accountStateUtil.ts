@@ -1,10 +1,7 @@
-import { BigNumber } from 'ethers';
-import { Provider } from '@reef-defi/evm-provider';
 import {
   getUpdAddresses, isUpdateAll, UpdateAction, UpdateDataType,
 } from './updateCtxUtil';
 import { ReefSigner } from '../state';
-import { getReefCoinBalance } from '../rpc';
 
 export const getSignersToUpdate = (updateType: UpdateDataType, updateActions: UpdateAction[], signers: ReefSigner[]): ReefSigner[] => {
   const updAddresses = getUpdAddresses(updateType, updateActions);
@@ -28,18 +25,6 @@ export const replaceUpdatedSigners = (existingSigners: ReefSigner[] = [], update
     }
   });
   return signers;
-};
-
-export const updateSignersBalances = (updateActions: UpdateAction[], signers: ReefSigner[], provider: Provider): Promise<ReefSigner[]> => {
-  if (!signers || !signers.length) {
-    return Promise.resolve([]);
-  }
-  const updSigners = getSignersToUpdate(UpdateDataType.ACCOUNT_NATIVE_BALANCE, updateActions, signers);
-  return Promise.all(updSigners.map((sig: ReefSigner) => getReefCoinBalance(sig.address, provider)))
-    .then((balances: BigNumber[]) => balances.map((balance: BigNumber, i: number) => {
-      const sig = updSigners[i];
-      return { ...sig, balance };
-    }));
 };
 
 export const updateSignersEvmBindings = (updateActions: UpdateAction[], signers?: ReefSigner[]): Promise<ReefSigner[]> => {

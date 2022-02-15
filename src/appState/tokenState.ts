@@ -1,8 +1,21 @@
 import {
-  combineLatest, from, map, mergeScan, Observable, of, shareReplay, skip, startWith, switchMap, tap, timer,
+  combineLatest,
+  distinctUntilChanged,
+  from,
+  map,
+  mergeScan,
+  Observable,
+  of,
+  shareReplay,
+  skip,
+  startWith,
+  switchMap,
+  tap,
+  timer,
 } from 'rxjs';
-import { BigNumber, utils } from 'ethers';
+import { BigNumber, FixedNumber, utils } from 'ethers';
 import { ApolloClient, gql, SubscriptionOptions } from '@apollo/client';
+import { filter } from 'rxjs/operators';
 import { combineTokensDistinct, toTokensWithPrice } from './util';
 import { selectedSigner$ } from './accountState';
 import { providerSubj, selectedNetworkSubj } from './providerState';
@@ -107,15 +120,17 @@ export const selectedSignerTokenBalances$: Observable<Token[]> = combineLatest([
     })).pipe(
       map((res: any) => (res.data && res.data.token_holder ? res.data.token_holder : undefined)),
       // eslint-disable-next-line camelcase
-      switchMap((tokenBalances:{token_address: string, balance: number}[]) => {
+      switchMap(async (tokenBalances:{token_address: string, balance: number}[]) => {
         const reefTkn = reefTokenWithAmount();
-        const hasReefBalance = tokenBalances.some((tb) => tb.token_address === reefTkn.address);
-        if (!hasReefBalance) {
-          return getReefCoinBalance(signer.address, provider).then((reefBalance: any) => {
-            tokenBalances.push({ token_address: reefTkn.address, balance: parseInt(utils.formatUnits(reefBalance, 'wei'), 10) });
-            return tokenBalances;
-          });
+        const reefTokenResult = tokenBalances.find((tb) => tb.token_address === reefTkn.address);
+
+        const reefBalance = await getReefCoinBalance(signer.address, provider);
+        if (!reefTokenResult) {
+          tokenBalances.push({ token_address: reefTkn.address, balance: parseInt(utils.formatUnits(reefBalance, 'wei'), 10) });
+          return Promise.resolve(tokenBalances);
         }
+
+        reefTokenResult.balance = FixedNumber.fromValue(reefBalance).toUnsafeFloat();
         return Promise.resolve(tokenBalances);
       }),
       // eslint-disable-next-line camelcase
@@ -125,7 +140,11 @@ export const selectedSignerTokenBalances$: Observable<Token[]> = combineLatest([
   )),
 );
 
-export const selectedSignerNFTs$: Observable<Token[]> = combineLatest([apolloClientInstance$, selectedSigner$, providerSubj]).pipe(
+const selectedSignerAddressUpdate$ = selectedSigner$.pipe(
+  filter((v) => !!v),
+  distinctUntilChanged((s1, s2) => s1?.address === s2?.address),
+);
+export const selectedSignerNFTs$: Observable<Token[]> = combineLatest([apolloClientInstance$, selectedSignerAddressUpdate$, providerSubj]).pipe(
   switchMap(([apollo, signer]) => (!signer ? []
     : from(apollo.subscribe({
       query: SIGNER_NFTS_GQL,
