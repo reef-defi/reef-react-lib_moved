@@ -1,7 +1,6 @@
 import {
   combineLatest,
   distinctUntilChanged,
-  from,
   map,
   mergeScan,
   Observable,
@@ -11,7 +10,8 @@ import {
   shareReplay,
   startWith,
   Subject,
-  switchMap, take,
+  switchMap,
+  take,
   withLatestFrom,
 } from 'rxjs';
 import { Provider } from '@reef-defi/evm-provider';
@@ -22,7 +22,7 @@ import { UpdateDataCtx } from './updateCtxUtil';
 import { replaceUpdatedSigners, updateSignersEvmBindings } from './accountStateUtil';
 import { providerSubj } from './providerState';
 import { ReefSigner } from '../state';
-import { apolloClientInstance$ } from '../graphql/apollo';
+import { apolloClientInstance$, zenToRx } from '../graphql/apollo';
 
 export const accountsSubj = new ReplaySubject<ReefSigner[] | null>(1);
 export const reloadSignersSubj = new Subject<UpdateDataCtx<ReefSigner[]>>();
@@ -102,7 +102,7 @@ subscription query($accountIds: [String!]!){
 interface AccountEvmAddrData { address: string; evm_address?: string; isEvmClaimed?: boolean }
 const indexedAccountValues$ = combineLatest([apolloClientInstance$, signersInjected$]).pipe(
   switchMap(([apollo, signers]) => (!signers ? []
-    : from(apollo.subscribe({
+    : zenToRx(apollo.subscribe({
       query: EVM_ADDRESS_UPDATE_GQL,
       variables: { accountIds: signers.map((s: any) => s.address) },
       fetchPolicy: 'network-only',
