@@ -167,13 +167,18 @@ export const PoolsComponent = ({
               <Button onClick={openAddLiquidity}>Add supply</Button>
             </FlexRow>
           </CardHeader>
+
+          {isLoading && !pools.length && <MT size="3"><Loading /></MT>}
+          {!isLoading && pools.length > 0 && (
           <MT size="3">
             <List>
               <ListEmptyItem />
-              {isLoading ? <Loading /> : poolsView}
+              { poolsView}
               <ListEmptyItem />
             </List>
           </MT>
+          )}
+
         </Card>
       </Width>
     </CenterColumn>
