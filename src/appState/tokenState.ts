@@ -1,7 +1,6 @@
 import {
   combineLatest,
   distinctUntilChanged,
-  from,
   map,
   mergeScan,
   Observable,
@@ -19,7 +18,7 @@ import { filter } from 'rxjs/operators';
 import { combineTokensDistinct, toTokensWithPrice } from './util';
 import { selectedSigner$ } from './accountState';
 import { providerSubj, selectedNetworkSubj } from './providerState';
-import { apolloClientInstance$ } from '../graphql/apollo';
+import { apolloClientInstance$, zenToRx } from '../graphql/apollo';
 import { getIconUrl } from '../utils';
 import { getReefCoinBalance, loadPools } from '../rpc';
 import { retrieveReefCoingeckoPrice } from '../api';
@@ -113,7 +112,7 @@ const tokenBalancesWithContractDataCache = (apollo: ApolloClient<any>) => (state
 
 export const selectedSignerTokenBalances$: Observable<Token[]> = combineLatest([apolloClientInstance$, selectedSigner$, providerSubj]).pipe(
   switchMap(([apollo, signer, provider]) => (!signer ? []
-    : from(apollo.subscribe({
+    : zenToRx(apollo.subscribe({
       query: SIGNER_TOKENS_GQL,
       variables: { accountId: signer.address },
       fetchPolicy: 'network-only',
@@ -147,7 +146,7 @@ const selectedSignerAddressUpdate$ = selectedSigner$.pipe(
 
 export const selectedSignerNFTs$: Observable<Token[]> = combineLatest([apolloClientInstance$, selectedSignerAddressUpdate$, providerSubj]).pipe(
   switchMap(([apollo, signer]) => (!signer ? []
-    : from(apollo.subscribe({
+    : zenToRx(apollo.subscribe({
       query: SIGNER_NFTS_GQL,
       variables: { /* accountId: '' signer.address */ },
       fetchPolicy: 'network-only',
@@ -203,7 +202,7 @@ subscription query($accountId: String!){
 
 export const transferHistory$: Observable<null|{ from: string, to: string, token: Token, timestamp: number, inbound: boolean; }[]> = combineLatest([apolloClientInstance$, selectedSigner$]).pipe(
   switchMap(([apollo, signer]) => (!signer ? []
-    : from(apollo.subscribe({
+    : zenToRx(apollo.subscribe({
       query: TRANSFER_HISTORY_GQL,
       variables: { accountId: signer.address },
       fetchPolicy: 'network-only',
@@ -268,7 +267,7 @@ const getGqlContractEventsQuery = (contractAddress: string, methodSignature?: st
 
 export const getEvmEvents$ = (contractAddress: string, methodSignature?: string): Observable<any[]> => combineLatest([apolloClientInstance$, selectedSignerAddressUpdate$, providerSubj]).pipe(
   switchMap(([apollo, signer]) => (!signer ? []
-    : from(apollo.subscribe(getGqlContractEventsQuery(contractAddress, methodSignature))).pipe(
+    : zenToRx(apollo.subscribe(getGqlContractEventsQuery(contractAddress, methodSignature))).pipe(
       map((res: any) => (res.data && res.data.evm_event ? res.data.evm_event : undefined)),
     )
   )),
