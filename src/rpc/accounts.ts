@@ -4,10 +4,16 @@ import type { InjectedAccount as InjectedAccountReef, InjectedAccountWithMeta as
 import type { Signer as InjectedSigner } from '@polkadot/api/types';
 import { DeriveBalancesAccountData } from '@polkadot/api-derive/balances/types';
 import { BigNumber } from 'ethers';
+import { firstValueFrom } from 'rxjs';
 import { ensure } from '../utils/utils';
 import { ReefSigner } from '../state/types';
+import { selectedSigner$ } from '../appState/accountState';
 
 export const getReefCoinBalance = async (address: string, provider?: Provider): Promise<BigNumber> => {
+  const selectedSigner = await firstValueFrom(selectedSigner$);
+  if (selectedSigner && selectedSigner.address === address) {
+    return selectedSigner.balance;
+  }
   if (!provider) {
     return BigNumber.from('0');
   }
