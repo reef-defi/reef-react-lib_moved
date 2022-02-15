@@ -144,6 +144,7 @@ const selectedSignerAddressUpdate$ = selectedSigner$.pipe(
   filter((v) => !!v),
   distinctUntilChanged((s1, s2) => s1?.address === s2?.address),
 );
+
 export const selectedSignerNFTs$: Observable<Token[]> = combineLatest([apolloClientInstance$, selectedSignerAddressUpdate$, providerSubj]).pipe(
   switchMap(([apollo, signer]) => (!signer ? []
     : from(apollo.subscribe({
@@ -229,14 +230,14 @@ export const transferHistory$: Observable<null|{ from: string, to: string, token
 
 const getGqlContractEventsQuery = (contractAddress: string, methodSignature?: string, perPage = 1, offset = 0): SubscriptionOptions => {
   const EVM_EVENT_GQL = gql`
-    subscription evmEvent($address: String!, $perPage: Int!, $offset: Int!, $topic0: String){
+    subscription evmEvent($address: String_comparison_exp!, $perPage: Int!, $offset: Int!, $topic0: String_comparison_exp){
         evm_event(
         limit: $perPage,
-        offset: $offset
-        order_by: {block_id: desc, extrinsic_index: desc, event_index: desc},
+        offset: $offset,
+        order_by: [{block_id: desc}, {extrinsic_index: desc}, {event_index: desc}],
         where: { _and:[
-            {contract_address: {_eq: $address}},
-            {topic_0: {_eq:$topic0}},
+            {contract_address: $address},
+            {topic_0: $topic0},
             {method: {_eq: "Log"}}
             ]
             }
@@ -248,13 +249,16 @@ const getGqlContractEventsQuery = (contractAddress: string, methodSignature?: st
         topic_1
         topic_2
         topic_3
+        block_id
+        extrinsic_index
+        event_index
       }
     }`;
   return {
     query: EVM_EVENT_GQL,
     variables: {
-      address: contractAddress,
-      topic0: methodSignature ? utils.keccak256(utils.toUtf8Bytes(methodSignature)) : undefined,
+      address: { _eq: contractAddress },
+      topic0: methodSignature ? { _eq: utils.keccak256(utils.toUtf8Bytes(methodSignature)) } : {},
       perPage,
       offset,
     },
@@ -262,12 +266,13 @@ const getGqlContractEventsQuery = (contractAddress: string, methodSignature?: st
   };
 };
 
-export const getEvmEvents$ = (contractAddress: string, methodSignature?: string): Observable<any[]> => combineLatest([apolloClientInstance$, selectedSigner$, providerSubj]).pipe(
+export const getEvmEvents$ = (contractAddress: string, methodSignature?: string): Observable<any[]> => combineLatest([apolloClientInstance$, selectedSignerAddressUpdate$, providerSubj]).pipe(
   switchMap(([apollo, signer]) => (!signer ? []
     : from(apollo.subscribe(getGqlContractEventsQuery(contractAddress, methodSignature))).pipe(
       map((res: any) => (res.data && res.data.evm_event ? res.data.evm_event : undefined)),
     )
   )),
+  filter((v) => !!v),
   skip(1),
   shareReplay(1),
 );
