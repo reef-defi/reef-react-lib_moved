@@ -6,6 +6,7 @@ export interface Network {
   routerAddress: string;
   factoryAddress: string;
   name: AvailableNetworks;
+  graphqlUrl: string;
 }
 
 export type Networks = Record<AvailableNetworks, Network>
@@ -17,6 +18,7 @@ export const availableNetworks: Networks = {
     reefscanUrl: 'https://testnet.reefscan.com',
     factoryAddress: '0xcA36bA38f2776184242d3652b17bA4A77842707e',
     routerAddress: '0x0A2906130B1EcBffbE1Edb63D5417002956dFd41',
+    graphqlUrl: 'wss://testnet.reefscan.com/graphql',
   },
   mainnet: {
     name: 'mainnet',
@@ -24,5 +26,6 @@ export const availableNetworks: Networks = {
     reefscanUrl: 'https://reefscan.com',
     routerAddress: '0x641e34931C03751BFED14C4087bA395303bEd1A5',
     factoryAddress: '0x380a9033500154872813F6E1120a81ed6c0760a8',
+    graphqlUrl: 'wss://reefscan.com/graphql',
   },
 };

@@ -1,10 +1,9 @@
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { Provider } from '@reef-defi/evm-provider';
-import { Network, Networks } from '../state';
-import { availableReefNetworks } from '../utils';
+import { availableNetworks, Network, Networks } from '../state';
 
 export const providerSubj: ReplaySubject<Provider> = new ReplaySubject<Provider>(1);
-export const networksSubj: BehaviorSubject<Networks> = new BehaviorSubject<Networks>(availableReefNetworks);
+export const networksSubj: BehaviorSubject<Networks> = new BehaviorSubject<Networks>(availableNetworks);
 export const selectedNetworkSubj: ReplaySubject<Network> = new ReplaySubject<Network>();
 selectedNetworkSubj.subscribe((network) => console.log('SELECTED NETWORK=', network.rpcUrl));
 
