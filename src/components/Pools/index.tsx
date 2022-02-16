@@ -6,13 +6,22 @@ import {
   Card, CardHeader, CardTitle, SubCard,
 } from '../common/Card';
 import {
-  CenterColumn, CenterRow, ContentBetween, ContentEnd, FlexColumn, FlexRow, FullColumn, MS, MT, Width,
+  CenterColumn,
+  CenterRow,
+  ContentBetween,
+  ContentEnd,
+  FlexColumn,
+  FlexRow,
+  FullColumn,
+  MS,
+  MT,
+  Width,
 } from '../common/Display';
-import { TokenIcon, DownIcon, UpIcon } from '../common/Icons';
+import { DownIcon, TokenIcon, UpIcon } from '../common/Icons';
 import { ConfirmLabel } from '../common/Label';
-import { ListItem, List, ListEmptyItem } from '../common/List';
+import { List, ListItem } from '../common/List';
 import { Loading } from '../common/Loading';
-import { Text, MiniText, MutedText } from '../common/Text';
+import { MiniText, MutedText, Text } from '../common/Text';
 
 interface DefaultState {
   pool: Pool;
@@ -159,28 +168,27 @@ export const PoolsComponent = ({
 
   return (
     <CenterColumn>
-      <Width size={500}>
-        <Card>
-          <CardHeader>
-            <CardTitle title="Pools" />
-            <FlexRow>
-              <Button onClick={openAddLiquidity}>Add supply</Button>
-            </FlexRow>
-          </CardHeader>
+      <div className="pools-list">
+        <Width size={500}>
+          <Card>
+            <CardHeader>
+              <CardTitle title="Pools" />
+              <FlexRow>
+                <Button onClick={openAddLiquidity}>Add supply</Button>
+              </FlexRow>
+            </CardHeader>
 
-          {isLoading && !pools.length && <MT size="3"><Loading /></MT>}
-          {!isLoading && pools.length > 0 && (
-          <MT size="3">
-            <List>
-              <ListEmptyItem />
-              { poolsView}
-              <ListEmptyItem />
-            </List>
-          </MT>
-          )}
-
-        </Card>
-      </Width>
+            {isLoading && !pools.length && <MT size="3"><Loading /></MT>}
+            {!isLoading && pools.length > 0 && (
+            <MT size="3">
+              <List>
+                { poolsView}
+              </List>
+            </MT>
+            )}
+          </Card>
+        </Width>
+      </div>
     </CenterColumn>
   );
 };
