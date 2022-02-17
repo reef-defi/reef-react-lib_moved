@@ -14,7 +14,8 @@ const getGQLUrls = (network: Network): {ws:string, http:string} => {
 
 export const useInitReefState = (signers: ReefSigner[], selectNetwork: Network): void => {
   const network = useObservableState(selectedNetworkSubj);
-  const [provider, isProviderLoading] = useProvider(network?.rpcUrl as string);
+  const provArr = useProvider((network as Network)?.rpcUrl);
+  const [provider, isProviderLoading] = provArr;
 
   useEffect(() => {
     setCurrentNetwork(selectNetwork);
