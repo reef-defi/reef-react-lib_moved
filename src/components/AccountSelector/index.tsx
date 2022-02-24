@@ -5,7 +5,9 @@ import { toReefBalanceDisplay, trim } from '../../utils';
 import {
   Border, ContentBetween, FlexRow, Margin, MT, MX,
 } from '../common/Display';
-import { CopyIcon, ExploreIcon, ReefAddressIcon } from '../common/Icons';
+import {
+  WalletIcon, CopyIcon, ExploreIcon, ReefAddressIcon,
+} from '../common/Icons';
 import {
   Modal, ModalBody, ModalClose, ModalHeader,
 } from '../common/Modal';
@@ -40,6 +42,7 @@ export const AccountSelector = ({
         data-bs-toggle="modal"
         data-bs-target="#account-modal"
       >
+        <WalletIcon />
         <span>{trim(name)}</span>
       </button>
       <Modal id="account-modal">
