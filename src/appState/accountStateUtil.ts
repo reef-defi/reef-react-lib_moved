@@ -1,7 +1,19 @@
-import {
-  getUpdAddresses, isUpdateAll, UpdateAction, UpdateDataType,
-} from './updateCtxUtil';
+import { UpdateAction, UpdateDataType } from './updateStateModel';
 import { ReefSigner } from '../state';
+
+const getUpdAddresses = (updateType: UpdateDataType, updateActions: UpdateAction[]): string[] | null => {
+  const typeUpdateActions = updateActions.filter((ua) => ua.type === updateType);
+  if (typeUpdateActions.length === 0) {
+    return null;
+  }
+  if (typeUpdateActions.some((tua) => !tua.address)) {
+    return [];
+  }
+
+  return typeUpdateActions.map((ua) => ua.address as string);
+};
+
+export const isUpdateAll = (addresses: string[] | null): boolean => addresses?.length === 0;
 
 export const getSignersToUpdate = (updateType: UpdateDataType, updateActions: UpdateAction[], signers: ReefSigner[]): ReefSigner[] => {
   const updAddresses = getUpdAddresses(updateType, updateActions);

@@ -1,5 +1,3 @@
-import { map, Observable, shareReplay } from 'rxjs';
-
 export enum UpdateDataType {
   ACCOUNT_NATIVE_BALANCE,
   ACCOUNT_TOKENS,
@@ -16,6 +14,7 @@ export interface UpdateDataCtx<T> {
   updateActions: UpdateAction[];
   ctx?: any;
 }
+/*
 
 export const createUpdateActions = (updateTypes: UpdateDataType[], addresses?: string[]): UpdateAction[] => {
   const updateActions: UpdateAction[] = [];
@@ -34,18 +33,6 @@ export const getUnwrappedData$ = <T>(dataCtx$: Observable<UpdateDataCtx<T>>): Ob
   shareReplay(1),
 );
 
-export const getUpdAddresses = (updateType: UpdateDataType, updateActions: UpdateAction[]): string[] | null => {
-  const typeUpdateActions = updateActions.filter((ua) => ua.type === updateType);
-  if (typeUpdateActions.length === 0) {
-    return null;
-  }
-  if (typeUpdateActions.some((tua) => !tua.address)) {
-    return [];
-  }
-
-  return typeUpdateActions.map((ua) => ua.address as string);
-};
-
 export const getAddressUpdateActionTypes = (address?: string, updateActions?: UpdateAction[]): UpdateDataType[] => {
   if (!address || !updateActions) {
     return [];
@@ -58,5 +45,4 @@ export const getAddressUpdateActionTypes = (address?: string, updateActions?: Up
       return distinctTypes;
     }, [] as UpdateDataType[]);
 };
-
-export const isUpdateAll = (addresses: string[] | null): boolean => addresses?.length === 0;
+*/
