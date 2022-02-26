@@ -1,6 +1,6 @@
 import { Token, TokenWithAmount } from '../state/token';
 import { reloadSignersSubj } from './accountState';
-import { UpdateAction } from './updateCtxUtil';
+import { UpdateAction } from './updateStateModel';
 import { Pool } from '../state';
 import { calculateTokenPrice, TxStatusUpdate } from '../utils';
 

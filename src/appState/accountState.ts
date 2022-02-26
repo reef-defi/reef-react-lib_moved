@@ -18,7 +18,7 @@ import { Provider } from '@reef-defi/evm-provider';
 import { BigNumber } from 'ethers';
 import { filter } from 'rxjs/operators';
 import { gql } from '@apollo/client';
-import { UpdateDataCtx } from './updateCtxUtil';
+import { UpdateDataCtx } from './updateStateModel';
 import { replaceUpdatedSigners, updateSignersEvmBindings } from './accountStateUtil';
 import { providerSubj } from './providerState';
 import { ReefSigner } from '../state';
