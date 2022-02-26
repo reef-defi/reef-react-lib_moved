@@ -7,6 +7,4 @@ export const networksSubj: BehaviorSubject<Networks> = new BehaviorSubject<Netwo
 export const selectedNetworkSubj: ReplaySubject<Network> = new ReplaySubject<Network>();
 selectedNetworkSubj.subscribe((network) => console.log('SELECTED NETWORK=', network.rpcUrl));
 
-export const setCurrentNetwork = (network: Network): void => {
-  selectedNetworkSubj.next(network);
-};
+export const setCurrentNetwork = (network: Network): void => selectedNetworkSubj.next(network);
