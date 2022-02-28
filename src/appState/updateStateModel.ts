@@ -1,7 +1,7 @@
 export enum UpdateDataType {
   ACCOUNT_NATIVE_BALANCE,
   ACCOUNT_TOKENS,
-  ACCOUNT_EVM_BINDING
+  ACCOUNT_EVM_BINDING,
 }
 
 export interface UpdateAction {

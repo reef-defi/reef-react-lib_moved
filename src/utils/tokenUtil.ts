@@ -1,16 +1,19 @@
-import { BigNumber, utils } from 'ethers';
-import { DataProgress, DataWithProgress, isDataSet } from './dataWithProgress';
-import {
-  Pool, reefTokenWithAmount, Token, TokenWithAmount,
-} from '../state';
-import { toDecimalPlaces } from './math';
+import { BigNumber, utils } from "ethers";
+import { DataProgress, DataWithProgress, isDataSet } from "./dataWithProgress";
+import { Pool, reefTokenWithAmount, Token, TokenWithAmount } from "../state";
+import { toDecimalPlaces } from "./math";
 
 const { parseUnits, formatEther } = utils;
 
-const getReefTokenPoolReserves = (reefTokenPool: Pool, reefAddress: string): {reefReserve:number, tokenReserve: number} => {
+const getReefTokenPoolReserves = (
+  reefTokenPool: Pool,
+  reefAddress: string
+): { reefReserve: number; tokenReserve: number } => {
   let reefReserve: number;
   let tokenReserve: number;
-  if (reefTokenPool.token1.address.toLowerCase() === reefAddress.toLowerCase()) {
+  if (
+    reefTokenPool.token1.address.toLowerCase() === reefAddress.toLowerCase()
+  ) {
     reefReserve = parseInt(reefTokenPool.reserve1, 10);
     tokenReserve = parseInt(reefTokenPool.reserve2, 10);
   } else {
@@ -19,9 +22,24 @@ const getReefTokenPoolReserves = (reefTokenPool: Pool, reefAddress: string): {re
   }
   return { reefReserve, tokenReserve };
 };
-const findReefTokenPool = (pools: Pool[], reefAddress: string, token: Token): Pool | undefined => pools.find((pool) => (pool.token1.address.toLowerCase() === reefAddress.toLowerCase() && pool.token2.address.toLowerCase() === token.address.toLowerCase()) || (pool.token2.address.toLowerCase() === reefAddress.toLowerCase() && pool.token1.address.toLowerCase() === token.address.toLowerCase()));
+const findReefTokenPool = (
+  pools: Pool[],
+  reefAddress: string,
+  token: Token
+): Pool | undefined =>
+  pools.find(
+    (pool) =>
+      (pool.token1.address.toLowerCase() === reefAddress.toLowerCase() &&
+        pool.token2.address.toLowerCase() === token.address.toLowerCase()) ||
+      (pool.token2.address.toLowerCase() === reefAddress.toLowerCase() &&
+        pool.token1.address.toLowerCase() === token.address.toLowerCase())
+  );
 
-export const calculateTokenPrice = (token: Token, pools: Pool[], reefPrice: DataWithProgress<number>): DataWithProgress<number> => {
+export const calculateTokenPrice = (
+  token: Token,
+  pools: Pool[],
+  reefPrice: DataWithProgress<number>
+): DataWithProgress<number> => {
   if (!isDataSet(reefPrice)) {
     return reefPrice;
   }
@@ -30,7 +48,10 @@ export const calculateTokenPrice = (token: Token, pools: Pool[], reefPrice: Data
   if (token.address.toLowerCase() !== reefAddress.toLowerCase()) {
     const reefTokenPool = findReefTokenPool(pools, reefAddress, token);
     if (reefTokenPool) {
-      const { reefReserve, tokenReserve } = getReefTokenPoolReserves(reefTokenPool, reefAddress);
+      const { reefReserve, tokenReserve } = getReefTokenPoolReserves(
+        reefTokenPool,
+        reefAddress
+      );
       ratio = reefReserve / tokenReserve;
       return ratio * (reefPrice as number);
     }
@@ -39,22 +60,33 @@ export const calculateTokenPrice = (token: Token, pools: Pool[], reefPrice: Data
   return reefPrice || DataProgress.NO_DATA;
 };
 
-export const calculateBalanceValue = ({ price, balance }:{price:DataWithProgress<number>, balance: BigNumber}|TokenWithAmount): DataWithProgress<number> => {
+export const calculateBalanceValue = ({
+  price,
+  balance,
+}:
+  | { price: DataWithProgress<number>; balance: BigNumber }
+  | TokenWithAmount): DataWithProgress<number> => {
   if (!isDataSet(price)) {
     return price;
   }
   const priceStr = price.toString();
   const priceBN = BigNumber.from(parseUnits(toDecimalPlaces(priceStr, 18)));
   const balanceFixed = parseInt(formatEther(balance.toString()), 10);
-  return parseFloat(formatEther(priceBN.mul(BigNumber.from(balanceFixed)).toString()));
+  return parseFloat(
+    formatEther(priceBN.mul(BigNumber.from(balanceFixed)).toString())
+  );
 };
 
-export const toCurrencyFormat = (value: number, options = { }): string => Intl.NumberFormat(navigator.language, {
-  style: 'currency', currency: 'USD', currencyDisplay: 'symbol', ...options,
-}).format(value);
+export const toCurrencyFormat = (value: number, options = {}): string =>
+  Intl.NumberFormat(navigator.language, {
+    style: "currency",
+    currency: "USD",
+    currencyDisplay: "symbol",
+    ...options,
+  }).format(value);
 
 // TODO implement with svg
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const getIconUrl = (address: string): string => '';
+export const getIconUrl = (address: string): string => "";

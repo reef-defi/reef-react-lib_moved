@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 export const Loading = (): JSX.Element => (
   <div className="spinner-border text-secondary m-auto" role="status">

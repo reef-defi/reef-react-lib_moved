@@ -1,17 +1,17 @@
-import { Signer } from '@reef-defi/evm-provider';
-import { BigNumber, Contract } from 'ethers';
-import { ensure, uniqueCombinations } from '../utils/utils';
-import { ReefswapPair } from '../assets/abi/ReefswapPair';
-import { balanceOf, getReefswapFactory } from './rpc';
-import { Token, Pool } from '..';
+import { Signer } from "@reef-defi/evm-provider";
+import { BigNumber, Contract } from "ethers";
+import { ensure, uniqueCombinations } from "../utils/utils";
+import { ReefswapPair } from "../assets/abi/ReefswapPair";
+import { balanceOf, getReefswapFactory } from "./rpc";
+import { Token, Pool } from "..";
 
-const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
+const EMPTY_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 const findPoolTokenAddress = async (
   address1: string,
   address2: string,
   signer: Signer,
-  factoryAddress: string,
+  factoryAddress: string
 ): Promise<string> => {
   const reefswapFactory = getReefswapFactory(factoryAddress, signer);
   const address = await reefswapFactory.getPair(address1, address2);
@@ -22,15 +22,15 @@ export const loadPool = async (
   token1: Token,
   token2: Token,
   signer: Signer,
-  factoryAddress: string,
+  factoryAddress: string
 ): Promise<Pool> => {
   const address = await findPoolTokenAddress(
     token1.address,
     token2.address,
     signer,
-    factoryAddress,
+    factoryAddress
   );
-  ensure(address !== EMPTY_ADDRESS, 'Pool does not exist!');
+  ensure(address !== EMPTY_ADDRESS, "Pool does not exist!");
   const contract = new Contract(address, ReefswapPair, signer);
 
   const decimals = await contract.decimals();
@@ -41,22 +41,26 @@ export const loadPool = async (
 
   const address1 = await contract.token1();
 
-  const tokenBalance1 = (await balanceOf(token1.address, address, signer)) || BigNumber.from('0');
-  const tokenBalance2 = (await balanceOf(token2.address, address, signer)) || BigNumber.from('0');
+  const tokenBalance1 =
+    (await balanceOf(token1.address, address, signer)) || BigNumber.from("0");
+  const tokenBalance2 =
+    (await balanceOf(token2.address, address, signer)) || BigNumber.from("0");
 
-  const [finalToken1, finalToken2] = token1.address === address1
-    ? [
-      { ...token1, balance: tokenBalance1 },
-      { ...token2, balance: tokenBalance2 },
-    ]
-    : [
-      { ...token2, balance: tokenBalance2 },
-      { ...token1, balance: tokenBalance1 },
-    ];
+  const [finalToken1, finalToken2] =
+    token1.address === address1
+      ? [
+          { ...token1, balance: tokenBalance1 },
+          { ...token2, balance: tokenBalance2 },
+        ]
+      : [
+          { ...token2, balance: tokenBalance2 },
+          { ...token1, balance: tokenBalance1 },
+        ];
 
-  const [finalReserve1, finalReserve2] = token1.address === address1
-    ? [reserves[0], reserves[1]]
-    : [reserves[1], reserves[0]];
+  const [finalReserve1, finalReserve2] =
+    token1.address === address1
+      ? [reserves[0], reserves[1]]
+      : [reserves[1], reserves[0]];
 
   return {
     poolAddress: address,
@@ -74,7 +78,7 @@ export const loadPool = async (
 export const loadPools = async (
   tokens: Token[],
   signer: Signer,
-  factoryAddress: string,
+  factoryAddress: string
 ): Promise<Pool[]> => {
   const tokenCombinations = uniqueCombinations(tokens);
   const pools: Pool[] = [];
