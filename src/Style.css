@@ -4,10 +4,7 @@
 .btn:focus {
   box-shadow: none;
 }
-.field-size {
-  max-width: 600px;
-  min-width: 500px;
-}
+
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
@@ -35,16 +32,6 @@ input {
   flex-direction: row;
 }
 
-.btn-reef {
-  background-color: #5531a9;
-  border-color: #5531a9;
-  color: white;
-}
-.btn-select:hover, .btn-reef:hover {
-  background-color: #46288b;
-  border-color: #46288b;
-  color: white;
-}
 .field {
   background-color: rgb(247, 248, 250);
   border: 1px solid rgb(237, 238, 242);
@@ -144,4 +131,82 @@ input[type=range]::-webkit-slider-thumb {
 .select-token-icon-size {
   width: 20px;
   height: 20px;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.bg-white, .nav-account {
+  background-color: #FFF;
+}
+
+.nav-account {
+  display: flex;
+  padding: 2px;
+}
+
+.card {
+  border: 1px solid rgba(0,0,0,.125);
+  box-shadow: 0 8px 20px 0 rgb(40 133 208 / 15%);
+}
+
+.d-flex-vert-base {
+  align-items: baseline;
+}
+
+.btn-reef {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  white-space: nowrap;
+  border-radius: 999px;
+  font-size: 1rem;
+  line-height: 22.984px;
+  font-family: 'tenon', sans-serif;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.4s;
+  text-decoration: none;
+  color: white;
+  background: #681cff;
+  box-shadow: 0 0.313rem 1.25rem -0.625rem #681cff;
+}
+
+.btn-reef > * {
+  position: relative;
+  z-index: 1;
+  color: white;
+}
+
+.btn-reef::after {
+  content: "";
+  z-index: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0), #fd3f83);
+  transform: translateY(100%);
+  transition: opacity 0.4s linear, transform 0.4s linear;
+}
+
+.btn-reef:hover {
+  box-shadow: 0 0.313rem 1.25rem -0.625rem #fd3f83;
+}
+
+.btn-reef:hover::after {
+  opacity: 1;
+  transform: none;
+}
+
+.btn-reef:active {
+  transition: none;
+  filter: brightness(1.2);
 }

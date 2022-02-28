@@ -1,14 +1,10 @@
 {
   "name": "@reef-defi/react-lib",
-  "version": "1.0.0",
-  "private": false,
+  "version": "1.0.30",
   "description": "Reef React Library",
   "author": "Frenkiee",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/reef-defi/reef-react-lib.git"
-  },
+  "repository": "git@github.com:reef-defi/reef-react-lib.git",
   "main": "dist/index.js",
   "module": "dist/index.modern.js",
   "source": "src/index.tsx",
@@ -38,6 +34,7 @@
     "@types/jest": "^25.1.4",
     "@types/node": "^12.12.38",
     "@types/react": "^17.0.0",
+    "@types/react-copy-to-clipboard": "^5.0.1",
     "@types/react-dom": "^17.0.0",
     "@types/validator": "^13.1.0",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
@@ -56,17 +53,29 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3",
-    "typescript": "^4.1.2"
+    "typescript": "^4.3.2"
   },
   "files": [
     "dist",
     "README.md"
   ],
   "dependencies": {
-    "@reef-defi/evm-provider": "^0.1.10",
+    "@polkadot/extension-dapp": "^0.40.4",
+    "@polkadot/react-identicon": "^0.86.4",
+    "@reef-defi/evm-provider": "^1.0.3",
+    "@reef-defi/extension-inject": "^0.41.2",
+    "@reef-defi/extension-dapp": "^0.41.2",
+    "@types/react-router-dom": "^5.3.0",
+    "graphql": "^16.2.0",
+    "@apollo/client": "^3.5.7",
+    "subscriptions-transport-ws": "^0.11.0",
+    "axios": "^0.21.4",
     "bootstrap": "^5.1.1",
     "eslint-import-resolver-typescript": "^2.4.0",
-    "react-tooltip": "^4.2.21"
+    "react-copy-to-clipboard": "^5.0.4",
+    "react-router-dom": "^5.3.0",
+    "react-tooltip": "^4.2.21",
+    "rxjs": "^7.5.4"
   },
   "resolutions": {
     "@ethersproject/abstract-signer": "5.0.9",
@@ -74,6 +83,7 @@
     "@ethersproject/bignumber": "5.0.9",
     "@ethersproject/bytes": "5.0.9",
     "@ethersproject/logger": "5.0.9",
-    "@ethersproject/properties": "5.0.9"
+    "@ethersproject/properties": "5.0.9",
+    "rollup-plugin-typescript2": "^0.31.1"
   }
 }

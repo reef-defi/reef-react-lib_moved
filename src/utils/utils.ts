@@ -1,4 +1,4 @@
-import { Networks } from '../state';
+import { BigNumber, ethers } from 'ethers';
 
 export interface ButtonStatus {
   text: string;
@@ -7,12 +7,23 @@ export interface ButtonStatus {
 
 export const trim = (value: string, size = 19): string => (value.length < size
   ? value
-  : `${value.slice(0, size - 5)}...${value.slice(value.length - 4)}`);
+  : `${value.slice(0, size - 5)}...${value.slice(value.length - 5)}`);
+
+export const toAddressShortDisplay = (address: string): string => trim(address, 7);
 
 export const ensure = (condition: boolean, message: string): void => {
   if (!condition) {
     throw new Error(message);
   }
+};
+
+export const toReefBalanceDisplay = (value?: BigNumber): string => {
+  if (value && value.gt(0)) {
+    const stringValue = ethers.utils.formatEther(value);
+    const delimiterIndex = stringValue.indexOf('.');
+    return `${stringValue.substring(0, delimiterIndex)} REEF`;
+  }
+  return '- REEF';
 };
 
 export const uniqueCombinations = <T>(array: T[]): [T, T][] => {
@@ -34,21 +45,4 @@ export const ensureVoidRun = (canRun: boolean) => <I>(fun: (obj: I) => void, obj
   if (canRun) {
     fun(obj);
   }
-};
-
-export const availableReefNetworks: Networks = {
-  testnet: {
-    name: 'testnet',
-    rpcUrl: 'wss://rpc-testnet.reefscan.com/ws',
-    reefscanUrl: 'https://testnet.reefscan.com/',
-    factoryAddress: '0xcA36bA38f2776184242d3652b17bA4A77842707e',
-    routerAddress: '0x0A2906130B1EcBffbE1Edb63D5417002956dFd41',
-  },
-  mainnet: {
-    name: 'mainnet',
-    rpcUrl: 'wss://rpc.reefscan.com/ws',
-    reefscanUrl: 'https://reefscan.com/',
-    routerAddress: '0x641e34931C03751BFED14C4087bA395303bEd1A5',
-    factoryAddress: '0x380a9033500154872813F6E1120a81ed6c0760a8',
-  },
 };

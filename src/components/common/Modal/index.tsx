@@ -1,5 +1,4 @@
 import React from 'react';
-import { Button } from '../Button';
 import { Title } from '../Text';
 
 interface Modal {
@@ -40,41 +39,51 @@ export const ModalFooter: React.FC<unknown> = ({ children }): JSX.Element => (
   </div>
 );
 
-export const ModalClose = (): JSX.Element => (
-  <button
-    type="button"
-    className="btn-close"
-    data-bs-dismiss="modal"
-    aria-label="Close"
-  />
+interface ModalClose {
+  onClick?: () => void;
+  className?: string;
+}
+
+export const ModalClose: React.FC<ModalClose> = (
+  { children, onClick = () => {}, className },
+): JSX.Element => (
+  <button type="button" className={className || 'btn-close'} onClick={onClick} data-bs-dismiss="modal" aria-label="Close">
+    {children}
+  </button>
 );
 
 interface OpenModalButton {
   id?: string;
   disabled?: boolean;
+  className?: string;
 }
 
-export const OpenModalButton: React.FC<OpenModalButton> = ({ children, id = 'open-modal-button', disabled }): JSX.Element => (
+export const OpenModalButton: React.FC<OpenModalButton> = ({
+  children, id = 'open-modal-button', disabled, className,
+}): JSX.Element => (
   <button
     type="button"
     disabled={disabled}
     data-bs-toggle="modal"
     data-bs-target={`#${id}`}
-    className="btn btn-reef btn-lg border-rad w-100"
+    className={className || 'btn btn-reef btn-lg border-rad w-100'}
   >
-    {children}
+    <span>{children}</span>
   </button>
 );
+
 interface ConfirmationModal {
   id?: string;
   title: string;
   confirmFun: () => void;
+  confirmBtnLabel?: string;
 }
 
 const ConfirmationModal: React.FC<ConfirmationModal> = ({
   id = 'exampleModal',
   title,
   confirmFun,
+  confirmBtnLabel = 'Confirm',
   children,
 }): JSX.Element => (
   <Modal id={id}>
@@ -84,9 +93,7 @@ const ConfirmationModal: React.FC<ConfirmationModal> = ({
     </ModalHeader>
     <ModalBody>{children}</ModalBody>
     <ModalFooter>
-      <Button onClick={confirmFun}>
-        {title}
-      </Button>
+      <ModalClose onClick={confirmFun} className="btn btn-reef border-rad"><span>{confirmBtnLabel}</span></ModalClose>
     </ModalFooter>
   </Modal>
 );

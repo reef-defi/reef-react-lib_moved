@@ -1,5 +1,5 @@
 import { BigNumber } from 'ethers';
-import { ensure } from '../utils';
+import { ensure } from '../utils/utils';
 import { calculateAmount } from '../utils/math';
 
 export interface BasicToken {
@@ -9,6 +9,7 @@ export interface BasicToken {
 }
 
 export interface Token extends BasicToken {
+  symbol?: string;
   balance: BigNumber;
   decimals: number;
 }

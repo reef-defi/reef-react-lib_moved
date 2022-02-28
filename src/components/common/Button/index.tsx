@@ -3,14 +3,16 @@ import { BackIcon, DownArrowIcon, PlusIcon } from '../Icons';
 
 interface ButtonProps {
   onClick?: () => void;
+  disabled?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
   children,
   onClick = () => {},
+  disabled,
 }): JSX.Element => (
-  <button type="button" className="btn btn-reef border-rad" onClick={onClick} data-bs-dismiss="modal">
-    {children}
+  <button type="button" className="btn btn-reef border-rad" disabled={disabled} onClick={onClick}>
+    <span>{children}</span>
   </button>
 );
 
@@ -66,9 +68,8 @@ export const IconButton: React.FC<IconButton> = ({
 }): JSX.Element => (
   <button
     type="button"
-    className="btn btn-select border-rad px-2 py-1"
     onClick={onClick}
-    data-bs-dismiss="modal"
+    className="btn btn-select border-rad px-2 py-1"
   >
     {children}
   </button>
@@ -89,6 +90,16 @@ export const PercentageButton: React.FC<PercentageButton> = ({ children, percent
     type="button"
     className={`btn ${Number.isNaN(percentage) ? 'btn-reef' : 'btn-secondary'} border-rad me-1`}
     onClick={onClick}
+  >
+    <span>{children}</span>
+  </button>
+);
+
+export const DangerButton: React.FC<ButtonProps> = ({ children, onClick }): JSX.Element => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="btn btn-danger border-rad"
   >
     {children}
   </button>

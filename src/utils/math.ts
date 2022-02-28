@@ -1,6 +1,6 @@
-import { BigNumber } from 'ethers';
-import { Pool, Token, TokenWithAmount } from '..';
+import { BigNumber, utils } from 'ethers';
 import { ensure } from './utils';
+import { Pool, Token, TokenWithAmount } from '../state';
 
 const findDecimalPoint = (amount: string): number => {
   const { length } = amount;
@@ -104,17 +104,26 @@ interface ToBalance {
 }
 
 interface ShowBalance extends ToBalance {
-  name: string
+  name: string;
+  symbol?: string;
 }
 
-export const showBalance = ({ decimals, balance, name }: ShowBalance, decimalPoints = 4): string => {
+export const showBalance = ({
+  decimals, balance, name, symbol,
+}: ShowBalance, decimalPoints = 4): string => {
+  if (!balance) {
+    return '';
+  }
   const balanceStr = balance.toString();
-  if (balanceStr === '0') { return `${balanceStr} ${name}`; }
+  if (balanceStr === '0') { return `${balanceStr} ${symbol || name}`; }
   const headLength = Math.max(balanceStr.length - decimals, 0);
   const tailLength = Math.max(headLength + decimalPoints, 0);
   const head = balanceStr.length < decimals ? '0' : balanceStr.slice(0, headLength);
-  const tail = balanceStr.slice(headLength, tailLength);
-  return tail.length ? `${head}.${tail} ${name}` : `${head} ${name}`;
+  let tail = balanceStr.slice(headLength, tailLength);
+  if (tail.search(/[^0]+/gm) === -1) {
+    tail = '';
+  }
+  return tail.length ? `${head}.${tail} ${symbol || name}` : `${head} ${symbol || name}`;
 };
 
 export const toBalance = ({ balance, decimals }: ToBalance): number => {
@@ -124,6 +133,16 @@ export const toBalance = ({ balance, decimals }: ToBalance): number => {
     ? '0'
     : num.slice(0, diff);
   return parseFloat(`${fullNum}.${num.slice(diff, num.length)}`);
+};
+
+export const toUnits = ({ balance, decimals }: ToBalance): string => utils.formatUnits(balance.toString(), decimals);
+
+export const toDecimalPlaces = (value: string, maxDecimalPlaces: number): string => {
+  const decimalDelim = value.indexOf('.');
+  if (!value || decimalDelim < 1 || value.length - decimalDelim < maxDecimalPlaces) {
+    return value;
+  }
+  return value.substring(0, decimalDelim + 1 + maxDecimalPlaces);
 };
 
 export const poolRatio = ({ token1, token2 }: Pool): number => toBalance(token2) / toBalance(token1);
@@ -167,4 +186,16 @@ export const calculateImpactPercentage = (sell: TokenWithAmount, buy: TokenWithA
   if (sellUsd === 0) { return 0; }
 
   return (buyUsd - sellUsd) / sellUsd;
+};
+
+export const getHashSumLastNr = (address: string): number => {
+  const summ = address.split('').reduce((sum, ch) => {
+    const nr = parseInt(ch, 10);
+    if (!Number.isNaN(nr)) {
+      return sum + nr;
+    }
+    return sum;
+  }, 0).toString(10);
+
+  return parseInt(summ.substring(summ.length - 1), 10);
 };
