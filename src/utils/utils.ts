@@ -1,15 +1,17 @@
-import { BigNumber, ethers } from 'ethers';
+import { BigNumber, ethers } from "ethers";
 
 export interface ButtonStatus {
   text: string;
   isValid: boolean;
 }
 
-export const trim = (value: string, size = 19): string => (value.length < size
-  ? value
-  : `${value.slice(0, size - 5)}...${value.slice(value.length - 5)}`);
+export const trim = (value: string, size = 19): string =>
+  value.length < size
+    ? value
+    : `${value.slice(0, size - 5)}...${value.slice(value.length - 5)}`;
 
-export const toAddressShortDisplay = (address: string): string => trim(address, 7);
+export const toAddressShortDisplay = (address: string): string =>
+  trim(address, 7);
 
 export const ensure = (condition: boolean, message: string): void => {
   if (!condition) {
@@ -20,10 +22,10 @@ export const ensure = (condition: boolean, message: string): void => {
 export const toReefBalanceDisplay = (value?: BigNumber): string => {
   if (value && value.gt(0)) {
     const stringValue = ethers.utils.formatEther(value);
-    const delimiterIndex = stringValue.indexOf('.');
+    const delimiterIndex = stringValue.indexOf(".");
     return `${stringValue.substring(0, delimiterIndex)} REEF`;
   }
-  return '- REEF';
+  return "- REEF";
 };
 
 export const uniqueCombinations = <T>(array: T[]): [T, T][] => {
@@ -41,8 +43,10 @@ export const errorStatus = (text: string): ButtonStatus => ({
   text,
 });
 
-export const ensureVoidRun = (canRun: boolean) => <I>(fun: (obj: I) => void, obj: I): void => {
-  if (canRun) {
-    fun(obj);
-  }
-};
+export const ensureVoidRun =
+  (canRun: boolean) =>
+  <I>(fun: (obj: I) => void, obj: I): void => {
+    if (canRun) {
+      fun(obj);
+    }
+  };

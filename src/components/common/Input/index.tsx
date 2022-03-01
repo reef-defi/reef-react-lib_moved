@@ -1,7 +1,7 @@
-import React, { BaseSyntheticEvent, useEffect, useState } from 'react';
+import React, { BaseSyntheticEvent, useEffect, useState } from "react";
 
 interface Input {
-  value?: string
+  value?: string;
   disabled?: boolean;
   maxLength?: number;
   placeholder?: string;
@@ -9,7 +9,11 @@ interface Input {
 }
 
 export const Input = ({
-  value, disabled, maxLength, placeholder, onChange = (_) => {},
+  value,
+  disabled,
+  maxLength,
+  placeholder,
+  onChange = (_) => {},
 }: Input): JSX.Element => (
   <input
     value={value}
@@ -31,10 +35,10 @@ interface InputAmount {
 export const InputAmount = ({
   amount,
   onAmountChange,
-  placeholder = '',
+  placeholder = "",
   disabled = false,
 }: InputAmount): JSX.Element => {
-  const mathDecimals = !amount ? '' : amount.replaceAll(',', '.');
+  const mathDecimals = !amount ? "" : amount.replaceAll(",", ".");
   const [amt, setAmt] = useState(mathDecimals);
   useEffect(() => setAmt(amount), [amount]);
   const inputChange = (event: any): void => {
@@ -56,15 +60,13 @@ export const InputAmount = ({
 };
 
 export const InputGroup: React.FC<unknown> = ({ children }): JSX.Element => (
-  <div className="input-group">
-    {children}
-  </div>
+  <div className="input-group">{children}</div>
 );
 
-export const InputTextGroup: React.FC<unknown> = ({ children }): JSX.Element => (
-  <div className="input-group-text field-input border-rad ps-1">
-    {children}
-  </div>
+export const InputTextGroup: React.FC<unknown> = ({
+  children,
+}): JSX.Element => (
+  <div className="input-group-text field-input border-rad ps-1">{children}</div>
 );
 
 interface NumberInput {
@@ -79,13 +81,23 @@ interface NumberInput {
 }
 
 export const NumberInput = ({
-  value, min, max, step, placeholder, onChange, disableDecimals, className = '',
+  value,
+  min,
+  max,
+  step,
+  placeholder,
+  onChange,
+  disableDecimals,
+  className = "",
 }: NumberInput): JSX.Element => {
   const keyDown = (e: BaseSyntheticEvent): void => {
     if (!disableDecimals) {
       return;
     }
-    if ((e.nativeEvent as KeyboardEvent).key === '.' || (e.nativeEvent as KeyboardEvent).key === ',') {
+    if (
+      (e.nativeEvent as KeyboardEvent).key === "." ||
+      (e.nativeEvent as KeyboardEvent).key === ","
+    ) {
       e.preventDefault();
       (e.nativeEvent as any).stopImmediatePropagation();
     }
@@ -101,7 +113,7 @@ export const NumberInput = ({
       placeholder={placeholder}
       onChange={(event) => onChange(event.target.value)}
       onKeyDown={keyDown}
-      className={className || 'form-control field-input border-rad text-end'}
+      className={className || "form-control field-input border-rad text-end"}
     />
   );
 };
@@ -112,7 +124,11 @@ interface PercentageRangeAmount {
   onChange: (value: number) => void;
 }
 
-export const PercentageRangeAmount = ({ value, disabled, onChange }: PercentageRangeAmount): JSX.Element => (
+export const PercentageRangeAmount = ({
+  value,
+  disabled,
+  onChange,
+}: PercentageRangeAmount): JSX.Element => (
   <input
     min={0}
     max={100}

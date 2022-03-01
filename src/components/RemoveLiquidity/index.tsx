@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useLoadPool } from '../../hooks/useLoadPool';
-import { approveAmount, getReefswapRouter } from '../../rpc';
+import React, { useEffect, useRef, useState } from "react";
+import { useLoadPool } from "../../hooks/useLoadPool";
+import { approveAmount, getReefswapRouter } from "../../rpc";
 import {
   availableNetworks,
   defaultSettings,
@@ -10,7 +10,7 @@ import {
   REMOVE_DEFAULT_SLIPPAGE_TOLERANCE,
   resolveSettings,
   Token,
-} from '../../state';
+} from "../../state";
 import {
   ButtonStatus,
   calculateDeadline,
@@ -22,23 +22,26 @@ import {
   transformAmount,
   TX_STATUS_ERROR_CODE,
   TxStatusHandler,
-} from '../../utils';
-import { DangerAlert } from '../common/Alert';
-import { Button } from '../common/Button';
+} from "../../utils";
+import { DangerAlert } from "../common/Alert";
+import { Button } from "../common/Button";
+import { Card, CardBack, CardHeader, CardTitle, SubCard } from "../common/Card";
 import {
-  Card, CardBack, CardHeader, CardTitle, SubCard,
-} from '../common/Card';
-import {
-  ComponentCenter, ContentBetween, ContentCenter, Margin, MT, MX,
-} from '../common/Display';
-import { DownIcon } from '../common/Icons';
-import { PercentageRangeAmount } from '../common/Input';
-import { ConfirmLabel } from '../common/Label';
-import { LoadingButtonIconWithText } from '../common/Loading';
-import { OpenModalButton } from '../common/Modal';
-import { LargeTitle } from '../common/Text';
-import { TransactionSettings } from '../TransactionSettings';
-import RemoveConfirmationModal from './RemoveConfirmationModal';
+  ComponentCenter,
+  ContentBetween,
+  ContentCenter,
+  Margin,
+  MT,
+  MX,
+} from "../common/Display";
+import { DownIcon } from "../common/Icons";
+import { PercentageRangeAmount } from "../common/Input";
+import { ConfirmLabel } from "../common/Label";
+import { LoadingButtonIconWithText } from "../common/Loading";
+import { OpenModalButton } from "../common/Modal";
+import { LargeTitle } from "../common/Text";
+import { TransactionSettings } from "../TransactionSettings";
+import RemoveConfirmationModal from "./RemoveConfirmationModal";
 
 interface RemoveLiquidityComponent {
   token1: Token;
@@ -51,12 +54,12 @@ interface RemoveLiquidityComponent {
 
 const status = (percentageAmount: number, pool?: Pool): ButtonStatus => {
   try {
-    ensure(!!pool, 'Invalid Pair');
-    ensure(pool?.userPoolBalance !== '0', 'Insufficient pool balance');
-    ensure(percentageAmount > 0, 'Enter an amount');
+    ensure(!!pool, "Invalid Pair");
+    ensure(pool?.userPoolBalance !== "0", "Insufficient pool balance");
+    ensure(percentageAmount > 0, "Enter an amount");
     return {
       isValid: true,
-      text: 'Confirm remove',
+      text: "Confirm remove",
     };
   } catch (e) {
     return {
@@ -67,11 +70,16 @@ const status = (percentageAmount: number, pool?: Pool): ButtonStatus => {
 };
 
 export const RemoveLiquidityComponent = ({
-  token1, token2, network, signer, back, onTxUpdate,
-} : RemoveLiquidityComponent): JSX.Element => {
+  token1,
+  token2,
+  network,
+  signer,
+  back,
+  onTxUpdate,
+}: RemoveLiquidityComponent): JSX.Element => {
   const mounted = useRef(true);
   const [isRemoving, setIsRemoving] = useState(false);
-  const [loadingStatus, setLoadingStatus] = useState('');
+  const [loadingStatus, setLoadingStatus] = useState("");
   const [settings, setSettings] = useState(defaultSettings());
   const [percentageAmount, setPercentageAmount] = useState(0);
 
@@ -79,37 +87,67 @@ export const RemoveLiquidityComponent = ({
     token1,
     token2,
     network.factoryAddress,
-    signer?.signer,
+    signer?.signer
   );
   const { isValid, text } = status(percentageAmount, pool);
-  const { percentage, deadline } = resolveSettings(settings, REMOVE_DEFAULT_SLIPPAGE_TOLERANCE);
+  const { percentage, deadline } = resolveSettings(
+    settings,
+    REMOVE_DEFAULT_SLIPPAGE_TOLERANCE
+  );
 
   const isLoading = isRemoving || isPoolLoading;
 
   const ensureMount = ensureVoidRun(mounted.current);
 
-  useEffect(() => () => {
-    mounted.current = false;
-  }, []);
+  useEffect(
+    () => () => {
+      mounted.current = false;
+    },
+    []
+  );
 
   const onRemove = async (): Promise<void> => {
-    if (!pool || percentageAmount === 0 || !signer) { return; }
+    if (!pool || percentageAmount === 0 || !signer) {
+      return;
+    }
 
-    const reefswapRouter = getReefswapRouter(network.routerAddress, signer.signer);
-    const normalRemovedSupply = removeSupply(percentageAmount, pool.userPoolBalance, 18);
+    const reefswapRouter = getReefswapRouter(
+      network.routerAddress,
+      signer.signer
+    );
+    const normalRemovedSupply = removeSupply(
+      percentageAmount,
+      pool.userPoolBalance,
+      18
+    );
     const removedLiquidity = transformAmount(18, `${normalRemovedSupply}`);
 
-    const minimumTokenAmount1 = removePoolTokenShare(Math.max(percentageAmount - percentage, 0), pool.token1);
-    const minimumTokenAmount2 = removePoolTokenShare(Math.max(percentageAmount - percentage, 0), pool.token2);
+    const minimumTokenAmount1 = removePoolTokenShare(
+      Math.max(percentageAmount - percentage, 0),
+      pool.token1
+    );
+    const minimumTokenAmount2 = removePoolTokenShare(
+      Math.max(percentageAmount - percentage, 0),
+      pool.token2
+    );
 
     const txIdent = Math.random().toString(10);
 
     Promise.resolve()
-      .then(() => { mounted.current = true; })
+      .then(() => {
+        mounted.current = true;
+      })
       .then(() => setIsRemoving(true))
-      .then(() => setLoadingStatus('Approving remove'))
-      .then(() => approveAmount(pool.poolAddress, network.routerAddress, removedLiquidity, signer.signer))
-      .then(() => setLoadingStatus('Removing supply'))
+      .then(() => setLoadingStatus("Approving remove"))
+      .then(() =>
+        approveAmount(
+          pool.poolAddress,
+          network.routerAddress,
+          removedLiquidity,
+          signer.signer
+        )
+      )
+      .then(() => setLoadingStatus("Removing supply"))
       .then(() => {
         if (onTxUpdate) {
           onTxUpdate({
@@ -117,23 +155,27 @@ export const RemoveLiquidityComponent = ({
           });
         }
       })
-      .then(() => reefswapRouter.removeLiquidity(
-        pool.token1.address,
-        pool.token2.address,
-        removedLiquidity,
-        transformAmount(token1.decimals, `${minimumTokenAmount1}`),
-        transformAmount(token2.decimals, `${minimumTokenAmount2}`),
-        signer.evmAddress,
-        calculateDeadline(deadline),
-      ))
-      .then((contractCall:any) => {
+      .then(() =>
+        reefswapRouter.removeLiquidity(
+          pool.token1.address,
+          pool.token2.address,
+          removedLiquidity,
+          transformAmount(token1.decimals, `${minimumTokenAmount1}`),
+          transformAmount(token2.decimals, `${minimumTokenAmount2}`),
+          signer.evmAddress,
+          calculateDeadline(deadline)
+        )
+      )
+      .then((contractCall: any) => {
         if (onTxUpdate) {
           onTxUpdate({
             txIdent,
             txHash: contractCall.hash,
             isInBlock: true,
             txTypeEvm: true,
-            url: `https://${network === availableNetworks.mainnet ? '' : `${network.name}.`}reefscan.com/extrinsic/${contractCall.hash}`,
+            url: `https://${
+              network === availableNetworks.mainnet ? "" : `${network.name}.`
+            }reefscan.com/extrinsic/${contractCall.hash}`,
             addresses: [signer.address],
           });
         }
@@ -143,7 +185,10 @@ export const RemoveLiquidityComponent = ({
         if (onTxUpdate) {
           onTxUpdate({
             txIdent,
-            error: { message: e.message, code: TX_STATUS_ERROR_CODE.ERROR_UNDEFINED },
+            error: {
+              message: e.message,
+              code: TX_STATUS_ERROR_CODE.ERROR_UNDEFINED,
+            },
             txTypeEvm: true,
             addresses: [signer.address],
           });
@@ -151,7 +196,7 @@ export const RemoveLiquidityComponent = ({
       })
       .finally(() => {
         ensureMount(setIsRemoving, false);
-        ensureMount(setLoadingStatus, '');
+        ensureMount(setLoadingStatus, "");
       });
   };
 
@@ -169,7 +214,9 @@ export const RemoveLiquidityComponent = ({
         </CardHeader>
         <DangerAlert>
           <b>Tip: </b>
-          Removing pool tokens converts your position back into underlying tokens at the current rate, proportional to your share of the pool. Accrued fees are included in the amounts you receive.
+          Removing pool tokens converts your position back into underlying
+          tokens at the current rate, proportional to your share of the pool.
+          Accrued fees are included in the amounts you receive.
         </DangerAlert>
         <SubCard>
           <LargeTitle>{`${percentageAmount} %`}</LargeTitle>
@@ -195,20 +242,51 @@ export const RemoveLiquidityComponent = ({
         <MT size="2" />
         <SubCard>
           <Margin size="3">
-            <ConfirmLabel title={removePoolTokenShare(percentageAmount, pool?.token1).toFixed(8)} value={token1.name} titleSize="title-text" valueSize="title-text" />
-            <ConfirmLabel title={removePoolTokenShare(percentageAmount, pool?.token2).toFixed(8)} value={token2.name} titleSize="title-text" valueSize="title-text" />
+            <ConfirmLabel
+              title={removePoolTokenShare(
+                percentageAmount,
+                pool?.token1
+              ).toFixed(8)}
+              value={token1.name}
+              titleSize="title-text"
+              valueSize="title-text"
+            />
+            <ConfirmLabel
+              title={removePoolTokenShare(
+                percentageAmount,
+                pool?.token2
+              ).toFixed(8)}
+              value={token2.name}
+              titleSize="title-text"
+              valueSize="title-text"
+            />
           </Margin>
         </SubCard>
         <MT size="3" />
         <MX size="4">
-          <ConfirmLabel title="Price" value={`1 ${token1.name} = ${calculatePoolRatio(pool).toFixed(8)} ${token2.name}`} />
-          <ConfirmLabel title="" value={`1 ${token2.name} = ${calculatePoolRatio(pool, false).toFixed(8)} ${token1.name}`} />
+          <ConfirmLabel
+            title="Price"
+            value={`1 ${token1.name} = ${calculatePoolRatio(pool).toFixed(8)} ${
+              token2.name
+            }`}
+          />
+          <ConfirmLabel
+            title=""
+            value={`1 ${token2.name} = ${calculatePoolRatio(
+              pool,
+              false
+            ).toFixed(8)} ${token1.name}`}
+          />
         </MX>
         <OpenModalButton
           id="remove-modal-toggle"
           disabled={!isValid || isPoolLoading}
         >
-          {isLoading ? <LoadingButtonIconWithText text={loadingStatus} /> : text}
+          {isLoading ? (
+            <LoadingButtonIconWithText text={loadingStatus} />
+          ) : (
+            text
+          )}
         </OpenModalButton>
         <RemoveConfirmationModal
           pool={pool!}

@@ -1,20 +1,24 @@
-import React from 'react';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { ReefSigner } from '../../state';
-import { toReefBalanceDisplay, trim } from '../../utils';
+import React from "react";
+import { CopyToClipboard } from "react-copy-to-clipboard";
+import { ReefSigner } from "../../state";
+import { toReefBalanceDisplay, trim } from "../../utils";
 import {
-  Border, ContentBetween, FlexRow, Margin, MT, MX,
-} from '../common/Display';
+  Border,
+  ContentBetween,
+  FlexRow,
+  Margin,
+  MT,
+  MX,
+} from "../common/Display";
 import {
-  WalletIcon, CopyIcon, ExploreIcon, ReefAddressIcon,
-} from '../common/Icons';
-import {
-  Modal, ModalBody, ModalClose, ModalHeader,
-} from '../common/Modal';
-import {
-  LeadText, MiniText, MutedText, Title,
-} from '../common/Text';
-import { AccountListModal } from './AccountListModal';
+  WalletIcon,
+  CopyIcon,
+  ExploreIcon,
+  ReefAddressIcon,
+} from "../common/Icons";
+import { Modal, ModalBody, ModalClose, ModalHeader } from "../common/Modal";
+import { LeadText, MiniText, MutedText, Title } from "../common/Text";
+import { AccountListModal } from "./AccountListModal";
 
 interface AccountSelector {
   reefscanUrl: string;
@@ -24,18 +28,21 @@ interface AccountSelector {
 }
 
 export const AccountSelector = ({
-  selectedSigner, accounts, reefscanUrl, selectAccount,
-} : AccountSelector): JSX.Element => {
-  const name = selectedSigner ? selectedSigner.name : '';
-  const address = selectedSigner ? selectedSigner.address : '';
-  const balance = selectedSigner ? toReefBalanceDisplay(selectedSigner.balance) : toReefBalanceDisplay(undefined);
-  const evmAddress = selectedSigner ? selectedSigner.evmAddress : '';
+  selectedSigner,
+  accounts,
+  reefscanUrl,
+  selectAccount,
+}: AccountSelector): JSX.Element => {
+  const name = selectedSigner ? selectedSigner.name : "";
+  const address = selectedSigner ? selectedSigner.address : "";
+  const balance = selectedSigner
+    ? toReefBalanceDisplay(selectedSigner.balance)
+    : toReefBalanceDisplay(undefined);
+  const evmAddress = selectedSigner ? selectedSigner.evmAddress : "";
 
   return (
     <div className="nav-account border-rad">
-      <div className="my-auto mx-2 fs-6">
-        {balance}
-      </div>
+      <div className="my-auto mx-2 fs-6">{balance}</div>
       <button
         type="button"
         className="btn btn-reef border-rad"
@@ -76,12 +83,21 @@ export const AccountSelector = ({
             <MT size="2" />
             <MX size="2">
               <CopyToClipboard text={evmAddress}>
-                <span className="form-text text-muted ms-2" style={{ cursor: 'pointer' }}>
+                <span
+                  className="form-text text-muted ms-2"
+                  style={{ cursor: "pointer" }}
+                >
                   <CopyIcon small />
                   <MiniText>Copy EVM Address</MiniText>
                 </span>
               </CopyToClipboard>
-              <a href={`${reefscanUrl}/account/${address}`} target="_blank" className="form-text text-muted ms-3" style={{ textDecoration: 'none' }} rel="noreferrer">
+              <a
+                href={`${reefscanUrl}/account/${address}`}
+                target="_blank"
+                className="form-text text-muted ms-3"
+                style={{ textDecoration: "none" }}
+                rel="noreferrer"
+              >
                 <ExploreIcon small />
                 <small className="ms-1">View on Explorer</small>
               </a>
@@ -90,7 +106,12 @@ export const AccountSelector = ({
           <MT size="2" />
         </ModalBody>
       </Modal>
-      <AccountListModal id="select-account-modal" accounts={accounts} selectAccount={selectAccount} backButtonModalId="#account-modal" />
+      <AccountListModal
+        id="select-account-modal"
+        accounts={accounts}
+        selectAccount={selectAccount}
+        backButtonModalId="#account-modal"
+      />
     </div>
   );
 };

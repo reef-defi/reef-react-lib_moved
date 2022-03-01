@@ -1,5 +1,5 @@
-import React from 'react';
-import { BackIcon, DownArrowIcon, PlusIcon } from '../Icons';
+import React from "react";
+import { BackIcon, DownArrowIcon, PlusIcon } from "../Icons";
 
 interface ButtonProps {
   onClick?: () => void;
@@ -11,7 +11,12 @@ export const Button: React.FC<ButtonProps> = ({
   onClick = () => {},
   disabled,
 }): JSX.Element => (
-  <button type="button" className="btn btn-reef border-rad" disabled={disabled} onClick={onClick}>
+  <button
+    type="button"
+    className="btn btn-reef border-rad"
+    disabled={disabled}
+    onClick={onClick}
+  >
     <span>{children}</span>
   </button>
 );
@@ -76,31 +81,34 @@ export const IconButton: React.FC<IconButton> = ({
 );
 
 export const ButtonGroup: React.FC<unknown> = ({ children }): JSX.Element => (
-  <div className="btn-group">
-    {children}
-  </div>
+  <div className="btn-group">{children}</div>
 );
 
 interface PercentageButton {
   percentage?: number;
   onClick?: () => void;
 }
-export const PercentageButton: React.FC<PercentageButton> = ({ children, percentage = Number.NaN, onClick }): JSX.Element => (
+export const PercentageButton: React.FC<PercentageButton> = ({
+  children,
+  percentage = Number.NaN,
+  onClick,
+}): JSX.Element => (
   <button
     type="button"
-    className={`btn ${Number.isNaN(percentage) ? 'btn-reef' : 'btn-secondary'} border-rad me-1`}
+    className={`btn ${
+      Number.isNaN(percentage) ? "btn-reef" : "btn-secondary"
+    } border-rad me-1`}
     onClick={onClick}
   >
     <span>{children}</span>
   </button>
 );
 
-export const DangerButton: React.FC<ButtonProps> = ({ children, onClick }): JSX.Element => (
-  <button
-    type="button"
-    onClick={onClick}
-    className="btn btn-danger border-rad"
-  >
+export const DangerButton: React.FC<ButtonProps> = ({
+  children,
+  onClick,
+}): JSX.Element => (
+  <button type="button" onClick={onClick} className="btn btn-danger border-rad">
     {children}
   </button>
 );

@@ -1,5 +1,5 @@
-import { Signer } from '@reef-defi/evm-provider';
-import { BigNumber } from 'ethers';
+import { Signer } from "@reef-defi/evm-provider";
+import { BigNumber } from "ethers";
 
 export interface ReefSigner {
   name: string;
@@ -11,5 +11,5 @@ export interface ReefSigner {
   source: string;
 }
 
-export type Color = 'success' | 'danger' | 'warning';
-export type Notify = 'success' | 'error' | 'warning';
+export type Color = "success" | "danger" | "warning";
+export type Notify = "success" | "error" | "warning";
