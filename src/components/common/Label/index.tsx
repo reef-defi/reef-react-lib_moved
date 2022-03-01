@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export const Label: React.FC<unknown> = ({ children }) => (
   <label>{children}</label>
@@ -14,8 +14,8 @@ interface ConfirmLabel {
 export const ConfirmLabel = ({
   title,
   value,
-  titleSize = "sub-text",
-  valueSize = "sub-text",
+  titleSize = 'sub-text',
+  valueSize = 'sub-text',
 }: ConfirmLabel): JSX.Element => (
   <div className="d-flex justify-content-between my-1">
     <span className={`text-muted my-auto ${titleSize}`}>{title}</span>

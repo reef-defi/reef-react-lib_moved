@@ -1,1 +1,1 @@
-export * as appState from "./appState";
+export * as appState from './appState';

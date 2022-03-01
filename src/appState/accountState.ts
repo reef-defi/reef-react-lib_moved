@@ -13,77 +13,74 @@ import {
   switchMap,
   take,
   withLatestFrom,
-} from "rxjs";
-import { Provider } from "@reef-defi/evm-provider";
-import { BigNumber } from "ethers";
-import { filter } from "rxjs/operators";
-import { gql } from "@apollo/client";
-import { UpdateDataCtx } from "./updateStateModel";
+} from 'rxjs';
+import { Provider } from '@reef-defi/evm-provider';
+import { BigNumber } from 'ethers';
+import { filter } from 'rxjs/operators';
+import { gql } from '@apollo/client';
+import { UpdateDataCtx } from './updateStateModel';
 import {
   replaceUpdatedSigners,
   updateSignersEvmBindings,
-} from "./accountStateUtil";
-import { providerSubj } from "./providerState";
-import { ReefSigner } from "../state";
-import { apolloClientInstance$, zenToRx } from "../graphql/apollo";
+} from './accountStateUtil';
+import { providerSubj } from './providerState';
+import { ReefSigner } from '../state';
+import { apolloClientInstance$, zenToRx } from '../graphql/apollo';
 
 export const accountsSubj = new ReplaySubject<ReefSigner[] | null>(1);
 export const reloadSignersSubj = new Subject<UpdateDataCtx<ReefSigner[]>>();
 
 export const signersInjected$ = accountsSubj.pipe(
   map((signrs) => (signrs?.length ? signrs : [])),
-  shareReplay(1)
+  shareReplay(1),
 );
 
-const signersLocallyUpdatedData$: Observable<ReefSigner[]> =
-  reloadSignersSubj.pipe(
-    filter((reloadCtx: any) => !!reloadCtx.updateActions.length),
-    withLatestFrom(signersInjected$),
-    mergeScan(
-      (
-        state: {
+const signersLocallyUpdatedData$: Observable<ReefSigner[]> = reloadSignersSubj.pipe(
+  filter((reloadCtx: any) => !!reloadCtx.updateActions.length),
+  withLatestFrom(signersInjected$),
+  mergeScan(
+    (
+      state: {
           all: ReefSigner[];
           allUpdated: ReefSigner[];
           lastUpdated: ReefSigner[];
         },
-        [updateCtx, signersInjected]
-      ): any => {
-        const allSignersLatestUpdates = replaceUpdatedSigners(
-          signersInjected,
-          state.allUpdated
-        );
-        return of(updateCtx.updateActions).pipe(
-          switchMap((updateActions) =>
-            updateSignersEvmBindings(
-              updateActions,
-              allSignersLatestUpdates
-            ).then((lastUpdated) => ({
-              all: replaceUpdatedSigners(
-                allSignersLatestUpdates,
-                lastUpdated,
-                true
-              ),
-              allUpdated: replaceUpdatedSigners(
-                state.allUpdated,
-                lastUpdated,
-                true
-              ),
-              lastUpdated,
-            }))
-          )
-        );
-      },
-      {
-        all: [],
-        allUpdated: [],
-        lastUpdated: [],
-      }
-    ),
-    filter((val: any) => !!val.lastUpdated.length),
-    map((val: any): any => val.all),
-    startWith([]),
-    shareReplay(1)
-  );
+      [updateCtx, signersInjected],
+    ): any => {
+      const allSignersLatestUpdates = replaceUpdatedSigners(
+        signersInjected,
+        state.allUpdated,
+      );
+      return of(updateCtx.updateActions).pipe(
+        switchMap((updateActions) => updateSignersEvmBindings(
+          updateActions,
+          allSignersLatestUpdates,
+        ).then((lastUpdated) => ({
+          all: replaceUpdatedSigners(
+            allSignersLatestUpdates,
+            lastUpdated,
+            true,
+          ),
+          allUpdated: replaceUpdatedSigners(
+            state.allUpdated,
+            lastUpdated,
+            true,
+          ),
+          lastUpdated,
+        }))),
+      );
+    },
+    {
+      all: [],
+      allUpdated: [],
+      lastUpdated: [],
+    },
+  ),
+  filter((val: any) => !!val.lastUpdated.length),
+  map((val: any): any => val.all),
+  startWith([]),
+  shareReplay(1),
+);
 
 const signersWithUpdatedBalances$ = combineLatest([
   providerSubj,
@@ -92,7 +89,7 @@ const signersWithUpdatedBalances$ = combineLatest([
   mergeScan(
     (
       state: { unsub: any; balancesByAddressSubj: ReplaySubject<any> },
-      [provider, signers]: [Provider, ReefSigner[]]
+      [provider, signers]: [Provider, ReefSigner[]],
     ) => {
       if (state.unsub) {
         state.unsub();
@@ -123,32 +120,28 @@ const signersWithUpdatedBalances$ = combineLatest([
           return state;
         });
     },
-    { unsub: null, balancesByAddressSubj: new ReplaySubject<any>(1) }
+    { unsub: null, balancesByAddressSubj: new ReplaySubject<any>(1) },
   ),
   distinctUntilChanged(
-    (prev: any, curr: any): any =>
-      prev.balancesByAddressSubj !== curr.balancesByAddressSubj
+    (prev: any, curr: any): any => prev.balancesByAddressSubj !== curr.balancesByAddressSubj,
   ),
   switchMap(
     (v: {
       balancesByAddressSubj: Subject<{ balances: any; signers: ReefSigner[] }>;
-    }) => v.balancesByAddressSubj
+    }) => v.balancesByAddressSubj,
   ),
-  map((balancesAndSigners: { balances: any; signers: ReefSigner[] }) =>
-    !balancesAndSigners.signers
-      ? []
-      : balancesAndSigners.signers.map((sig) => {
-          const bal = balancesAndSigners.balances.find(
-            (b: { address: string; balance: string }) =>
-              b.address === sig.address
-          );
-          if (bal && !BigNumber.from(bal.balance).eq(sig.balance)) {
-            return { ...sig, balance: BigNumber.from(bal.balance) };
-          }
-          return sig;
-        })
-  ),
-  shareReplay(1)
+  map((balancesAndSigners: { balances: any; signers: ReefSigner[] }) => (!balancesAndSigners.signers
+    ? []
+    : balancesAndSigners.signers.map((sig) => {
+      const bal = balancesAndSigners.balances.find(
+        (b: { address: string; balance: string }) => b.address === sig.address,
+      );
+      if (bal && !BigNumber.from(bal.balance).eq(sig.balance)) {
+        return { ...sig, balance: BigNumber.from(bal.balance) };
+      }
+      return sig;
+    }))),
+  shareReplay(1),
 );
 
 const EVM_ADDRESS_UPDATE_GQL = gql`
@@ -172,20 +165,18 @@ const indexedAccountValues$ = combineLatest([
   apolloClientInstance$,
   signersInjected$,
 ]).pipe(
-  switchMap(([apollo, signers]) =>
-    !signers
-      ? []
-      : zenToRx(
-          apollo.subscribe({
-            query: EVM_ADDRESS_UPDATE_GQL,
-            variables: { accountIds: signers.map((s: any) => s.address) },
-            fetchPolicy: "network-only",
-          })
-        )
-  ),
+  switchMap(([apollo, signers]) => (!signers
+    ? []
+    : zenToRx(
+      apollo.subscribe({
+        query: EVM_ADDRESS_UPDATE_GQL,
+        variables: { accountIds: signers.map((s: any) => s.address) },
+        fetchPolicy: 'network-only',
+      }),
+    ))),
   map((result: any): AccountEvmAddrData[] => result.data.account),
   filter((v) => !!v),
-  startWith([])
+  startWith([]),
 );
 
 const signersWithUpdatedData$ = combineLatest([
@@ -200,7 +191,7 @@ const signersWithUpdatedData$ = combineLatest([
         lastIndexed: AccountEvmAddrData[];
         lastSigners: ReefSigner[];
       },
-      [signers, locallyUpdated, indexed]
+      [signers, locallyUpdated, indexed],
     ) => {
       let updateBindValues: AccountEvmAddrData[] = [];
       if (state.lastlocallyUpdated !== locallyUpdated) {
@@ -237,39 +228,37 @@ const signersWithUpdatedData$ = combineLatest([
       lastlocallyUpdated: [],
       lastIndexed: [],
       lastSigners: [],
-    }
+    },
   ),
-  map(({ signers }) => signers)
+  map(({ signers }) => signers),
 );
 
 export const signers$: Observable<ReefSigner[]> = signersWithUpdatedData$;
 
-export const selectAddressSubj: ReplaySubject<string | undefined> =
-  new ReplaySubject<string | undefined>(1);
+export const selectAddressSubj: ReplaySubject<string | undefined> = new ReplaySubject<string | undefined>(1);
 signers$.pipe(take(1)).subscribe((signers: any): any => {
   selectAddressSubj.next(
-    localStorage.getItem("selected_address_reef") || signers[0]
+    localStorage.getItem('selected_address_reef') || signers[0],
   );
 });
-export const selectedSigner$: Observable<ReefSigner | undefined> =
-  combineLatest([
-    selectAddressSubj.pipe(distinctUntilChanged()),
-    signers$,
-  ]).pipe(
-    map(([selectedAddress, signers]) => {
-      let foundSigner = signers?.find(
-        (signer: ReefSigner) => signer.address === selectedAddress
+export const selectedSigner$: Observable<ReefSigner | undefined> = combineLatest([
+  selectAddressSubj.pipe(distinctUntilChanged()),
+  signers$,
+]).pipe(
+  map(([selectedAddress, signers]) => {
+    let foundSigner = signers?.find(
+      (signer: ReefSigner) => signer.address === selectedAddress,
+    );
+    if (!foundSigner) {
+      foundSigner = signers ? signers[0] : undefined;
+    }
+    if (foundSigner) {
+      localStorage.setItem(
+        'selected_address_reef',
+        foundSigner.address || '',
       );
-      if (!foundSigner) {
-        foundSigner = signers ? signers[0] : undefined;
-      }
-      if (foundSigner) {
-        localStorage.setItem(
-          "selected_address_reef",
-          foundSigner.address || ""
-        );
-      }
-      return foundSigner ? { ...foundSigner } : undefined;
-    }),
-    shareReplay(1)
-  );
+    }
+    return foundSigner ? { ...foundSigner } : undefined;
+  }),
+  shareReplay(1),
+);

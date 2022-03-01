@@ -1,11 +1,15 @@
-import React, { ReactElement } from "react";
-import { Color, ReefSigner, Token, TokenWithAmount } from "../../state";
-import { showBalance, toUnits } from "../../utils/math";
-import { SubCard } from "../common/Card";
-import { CenterColumn, ContentBetween, FlexRow, MT } from "../common/Display";
-import { InputAmount } from "../common/Input";
-import { ColorText, MiniText } from "../common/Text";
-import SelectToken from "../SelectToken";
+import React, { ReactElement } from 'react';
+import {
+  Color, ReefSigner, Token, TokenWithAmount,
+} from '../../state';
+import { showBalance, toUnits } from '../../utils/math';
+import { SubCard } from '../common/Card';
+import {
+  CenterColumn, ContentBetween, FlexRow, MT,
+} from '../common/Display';
+import { InputAmount } from '../common/Input';
+import { ColorText, MiniText } from '../common/Text';
+import SelectToken from '../SelectToken';
 
 interface TokenAmountFieldProps {
   id?: string;
@@ -20,18 +24,20 @@ interface TokenAmountFieldProps {
 }
 
 const TokenAmountFieldBase: React.FC<TokenAmountFieldProps> = ({
-  id = "exampleModal",
+  id = 'exampleModal',
   token,
   tokens,
   signer,
   onTokenSelect,
   onAmountChange,
-  placeholder = "0.0",
+  placeholder = '0.0',
   children,
   onAddressChange = async () => {},
   hideSelectTokenCommonBaseView,
 }): JSX.Element => {
-  const { name, isEmpty, amount, iconUrl } = token;
+  const {
+    name, isEmpty, amount, iconUrl,
+  } = token;
 
   return (
     <SubCard>
@@ -86,10 +92,10 @@ export const TokenAmountField = ({
     >
       <MiniText>{!isEmpty && `Balance: ${showBalance(token)}`}</MiniText>
       <MiniText>
-        {!isEmpty &&
-          price !== 0 &&
-          amount !== "" &&
-          `~$ ${(amo * price).toFixed(2)}`}
+        {!isEmpty
+          && price !== 0
+          && amount !== ''
+          && `~$ ${(amo * price).toFixed(2)}`}
       </MiniText>
     </TokenAmountFieldBase>
   );
@@ -129,8 +135,8 @@ export const TokenAmountFieldMax = ({
       <MiniText>
         {!isEmpty && `Balance: ${showBalance(token)}`}
 
-        {!isEmpty &&
-          (afterBalanceEl || (
+        {!isEmpty
+          && (afterBalanceEl || (
             <span
               className="text-primary text-decoration-none"
               role="button"
@@ -141,10 +147,10 @@ export const TokenAmountFieldMax = ({
           ))}
       </MiniText>
       <MiniText>
-        {!isEmpty &&
-          price !== 0 &&
-          amount !== "" &&
-          `~$ ${(amo * price).toFixed(4)}`}
+        {!isEmpty
+          && price !== 0
+          && amount !== ''
+          && `~$ ${(amo * price).toFixed(4)}`}
       </MiniText>
     </TokenAmountFieldBase>
   );
@@ -159,17 +165,19 @@ const PercentageView = ({
 }: {
   percentage: number;
 }): JSX.Element => {
-  let color: Color = "success";
+  let color: Color = 'success';
   if (percentage > 0) {
-    color = "success";
+    color = 'success';
   } else if (percentage < -0.05) {
-    color = "danger";
+    color = 'danger';
   } else {
-    color = "warning";
+    color = 'warning';
   }
   return (
     <ColorText color={color}>
-      ({`${(percentage * 100).toFixed(2)} %`})
+      (
+      {`${(percentage * 100).toFixed(2)} %`}
+      )
     </ColorText>
   );
 };
@@ -188,7 +196,7 @@ export const TokenAmountFieldImpactPrice = ({
   const { amount, price, isEmpty } = token;
   const amo = parseFloat(amount);
 
-  const showUsd = !isEmpty && price !== 0 && amount !== "";
+  const showUsd = !isEmpty && price !== 0 && amount !== '';
 
   return (
     <TokenAmountFieldBase

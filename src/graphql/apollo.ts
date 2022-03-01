@@ -4,11 +4,13 @@ import {
   HttpLink,
   InMemoryCache,
   split,
-} from "@apollo/client";
-import { map, Observable, ReplaySubject, shareReplay } from "rxjs";
-import { WebSocketLink } from "@apollo/client/link/ws";
-import { getMainDefinition } from "@apollo/client/utilities";
-import { Observable as ZenObservable } from "zen-observable-ts";
+} from '@apollo/client';
+import {
+  map, Observable, ReplaySubject, shareReplay,
+} from 'rxjs';
+import { WebSocketLink } from '@apollo/client/link/ws';
+import { getMainDefinition } from '@apollo/client/utilities';
+import { Observable as ZenObservable } from 'zen-observable-ts';
 
 const apolloUrlsSubj = new ReplaySubject<{ ws: string; http: string }>(1);
 
@@ -33,27 +35,24 @@ const splitLink$ = apolloUrlsSubj.pipe(
         const definition = getMainDefinition(query);
 
         return (
-          definition.kind === "OperationDefinition" &&
-          definition.operation === "subscription"
+          definition.kind === 'OperationDefinition'
+          && definition.operation === 'subscription'
         );
       },
       wsLink,
-      httpLink
+      httpLink,
     );
-  })
+  }),
 );
 
-export const apolloClientInstance$: Observable<ApolloClient<any>> =
-  splitLink$.pipe(
-    map(
-      (splitLink) =>
-        new ApolloClient({
-          cache: new InMemoryCache(),
-          link: ApolloLink.from([splitLink]),
-        })
-    ),
-    shareReplay(1)
-  );
+export const apolloClientInstance$: Observable<ApolloClient<any>> = splitLink$.pipe(
+  map(
+    (splitLink) => new ApolloClient({
+      cache: new InMemoryCache(),
+      link: ApolloLink.from([splitLink]),
+    }),
+  ),
+  shareReplay(1),
+);
 
-export const zenToRx = <T>(zenObservable: ZenObservable<T>): Observable<T> =>
-  new Observable((observer) => zenObservable.subscribe(observer));
+export const zenToRx = <T>(zenObservable: ZenObservable<T>): Observable<T> => new Observable((observer) => zenObservable.subscribe(observer));

@@ -1,2 +1,2 @@
-export * from "./TokenAmountField";
-export * from "./TokenAmountView";
+export * from './TokenAmountField';
+export * from './TokenAmountView';

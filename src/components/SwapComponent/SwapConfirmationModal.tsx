@@ -1,13 +1,13 @@
-import React from "react";
-import { TokenWithAmount } from "../../state";
-import { calculateUsdAmount, minimumRecieveAmount } from "../../utils/math";
-import { SwitchTokenButton } from "../common/Button";
-import { SubCard } from "../common/Card";
-import { Margin } from "../common/Display";
-import { ConfirmLabel } from "../common/Label";
-import ConfirmationModal from "../common/Modal";
-import { MutedText } from "../common/Text";
-import { TokenAmountView } from "../TokenFields";
+import React from 'react';
+import { TokenWithAmount } from '../../state';
+import { calculateUsdAmount, minimumRecieveAmount } from '../../utils/math';
+import { SwitchTokenButton } from '../common/Button';
+import { SubCard } from '../common/Card';
+import { Margin } from '../common/Display';
+import { ConfirmLabel } from '../common/Label';
+import ConfirmationModal from '../common/Modal';
+import { MutedText } from '../common/Text';
+import { TokenAmountView } from '../TokenFields';
 
 interface SwapConfirmationModal {
   id?: string;
@@ -82,9 +82,12 @@ const SwapConfirmationModal = ({
     <Margin size="3">
       <MutedText>
         Output is estimated. You will receive at least
-        <b>{`${minimumRecieveAmount(buy, percentage).toFixed(4)} ${
-          buy.name
-        }`}</b>{" "}
+        <b>
+          {`${minimumRecieveAmount(buy, percentage).toFixed(4)} ${
+            buy.name
+          }`}
+        </b>
+        {' '}
         or the transaction will revert.
       </MutedText>
     </Margin>

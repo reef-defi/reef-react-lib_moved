@@ -1,5 +1,5 @@
-import React from "react";
-import { BackIcon, DownArrowIcon, PlusIcon } from "../Icons";
+import React from 'react';
+import { BackIcon, DownArrowIcon, PlusIcon } from '../Icons';
 
 interface ButtonProps {
   onClick?: () => void;
@@ -96,7 +96,7 @@ export const PercentageButton: React.FC<PercentageButton> = ({
   <button
     type="button"
     className={`btn ${
-      Number.isNaN(percentage) ? "btn-reef" : "btn-secondary"
+      Number.isNaN(percentage) ? 'btn-reef' : 'btn-secondary'
     } border-rad me-1`}
     onClick={onClick}
   >

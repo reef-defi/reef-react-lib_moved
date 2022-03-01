@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { Pool } from "../../state";
-import { calculatePoolShare, convert2Normal, toBalance } from "../../utils";
-import { Button, EmptyButton } from "../common/Button";
-import { Card, CardHeader, CardTitle, SubCard } from "../common/Card";
+import React, { useEffect, useState } from 'react';
+import { Pool } from '../../state';
+import { calculatePoolShare, convert2Normal, toBalance } from '../../utils';
+import { Button, EmptyButton } from '../common/Button';
+import {
+  Card, CardHeader, CardTitle, SubCard,
+} from '../common/Card';
 import {
   CenterColumn,
   CenterRow,
@@ -14,12 +16,12 @@ import {
   MS,
   MT,
   Width,
-} from "../common/Display";
-import { DownIcon, TokenIcon, UpIcon } from "../common/Icons";
-import { ConfirmLabel } from "../common/Label";
-import { List, ListItem } from "../common/List";
-import { Loading } from "../common/Loading";
-import { MiniText, MutedText, Text } from "../common/Text";
+} from '../common/Display';
+import { DownIcon, TokenIcon, UpIcon } from '../common/Icons';
+import { ConfirmLabel } from '../common/Label';
+import { List, ListItem } from '../common/List';
+import { Loading } from '../common/Loading';
+import { MiniText, MutedText, Text } from '../common/Text';
 
 interface DefaultState {
   pool: Pool;
@@ -40,7 +42,9 @@ const DefaultState = ({ pool }: DefaultState): JSX.Element => (
     <CenterRow>
       <MS size="2">
         <Text>
-          {pool.token1.name}/{pool.token2.name}
+          {pool.token1.name}
+          /
+          {pool.token2.name}
         </Text>
       </MS>
     </CenterRow>
@@ -93,7 +97,7 @@ const OpenState = ({
           <ConfirmLabel
             title="Liquidity: "
             value={convert2Normal(pool.decimals, pool.minimumLiquidity).toFixed(
-              4
+              4,
             )}
           />
           <ConfirmLabel
@@ -114,9 +118,7 @@ const OpenState = ({
     <MT size="2" />
     <ContentEnd>
       <Button
-        onClick={() =>
-          openRemoveLiquidity(pool.token1.address, pool.token2.address)
-        }
+        onClick={() => openRemoveLiquidity(pool.token1.address, pool.token2.address)}
       >
         Remove supply
       </Button>

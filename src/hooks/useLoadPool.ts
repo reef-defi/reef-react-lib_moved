@@ -1,7 +1,7 @@
-import { Signer } from "@reef-defi/evm-provider";
-import { useState, useEffect } from "react";
-import { Pool, Token } from "..";
-import { loadPool } from "../rpc/pools";
+import { Signer } from '@reef-defi/evm-provider';
+import { useState, useEffect } from 'react';
+import { Pool, Token } from '..';
+import { loadPool } from '../rpc/pools';
 
 type LoadingPool = Pool | undefined;
 
@@ -9,7 +9,7 @@ export const useLoadPool = (
   token1: Token,
   token2: Token,
   factoryAddress: string,
-  signer?: Signer
+  signer?: Signer,
 ): [LoadingPool, boolean] => {
   const [pool, setPool] = useState<Pool>();
   const [isLoading, setIsLoading] = useState(false);
