@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { utils } from "ethers";
-import { decodeAddress } from "@polkadot/util-crypto";
-import { Provider } from "@reef-defi/evm-provider";
+import React, { useEffect, useState } from 'react';
+import { utils } from 'ethers';
+import { decodeAddress } from '@polkadot/util-crypto';
+import { Provider } from '@reef-defi/evm-provider';
 import {
   calculateUsdAmount,
   handleErr,
@@ -9,41 +9,41 @@ import {
   toDecimalPlaces,
   toUnits,
   TX_STATUS_ERROR_CODE,
-} from "../../utils";
+} from '../../utils';
 import {
   ensureTokenAmount,
   ReefSigner,
   reefTokenWithAmount,
   Token,
   TokenWithAmount,
-} from "../../state";
-import { getREEF20Contract } from "../../rpc";
+} from '../../state';
+import { getREEF20Contract } from '../../rpc';
 import {
   CenterColumn,
   ComponentCenter,
   FlexRow,
   Margin,
   MT,
-} from "../common/Display";
+} from '../common/Display';
 import {
   Card,
   CardHeader,
   CardHeaderBlank,
   CardTitle,
   SubCard,
-} from "../common/Card";
-import { TokenAmountFieldMax, TokenAmountView } from "../TokenFields";
-import { Input } from "../common/Input";
-import { MiniText } from "../common/Text";
+} from '../common/Card';
+import { TokenAmountFieldMax, TokenAmountView } from '../TokenFields';
+import { Input } from '../common/Input';
+import { MiniText } from '../common/Text';
 import ConfirmationModal, {
   ModalFooter,
   OpenModalButton,
-} from "../common/Modal";
-import { Loading, LoadingButtonIconWithText } from "../common/Loading";
-import { AccountListModal } from "../AccountSelector/AccountListModal";
-import { ConfirmLabel } from "../common/Label";
-import { Button } from "../common/Button";
-import { TxStatusHandler, TxStatusUpdate } from "../../utils/transactionUtil";
+} from '../common/Modal';
+import { Loading, LoadingButtonIconWithText } from '../common/Loading';
+import { AccountListModal } from '../AccountSelector/AccountListModal';
+import { ConfirmLabel } from '../common/Label';
+import { Button } from '../common/Button';
+import { TxStatusHandler, TxStatusUpdate } from '../../utils/transactionUtil';
 
 interface TransferComponent {
   tokens: Token[];
@@ -55,11 +55,11 @@ interface TransferComponent {
   currentAccount: ReefSigner;
 }
 
-const TX_IDENT_ANY = "TX_HASH_ANY";
+const TX_IDENT_ANY = 'TX_HASH_ANY';
 const REEF_TOKEN = reefTokenWithAmount();
 
 const isSubstrateAddress = (to: string): boolean => {
-  if (!to || !to.startsWith("5")) {
+  if (!to || !to.startsWith('5')) {
     return false;
   }
   try {
@@ -72,17 +72,17 @@ async function sendToEvmAddress(
   txToken: TokenWithAmount,
   signer: ReefSigner,
   to: string,
-  txHandler: TxStatusHandler
+  txHandler: TxStatusHandler,
 ): Promise<string> {
   const txIdent = Math.random().toString(10);
   const tokenContract = await getREEF20Contract(txToken.address, signer.signer);
   if (!tokenContract) {
     handleErr(
-      { message: "Contract does not exist." },
+      { message: 'Contract does not exist.' },
       txIdent,
-      "",
+      '',
       txHandler,
-      signer
+      signer,
     );
     return Promise.resolve(txIdent);
   }
@@ -102,44 +102,40 @@ async function sendToEvmAddress(
         });
       })
       .catch(async (e: any) => {
-        console.log("sendToEvmAddress error=", e);
-        handleErr(e, txIdent, "", txHandler, signer);
+        console.log('sendToEvmAddress error=', e);
+        handleErr(e, txIdent, '', txHandler, signer);
       });
   } catch (e) {
-    console.log("sendToEvmAddress err =", e);
-    handleErr(e, txIdent, "", txHandler, signer);
+    console.log('sendToEvmAddress err =', e);
+    handleErr(e, txIdent, '', txHandler, signer);
   }
   return Promise.resolve(txIdent);
 }
 
 const filterCurrentAccount = (
   accounts: ReefSigner[],
-  selected: ReefSigner
+  selected: ReefSigner,
 ): ReefSigner[] => accounts.filter((a) => a.address !== selected.address);
 
-const transferFeeNative = utils.parseEther("1.53").toString();
-const existentialDeposit = utils.parseEther("1.001").toString();
+const transferFeeNative = utils.parseEther('1.53').toString();
+const existentialDeposit = utils.parseEther('1.001').toString();
 
-const getSubtractedFeeAndExistential = (txToken: TokenWithAmount): string =>
-  toUnits({
-    balance: txToken.balance.sub(transferFeeNative).sub(existentialDeposit),
-    decimals: 18,
-  });
+const getSubtractedFeeAndExistential = (txToken: TokenWithAmount): string => toUnits({
+  balance: txToken.balance.sub(transferFeeNative).sub(existentialDeposit),
+  decimals: 18,
+});
 
-const getSubtractedFee = (txToken: TokenWithAmount): string =>
-  toUnits({ balance: txToken.balance.sub(transferFeeNative), decimals: 18 });
+const getSubtractedFee = (txToken: TokenWithAmount): string => toUnits({ balance: txToken.balance.sub(transferFeeNative), decimals: 18 });
 
 function toAmountInputValue(amt: string): string {
   return toDecimalPlaces(amt, 8);
 }
 
 // need to call onTxUpdate even if component is destroyed
-const getUpdateTxCallback =
-  (fns: (TxStatusHandler | undefined)[]): TxStatusHandler =>
-  (val) => {
-    const handlers = fns.filter((v) => !!v) as TxStatusHandler[];
-    handlers.forEach((fn) => fn(val));
-  };
+const getUpdateTxCallback = (fns: (TxStatusHandler | undefined)[]): TxStatusHandler => (val) => {
+  const handlers = fns.filter((v) => !!v) as TxStatusHandler[];
+  handlers.forEach((fn) => fn(val));
+};
 
 export const TransferComponent = ({
   tokens,
@@ -151,14 +147,13 @@ export const TransferComponent = ({
   accounts,
 }: TransferComponent): JSX.Element => {
   const [availableTxAccounts, setAvailableTxAccounts] = useState<ReefSigner[]>(
-    []
+    [],
   );
   const [isLoading, setIsLoading] = useState(false);
   const [txToken, setTxToken] = useState(token);
-  const [to, setTo] = useState("");
-  const [foundToAccountAddress, setFoundToAccountAddress] =
-    useState<ReefSigner | null>();
-  const [validationError, setValidationError] = useState("");
+  const [to, setTo] = useState('');
+  const [foundToAccountAddress, setFoundToAccountAddress] = useState<ReefSigner | null>();
+  const [validationError, setValidationError] = useState('');
   const [resultMessage, setResultMessage] = useState<{
     complete: boolean;
     title: string;
@@ -175,39 +170,39 @@ export const TransferComponent = ({
       return;
     }
     if (
-      lastTxIdentInProgress === txUpdateData?.txIdent ||
-      txUpdateData?.txIdent === TX_IDENT_ANY
+      lastTxIdentInProgress === txUpdateData?.txIdent
+      || txUpdateData?.txIdent === TX_IDENT_ANY
     ) {
       if (txUpdateData?.error) {
         setResultMessage({
           complete: true,
-          title: "Transaction failed",
-          message: txUpdateData.error.message || "",
+          title: 'Transaction failed',
+          message: txUpdateData.error.message || '',
         });
         return;
       }
       if (!txUpdateData?.isInBlock && !txUpdateData?.isComplete) {
         setResultMessage({
           complete: false,
-          title: "Transaction initiated",
-          message: "Sending transaction to blockchain.",
+          title: 'Transaction initiated',
+          message: 'Sending transaction to blockchain.',
           loading: true,
         });
         return;
       }
       if (txUpdateData?.isInBlock) {
-        let message = "Transaction was accepted in latest block.";
+        let message = 'Transaction was accepted in latest block.';
         if (!txUpdateData.txTypeEvm) {
-          message +=
-            " For maximum reliability you can wait block finality ~30sec.";
+          message
+            += ' For maximum reliability you can wait block finality ~30sec.';
         }
         setResultMessage({
           complete: true,
-          title: "Transaction successfull",
+          title: 'Transaction successfull',
           message,
           url:
-            txUpdateData.url ||
-            `https://reefscan.com/transfer/${txUpdateData.txHash}`,
+            txUpdateData.url
+            || `https://reefscan.com/transfer/${txUpdateData.txHash}`,
           loading: !txUpdateData.txTypeEvm,
         });
         return;
@@ -215,11 +210,11 @@ export const TransferComponent = ({
       if (txUpdateData?.isComplete) {
         setResultMessage({
           complete: true,
-          title: "Transaction complete",
-          message: "Token transfer has been finalized.",
+          title: 'Transaction complete',
+          message: 'Token transfer has been finalized.',
           url:
-            txUpdateData.url ||
-            `https://reefscan.com/transfer/${txUpdateData.txHash}`,
+            txUpdateData.url
+            || `https://reefscan.com/transfer/${txUpdateData.txHash}`,
         });
       }
     }
@@ -249,7 +244,7 @@ export const TransferComponent = ({
   const amountChanged = (amount: string): void => {
     let amt = amount;
     if (parseFloat(amt) <= 0) {
-      amt = "";
+      amt = '';
     }
     setTxToken({ ...txToken, amount: toAmountInputValue(amt) });
   };
@@ -258,7 +253,7 @@ export const TransferComponent = ({
 
   const tokenSelected = (tkn: Token): void => {
     if (tkn.address !== txToken.address) {
-      setTxToken({ ...tkn, amount: "", isEmpty: false } as TokenWithAmount);
+      setTxToken({ ...tkn, amount: '', isEmpty: false } as TokenWithAmount);
     }
   };
 
@@ -274,7 +269,7 @@ export const TransferComponent = ({
           txToken,
           from,
           to,
-          getUpdateTxCallback([onTxUpdate, setTxUpdateData])
+          getUpdateTxCallback([onTxUpdate, setTxUpdateData]),
         );
         setLastTxIdentInProgress(txIdent);
         getUpdateTxCallback([onTxUpdate, setTxUpdateData])({ txIdent });
@@ -284,13 +279,13 @@ export const TransferComponent = ({
           from,
           utils.parseEther(txToken.amount),
           to,
-          getUpdateTxCallback([onTxUpdate, setTxUpdateData])
+          getUpdateTxCallback([onTxUpdate, setTxUpdateData]),
         );
         setLastTxIdentInProgress(txIdent);
         getUpdateTxCallback([onTxUpdate, setTxUpdateData])({ txIdent });
       }
     } catch (err) {
-      console.log("onSendTxConfirmed error =", err);
+      console.log('onSendTxConfirmed error =', err);
       setLastTxIdentInProgress(TX_IDENT_ANY);
       getUpdateTxCallback([onTxUpdate, setTxUpdateData])({
         txIdent: TX_IDENT_ANY,
@@ -305,15 +300,15 @@ export const TransferComponent = ({
   };
 
   const initTransferUi = (): void => {
-    setLastTxIdentInProgress("");
+    setLastTxIdentInProgress('');
     setResultMessage(null);
-    amountChanged("");
-    setTo("");
+    amountChanged('');
+    setTo('');
   };
 
   useEffect(() => {
     if (!txToken.amount || utils.parseEther(txToken.amount).isZero()) {
-      setValidationError("Set amount");
+      setValidationError('Set amount');
       return;
     }
 
@@ -321,35 +316,34 @@ export const TransferComponent = ({
       .parseEther(txToken.amount)
       .gt(txToken.balance);
     if (!amountOverBalance && txToken.address === REEF_TOKEN.address) {
-      const isOverTxFee =
-        parseFloat(txToken.amount) >
-        parseFloat(toAmountInputValue(getSubtractedFee(txToken)));
+      const isOverTxFee = parseFloat(txToken.amount)
+        > parseFloat(toAmountInputValue(getSubtractedFee(txToken)));
       if (isOverTxFee) {
         setValidationError(
           `Amount too high for transfer fee ( ~${utils.formatUnits(
             transferFeeNative,
-            18
-          )}REEF)`
+            18,
+          )}REEF)`,
         );
         return;
       }
     }
 
     if (amountOverBalance) {
-      setValidationError("Amount exceeds balance");
+      setValidationError('Amount exceeds balance');
       return;
     }
 
     if (!to.trim()) {
-      setValidationError("Set address");
+      setValidationError('Set address');
       return;
     }
 
     if (!isSubstrateAddress(to) && !utils.isAddress(to)) {
-      setValidationError("Send to not valid address");
+      setValidationError('Send to not valid address');
       return;
     }
-    setValidationError("");
+    setValidationError('');
   }, [to, txToken]);
 
   useEffect(() => {
@@ -358,9 +352,8 @@ export const TransferComponent = ({
       return;
     }
     const foundToAddrAccount = accounts.find(
-      (a: any) =>
-        a.address.toLowerCase() === to.toLowerCase() ||
-        a.evmAddress.toLowerCase() === to.toLowerCase()
+      (a: any) => a.address.toLowerCase() === to.toLowerCase()
+        || a.evmAddress.toLowerCase() === to.toLowerCase(),
     );
     if (foundToAddrAccount) {
       setFoundToAccountAddress(foundToAddrAccount);
@@ -371,7 +364,7 @@ export const TransferComponent = ({
 
   const onAccountSelect = (_: any, selected: ReefSigner): void => {
     const selectAcc = async (): Promise<void> => {
-      let addr = "";
+      let addr = '';
       if (txToken.address === REEF_TOKEN.address) {
         addr = await selected.signer.getSubstrateAddress();
       }
@@ -433,39 +426,35 @@ export const TransferComponent = ({
                 onAddressChange={addressChanged}
                 hideSelectTokenCommonBaseView
                 afterBalanceEl={
-                  txToken.address === REEF_TOKEN.address &&
-                  isSubstrateAddress(to) ? (
+                  txToken.address === REEF_TOKEN.address
+                  && isSubstrateAddress(to) ? (
                     <span>
-                      {txToken.amount !==
-                        toAmountInputValue(getSubtractedFee(txToken)) && (
+                      {txToken.amount
+                        !== toAmountInputValue(getSubtractedFee(txToken)) && (
                         <span
                           className="text-primary text-decoration-none"
                           role="button"
-                          onClick={() =>
-                            amountChanged(getSubtractedFee(txToken))
-                          }
+                          onClick={() => amountChanged(getSubtractedFee(txToken))}
                         >
                           (Max)
                         </span>
                       )}
-                      {txToken.amount ===
-                        toAmountInputValue(getSubtractedFee(txToken)) && (
+                      {txToken.amount
+                        === toAmountInputValue(getSubtractedFee(txToken)) && (
                         <span
                           className="text-primary text-decoration-none"
                           role="button"
-                          onClick={() =>
-                            amountChanged(
-                              getSubtractedFeeAndExistential(txToken)
-                            )
-                          }
+                          onClick={() => amountChanged(
+                            getSubtractedFeeAndExistential(txToken),
+                          )}
                         >
                           (Keep existential deposit)
                         </span>
                       )}
                     </span>
-                  ) : (
-                    <span />
-                  )
+                    ) : (
+                      <span />
+                    )
                 }
               />
 
@@ -478,7 +467,7 @@ export const TransferComponent = ({
                     {isLoading ? (
                       <LoadingButtonIconWithText text="Sending" />
                     ) : (
-                      validationError || "Send"
+                      validationError || 'Send'
                     )}
                   </OpenModalButton>
                 </CenterColumn>
@@ -490,14 +479,14 @@ export const TransferComponent = ({
             id="selectMyAddress"
             accounts={availableTxAccounts}
             selectAccount={onAccountSelect}
-            title={
+            title={(
               <div>
                 Select account&nbsp;
                 {txToken.address !== REEF_TOKEN.address && (
                   <span className="text-xs">(Ethereum VM enabled)</span>
                 )}
               </div>
-            }
+            )}
           />
 
           <ConfirmationModal

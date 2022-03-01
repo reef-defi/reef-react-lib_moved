@@ -1,5 +1,5 @@
-import React from "react";
-import { BackIcon } from "../Icons";
+import React from 'react';
+import { BackIcon } from '../Icons';
 
 export const Card: React.FC = ({ children }): JSX.Element => (
   <div className="card border-rad">
@@ -12,7 +12,7 @@ export const CardHeader: React.FC<unknown> = ({ children }) => (
 );
 
 export const CardHeaderBlank = (): JSX.Element => (
-  <div style={{ width: "46px" }} />
+  <div style={{ width: '46px' }} />
 );
 
 interface Title {

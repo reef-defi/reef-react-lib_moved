@@ -1,7 +1,7 @@
-import React from "react";
-import { SubCard } from "../common/Card";
-import { ContentBetween, Margin } from "../common/Display";
-import { MiniText, MutedText, Title } from "../common/Text";
+import React from 'react';
+import { SubCard } from '../common/Card';
+import { ContentBetween, Margin } from '../common/Display';
+import { MiniText, MutedText, Title } from '../common/Text';
 
 interface TokenAmountView {
   name: string;

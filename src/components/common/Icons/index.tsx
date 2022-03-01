@@ -1,5 +1,5 @@
-import React from "react";
-import Identicon from "@polkadot/react-identicon";
+import React from 'react';
+import Identicon from '@polkadot/react-identicon';
 
 interface BaseIcon {
   small?: boolean;
@@ -11,10 +11,10 @@ interface Icon extends BaseIcon {
 
 const Icon: React.FC<Icon> = ({
   small = false,
-  className = "",
+  className = '',
   children,
 }): JSX.Element => {
-  const size = small ? "16" : "20";
+  const size = small ? '16' : '20';
   return (
     <svg
       width={size}
@@ -164,7 +164,7 @@ interface TokenIcon extends BaseIcon {
 
 export const TokenIcon = ({ src }: TokenIcon): JSX.Element => (
   <div className="d-flex my-auto user-select-none">
-    {src === "" ? (
+    {src === '' ? (
       <DefaultTokenIcon />
     ) : (
       <img

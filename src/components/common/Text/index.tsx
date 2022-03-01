@@ -1,5 +1,5 @@
-import React from "react";
-import { Color } from "../../../state/types";
+import React from 'react';
+import { Color } from '../../../state/types';
 
 export const LargeTitle: React.FC<unknown> = ({ children }): JSX.Element => (
   <h1 className="display-3 user-select-none">{children}</h1>
@@ -23,7 +23,7 @@ interface ColorText {
 
 export const ColorText: React.FC<ColorText> = ({
   children,
-  color = "success",
+  color = 'success',
 }): JSX.Element => (
   <span className={`user-select-none text-${color}`}>{children}</span>
 );

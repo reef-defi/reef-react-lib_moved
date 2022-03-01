@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { Pool, TokenWithAmount } from "../state";
-import { assertAmount, getInputAmount, getOutputAmount } from "../utils/math";
+import { useState, useEffect } from 'react';
+import { Pool, TokenWithAmount } from '../state';
+import { assertAmount, getInputAmount, getOutputAmount } from '../utils/math';
 
 interface UpdateAmountHookInput {
   pool?: Pool;
@@ -54,10 +54,10 @@ export const useUpdateLiquidityAmount = ({
     const ratio = token2.price / token1.price;
     if (token1.address !== prevAddress1) {
       const amount = parseFloat(assertAmount(token2.amount)) * ratio;
-      setToken1({ ...token1, amount: amount === 0 ? "" : amount.toFixed(4) });
+      setToken1({ ...token1, amount: amount === 0 ? '' : amount.toFixed(4) });
     } else if (token2.address !== prevAddress2) {
       const amount = parseFloat(assertAmount(token1.amount)) / ratio;
-      setToken2({ ...token2, amount: amount === 0 ? "" : amount.toFixed(4) });
+      setToken2({ ...token2, amount: amount === 0 ? '' : amount.toFixed(4) });
     }
     setPrevAddress1(token1.address);
     setPrevAddress2(token2.address);

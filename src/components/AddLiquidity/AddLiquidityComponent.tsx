@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { BigNumber } from "ethers";
-import { SwitchTokenButton } from "../common/Button";
-import { Card, CardBack, CardHeader, CardTitle } from "../common/Card";
-import { TokenAmountField } from "../TokenFields";
-import { LoadingButtonIconWithText } from "../common/Loading";
-import { approveTokenAmount, getReefswapRouter } from "../../rpc";
+import React, { useEffect, useState } from 'react';
+import { BigNumber } from 'ethers';
+import { SwitchTokenButton } from '../common/Button';
+import {
+  Card, CardBack, CardHeader, CardTitle,
+} from '../common/Card';
+import { TokenAmountField } from '../TokenFields';
+import { LoadingButtonIconWithText } from '../common/Loading';
+import { approveTokenAmount, getReefswapRouter } from '../../rpc';
 import {
   assertAmount,
   calculateAmount,
@@ -13,11 +15,11 @@ import {
   calculatePoolShare,
   calculatePoolSupply,
   ensureAmount,
-} from "../../utils/math";
-import { useUpdateBalance } from "../../hooks/useUpdateBalance";
-import { useLoadPool } from "../../hooks/useLoadPool";
-import { useUpdateTokensPrice } from "../../hooks/useUpdateTokensPrice";
-import { useUpdateLiquidityAmount } from "../../hooks/useUpdateAmount";
+} from '../../utils/math';
+import { useUpdateBalance } from '../../hooks/useUpdateBalance';
+import { useLoadPool } from '../../hooks/useLoadPool';
+import { useUpdateTokensPrice } from '../../hooks/useUpdateTokensPrice';
+import { useUpdateLiquidityAmount } from '../../hooks/useUpdateAmount';
 import {
   availableNetworks,
   createEmptyTokenWithAmount,
@@ -28,17 +30,17 @@ import {
   resolveSettings,
   Token,
   TokenWithAmount,
-} from "../../state";
+} from '../../state';
 import {
   ButtonStatus,
   errorHandler,
   TX_STATUS_ERROR_CODE,
   TxStatusHandler,
-} from "../../utils";
-import { TransactionSettings } from "../TransactionSettings";
-import ConfirmationModal from "../common/Modal";
-import { ConfirmLabel } from "../common/Label";
-import { ComponentCenter } from "../common/Display";
+} from '../../utils';
+import { TransactionSettings } from '../TransactionSettings';
+import ConfirmationModal from '../common/Modal';
+import { ConfirmLabel } from '../common/Label';
+import { ComponentCenter } from '../common/Display';
 
 const errorStatus = (text: string): ButtonStatus => ({
   isValid: false,
@@ -48,19 +50,19 @@ const errorStatus = (text: string): ButtonStatus => ({
 const buttonStatus = (
   token1: TokenWithAmount,
   token2: TokenWithAmount,
-  isEvmClaimed: boolean
+  isEvmClaimed: boolean,
 ): ButtonStatus => {
   if (!isEvmClaimed) {
-    return errorStatus("Bind account");
+    return errorStatus('Bind account');
   }
   if (token1.isEmpty || token2.isEmpty) {
-    return errorStatus("Invalid pair");
+    return errorStatus('Invalid pair');
   }
   if (token1.amount.length === 0) {
-    return errorStatus("Missing first token amount");
+    return errorStatus('Missing first token amount');
   }
   if (token2.amount.length === 0) {
-    return errorStatus("Missing second token amount");
+    return errorStatus('Missing second token amount');
   }
   if (BigNumber.from(calculateAmount(token1)).gt(token1.balance)) {
     return errorStatus(`Insufficient ${token1.name} balance`);
@@ -68,24 +70,24 @@ const buttonStatus = (
   if (BigNumber.from(calculateAmount(token2)).gt(token2.balance)) {
     return errorStatus(`Insufficient ${token2.name} balance`);
   }
-  return { isValid: true, text: "Supply" };
+  return { isValid: true, text: 'Supply' };
 };
 
 const loadingStatus = (
   status: string,
   isPoolLoading: boolean,
-  isPriceLoading: boolean
+  isPriceLoading: boolean,
 ): string => {
   if (status) {
     return status;
   }
   if (isPoolLoading) {
-    return "Loading pool";
+    return 'Loading pool';
   }
   if (isPriceLoading) {
-    return "Loading prices";
+    return 'Loading prices';
   }
-  return "";
+  return '';
 };
 
 interface AddLiquidityComponent {
@@ -111,12 +113,12 @@ export const AddLiquidityComponent = ({
 }: AddLiquidityComponent): JSX.Element => {
   const { signer: sgnr, evmAddress, isEvmClaimed } = signer;
 
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState('');
   const [settings, setSettings] = useState(defaultSettings());
   const [isLiquidityLoading, setIsLiquidityLoading] = useState(false);
 
   const [token2, setToken2] = useState(
-    tokenValue2 || createEmptyTokenWithAmount()
+    tokenValue2 || createEmptyTokenWithAmount(),
   );
   const [token1, setToken1] = useState(tokenValue1 || reefTokenWithAmount());
   const { deadline, percentage } = resolveSettings(settings);
@@ -130,7 +132,7 @@ export const AddLiquidityComponent = ({
     token1,
     token2,
     network.factoryAddress,
-    sgnr
+    sgnr,
   );
   const newPoolSupply = calculatePoolSupply(token1, token2, pool);
 
@@ -157,20 +159,18 @@ export const AddLiquidityComponent = ({
   const isLoading = isLiquidityLoading || isPoolLoading || isPriceLoading;
   const { text, isValid } = buttonStatus(token1, token2, isEvmClaimed);
 
-  const changeToken1 = (newToken: Token): void =>
-    setToken1({
-      ...newToken,
-      amount: "",
-      price: 0,
-      isEmpty: false,
-    });
-  const changeToken2 = (newToken: Token): void =>
-    setToken2({
-      ...newToken,
-      amount: "",
-      price: 0,
-      isEmpty: false,
-    });
+  const changeToken1 = (newToken: Token): void => setToken1({
+    ...newToken,
+    amount: '',
+    price: 0,
+    isEmpty: false,
+  });
+  const changeToken2 = (newToken: Token): void => setToken2({
+    ...newToken,
+    amount: '',
+    price: 0,
+    isEmpty: false,
+  });
 
   const setAmount1 = (amount: string): void => {
     if (isLoading) {
@@ -178,9 +178,8 @@ export const AddLiquidityComponent = ({
     }
     setToken1({ ...token1, amount });
     if (token1.price && token2.price) {
-      const newAmount =
-        (token1.price / token2.price) * parseFloat(assertAmount(amount));
-      setToken2({ ...token2, amount: !newAmount ? "" : newAmount.toFixed(4) });
+      const newAmount = (token1.price / token2.price) * parseFloat(assertAmount(amount));
+      setToken2({ ...token2, amount: !newAmount ? '' : newAmount.toFixed(4) });
     }
   };
   const setAmount2 = (amount: string): void => {
@@ -189,9 +188,8 @@ export const AddLiquidityComponent = ({
     }
     setToken2({ ...token2, amount });
     if (token1.price && token2.price) {
-      const newAmount =
-        (token2.price / token1.price) * parseFloat(assertAmount(amount));
-      setToken1({ ...token1, amount: !newAmount ? "" : newAmount.toFixed(4) });
+      const newAmount = (token2.price / token1.price) * parseFloat(assertAmount(amount));
+      setToken1({ ...token1, amount: !newAmount ? '' : newAmount.toFixed(4) });
     }
   };
 
@@ -211,7 +209,7 @@ export const AddLiquidityComponent = ({
       setStatus(`Approving ${token2.name} token`);
       await approveTokenAmount(token2, network.routerAddress, sgnr);
 
-      setStatus("Adding supply");
+      setStatus('Adding supply');
       const reefswapRouter = getReefswapRouter(network.routerAddress, sgnr);
       if (onTxUpdate) {
         onTxUpdate({
@@ -226,7 +224,7 @@ export const AddLiquidityComponent = ({
         calculateAmountWithPercentage(token1, percentage), // min amount token1
         calculateAmountWithPercentage(token2, percentage), // min amount token2
         evmAddress,
-        calculateDeadline(deadline)
+        calculateDeadline(deadline),
       );
       if (onTxUpdate) {
         onTxUpdate({
@@ -235,7 +233,7 @@ export const AddLiquidityComponent = ({
           isInBlock: true,
           txTypeEvm: true,
           url: `https://${
-            network === availableNetworks.mainnet ? "" : `${network.name}.`
+            network === availableNetworks.mainnet ? '' : `${network.name}.`
           }reefscan.com/extrinsic/${contractCall.hash}`,
           addresses: [signer.address],
         });
@@ -243,8 +241,8 @@ export const AddLiquidityComponent = ({
       // toast.success(`${token1.name}/${token2.name} supply added successfully!`);
     } catch (error) {
       const message = errorHandler(error.message)
-        .replace("first", token1.name)
-        .replace("second", token2.name);
+        .replace('first', token1.name)
+        .replace('second', token2.name);
       // toast.error(errorHandler(message));
       if (onTxUpdate) {
         onTxUpdate({
@@ -259,7 +257,7 @@ export const AddLiquidityComponent = ({
       dispatch(setAllTokensAction(newTokens)); */
 
       setIsLiquidityLoading(false);
-      setStatus("");
+      setStatus('');
     }
   };
 
@@ -334,8 +332,10 @@ export const AddLiquidityComponent = ({
           </div>
           <div className="m-3">
             <span className="mini-text text-muted d-inline-block">
-              Output is estimated. If the price changes by more than{" "}
-              {percentage}% your transaction will revert.
+              Output is estimated. If the price changes by more than
+              {' '}
+              {percentage}
+              % your transaction will revert.
             </span>
           </div>
           <div className="field p-2 border-rad">
