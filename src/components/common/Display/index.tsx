@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 interface FlexRow {
   className?: string;
@@ -6,7 +6,7 @@ interface FlexRow {
 }
 export const FlexRow: React.FC<FlexRow> = ({
   children,
-  className = "",
+  className = '',
 }): JSX.Element => (
   <div className={`d-flex flex-row ${className}`}>{children}</div>
 );
@@ -54,53 +54,53 @@ export const Width: React.FC<Width> = ({ children, size }): JSX.Element => (
 );
 
 interface Size {
-  size?: "1" | "2" | "3" | "4" | "5" | "6" | "auto";
+  size?: '1' | '2' | '3' | '4' | '5' | '6' | 'auto';
 }
 
 export const Margin: React.FC<Size> = ({
   children,
-  size = "1",
+  size = '1',
 }): JSX.Element => <div className={`m-${size}`}>{children}</div>;
 
-export const MT: React.FC<Size> = ({ children, size = "1" }): JSX.Element => (
+export const MT: React.FC<Size> = ({ children, size = '1' }): JSX.Element => (
   <div className={`mt-${size}`}>{children}</div>
 );
-export const ME: React.FC<Size> = ({ children, size = "1" }): JSX.Element => (
+export const ME: React.FC<Size> = ({ children, size = '1' }): JSX.Element => (
   <div className={`me-${size}`}>{children}</div>
 );
-export const MB: React.FC<Size> = ({ children, size = "1" }): JSX.Element => (
+export const MB: React.FC<Size> = ({ children, size = '1' }): JSX.Element => (
   <div className={`mb-${size}`}>{children}</div>
 );
-export const MS: React.FC<Size> = ({ children, size = "1" }): JSX.Element => (
+export const MS: React.FC<Size> = ({ children, size = '1' }): JSX.Element => (
   <div className={`ms-${size}`}>{children}</div>
 );
 
 export const MX: React.FC<Size> = ({
   children,
-  size = "auto",
+  size = 'auto',
 }): JSX.Element => <div className={`mx-${size}`}>{children}</div>;
 
 export const PY: React.FC<Size> = ({
   children,
-  size = "auto",
+  size = 'auto',
 }): JSX.Element => <div className={`py-${size}`}>{children}</div>;
 
-export const PT: React.FC<Size> = ({ children, size = "1" }): JSX.Element => (
+export const PT: React.FC<Size> = ({ children, size = '1' }): JSX.Element => (
   <div className={`pt-${size}`}>{children}</div>
 );
-export const PE: React.FC<Size> = ({ children, size = "1" }): JSX.Element => (
+export const PE: React.FC<Size> = ({ children, size = '1' }): JSX.Element => (
   <div className={`pe-${size}`}>{children}</div>
 );
-export const PB: React.FC<Size> = ({ children, size = "1" }): JSX.Element => (
+export const PB: React.FC<Size> = ({ children, size = '1' }): JSX.Element => (
   <div className={`pb-${size}`}>{children}</div>
 );
-export const PS: React.FC<Size> = ({ children, size = "1" }): JSX.Element => (
+export const PS: React.FC<Size> = ({ children, size = '1' }): JSX.Element => (
   <div className={`ps-${size}`}>{children}</div>
 );
 
 export const Border: React.FC<Size> = ({
   children,
-  size = "1",
+  size = '1',
 }): JSX.Element => (
   <div className={`border border-rad p-${size}`}>{children}</div>
 );

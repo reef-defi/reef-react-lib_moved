@@ -1,18 +1,18 @@
-import React from "react";
+import React from 'react';
 import {
   DEFAULT_DEADLINE,
   DEFAULT_SLIPPAGE_TOLERANCE,
   MAX_SLIPPAGE_TOLERANCE,
   Settings,
-} from "../../state";
-import { ButtonGroup, PercentageButton } from "../common/Button";
-import { FlexRow, MS, PT } from "../common/Display";
-import { DropdownButton, DropdownMenu } from "../common/Dropdown";
-import { GearIcon } from "../common/Icons";
-import { InputGroup, InputTextGroup, NumberInput } from "../common/Input";
-import { FormLabel, TransactionWarningLabel } from "../common/Label";
-import { MutedText, Title } from "../common/Text";
-import { QuestionTooltip } from "../common/Tooltip";
+} from '../../state';
+import { ButtonGroup, PercentageButton } from '../common/Button';
+import { FlexRow, MS, PT } from '../common/Display';
+import { DropdownButton, DropdownMenu } from '../common/Dropdown';
+import { GearIcon } from '../common/Icons';
+import { InputGroup, InputTextGroup, NumberInput } from '../common/Input';
+import { FormLabel, TransactionWarningLabel } from '../common/Label';
+import { MutedText, Title } from '../common/Text';
+import { QuestionTooltip } from '../common/Tooltip';
 
 interface TransactionSettings {
   id?: string;
@@ -24,7 +24,7 @@ interface TransactionSettings {
 export const TransactionSettings: React.FC<TransactionSettings> = ({
   settings,
   setSettings,
-  id = "settings",
+  id = 'settings',
   defaultSlippageTolerance = DEFAULT_SLIPPAGE_TOLERANCE,
 }): JSX.Element => (
   <ButtonGroup>
@@ -50,19 +50,17 @@ export const TransactionSettings: React.FC<TransactionSettings> = ({
         <InputGroup>
           <NumberInput
             value={
-              Number.isNaN(settings.percentage) ? "" : `${settings.percentage}`
+              Number.isNaN(settings.percentage) ? '' : `${settings.percentage}`
             }
             min={0}
             max={100}
             step={0.1}
             className="border-right-0"
             placeholder={`${defaultSlippageTolerance}`}
-            onChange={(value) =>
-              setSettings({
-                ...settings,
-                percentage: value ? parseFloat(value) : Number.NaN,
-              })
-            }
+            onChange={(value) => setSettings({
+              ...settings,
+              percentage: value ? parseFloat(value) : Number.NaN,
+            })}
           />
           <InputTextGroup>%</InputTextGroup>
         </InputGroup>
@@ -73,8 +71,8 @@ export const TransactionSettings: React.FC<TransactionSettings> = ({
             Your transaction may fail
           </TransactionWarningLabel>
         )}
-        {settings.percentage >
-          defaultSlippageTolerance + MAX_SLIPPAGE_TOLERANCE && (
+        {settings.percentage
+          > defaultSlippageTolerance + MAX_SLIPPAGE_TOLERANCE && (
           <TransactionWarningLabel>
             Your transaction may be frontrun
           </TransactionWarningLabel>
@@ -93,13 +91,11 @@ export const TransactionSettings: React.FC<TransactionSettings> = ({
           max={30}
           step={1}
           placeholder={`${DEFAULT_DEADLINE}`}
-          value={Number.isNaN(settings.deadline) ? "" : `${settings.deadline}`}
-          onChange={(value) =>
-            setSettings({
-              ...settings,
-              deadline: value ? parseInt(value, 10) : Number.NaN,
-            })
-          }
+          value={Number.isNaN(settings.deadline) ? '' : `${settings.deadline}`}
+          onChange={(value) => setSettings({
+            ...settings,
+            deadline: value ? parseInt(value, 10) : Number.NaN,
+          })}
         />
         <MS size="2">
           <MutedText>minutes</MutedText>

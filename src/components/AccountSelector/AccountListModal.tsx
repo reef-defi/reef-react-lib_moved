@@ -1,11 +1,11 @@
-import React, { ReactElement } from "react";
-import { ReefSigner } from "../../state";
-import { BackIcon, CloseIcon } from "../common/Icons";
-import { ListItem } from "../common/List";
-import { Modal, ModalHeader } from "../common/Modal";
-import { Title } from "../common/Text";
-import AccountInlineInfo from "./AccountInlineInfo";
-import { getSignerIdent } from "../../rpc";
+import React, { ReactElement } from 'react';
+import { ReefSigner } from '../../state';
+import { BackIcon, CloseIcon } from '../common/Icons';
+import { ListItem } from '../common/List';
+import { Modal, ModalHeader } from '../common/Modal';
+import { Title } from '../common/Text';
+import AccountInlineInfo from './AccountInlineInfo';
+import { getSignerIdent } from '../../rpc';
 
 interface AccountListModal {
   id: string;
@@ -20,7 +20,7 @@ export const AccountListModal = ({
   accounts,
   selectAccount,
   backButtonModalId,
-  title = "Select account",
+  title = 'Select account',
 }: AccountListModal): JSX.Element => {
   const accountsView = accounts.map((acc, index) => (
     <ListItem key={getSignerIdent(acc)}>
@@ -58,7 +58,7 @@ export const AccountListModal = ({
         </button>
       </ModalHeader>
       <div className="modal-body px-0">
-        <ul className="list-group overflow-scroll" style={{ height: "300px" }}>
+        <ul className="list-group overflow-scroll" style={{ height: '300px' }}>
           {accountsView}
         </ul>
       </div>

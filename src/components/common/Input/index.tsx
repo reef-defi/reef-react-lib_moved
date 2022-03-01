@@ -1,4 +1,4 @@
-import React, { BaseSyntheticEvent, useEffect, useState } from "react";
+import React, { BaseSyntheticEvent, useEffect, useState } from 'react';
 
 interface Input {
   value?: string;
@@ -35,10 +35,10 @@ interface InputAmount {
 export const InputAmount = ({
   amount,
   onAmountChange,
-  placeholder = "",
+  placeholder = '',
   disabled = false,
 }: InputAmount): JSX.Element => {
-  const mathDecimals = !amount ? "" : amount.replaceAll(",", ".");
+  const mathDecimals = !amount ? '' : amount.replaceAll(',', '.');
   const [amt, setAmt] = useState(mathDecimals);
   useEffect(() => setAmt(amount), [amount]);
   const inputChange = (event: any): void => {
@@ -88,15 +88,15 @@ export const NumberInput = ({
   placeholder,
   onChange,
   disableDecimals,
-  className = "",
+  className = '',
 }: NumberInput): JSX.Element => {
   const keyDown = (e: BaseSyntheticEvent): void => {
     if (!disableDecimals) {
       return;
     }
     if (
-      (e.nativeEvent as KeyboardEvent).key === "." ||
-      (e.nativeEvent as KeyboardEvent).key === ","
+      (e.nativeEvent as KeyboardEvent).key === '.'
+      || (e.nativeEvent as KeyboardEvent).key === ','
     ) {
       e.preventDefault();
       (e.nativeEvent as any).stopImmediatePropagation();
@@ -113,7 +113,7 @@ export const NumberInput = ({
       placeholder={placeholder}
       onChange={(event) => onChange(event.target.value)}
       onKeyDown={keyDown}
-      className={className || "form-control field-input border-rad text-end"}
+      className={className || 'form-control field-input border-rad text-end'}
     />
   );
 };

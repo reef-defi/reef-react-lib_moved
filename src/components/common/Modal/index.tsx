@@ -1,5 +1,5 @@
-import React from "react";
-import { Title } from "../Text";
+import React from 'react';
+import { Title } from '../Text';
 
 interface Modal {
   id?: string;
@@ -7,7 +7,7 @@ interface Modal {
 
 export const Modal: React.FC<Modal> = ({
   children,
-  id = "modal",
+  id = 'modal',
 }): JSX.Element => (
   <div
     className="modal fade"
@@ -46,7 +46,7 @@ export const ModalClose: React.FC<ModalClose> = ({
 }): JSX.Element => (
   <button
     type="button"
-    className={className || "btn-close"}
+    className={className || 'btn-close'}
     onClick={onClick}
     data-bs-dismiss="modal"
     aria-label="Close"
@@ -63,7 +63,7 @@ interface OpenModalButton {
 
 export const OpenModalButton: React.FC<OpenModalButton> = ({
   children,
-  id = "open-modal-button",
+  id = 'open-modal-button',
   disabled,
   className,
 }): JSX.Element => (
@@ -72,7 +72,7 @@ export const OpenModalButton: React.FC<OpenModalButton> = ({
     disabled={disabled}
     data-bs-toggle="modal"
     data-bs-target={`#${id}`}
-    className={className || "btn btn-reef btn-lg border-rad w-100"}
+    className={className || 'btn btn-reef btn-lg border-rad w-100'}
   >
     <span>{children}</span>
   </button>
@@ -86,10 +86,10 @@ interface ConfirmationModal {
 }
 
 const ConfirmationModal: React.FC<ConfirmationModal> = ({
-  id = "exampleModal",
+  id = 'exampleModal',
   title,
   confirmFun,
-  confirmBtnLabel = "Confirm",
+  confirmBtnLabel = 'Confirm',
   children,
 }): JSX.Element => (
   <Modal id={id}>

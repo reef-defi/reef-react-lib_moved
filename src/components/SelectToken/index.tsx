@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { utils } from "ethers";
-import { useAsyncEffect } from "../../hooks";
-import { ReefSigner, Token } from "../../state";
+import React, { useEffect, useState } from 'react';
+import { utils } from 'ethers';
+import { useAsyncEffect } from '../../hooks';
+import { ReefSigner, Token } from '../../state';
 import {
   DataProgress,
   DataWithProgress,
@@ -9,8 +9,8 @@ import {
   getProgress,
   toBalance,
   trim,
-} from "../../utils";
-import { IconButton } from "../common/Button";
+} from '../../utils';
+import { IconButton } from '../common/Button';
 import {
   CenterRow,
   ContentEnd,
@@ -19,15 +19,19 @@ import {
   FullRow,
   Margin,
   MS,
-} from "../common/Display";
-import { DownIcon, TokenIcon } from "../common/Icons";
-import { Input } from "../common/Input";
-import { List, ListEmptyItem, ListItemDismissModal } from "../common/List";
-import { Loading } from "../common/Loading";
-import { Modal, ModalBody, ModalClose, ModalHeader } from "../common/Modal";
-import { LeadText, MiniText, MutedText, Text, Title } from "../common/Text";
-import { QuestionTooltip } from "../common/Tooltip";
-import { loadToken } from "../../rpc";
+} from '../common/Display';
+import { DownIcon, TokenIcon } from '../common/Icons';
+import { Input } from '../common/Input';
+import { List, ListEmptyItem, ListItemDismissModal } from '../common/List';
+import { Loading } from '../common/Loading';
+import {
+  Modal, ModalBody, ModalClose, ModalHeader,
+} from '../common/Modal';
+import {
+  LeadText, MiniText, MutedText, Text, Title,
+} from '../common/Text';
+import { QuestionTooltip } from '../common/Tooltip';
+import { loadToken } from '../../rpc';
 
 interface SelectToken {
   id?: string;
@@ -41,12 +45,12 @@ interface SelectToken {
   signer: ReefSigner;
 }
 
-const COMMON_BASES = ["REEF"];
+const COMMON_BASES = ['REEF'];
 
 const emptyFunction = async (): Promise<void> => {};
 
 const SelectToken = ({
-  id = "exampleModal",
+  id = 'exampleModal',
   tokens,
   selectedTokenName,
   onTokenSelect,
@@ -57,12 +61,12 @@ const SelectToken = ({
   signer,
 }: SelectToken): JSX.Element => {
   const [isLoading, setIsLoading] = useState(false);
-  const [address, setAddress] = useState("");
+  const [address, setAddress] = useState('');
   const [foundSearchTokens, setFoundSearchTokens] = useState<
     DataWithProgress<Token[]>
   >([...tokens]);
 
-  const isEmpty = selectedTokenName === "Select token";
+  const isEmpty = selectedTokenName === 'Select token';
 
   useEffect(() => {
     if (!signer) {
@@ -70,20 +74,19 @@ const SelectToken = ({
     }
     async function searchTokens(): Promise<void> {
       let tokenSearchRes = [...tokens].filter(
-        (token) =>
-          token.name.toLowerCase().startsWith(address.toLowerCase()) ||
-          token.address.toLowerCase().startsWith(address.toLowerCase())
+        (token) => token.name.toLowerCase().startsWith(address.toLowerCase())
+          || token.address.toLowerCase().startsWith(address.toLowerCase()),
       );
       if (!tokenSearchRes.length && utils.isAddress(address)) {
         setFoundSearchTokens(DataProgress.LOADING);
         const contractToken: Token | null = await loadToken(
           address,
-          signer.signer
+          signer.signer,
         );
         if (contractToken) {
           tokenSearchRes = [contractToken];
         } else {
-          console.log("searchTokens contract not found addr=", address);
+          console.log('searchTokens contract not found addr=', address);
         }
       }
       setFoundSearchTokens(tokenSearchRes);
@@ -141,14 +144,14 @@ const SelectToken = ({
     <div>
       <button
         type="button"
-        className={`btn btn-select border-rad ${fullWidth && "w-100"} ${
-          isEmpty ? "btn-reef" : "btn-token-select"
+        className={`btn btn-select border-rad ${fullWidth && 'w-100'} ${
+          isEmpty ? 'btn-reef' : 'btn-token-select'
         }`}
         data-bs-toggle="modal"
         data-bs-target={`#${id}`}
       >
         {!isEmpty && <TokenIcon src={iconUrl} />}
-        <div className={`my-auto ${!isEmpty ? "mx-2" : "me-2"}`}>
+        <div className={`my-auto ${!isEmpty ? 'mx-2' : 'me-2'}`}>
           {selectedTokenName}
         </div>
         <DownIcon small />
@@ -171,7 +174,9 @@ const SelectToken = ({
                 <FlexRow>
                   Common bases
                   <QuestionTooltip>
-                    These tokens are commonly <br />
+                    These tokens are commonly
+                    {' '}
+                    <br />
                     paired with other tokens.
                   </QuestionTooltip>
                 </FlexRow>
@@ -181,12 +186,12 @@ const SelectToken = ({
           )}
           <List>
             <ListEmptyItem />
-            {isLoading ||
-            getProgress(foundSearchTokens) === DataProgress.LOADING ? (
+            {isLoading
+            || getProgress(foundSearchTokens) === DataProgress.LOADING ? (
               <Loading />
-            ) : (
-              tokensView
-            )}
+              ) : (
+                tokensView
+              )}
             <ListEmptyItem />
           </List>
         </ModalBody>

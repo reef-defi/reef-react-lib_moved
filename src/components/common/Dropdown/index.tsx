@@ -1,5 +1,5 @@
-import React from "react";
-import { Margin } from "../Display";
+import React from 'react';
+import { Margin } from '../Display';
 
 interface Dropdown {
   id?: string;
@@ -11,7 +11,7 @@ export const Dropdown: React.FC<unknown> = ({ children }): JSX.Element => (
 
 export const DropdownButton: React.FC<Dropdown> = ({
   children,
-  id = "dropdown-button",
+  id = 'dropdown-button',
 }): JSX.Element => (
   <button
     id={id}
@@ -31,8 +31,8 @@ interface DropdownMenu extends Dropdown {
 
 export const DropdownMenu: React.FC<DropdownMenu> = ({
   children,
-  id = "dropdown-button",
-  size = "auto",
+  id = 'dropdown-button',
+  size = 'auto',
 }): JSX.Element => (
   <div
     className="dropdown-menu dropdown-menu-end border-rad"

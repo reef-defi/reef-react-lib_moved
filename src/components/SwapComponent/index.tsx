@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from "react";
-import { BigNumber } from "ethers";
+import React, { useMemo, useState } from 'react';
+import { BigNumber } from 'ethers';
 import {
   availableNetworks,
   createEmptyTokenWithAmount,
@@ -12,8 +12,8 @@ import {
   resolveSettings,
   Token,
   TokenWithAmount,
-} from "../../state";
-import { ButtonStatus, ensure, TX_STATUS_ERROR_CODE } from "../../utils";
+} from '../../state';
+import { ButtonStatus, ensure, TX_STATUS_ERROR_CODE } from '../../utils';
 import {
   calculateAmount,
   calculateAmountWithPercentage,
@@ -22,25 +22,27 @@ import {
   convert2Normal,
   getInputAmount,
   getOutputAmount,
-} from "../../utils/math";
-import { useLoadPool } from "../../hooks/useLoadPool";
-import { getReefswapRouter } from "../../rpc";
-import { useUpdateBalance } from "../../hooks/useUpdateBalance";
-import { useUpdateSwapAmount } from "../../hooks/useUpdateAmount";
-import { useUpdateTokensPrice } from "../../hooks/useUpdateTokensPrice";
-import { approveTokenAmount } from "../../rpc/tokens";
-import { Card, CardHeader, CardHeaderBlank, CardTitle } from "../common/Card";
+} from '../../utils/math';
+import { useLoadPool } from '../../hooks/useLoadPool';
+import { getReefswapRouter } from '../../rpc';
+import { useUpdateBalance } from '../../hooks/useUpdateBalance';
+import { useUpdateSwapAmount } from '../../hooks/useUpdateAmount';
+import { useUpdateTokensPrice } from '../../hooks/useUpdateTokensPrice';
+import { approveTokenAmount } from '../../rpc/tokens';
+import {
+  Card, CardHeader, CardHeaderBlank, CardTitle,
+} from '../common/Card';
 import {
   TokenAmountFieldImpactPrice,
   TokenAmountFieldMax,
-} from "../TokenFields";
-import { SwitchTokenButton } from "../common/Button";
-import SwapConfirmationModal from "./SwapConfirmationModal";
-import { CenterColumn, ComponentCenter, MT } from "../common/Display";
-import { OpenModalButton } from "../common/Modal";
-import { LoadingButtonIconWithText } from "../common/Loading";
-import { TransactionSettings } from "../TransactionSettings";
-import { TxStatusHandler } from "../../utils/transactionUtil";
+} from '../TokenFields';
+import { SwitchTokenButton } from '../common/Button';
+import SwapConfirmationModal from './SwapConfirmationModal';
+import { CenterColumn, ComponentCenter, MT } from '../common/Display';
+import { OpenModalButton } from '../common/Modal';
+import { LoadingButtonIconWithText } from '../common/Loading';
+import { TransactionSettings } from '../TransactionSettings';
+import { TxStatusHandler } from '../../utils/transactionUtil';
 
 interface SwapComponent {
   tokens: Token[];
@@ -53,25 +55,27 @@ const swapStatus = (
   sell: TokenWithAmount,
   buy: TokenWithAmount,
   isEvmClaimed?: boolean,
-  pool?: Pool
+  pool?: Pool,
 ): ButtonStatus => {
   try {
-    ensure(isEvmClaimed === true, "Bind account");
-    ensure(!sell.isEmpty, "Select sell token");
-    ensure(!buy.isEmpty, "Select buy token");
-    ensure(buy.address !== sell.address, "Tokens must be different");
-    ensure(!!pool, "Pool does not exist");
+    ensure(isEvmClaimed === true, 'Bind account');
+    ensure(!sell.isEmpty, 'Select sell token');
+    ensure(!buy.isEmpty, 'Select buy token');
+    ensure(buy.address !== sell.address, 'Tokens must be different');
+    ensure(!!pool, 'Pool does not exist');
     ensure(sell.amount.length !== 0, `Missing ${sell.name} amount`);
     ensure(buy.amount.length !== 0, `Missing ${buy.name} amount`);
     ensure(parseFloat(sell.amount) > 0, `Missing ${sell.name} amount`);
     ensure(
-      parseFloat(sell.amount) <=
-        convert2Normal(sell.decimals, sell.balance.toString()),
-      `Insufficient ${sell.name} balance`
+      parseFloat(sell.amount)
+        <= convert2Normal(sell.decimals, sell.balance.toString()),
+      `Insufficient ${sell.name} balance`,
     );
 
     // Because of aboves ensure pool would not need explenation mark. Typescript broken...
-    const { token1, token2, reserve1, reserve2 } = pool!;
+    const {
+      token1, token2, reserve1, reserve2,
+    } = pool!;
     const amountOut1 = BigNumber.from(calculateAmount(sell));
     const amountOut2 = BigNumber.from(calculateAmount(buy));
     const reserved1 = BigNumber.from(reserve1); // .sub(amountOut1);
@@ -85,7 +89,7 @@ const swapStatus = (
       ? token2.balance.sub(reserved2.sub(amountOut2))
       : BigNumber.from(0);
 
-    ensure(amountIn1.gt(0) || amountIn2.gt(0), "Insufficient amounts");
+    ensure(amountIn1.gt(0) || amountIn2.gt(0), 'Insufficient amounts');
 
     // WIP checking for ReefswapV2: K error
     // Temporary solution was with `swapExactTokensForTokensSupportingFeeOnTransferTokens` function!
@@ -98,7 +102,7 @@ const swapStatus = (
     // const balance = balanceAdjuster1.mul(balanceAdjuster2);
     // ensure(balance.gte(reserved), 'Deliquified pool');
     // ensure(amountOut1.eq(amountIn1) && amountOut2.eq(amountIn2), 'Deliquified pool')
-    return { isValid: true, text: "Swap" };
+    return { isValid: true, text: 'Swap' };
   } catch (e) {
     return { isValid: false, text: e.message };
   }
@@ -107,18 +111,18 @@ const swapStatus = (
 const loadingStatus = (
   status: string,
   isPoolLoading: boolean,
-  isPriceLoading: boolean
+  isPriceLoading: boolean,
 ): string => {
   if (status) {
     return status;
   }
   if (isPoolLoading) {
-    return "Loading pool";
+    return 'Loading pool';
   }
   if (isPriceLoading) {
-    return "Loading prices";
+    return 'Loading prices';
   }
-  return "";
+  return '';
 };
 
 export const SwapComponent = ({
@@ -129,7 +133,7 @@ export const SwapComponent = ({
 }: SwapComponent): JSX.Element => {
   const [buy, setBuy] = useState(createEmptyTokenWithAmount());
   const [sell, setSell] = useState(reefTokenWithAmount());
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState('');
   const [settings, setSettings] = useState(defaultSettings());
   const [isSwapLoading, setIsSwapLoading] = useState(false);
 
@@ -137,13 +141,13 @@ export const SwapComponent = ({
     sell,
     buy,
     network.factoryAddress,
-    account?.signer
+    account?.signer,
   );
 
   const { percentage, deadline } = resolveSettings(settings);
   const { text, isValid } = useMemo(
     () => swapStatus(sell, buy, account?.isEvmClaimed, pool),
-    [sell, buy, percentage, account?.isEvmClaimed, pool]
+    [sell, buy, percentage, account?.isEvmClaimed, pool],
   );
 
   useUpdateBalance(buy, tokens, setBuy);
@@ -172,10 +176,9 @@ export const SwapComponent = ({
     if (isLoading) {
       return;
     }
-    const amo =
-      pool && amount !== ""
-        ? getOutputAmount({ ...sell, amount }, pool).toFixed(4)
-        : "";
+    const amo = pool && amount !== ''
+      ? getOutputAmount({ ...sell, amount }, pool).toFixed(4)
+      : '';
 
     setSell({ ...sell, amount });
     setBuy({ ...buy, amount: amo });
@@ -184,29 +187,26 @@ export const SwapComponent = ({
     if (isLoading) {
       return;
     }
-    const amo =
-      pool && amount !== ""
-        ? getInputAmount({ ...buy, amount }, pool).toFixed(4)
-        : "";
+    const amo = pool && amount !== ''
+      ? getInputAmount({ ...buy, amount }, pool).toFixed(4)
+      : '';
 
     setBuy({ ...buy, amount });
     setSell({ ...sell, amount: amo });
   };
 
-  const changeBuyToken = (newToken: Token): void =>
-    setBuy({
-      ...newToken,
-      amount: "",
-      price: 0,
-      isEmpty: false,
-    });
-  const changeSellToken = (newToken: Token): void =>
-    setSell({
-      ...newToken,
-      amount: "",
-      price: 0,
-      isEmpty: false,
-    });
+  const changeBuyToken = (newToken: Token): void => setBuy({
+    ...newToken,
+    amount: '',
+    price: 0,
+    isEmpty: false,
+  });
+  const changeSellToken = (newToken: Token): void => setSell({
+    ...newToken,
+    amount: '',
+    price: 0,
+    isEmpty: false,
+  });
 
   const onSwitch = (): void => {
     if (buy.isEmpty || isLoading || !pool) {
@@ -233,7 +233,7 @@ export const SwapComponent = ({
       const reefswapRouter = getReefswapRouter(network.routerAddress, signer);
       await approveTokenAmount(sell, network.routerAddress, signer);
 
-      setStatus("Executing swap");
+      setStatus('Executing swap');
       if (onTxUpdate) {
         onTxUpdate({
           txIdent,
@@ -245,7 +245,7 @@ export const SwapComponent = ({
           minBuyAmount,
           [sell.address, buy.address],
           evmAddress,
-          calculateDeadline(deadline)
+          calculateDeadline(deadline),
         )
         .then((contractCall: any) => {
           if (onTxUpdate) {
@@ -255,7 +255,7 @@ export const SwapComponent = ({
               isInBlock: true,
               txTypeEvm: true,
               url: `https://${
-                network === availableNetworks.mainnet ? "" : `${network.name}.`
+                network === availableNetworks.mainnet ? '' : `${network.name}.`
               }reefscan.com/extrinsic/${contractCall.hash}`,
               addresses: [account.address],
             });
@@ -276,7 +276,7 @@ export const SwapComponent = ({
       }
     } finally {
       setIsSwapLoading(false);
-      setStatus("");
+      setStatus('');
     }
   };
 

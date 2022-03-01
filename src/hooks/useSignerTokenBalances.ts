@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   DataProgress,
   DataWithProgress,
   isDataSet,
-} from "../utils/dataWithProgress";
-import { Token } from "../state/token";
-import { Pool } from "../state";
-import { calculateBalanceValue, calculateTokenPrice } from "../utils/tokenUtil";
+} from '../utils/dataWithProgress';
+import { Token } from '../state/token';
+import { Pool } from '../state';
+import { calculateBalanceValue, calculateTokenPrice } from '../utils/tokenUtil';
 
 export interface TokenWithPrice extends Token {
   price: DataWithProgress<number>;
@@ -16,10 +16,10 @@ export interface TokenWithPrice extends Token {
 export const useSignerTokenBalances = (
   tokens: DataWithProgress<Token[]>,
   pools: Pool[],
-  reefPrice: DataWithProgress<number>
+  reefPrice: DataWithProgress<number>,
 ): DataWithProgress<TokenWithPrice[]> => {
   const [balances, setBalances] = useState<DataWithProgress<TokenWithPrice[]>>(
-    DataProgress.LOADING
+    DataProgress.LOADING,
   );
   useEffect(() => {
     if (!isDataSet(tokens)) {
@@ -31,7 +31,7 @@ export const useSignerTokenBalances = (
         (tokens as Token[]).map((tkn) => {
           const stat = !isDataSet(reefPrice) ? reefPrice : DataProgress.LOADING;
           return { ...tkn, balanceValue: stat, price: stat } as TokenWithPrice;
-        })
+        }),
       );
       return;
     }

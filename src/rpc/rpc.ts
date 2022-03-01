@@ -1,13 +1,13 @@
-import { Signer } from "@reef-defi/evm-provider";
-import { BigNumber, Contract } from "ethers";
-import { ERC20 } from "../assets/abi/ERC20";
-import { ReefswapFactory } from "../assets/abi/ReefswapFactory";
-import { ReefswapRouter } from "../assets/abi/ReefswapRouter";
-import { createEmptyToken, ReefSigner, Token } from "../state";
+import { Signer } from '@reef-defi/evm-provider';
+import { BigNumber, Contract } from 'ethers';
+import { ERC20 } from '../assets/abi/ERC20';
+import { ReefswapFactory } from '../assets/abi/ReefswapFactory';
+import { ReefswapRouter } from '../assets/abi/ReefswapRouter';
+import { createEmptyToken, ReefSigner, Token } from '../state';
 
 export const checkIfERC20ContractExist = async (
   address: string,
-  signer: Signer
+  signer: Signer,
 ): Promise<{ name: string; symbol: string; decimals: number } | undefined> => {
   try {
     const contract = new Contract(address, ERC20, signer);
@@ -17,13 +17,13 @@ export const checkIfERC20ContractExist = async (
     const decimals = await contract.decimals();
     return { name, symbol, decimals };
   } catch (error) {
-    throw new Error("Unknown address");
+    throw new Error('Unknown address');
   }
 };
 
 export const getREEF20Contract = async (
   address: string,
-  signer: Signer
+  signer: Signer,
 ): Promise<{
   contract: Contract;
   values: { name: string; symbol: string; decimals: number };
@@ -39,7 +39,7 @@ export const getREEF20Contract = async (
 
 export const contractToToken = async (
   tokenContract: Contract,
-  signer: ReefSigner
+  signer: ReefSigner,
 ): Promise<Token> => {
   const contractToken = createEmptyToken();
   contractToken.address = tokenContract.address;
@@ -53,13 +53,11 @@ export const contractToToken = async (
 export const balanceOf = async (
   address: string,
   balanceAddress: string,
-  signer: Signer
+  signer: Signer,
 ): Promise<BigNumber | null> => {
   const contract = (await getREEF20Contract(address, signer))?.contract;
   return contract ? contract.balanceOf(balanceAddress) : null;
 };
 
-export const getReefswapRouter = (address: string, signer: Signer): Contract =>
-  new Contract(address, ReefswapRouter, signer);
-export const getReefswapFactory = (address: string, signer: Signer): Contract =>
-  new Contract(address, ReefswapFactory, signer);
+export const getReefswapRouter = (address: string, signer: Signer): Contract => new Contract(address, ReefswapRouter, signer);
+export const getReefswapFactory = (address: string, signer: Signer): Contract => new Contract(address, ReefswapFactory, signer);

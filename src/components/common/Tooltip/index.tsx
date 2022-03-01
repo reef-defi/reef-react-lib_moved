@@ -1,5 +1,5 @@
-import React from "react";
-import ReactTooltip from "react-tooltip";
+import React from 'react';
+import ReactTooltip from 'react-tooltip';
 
 interface Tooltip {
   id?: string;
@@ -7,7 +7,7 @@ interface Tooltip {
 
 export const QuestionTooltip: React.FC<Tooltip> = ({
   children,
-  id = "question-tooltip",
+  id = 'question-tooltip',
 }): JSX.Element => (
   <div>
     <b className="ms-1" data-tip data-for={id}>
