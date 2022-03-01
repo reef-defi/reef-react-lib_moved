@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Pool, TokenWithAmount } from '../state';
-import {
-  assertAmount, getInputAmount, getOutputAmount,
-} from '../utils/math';
+import { assertAmount, getInputAmount, getOutputAmount } from '../utils/math';
 
 interface UpdateAmountHookInput {
   pool?: Pool;
@@ -13,13 +11,19 @@ interface UpdateAmountHookInput {
 }
 
 export const useUpdateSwapAmount = ({
-  pool, token2, token1, setToken1: setSell, setToken2: setBuy,
+  pool,
+  token2,
+  token1,
+  setToken1: setSell,
+  setToken2: setBuy,
 }: UpdateAmountHookInput): void => {
   const [prevBuyAddress, setPrevBuyAddress] = useState(token2.address);
   const [prevSellAddress, setPrevSellAddress] = useState(token1.address);
 
   useEffect(() => {
-    if (!pool || token2.price === 0 || token1.price === 0) { return; }
+    if (!pool || token2.price === 0 || token1.price === 0) {
+      return;
+    }
 
     if (token2.address !== prevBuyAddress) {
       setBuy({ ...token2, amount: getOutputAmount(token1, pool).toFixed(4) });
@@ -33,13 +37,19 @@ export const useUpdateSwapAmount = ({
 };
 
 export const useUpdateLiquidityAmount = ({
-  pool, token1, token2, setToken1, setToken2,
+  pool,
+  token1,
+  token2,
+  setToken1,
+  setToken2,
 }: UpdateAmountHookInput): void => {
   const [prevAddress1, setPrevAddress1] = useState(token1.address);
   const [prevAddress2, setPrevAddress2] = useState(token2.address);
 
   useEffect(() => {
-    if (!pool || token1.price === 0 || token2.price === 0) { return; }
+    if (!pool || token1.price === 0 || token2.price === 0) {
+      return;
+    }
 
     const ratio = token2.price / token1.price;
     if (token1.address !== prevAddress1) {

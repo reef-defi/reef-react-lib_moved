@@ -11,8 +11,11 @@ interface TokenAmountView {
 }
 
 export const TokenAmountView = ({
-  name, amount, usdAmount, placeholder,
-} : TokenAmountView): JSX.Element => (
+  name,
+  amount,
+  usdAmount,
+  placeholder,
+}: TokenAmountView): JSX.Element => (
   <SubCard>
     <ContentBetween>
       <MutedText>{placeholder}</MutedText>

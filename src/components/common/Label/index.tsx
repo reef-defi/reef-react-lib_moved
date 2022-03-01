@@ -1,9 +1,7 @@
 import React from 'react';
 
 export const Label: React.FC<unknown> = ({ children }) => (
-  <label>
-    {children}
-  </label>
+  <label>{children}</label>
 );
 
 interface ConfirmLabel {
@@ -31,8 +29,8 @@ export const FormLabel: React.FC<unknown> = ({ children }): JSX.Element => (
   </label>
 );
 
-export const TransactionWarningLabel: React.FC<unknown> = ({ children }): JSX.Element => (
-  <span className="text-warn sub-text mx-auto">
-    {children}
-  </span>
+export const TransactionWarningLabel: React.FC<unknown> = ({
+  children,
+}): JSX.Element => (
+  <span className="text-warn sub-text mx-auto">{children}</span>
 );

@@ -1,4 +1,5 @@
 import React from 'react';
+import Identicon from '@polkadot/react-identicon';
 
 interface BaseIcon {
   small?: boolean;
@@ -29,6 +30,23 @@ const Icon: React.FC<Icon> = ({
 
 export default Icon;
 
+export const WalletIcon = (): JSX.Element => (
+  <svg
+    version="1.1"
+    stroke="currentColor"
+    fill="currentColor"
+    strokeWidth="0"
+    viewBox="10 0 100 125"
+    height="1.5em"
+    width="1.5em"
+  >
+    <g>
+      <path d="M63.02,59.188c-6.502,0-11.792-5.29-11.792-11.792V37.208c0-6.501,5.29-11.791,11.792-11.791h4.76   c0.109-0.007,0.221-0.011,0.334-0.011h20.102v-5.365c0,0,0-6.791-6.792-6.791H13.507c-3.749,0-6.792,3.044-6.792,6.791v59.917   c0,3.747,3.043,6.792,6.792,6.792h67.916c6.792,0,6.792-6.792,6.792-6.792V59.188H63.02z" />
+      <path d="M91.186,30.419v-0.002H91.17c-0.03-0.001-0.052-0.011-0.083-0.011H68.113c-0.037,0-0.07,0.009-0.106,0.011H63.02   c-3.749,0-6.792,3.043-6.792,6.791v10.188c0,3.747,3.043,6.792,6.792,6.792h28.166v-0.014c2.088-0.072,2.1-2.186,2.1-2.186V32.604   C93.285,32.604,93.273,30.491,91.186,30.419z M65.86,46.143c-2.121,0-3.841-1.72-3.841-3.841c0-2.12,1.72-3.84,3.841-3.84   c2.119,0,3.84,1.721,3.84,3.84C69.7,44.422,67.979,46.143,65.86,46.143z" />
+    </g>
+  </svg>
+);
+
 export const GearIcon = ({ small }: BaseIcon): JSX.Element => (
   <Icon className="bi-gear" small={small}>
     <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z" />
@@ -50,6 +68,15 @@ export const DownIcon = ({ small }: BaseIcon): JSX.Element => (
     <path
       fillRule="evenodd"
       d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"
+    />
+  </Icon>
+);
+
+export const UpIcon = ({ small }: BaseIcon): JSX.Element => (
+  <Icon className="bi-chevron-up" small={small}>
+    <path
+      fillRule="evenodd"
+      d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"
     />
   </Icon>
 );
@@ -136,7 +163,7 @@ interface TokenIcon extends BaseIcon {
 }
 
 export const TokenIcon = ({ src }: TokenIcon): JSX.Element => (
-  <div className="d-flex my-auto">
+  <div className="d-flex my-auto user-select-none">
     {src === '' ? (
       <DefaultTokenIcon />
     ) : (
@@ -146,5 +173,15 @@ export const TokenIcon = ({ src }: TokenIcon): JSX.Element => (
         alt="..."
       />
     )}
+  </div>
+);
+
+interface ReefAddressIcon {
+  address: string;
+}
+
+export const ReefAddressIcon = ({ address }: ReefAddressIcon): JSX.Element => (
+  <div className="rounded-circle bg-white">
+    <Identicon value={address} size={30} theme="substrate" />
   </div>
 );

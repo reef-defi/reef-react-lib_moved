@@ -4,7 +4,11 @@ import { Token, Pool, Network } from '..';
 import { loadPools } from '../rpc/pools';
 import { ensureVoidRun } from '../utils/utils';
 
-export const useLoadPools = (tokens: Token[], signer: Signer, settings: Network): [Pool[], boolean] => {
+export const useLoadPools = (
+  tokens: Token[],
+  signer: Signer,
+  settings: Network,
+): [Pool[], boolean] => {
   const mounted = useRef(true);
 
   const [pools, setPools] = useState<Pool[]>([]);
@@ -14,7 +18,9 @@ export const useLoadPools = (tokens: Token[], signer: Signer, settings: Network)
 
   useEffect(() => {
     const load = async (): Promise<void> => Promise.resolve()
-      .then(() => { mounted.current = true; })
+      .then(() => {
+        mounted.current = true;
+      })
       .then(() => setIsLoading(true))
       .then(() => loadPools(tokens, signer, settings))
       .then((res) => ensureMounted(setPools, res))

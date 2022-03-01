@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { BaseSyntheticEvent, useEffect, useState } from 'react';
 
 interface Input {
-  value?: string
+  value?: string;
   disabled?: boolean;
   maxLength?: number;
   placeholder?: string;
@@ -9,7 +9,11 @@ interface Input {
 }
 
 export const Input = ({
-  value, disabled, maxLength, placeholder, onChange = (_) => {},
+  value,
+  disabled,
+  maxLength,
+  placeholder,
+  onChange = (_) => {},
 }: Input): JSX.Element => (
   <input
     value={value}
@@ -33,28 +37,36 @@ export const InputAmount = ({
   onAmountChange,
   placeholder = '',
   disabled = false,
-}: InputAmount): JSX.Element => (
-  <input
-    type="number"
-    min={0.0}
-    disabled={disabled}
-    value={disabled ? '' : amount.replaceAll(',', '.')}
-    placeholder={placeholder}
-    className="field-input ms-2 flex-grow-1 text-end"
-    onChange={(event) => onAmountChange(event.target.value)}
-  />
-);
+}: InputAmount): JSX.Element => {
+  const mathDecimals = !amount ? '' : amount.replaceAll(',', '.');
+  const [amt, setAmt] = useState(mathDecimals);
+  useEffect(() => setAmt(amount), [amount]);
+  const inputChange = (event: any): void => {
+    const newVal = event.target.value;
+    setAmt(newVal);
+    onAmountChange(newVal);
+  };
+  return (
+    <input
+      type="number"
+      min={0.0}
+      disabled={disabled}
+      value={amt}
+      placeholder={placeholder}
+      className="field-input ms-2 flex-grow-1 text-end"
+      onChange={inputChange}
+    />
+  );
+};
 
 export const InputGroup: React.FC<unknown> = ({ children }): JSX.Element => (
-  <div className="input-group">
-    {children}
-  </div>
+  <div className="input-group">{children}</div>
 );
 
-export const InputTextGroup: React.FC<unknown> = ({ children }): JSX.Element => (
-  <div className="input-group-text field-input border-rad ps-1">
-    {children}
-  </div>
+export const InputTextGroup: React.FC<unknown> = ({
+  children,
+}): JSX.Element => (
+  <div className="input-group-text field-input border-rad ps-1">{children}</div>
 );
 
 interface NumberInput {
@@ -65,19 +77,65 @@ interface NumberInput {
   className?: string;
   placeholder?: string;
   onChange: (value: string) => void;
+  disableDecimals?: boolean;
 }
 
 export const NumberInput = ({
-  value, min, max, step, placeholder, onChange, className = '',
-}: NumberInput): JSX.Element => (
+  value,
+  min,
+  max,
+  step,
+  placeholder,
+  onChange,
+  disableDecimals,
+  className = '',
+}: NumberInput): JSX.Element => {
+  const keyDown = (e: BaseSyntheticEvent): void => {
+    if (!disableDecimals) {
+      return;
+    }
+    if (
+      (e.nativeEvent as KeyboardEvent).key === '.'
+      || (e.nativeEvent as KeyboardEvent).key === ','
+    ) {
+      e.preventDefault();
+      (e.nativeEvent as any).stopImmediatePropagation();
+    }
+  };
+
+  return (
+    <input
+      min={min}
+      max={max}
+      step={step}
+      type="number"
+      value={value}
+      placeholder={placeholder}
+      onChange={(event) => onChange(event.target.value)}
+      onKeyDown={keyDown}
+      className={className || 'form-control field-input border-rad text-end'}
+    />
+  );
+};
+
+interface PercentageRangeAmount {
+  value: number;
+  disabled?: boolean;
+  onChange: (value: number) => void;
+}
+
+export const PercentageRangeAmount = ({
+  value,
+  disabled,
+  onChange,
+}: PercentageRangeAmount): JSX.Element => (
   <input
-    min={min}
-    max={max}
-    step={step}
-    type="number"
+    min={0}
+    max={100}
+    type="range"
+    className="form-range"
     value={value}
-    placeholder={placeholder}
-    onChange={(event) => onChange(event.target.value)}
-    className={`form-control field-input border-rad text-end ${className}`}
+    disabled={disabled}
+    onChange={(event) => onChange(parseInt(event.target.value, 10))}
   />
 );

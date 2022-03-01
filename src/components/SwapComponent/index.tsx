@@ -1,13 +1,29 @@
 import React, { useMemo, useState } from 'react';
 import { BigNumber } from 'ethers';
 import {
-  createEmptyTokenWithAmount, defaultSettings, ensureTokenAmount, Network, Notify, Pool, ReefSigner, reefTokenWithAmount, resolveSettings, Token, TokenWithAmount,
+  availableNetworks,
+  createEmptyTokenWithAmount,
+  defaultSettings,
+  ensureTokenAmount,
+  Network,
+  Pool,
+  ReefSigner,
+  reefTokenWithAmount,
+  resolveSettings,
+  Token,
+  TokenWithAmount,
 } from '../../state';
-import { ButtonStatus, ensure } from '../../utils';
+import { ButtonStatus, ensure, TX_STATUS_ERROR_CODE } from '../../utils';
 import {
-  convert2Normal, calculateAmount, getOutputAmount, getInputAmount, calculateAmountWithPercentage, calculateDeadline, calculateImpactPercentage,
+  calculateAmount,
+  calculateAmountWithPercentage,
+  calculateDeadline,
+  calculateImpactPercentage,
+  convert2Normal,
+  getInputAmount,
+  getOutputAmount,
 } from '../../utils/math';
-import { useLoadPool } from '../../hooks';
+import { useLoadPool } from '../../hooks/useLoadPool';
 import { getReefswapRouter } from '../../rpc';
 import { useUpdateBalance } from '../../hooks/useUpdateBalance';
 import { useUpdateSwapAmount } from '../../hooks/useUpdateAmount';
@@ -16,32 +32,45 @@ import { approveTokenAmount } from '../../rpc/tokens';
 import {
   Card, CardHeader, CardHeaderBlank, CardTitle,
 } from '../common/Card';
-import { TokenAmountFieldImpactPrice, TokenAmountFieldMax } from '../TokenFields';
+import {
+  TokenAmountFieldImpactPrice,
+  TokenAmountFieldMax,
+} from '../TokenFields';
 import { SwitchTokenButton } from '../common/Button';
 import SwapConfirmationModal from './SwapConfirmationModal';
-import { CenterColumn, MT } from '../common/Display';
+import { CenterColumn, ComponentCenter, MT } from '../common/Display';
 import { OpenModalButton } from '../common/Modal';
 import { LoadingButtonIconWithText } from '../common/Loading';
 import { TransactionSettings } from '../TransactionSettings';
+import { TxStatusHandler } from '../../utils/transactionUtil';
 
 interface SwapComponent {
   tokens: Token[];
   network: Network;
-  account?: ReefSigner;
-  reloadTokens: () => void;
-  notify: (message: string, type: Notify) => void;
+  account: ReefSigner;
+  onTxUpdate?: TxStatusHandler;
 }
 
-const swapStatus = (sell: TokenWithAmount, buy: TokenWithAmount, isEvmClaimed?: boolean, pool?: Pool): ButtonStatus => {
+const swapStatus = (
+  sell: TokenWithAmount,
+  buy: TokenWithAmount,
+  isEvmClaimed?: boolean,
+  pool?: Pool,
+): ButtonStatus => {
   try {
     ensure(isEvmClaimed === true, 'Bind account');
     ensure(!sell.isEmpty, 'Select sell token');
     ensure(!buy.isEmpty, 'Select buy token');
-    ensure(!!pool, 'Invalid pair');
+    ensure(buy.address !== sell.address, 'Tokens must be different');
+    ensure(!!pool, 'Pool does not exist');
     ensure(sell.amount.length !== 0, `Missing ${sell.name} amount`);
     ensure(buy.amount.length !== 0, `Missing ${buy.name} amount`);
     ensure(parseFloat(sell.amount) > 0, `Missing ${sell.name} amount`);
-    ensure(parseFloat(sell.amount) <= convert2Normal(sell.decimals, sell.balance.toString()), `Insufficient ${sell.name} balance`);
+    ensure(
+      parseFloat(sell.amount)
+        <= convert2Normal(sell.decimals, sell.balance.toString()),
+      `Insufficient ${sell.name} balance`,
+    );
 
     // Because of aboves ensure pool would not need explenation mark. Typescript broken...
     const {
@@ -49,8 +78,8 @@ const swapStatus = (sell: TokenWithAmount, buy: TokenWithAmount, isEvmClaimed?: 
     } = pool!;
     const amountOut1 = BigNumber.from(calculateAmount(sell));
     const amountOut2 = BigNumber.from(calculateAmount(buy));
-    const reserved1 = BigNumber.from(reserve1);// .sub(amountOut1);
-    const reserved2 = BigNumber.from(reserve2);// .sub(amountOut2);
+    const reserved1 = BigNumber.from(reserve1); // .sub(amountOut1);
+    const reserved2 = BigNumber.from(reserve2); // .sub(amountOut2);
 
     const amountIn1 = token1.balance.gt(reserved1.sub(amountOut1))
       ? token1.balance.sub(reserved1.sub(amountOut1))
@@ -79,23 +108,41 @@ const swapStatus = (sell: TokenWithAmount, buy: TokenWithAmount, isEvmClaimed?: 
   }
 };
 
-const loadingStatus = (status: string, isPoolLoading: boolean, isPriceLoading: boolean): string => {
-  if (status) { return status; }
-  if (isPoolLoading) { return 'Loading pool'; }
-  if (isPriceLoading) { return 'Loading prices'; }
+const loadingStatus = (
+  status: string,
+  isPoolLoading: boolean,
+  isPriceLoading: boolean,
+): string => {
+  if (status) {
+    return status;
+  }
+  if (isPoolLoading) {
+    return 'Loading pool';
+  }
+  if (isPriceLoading) {
+    return 'Loading prices';
+  }
   return '';
 };
 
 export const SwapComponent = ({
-  tokens, network, account, notify, reloadTokens,
-} : SwapComponent): JSX.Element => {
+  tokens,
+  network,
+  account,
+  onTxUpdate,
+}: SwapComponent): JSX.Element => {
   const [buy, setBuy] = useState(createEmptyTokenWithAmount());
   const [sell, setSell] = useState(reefTokenWithAmount());
   const [status, setStatus] = useState('');
   const [settings, setSettings] = useState(defaultSettings());
   const [isSwapLoading, setIsSwapLoading] = useState(false);
 
-  const [pool, isPoolLoading] = useLoadPool(sell, buy, network.factoryAddress, account?.signer);
+  const [pool, isPoolLoading] = useLoadPool(
+    sell,
+    buy,
+    network.factoryAddress,
+    account?.signer,
+  );
 
   const { percentage, deadline } = resolveSettings(settings);
   const { text, isValid } = useMemo(
@@ -126,7 +173,9 @@ export const SwapComponent = ({
   });
 
   const setSellAmount = (amount: string): void => {
-    if (isLoading) { return; }
+    if (isLoading) {
+      return;
+    }
     const amo = pool && amount !== ''
       ? getOutputAmount({ ...sell, amount }, pool).toFixed(4)
       : '';
@@ -135,7 +184,9 @@ export const SwapComponent = ({
     setBuy({ ...buy, amount: amo });
   };
   const setBuyAmount = (amount: string): void => {
-    if (isLoading) { return; }
+    if (isLoading) {
+      return;
+    }
     const amo = pool && amount !== ''
       ? getInputAmount({ ...buy, amount }, pool).toFixed(4)
       : '';
@@ -145,22 +196,33 @@ export const SwapComponent = ({
   };
 
   const changeBuyToken = (newToken: Token): void => setBuy({
-    ...newToken, amount: '', price: 0, isEmpty: false,
+    ...newToken,
+    amount: '',
+    price: 0,
+    isEmpty: false,
   });
   const changeSellToken = (newToken: Token): void => setSell({
-    ...newToken, amount: '', price: 0, isEmpty: false,
+    ...newToken,
+    amount: '',
+    price: 0,
+    isEmpty: false,
   });
 
   const onSwitch = (): void => {
-    if (buy.isEmpty || isLoading || !pool) { return; }
+    if (buy.isEmpty || isLoading || !pool) {
+      return;
+    }
     const subSellState = { ...sell };
     setSell({ ...buy });
     setBuy({ ...subSellState, amount: getOutputAmount(buy, pool).toFixed(4) });
   };
 
   const onSwap = async (): Promise<void> => {
-    if (!isValid || !account) { return; }
+    if (!isValid || !account) {
+      return;
+    }
     const { signer, evmAddress } = account;
+    const txIdent = Math.random().toString(10);
     try {
       setIsSwapLoading(true);
       ensureTokenAmount(sell);
@@ -172,63 +234,100 @@ export const SwapComponent = ({
       await approveTokenAmount(sell, network.routerAddress, signer);
 
       setStatus('Executing swap');
-      await reefswapRouter.swapExactTokensForTokensSupportingFeeOnTransferTokens(
-        sellAmount,
-        minBuyAmount,
-        [sell.address, buy.address],
-        evmAddress,
-        calculateDeadline(deadline),
-
-      );
-      notify('Swap complete!', 'success');
+      if (onTxUpdate) {
+        onTxUpdate({
+          txIdent,
+        });
+      }
+      await reefswapRouter
+        .swapExactTokensForTokensSupportingFeeOnTransferTokens(
+          sellAmount,
+          minBuyAmount,
+          [sell.address, buy.address],
+          evmAddress,
+          calculateDeadline(deadline),
+        )
+        .then((contractCall: any) => {
+          if (onTxUpdate) {
+            onTxUpdate({
+              txIdent,
+              txHash: contractCall.hash,
+              isInBlock: true,
+              txTypeEvm: true,
+              url: `https://${
+                network === availableNetworks.mainnet ? '' : `${network.name}.`
+              }reefscan.com/extrinsic/${contractCall.hash}`,
+              addresses: [account.address],
+            });
+          }
+          return contractCall;
+        });
     } catch (error) {
-      notify(error.message, 'error');
+      if (onTxUpdate) {
+        onTxUpdate({
+          txIdent,
+          error: {
+            message: error.message,
+            code: TX_STATUS_ERROR_CODE.ERROR_UNDEFINED,
+          },
+          txTypeEvm: true,
+          addresses: [account.address],
+        });
+      }
     } finally {
-      // TODO move this out!
-      reloadTokens();
       setIsSwapLoading(false);
       setStatus('');
     }
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardHeaderBlank />
-        <CardTitle title="Swap" />
-        <TransactionSettings settings={settings} setSettings={setSettings} />
-      </CardHeader>
+    <ComponentCenter>
+      <Card>
+        <CardHeader>
+          <CardHeaderBlank />
+          <CardTitle title="Swap" />
+          <TransactionSettings settings={settings} setSettings={setSettings} />
+        </CardHeader>
 
-      <TokenAmountFieldMax
-        token={sell}
-        tokens={tokens}
-        id="sell-token-field"
-        onAmountChange={setSellAmount}
-        onTokenSelect={changeSellToken}
-      />
-      <SwitchTokenButton onClick={onSwitch} />
-      <TokenAmountFieldImpactPrice
-        token={buy}
-        tokens={tokens}
-        id="buy-token-field"
-        percentage={calculateImpactPercentage(sell, buy)}
-        onAmountChange={setBuyAmount}
-        onTokenSelect={changeBuyToken}
-      />
-      <MT size="2">
-        <CenterColumn>
-          <OpenModalButton id="swapModalToggle">
-            {isLoading ? <LoadingButtonIconWithText text={loadingStatus(status, isPoolLoading, isPriceLoading)} /> : text}
-          </OpenModalButton>
-        </CenterColumn>
-      </MT>
-      <SwapConfirmationModal
-        buy={buy}
-        sell={sell}
-        id="swapModalToggle"
-        percentage={settings.percentage}
-        confirmFun={onSwap}
-      />
-    </Card>
+        <TokenAmountFieldMax
+          token={sell}
+          tokens={tokens}
+          signer={account}
+          id="sell-token-field"
+          onAmountChange={setSellAmount}
+          onTokenSelect={changeSellToken}
+        />
+        <SwitchTokenButton onClick={onSwitch} />
+        <TokenAmountFieldImpactPrice
+          token={buy}
+          tokens={tokens}
+          signer={account}
+          id="buy-token-field"
+          percentage={calculateImpactPercentage(sell, buy)}
+          onAmountChange={setBuyAmount}
+          onTokenSelect={changeBuyToken}
+        />
+        <MT size="2">
+          <CenterColumn>
+            <OpenModalButton id="swapModalToggle">
+              {isLoading ? (
+                <LoadingButtonIconWithText
+                  text={loadingStatus(status, isPoolLoading, isPriceLoading)}
+                />
+              ) : (
+                text
+              )}
+            </OpenModalButton>
+          </CenterColumn>
+        </MT>
+        <SwapConfirmationModal
+          buy={buy}
+          sell={sell}
+          id="swapModalToggle"
+          percentage={settings.percentage}
+          confirmFun={onSwap}
+        />
+      </Card>
+    </ComponentCenter>
   );
 };
