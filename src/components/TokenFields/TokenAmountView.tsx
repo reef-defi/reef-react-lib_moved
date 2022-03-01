@@ -1,7 +1,7 @@
-import React from 'react';
-import { SubCard } from '../common/Card';
-import { ContentBetween, Margin } from '../common/Display';
-import { MiniText, MutedText, Title } from '../common/Text';
+import React from "react";
+import { SubCard } from "../common/Card";
+import { ContentBetween, Margin } from "../common/Display";
+import { MiniText, MutedText, Title } from "../common/Text";
 
 interface TokenAmountView {
   name: string;
@@ -11,8 +11,11 @@ interface TokenAmountView {
 }
 
 export const TokenAmountView = ({
-  name, amount, usdAmount, placeholder,
-} : TokenAmountView): JSX.Element => (
+  name,
+  amount,
+  usdAmount,
+  placeholder,
+}: TokenAmountView): JSX.Element => (
   <SubCard>
     <ContentBetween>
       <MutedText>{placeholder}</MutedText>

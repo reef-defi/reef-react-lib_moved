@@ -1,9 +1,7 @@
-import React from 'react';
+import React from "react";
 
 export const Label: React.FC<unknown> = ({ children }) => (
-  <label>
-    {children}
-  </label>
+  <label>{children}</label>
 );
 
 interface ConfirmLabel {
@@ -16,8 +14,8 @@ interface ConfirmLabel {
 export const ConfirmLabel = ({
   title,
   value,
-  titleSize = 'sub-text',
-  valueSize = 'sub-text',
+  titleSize = "sub-text",
+  valueSize = "sub-text",
 }: ConfirmLabel): JSX.Element => (
   <div className="d-flex justify-content-between my-1">
     <span className={`text-muted my-auto ${titleSize}`}>{title}</span>
@@ -31,8 +29,8 @@ export const FormLabel: React.FC<unknown> = ({ children }): JSX.Element => (
   </label>
 );
 
-export const TransactionWarningLabel: React.FC<unknown> = ({ children }): JSX.Element => (
-  <span className="text-warn sub-text mx-auto">
-    {children}
-  </span>
+export const TransactionWarningLabel: React.FC<unknown> = ({
+  children,
+}): JSX.Element => (
+  <span className="text-warn sub-text mx-auto">{children}</span>
 );

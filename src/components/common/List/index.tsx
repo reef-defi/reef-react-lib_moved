@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface ListItem {
   onClick?: () => void;
@@ -10,20 +10,30 @@ export const List: React.FC<unknown> = ({ children }): JSX.Element => (
   </ul>
 );
 
-export const ListItem: React.FC<ListItem> = ({ children, onClick }): JSX.Element => (
+export const ListItem: React.FC<ListItem> = ({
+  children,
+  onClick,
+}): JSX.Element => (
   <li
     onClick={onClick}
-    className={`list-group-item d-flex justify-content-between border-rad ${!!onClick && 'pointer'}`}
+    className={`list-group-item d-flex justify-content-between border-rad ${
+      !!onClick && "pointer"
+    }`}
   >
     {children}
   </li>
 );
 
-export const ListItemDismissModal: React.FC<ListItem> = ({ children, onClick }): JSX.Element => (
+export const ListItemDismissModal: React.FC<ListItem> = ({
+  children,
+  onClick,
+}): JSX.Element => (
   <li
     onClick={onClick}
     data-bs-dismiss="modal"
-    className={`list-group-item list-group-item-action d-flex justify-content-between border-rad ${onClick && 'pointer'}`}
+    className={`list-group-item list-group-item-action d-flex justify-content-between border-rad ${
+      onClick && "pointer"
+    }`}
   >
     {children}
   </li>

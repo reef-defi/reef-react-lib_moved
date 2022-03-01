@@ -1,12 +1,10 @@
-import { Signer } from '@reef-defi/evm-provider';
-import { useEffect, useRef, useState } from 'react';
-import { retrieveReefCoingeckoPrice } from '../api';
-import { loadPool } from '../rpc';
-import {
-  Pool, reefTokenWithAmount, Token, TokenWithAmount,
-} from '../state';
-import { ensureVoidRun } from '../utils';
-import { poolRatio } from '../utils/math';
+import { Signer } from "@reef-defi/evm-provider";
+import { useEffect, useRef, useState } from "react";
+import { retrieveReefCoingeckoPrice } from "../api";
+import { loadPool } from "../rpc";
+import { Pool, reefTokenWithAmount, Token, TokenWithAmount } from "../state";
+import { ensureVoidRun } from "../utils";
+import { poolRatio } from "../utils/math";
 
 interface UpdateTokensPriceHook {
   pool?: Pool;
@@ -22,7 +20,14 @@ interface UpdateTokensPriceHook {
 const REEF_TOKEN = reefTokenWithAmount();
 
 export const useUpdateTokensPrice = ({
-  pool, token1, token2, tokens, signer, factoryAddress, setToken1, setToken2,
+  pool,
+  token1,
+  token2,
+  tokens,
+  signer,
+  factoryAddress,
+  setToken1,
+  setToken2,
 }: UpdateTokensPriceHook): boolean => {
   const mounted = useRef(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +40,9 @@ export const useUpdateTokensPrice = ({
 
   useEffect(() => {
     const load = async (): Promise<void> => {
-      if (!pool || !signer) { return; }
+      if (!pool || !signer) {
+        return;
+      }
       try {
         mounted.current = true;
         setIsLoading(true);
@@ -47,9 +54,17 @@ export const useUpdateTokensPrice = ({
           updateTokens(reefPrice, reefPrice * baseRatio);
         } else {
           // const sellPool = await poolContract(tokens[0], token1, signer, settings);
-          const sellPool = await loadPool(tokens[0], token1, signer, factoryAddress);
+          const sellPool = await loadPool(
+            tokens[0],
+            token1,
+            signer,
+            factoryAddress
+          );
           const sellRatio = poolRatio(sellPool);
-          updateTokens(reefPrice / sellRatio, reefPrice / sellRatio * baseRatio);
+          updateTokens(
+            reefPrice / sellRatio,
+            (reefPrice / sellRatio) * baseRatio
+          );
         }
       } catch (error) {
         console.error(error);

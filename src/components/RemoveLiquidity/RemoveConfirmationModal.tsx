@@ -1,14 +1,17 @@
-import React from 'react';
-import { Pool } from '../../state';
+import React from "react";
+import { Pool } from "../../state";
 import {
-  calculatePoolRatio, calculatePoolShare, removePoolTokenShare, removeUserPoolSupply,
-} from '../../utils';
-import { SubCard } from '../common/Card';
-import { Margin, MT, MX } from '../common/Display';
-import { PlusIcon } from '../common/Icons';
-import { ConfirmLabel } from '../common/Label';
-import ConfirmationModal from '../common/Modal';
-import { MiniText, MutedText } from '../common/Text';
+  calculatePoolRatio,
+  calculatePoolShare,
+  removePoolTokenShare,
+  removeUserPoolSupply,
+} from "../../utils";
+import { SubCard } from "../common/Card";
+import { Margin, MT, MX } from "../common/Display";
+import { PlusIcon } from "../common/Icons";
+import { ConfirmLabel } from "../common/Label";
+import ConfirmationModal from "../common/Modal";
+import { MiniText, MutedText } from "../common/Text";
 
 interface RemoveConfirmationModal {
   id: string;
@@ -19,10 +22,14 @@ interface RemoveConfirmationModal {
 }
 
 const RemoveConfirmationModal = ({
-  id, pool, slipperage, percentageAmount, onRemove,
-} : RemoveConfirmationModal): JSX.Element => {
-  const name1 = pool ? pool.token1.name : '';
-  const name2 = pool ? pool.token2.name : '';
+  id,
+  pool,
+  slipperage,
+  percentageAmount,
+  onRemove,
+}: RemoveConfirmationModal): JSX.Element => {
+  const name1 = pool ? pool.token1.name : "";
+  const name2 = pool ? pool.token2.name : "";
   return (
     <ConfirmationModal
       id={id}
@@ -36,14 +43,18 @@ const RemoveConfirmationModal = ({
           <ConfirmLabel
             titleSize="h4"
             valueSize="h6"
-            title={removePoolTokenShare(percentageAmount, pool?.token1).toFixed(8)}
+            title={removePoolTokenShare(percentageAmount, pool?.token1).toFixed(
+              8
+            )}
             value={name1}
           />
           <PlusIcon />
           <ConfirmLabel
             titleSize="h4"
             valueSize="h6"
-            title={removePoolTokenShare(percentageAmount, pool?.token2).toFixed(8)}
+            title={removePoolTokenShare(percentageAmount, pool?.token2).toFixed(
+              8
+            )}
             value={name2}
           />
         </SubCard>
@@ -60,18 +71,40 @@ const RemoveConfirmationModal = ({
         <Margin size="3">
           <MiniText>
             <MutedText>
-              Output is estimated. If the price changes by more than
-              {' '}
-              {slipperage}
-              % your transaction will revert.
+              Output is estimated. If the price changes by more than{" "}
+              {slipperage}% your transaction will revert.
             </MutedText>
           </MiniText>
         </Margin>
         <SubCard>
-          <ConfirmLabel title="Liquidity Provider Fee" value="1.5 REEF" titleSize="mini-text" valueSize="mini-text" />
-          <ConfirmLabel title="Rates" value={`1 ${name1} = ${calculatePoolRatio(pool).toFixed(8)} ${name2}`} titleSize="mini-text" valueSize="mini-text" />
-          <ConfirmLabel title="" value={`1 ${name2} = ${calculatePoolRatio(pool, false).toFixed(8)} ${name1}`} titleSize="mini-text" valueSize="mini-text" />
-          <ConfirmLabel title="Share of Pool" value={`${calculatePoolShare(pool).toFixed(8)} %`} titleSize="mini-text" valueSize="mini-text" />
+          <ConfirmLabel
+            title="Liquidity Provider Fee"
+            value="1.5 REEF"
+            titleSize="mini-text"
+            valueSize="mini-text"
+          />
+          <ConfirmLabel
+            title="Rates"
+            value={`1 ${name1} = ${calculatePoolRatio(pool).toFixed(
+              8
+            )} ${name2}`}
+            titleSize="mini-text"
+            valueSize="mini-text"
+          />
+          <ConfirmLabel
+            title=""
+            value={`1 ${name2} = ${calculatePoolRatio(pool, false).toFixed(
+              8
+            )} ${name1}`}
+            titleSize="mini-text"
+            valueSize="mini-text"
+          />
+          <ConfirmLabel
+            title="Share of Pool"
+            value={`${calculatePoolShare(pool).toFixed(8)} %`}
+            titleSize="mini-text"
+            valueSize="mini-text"
+          />
         </SubCard>
       </MX>
     </ConfirmationModal>

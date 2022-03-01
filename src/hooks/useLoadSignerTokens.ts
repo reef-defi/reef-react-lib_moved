@@ -1,15 +1,22 @@
-import { useEffect, useState } from 'react';
-import { BigNumber } from 'ethers';
+import { useEffect, useState } from "react";
+import { BigNumber } from "ethers";
 import {
-  DataProgress, DataWithProgress, getData, isDataSet,
-} from '../utils/dataWithProgress';
-import {
-  Network, ReefSigner, reefTokenWithAmount, Token,
-} from '../state';
-import { loadSignerTokens } from '../api/tokens';
+  DataProgress,
+  DataWithProgress,
+  getData,
+  isDataSet,
+} from "../utils/dataWithProgress";
+import { Network, ReefSigner, reefTokenWithAmount, Token } from "../state";
+import { loadSignerTokens } from "../api/tokens";
 
-export const useLoadSignerTokens = (refreshToggle: boolean, network: Network, signer?: ReefSigner): DataWithProgress<Token[]> => {
-  const [tokens, setTokens] = useState<DataWithProgress<Token[]>>(DataProgress.LOADING);
+export const useLoadSignerTokens = (
+  refreshToggle: boolean,
+  network: Network,
+  signer?: ReefSigner
+): DataWithProgress<Token[]> => {
+  const [tokens, setTokens] = useState<DataWithProgress<Token[]>>(
+    DataProgress.LOADING
+  );
   useEffect(() => {
     if (!signer) {
       return;
@@ -19,7 +26,10 @@ export const useLoadSignerTokens = (refreshToggle: boolean, network: Network, si
         setTokens(DataProgress.LOADING);
         return;
       }
-      const selectedAccountTokens: Token[] | null = await loadSignerTokens(signer, network);
+      const selectedAccountTokens: Token[] | null = await loadSignerTokens(
+        signer,
+        network
+      );
       if (!selectedAccountTokens) {
         setTokens(DataProgress.NO_DATA);
         return;

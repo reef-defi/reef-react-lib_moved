@@ -1,5 +1,5 @@
-import React from 'react';
-import { BackIcon } from '../Icons';
+import React from "react";
+import { BackIcon } from "../Icons";
 
 export const Card: React.FC = ({ children }): JSX.Element => (
   <div className="card border-rad">
@@ -11,7 +11,9 @@ export const CardHeader: React.FC<unknown> = ({ children }) => (
   <div className="d-flex justify-content-between mb-2">{children}</div>
 );
 
-export const CardHeaderBlank = (): JSX.Element => <div style={{ width: '46px' }} />;
+export const CardHeaderBlank = (): JSX.Element => (
+  <div style={{ width: "46px" }} />
+);
 
 interface Title {
   title: string;
@@ -47,7 +49,5 @@ export const ErrorCard = ({ title, message }: ErrorCardProps): JSX.Element => (
 );
 
 export const SubCard: React.FC<unknown> = ({ children }): JSX.Element => (
-  <div className="field border-rad p-3">
-    {children}
-  </div>
+  <div className="field border-rad p-3">{children}</div>
 );
