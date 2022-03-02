@@ -10,6 +10,8 @@ export interface Network {
   genesisHash: string;
 }
 
+export const SS58_REEF = 42;
+
 export type Networks = Record<AvailableNetworks, Network>;
 
 export const availableNetworks: Networks = {

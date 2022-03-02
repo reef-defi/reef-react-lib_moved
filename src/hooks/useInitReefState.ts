@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { Provider } from '@reef-defi/evm-provider';
 import { useObservableState } from './useObservableState';
 import { Network, ReefSigner } from '../state';
 import { useProvider } from './useProvider';
@@ -9,6 +10,7 @@ import {
 } from '../appState/providerState';
 import { setApolloUrls } from '../graphql';
 import { accountsSubj } from '../appState/accountState';
+import { useLoadSigners } from './useLoadSigners';
 
 const getGQLUrls = (network: Network): { ws: string; http: string } => {
   const ws = network.graphqlUrl.startsWith('http')
@@ -21,18 +23,26 @@ const getGQLUrls = (network: Network): { ws: string; http: string } => {
 };
 
 export const useInitReefState = (
-  signers: ReefSigner[],
   selectNetwork: Network,
-): void => {
-  const network = useObservableState(selectedNetworkSubj);
-  const provArr = useProvider((network as Network)?.rpcUrl);
-  const [provider, isProviderLoading] = provArr;
+  applicationDisplayName: string,
+): [signers: ReefSigner[]|undefined, provider: Provider|undefined, selectedNetwork: Network|undefined, isLoading:boolean, error: any] => {
+  const selectedNetwork = useObservableState(selectedNetworkSubj);
+  const [provider, isProviderLoading] = useProvider((selectedNetwork as Network)?.rpcUrl);
+  const [signers, isSignersLoading, error] = useLoadSigners(applicationDisplayName, provider);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setCurrentNetwork(selectNetwork);
-    const gqlUrls = getGQLUrls(selectNetwork);
-    setApolloUrls(gqlUrls);
+    if (selectNetwork !== selectedNetwork) {
+      setCurrentNetwork(selectNetwork);
+    }
   }, [selectNetwork]);
+
+  useEffect(() => {
+    if (selectedNetwork) {
+      const gqlUrls = getGQLUrls(selectedNetwork);
+      setApolloUrls(gqlUrls);
+    }
+  }, [selectedNetwork]);
 
   useEffect(() => {
     if (provider) {
@@ -50,4 +60,9 @@ export const useInitReefState = (
   useEffect(() => {
     accountsSubj.next(signers || []);
   }, [signers]);
+
+  useEffect(() => {
+    setLoading(isProviderLoading || isSignersLoading);
+  }, [isProviderLoading, isSignersLoading]);
+  return [signers, provider, selectedNetwork, loading, error];
 };
