@@ -2,7 +2,7 @@ import { Provider } from '@reef-defi/evm-provider';
 import { web3Accounts, web3Enable } from '@reef-defi/extension-dapp';
 import { InjectedExtension } from '@reef-defi/extension-inject/types';
 import { useState } from 'react';
-import { ReefSigner } from '../state';
+import { Network, ReefSigner } from '../state';
 import { useAsyncEffect } from './useAsyncEffect';
 import { getExtensionSigners } from '../rpc';
 
@@ -34,6 +34,7 @@ function getInstallExtensionMessage(): { message: string; url?: string } {
 export const useLoadSigners = (
   appDisplayName: string,
   provider?: Provider,
+  network?: Network,
 ): [
   ReefSigner[],
   boolean,
@@ -69,7 +70,7 @@ export const useLoadSigners = (
         return;
       }
 
-      const sgnrs = await getExtensionSigners(extensions, provider);
+      const sgnrs = await getExtensionSigners(extensions, provider, network);
       // TODO signers objects are large cause of provider object inside. Find a way to overcome this problem.
       setSigners(sgnrs);
     } catch (e) {
