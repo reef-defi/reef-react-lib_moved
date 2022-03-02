@@ -193,7 +193,7 @@ export const selectedSignerTokenBalances$: Observable<Token[]> = combineLatest([
     ))),
 );
 
-const selectedSignerAddressUpdate$ = selectedSigner$.pipe(
+export const selectedSignerAddressUpdate$ = selectedSigner$.pipe(
   filter((v) => !!v),
   distinctUntilChanged((s1, s2) => s1?.address === s2?.address),
 );

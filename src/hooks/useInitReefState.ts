@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Provider } from '@reef-defi/evm-provider';
+import { ApolloClient } from '@apollo/client';
 import { useObservableState } from './useObservableState';
 import { Network, ReefSigner } from '../state';
 import { useProvider } from './useProvider';
@@ -8,7 +9,7 @@ import {
   selectedNetworkSubj,
   setCurrentNetwork,
 } from '../appState/providerState';
-import { setApolloUrls } from '../graphql';
+import { apolloClientSubj, setApolloUrls } from '../graphql';
 import { accountsSubj } from '../appState/accountState';
 import { useLoadSigners } from './useLoadSigners';
 
@@ -22,9 +23,11 @@ const getGQLUrls = (network: Network): { ws: string; http: string } => {
   return { ws, http };
 };
 export type UseInitReefState = [ReefSigner[] | undefined, Provider | undefined, Network | undefined, boolean, any];
+
 export const useInitReefState = (
   selectNetwork: Network,
   applicationDisplayName: string,
+  apolloClient?: ApolloClient<any>,
 ): UseInitReefState => {
   const selectedNetwork: Network|undefined = useObservableState(selectedNetworkSubj);
   const [provider, isProviderLoading] = useProvider((selectedNetwork as Network)?.rpcUrl);
@@ -39,10 +42,14 @@ export const useInitReefState = (
 
   useEffect(() => {
     if (selectedNetwork) {
-      const gqlUrls = getGQLUrls(selectedNetwork);
-      setApolloUrls(gqlUrls);
+      if (!apolloClient) {
+        const gqlUrls = getGQLUrls(selectedNetwork);
+        setApolloUrls(gqlUrls);
+      } else {
+        apolloClientSubj.next(apolloClient);
+      }
     }
-  }, [selectedNetwork]);
+  }, [selectedNetwork, apolloClient]);
 
   useEffect(() => {
     if (provider) {
@@ -52,10 +59,6 @@ export const useInitReefState = (
       provider?.api.disconnect();
     };
   }, [provider]);
-
-  useEffect(() => {
-    // dispatch(setProviderLoading(isProviderLoading));
-  }, [isProviderLoading]);
 
   useEffect(() => {
     accountsSubj.next(signers || []);
