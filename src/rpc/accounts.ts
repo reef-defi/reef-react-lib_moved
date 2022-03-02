@@ -62,9 +62,8 @@ export const accountsToSigners = async (
   accounts: InjectedAccountWithMeta[] | InjectedAccountWithMetaReef[],
   provider: Provider,
   sign: InjectedSigner,
-  network?: Network,
 ): Promise<ReefSigner[]> => Promise.all(
-  accounts.filter((acc) => !network || !network.genesisHash || !acc.meta.genesisHash || acc.meta.genesisHash === network.genesisHash)
+  accounts.filter((acc) => !provider || !provider.api.genesisHash.toString() || !acc.meta.genesisHash || acc.meta.genesisHash === provider.api.genesisHash.toString())
     .map((account) => accountToSigner(account, provider, sign)),
 );
 
@@ -86,7 +85,6 @@ function toAccountWithMeta(
 export const getExtensionSigners = async (
   extensions: InjectedExtension[] | InjectedExtensionReef[],
   provider: Provider,
-  network?: Network,
 ): Promise<ReefSigner[]> => {
   const extensionAccountPromises = extensions.map((ext) => ext.accounts
     .get()
@@ -94,7 +92,6 @@ export const getExtensionSigners = async (
       toAccountWithMeta(ext, extAccounts),
       provider,
       ext.signer as any,
-      network,
     )));
   return Promise.all(extensionAccountPromises).then((signersByExt) => signersByExt.reduce((all, curr) => all.concat(curr), []));
 };
