@@ -21,12 +21,12 @@ const getGQLUrls = (network: Network): { ws: string; http: string } => {
     : network.graphqlUrl;
   return { ws, http };
 };
-
+export type UseInitReefState = [ReefSigner[] | undefined, Provider | undefined, Network | undefined, boolean, any];
 export const useInitReefState = (
   selectNetwork: Network,
   applicationDisplayName: string,
-): [signers: ReefSigner[]|undefined, provider: Provider|undefined, selectedNetwork: Network|undefined, isLoading:boolean, error: any] => {
-  const selectedNetwork = useObservableState(selectedNetworkSubj);
+): UseInitReefState => {
+  const selectedNetwork: Network|undefined = useObservableState(selectedNetworkSubj);
   const [provider, isProviderLoading] = useProvider((selectedNetwork as Network)?.rpcUrl);
   const [signers, isSignersLoading, error] = useLoadSigners(applicationDisplayName, provider);
   const [loading, setLoading] = useState(false);
