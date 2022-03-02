@@ -2,7 +2,7 @@ import { Provider } from '@reef-defi/evm-provider';
 import { web3Accounts, web3Enable } from '@reef-defi/extension-dapp';
 import { InjectedExtension } from '@reef-defi/extension-inject/types';
 import { useState } from 'react';
-import { ReefSigner, SS58_REEF } from '../state';
+import { ReefSigner } from '../state';
 import { useAsyncEffect } from './useAsyncEffect';
 import { getExtensionSigners } from '../rpc';
 
@@ -59,7 +59,7 @@ export const useLoadSigners = (
         });
         return;
       }
-      const web3accounts = await web3Accounts({ ss58Format: SS58_REEF });
+      const web3accounts = await web3Accounts();
       if (web3accounts.length < 1) {
         setError({
           code: 2,
