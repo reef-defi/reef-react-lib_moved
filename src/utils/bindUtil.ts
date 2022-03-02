@@ -41,7 +41,7 @@ export const bindEvmAddress = (
         .claimDefaultAccount()
         .then(() => {
           if (!onTxChange) {
-            alert(`Success, Ethereum VM address is ${signer.evmAddress}.`);
+            alert(`Success, Ethereum VM address is ${signer.evmAddress}. Use this address ONLY on Reef chain.`);
           } else {
             onTxChange({
               txIdent,
