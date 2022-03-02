@@ -16,6 +16,7 @@ import { firstValueFrom } from 'rxjs';
 import { ensure } from '../utils/utils';
 import { ReefSigner } from '../state/types';
 import { selectedSigner$ } from '../appState/accountState';
+import { Network } from '../state';
 
 export const getReefCoinBalance = async (
   address: string,
@@ -53,6 +54,7 @@ export const accountToSigner = async (
     name: account.meta.name || '',
     address: account.address,
     source: account.meta.source,
+    genesisHash: account.meta.genesisHash!,
   };
 };
 
@@ -60,8 +62,10 @@ export const accountsToSigners = async (
   accounts: InjectedAccountWithMeta[] | InjectedAccountWithMetaReef[],
   provider: Provider,
   sign: InjectedSigner,
+  network?: Network,
 ): Promise<ReefSigner[]> => Promise.all(
-  accounts.map((account) => accountToSigner(account, provider, sign)),
+  accounts.filter((acc) => !network || !network.genesisHash || !acc.meta.genesisHash || acc.meta.genesisHash === network.genesisHash)
+    .map((account) => accountToSigner(account, provider, sign)),
 );
 
 function toAccountWithMeta(
@@ -82,13 +86,15 @@ function toAccountWithMeta(
 export const getExtensionSigners = async (
   extensions: InjectedExtension[] | InjectedExtensionReef[],
   provider: Provider,
+  network?: Network,
 ): Promise<ReefSigner[]> => {
   const extensionAccountPromises = extensions.map((ext) => ext.accounts
     .get()
     .then((extAccounts) => accountsToSigners(
       toAccountWithMeta(ext, extAccounts),
       provider,
-          ext.signer as any,
+      ext.signer as any,
+      network,
     )));
   return Promise.all(extensionAccountPromises).then((signersByExt) => signersByExt.reduce((all, curr) => all.concat(curr), []));
 };
