@@ -28,8 +28,8 @@ const getGQLUrls = (network: Network): { ws: string; http: string }|undefined =>
 export type UseInitReefState = [ReefSigner[] | undefined, Provider | undefined, Network | undefined, boolean, any];
 
 export const useInitReefState = (
-  selectNetwork: Network,
   applicationDisplayName: string,
+  selectNetwork: Network = availableNetworks.mainnet,
   signersParam?: ReefSigner[],
   apolloClient?: ApolloClient<any>,
 ): UseInitReefState => {
@@ -41,8 +41,6 @@ export const useInitReefState = (
   useEffect(() => {
     if (selectNetwork && selectNetwork !== selectedNetwork) {
       setCurrentNetwork(selectNetwork);
-    } else if (!selectNetwork) {
-      setCurrentNetwork(availableNetworks.mainnet);
     }
   }, [selectNetwork]);
 
