@@ -9,6 +9,7 @@ export interface ReefSigner {
   evmAddress: string;
   isEvmClaimed: boolean;
   source: string;
+  genesisHash?: string;
 }
 
 export type Color = 'success' | 'danger' | 'warning';
