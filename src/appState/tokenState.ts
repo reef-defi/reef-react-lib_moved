@@ -1,12 +1,13 @@
 import {
   combineLatest,
   distinctUntilChanged,
+  from,
   map,
   mergeScan,
   Observable,
   of,
+  scan,
   shareReplay,
-  skip,
   startWith,
   switchMap,
   tap,
@@ -98,6 +99,7 @@ const fetchTokensData = (
   })
 // eslint-disable-next-line camelcase
   .then((verContracts) => verContracts.data.verified_contract.map(
+    // eslint-disable-next-line camelcase
     (vContract: { address: string; contract_data: any }) => ({
       address: vContract.address,
       iconUrl: vContract.contract_data.token_icon_url,
@@ -111,6 +113,7 @@ const fetchTokensData = (
 // eslint-disable-next-line camelcase
 const tokenBalancesWithContractDataCache = (apollo: ApolloClient<any>) => (
   state: { tokens: Token[]; contractData: Token[] },
+  // eslint-disable-next-line camelcase
   tokenBalances: { token_address: string; balance: number }[],
 ) => {
   const missingCacheContractDataAddresses = tokenBalances
@@ -158,6 +161,7 @@ export const selectedSignerTokenBalances$: Observable<Token[]> = combineLatest([
       // eslint-disable-next-line camelcase
       switchMap(
         async (
+          // eslint-disable-next-line camelcase
           tokenBalances: { token_address: string; balance: number }[],
         ) => {
           const reefTkn = reefTokenWithAmount();
@@ -318,20 +322,17 @@ export const transferHistory$: Observable<
 
 const getGqlContractEventsQuery = (
   contractAddress: string,
-  methodSignature?: string,
-  perPage = 1,
-  offset = 0,
+  methodSignature?: string | null,
+  fromBlockId?: number,
+  toBlockId?: number,
 ): SubscriptionOptions => {
   const EVM_EVENT_GQL = gql`
-    subscription evmEvent(
+    query evmEvent(
       $address: String_comparison_exp!
-      $perPage: Int!
-      $offset: Int!
+      $blockId: bigint_comparison_exp!
       $topic0: String_comparison_exp
     ) {
       evm_event(
-        limit: $perPage
-        offset: $offset
         order_by: [
           { block_id: desc }
           { extrinsic_index: desc }
@@ -342,6 +343,7 @@ const getGqlContractEventsQuery = (
             { contract_address: $address }
             { topic_0: $topic0 }
             { method: { _eq: "Log" } }
+            { block_id: $blockId }
           ]
         }
       ) {
@@ -365,31 +367,73 @@ const getGqlContractEventsQuery = (
       topic0: methodSignature
         ? { _eq: utils.keccak256(utils.toUtf8Bytes(methodSignature)) }
         : {},
-      perPage,
-      offset,
+      blockId: toBlockId ? { _gte: fromBlockId, _lte: toBlockId } : { _eq: fromBlockId },
     },
     fetchPolicy: 'network-only',
   };
 };
 
-export const getEvmEvents$ = (
-  contractAddress: string,
-  methodSignature?: string,
-): Observable<any[]> => combineLatest([
-  apolloClientInstance$,
-  selectedSignerAddressUpdate$,
-  providerSubj,
-]).pipe(
-  switchMap(([apollo, signer]) => (!signer
-    ? []
-    : zenToRx(
-      apollo.subscribe(
-        getGqlContractEventsQuery(contractAddress, methodSignature),
-      ),
-    ).pipe(
-      map((res: any) => (res.data && res.data.evm_event ? res.data.evm_event : undefined)),
+const getGqlLastFinalizedBlock = (): SubscriptionOptions => {
+  const FINALISED_BLOCK_GQL = gql`
+    subscription finalisedBlock {
+      block(order_by: {id: desc}, limit: 1, where: {finalized: {_eq: true}}) {
+        id
+      }
+    }
+  `;
+  return {
+    query: FINALISED_BLOCK_GQL,
+    variables: {},
+    fetchPolicy: 'network-only',
+  };
+};
+
+export function getEvmEvents$(contractAddress: string, methodSignature?: string, fromBlockId?: number, toBlockId?: number): Observable<{ fromBlockId:number, toBlockId:number, evmEvents:any[] }|null> {
+  if (!contractAddress) {
+    console.warn('getEvmEvents$ expects contractAddress');
+    return of(null);
+  }
+  if (!fromBlockId) {
+    return apolloClientInstance$.pipe(
+      switchMap((apolloClient: ApolloClient<any>) => zenToRx(apolloClient.subscribe(getGqlLastFinalizedBlock())).pipe(
+        scan((state, res: any) => {
+          const block = res?.data?.block?.length ? res.data.block[0] : null;
+          if (!block) {
+            console.warn('getEvmEvents$ NO FINALISED BLOCK RESULT', res);
+            return state;
+          }
+          const newBlockId = block.id;
+          const diff = state.prevBlockId ? newBlockId - state.prevBlockId : 1;
+          let fromBlockId = newBlockId;
+          let toBlockId;
+          if (diff > 1 && state.prevBlockId) {
+            toBlockId = newBlockId;
+            fromBlockId = state.prevBlockId + 1;
+          }
+          return { prevBlockId: newBlockId, fromBlockId, toBlockId };
+        }, { prevBlockId: undefined, fromBlockId: undefined, toBlockId: undefined }),
+        switchMap((res: { fromBlockId: number, toBlockId: number | undefined }) => from(apolloClient?.query(
+          getGqlContractEventsQuery(contractAddress, methodSignature, res.fromBlockId, res.toBlockId),
+        )).pipe(
+          map((events) => ({
+            fromBlockId: res.fromBlockId,
+            toBlockId: res.toBlockId || res.fromBlockId,
+            evmEvents: events.data.evm_event,
+          })),
+        )),
+      ) as Observable<any>),
+      shareReplay(1),
+    );
+  }
+  return apolloClientInstance$.pipe(
+    switchMap((apolloClient: ApolloClient<any>) => from(apolloClient?.query(
+      getGqlContractEventsQuery(contractAddress, methodSignature, fromBlockId, toBlockId),
     ))),
-  filter((v) => !!v),
-  skip(1),
-  shareReplay(1),
-);
+    map((events) => ({
+      fromBlockId,
+      toBlockId: toBlockId || fromBlockId,
+      evmEvents: events.data.evm_event,
+    })),
+    shareReplay(1),
+  );
+}
