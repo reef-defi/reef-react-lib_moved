@@ -1,6 +1,7 @@
 import { BigNumber } from 'ethers';
 import { ensure } from '../utils/utils';
 import { calculateAmount } from '../utils/math';
+import { DataProgress } from '../utils';
 
 export interface BasicToken {
   name: string;
@@ -16,7 +17,7 @@ export interface Token extends BasicToken {
 
 export interface TokenWithAmount extends Token {
   amount: string;
-  price: number;
+  price: number | DataProgress;
   isEmpty: boolean;
 }
 
