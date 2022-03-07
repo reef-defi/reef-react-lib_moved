@@ -118,7 +118,11 @@ export const TokenAmountFieldMax = ({
   hideSelectTokenCommonBaseView,
 }: TokenAmountFieldMax): JSX.Element => {
   const { amount, price, isEmpty } = token;
-  const amo = parseFloat(amount);
+  const amountFl = parseFloat(amount);
+  const canCalcValue = (amt:number, prc:number): boolean => {
+    console.log('VVVVV=', amt, prc);
+    return !Number.isNaN(amt) && !Number.isNaN(prc) && !!amt && !!prc;
+  };
 
   return (
     <TokenAmountFieldBase
@@ -148,9 +152,10 @@ export const TokenAmountFieldMax = ({
       </MiniText>
       <MiniText>
         {!isEmpty
-          && price !== 0
-          && amount !== ''
-          && `~$ ${(amo * price).toFixed(4)}`}
+          && !!price
+          && !!amountFl
+          && canCalcValue(amountFl, price)
+          && `~$ ${(amountFl * price).toFixed(4)}`}
       </MiniText>
     </TokenAmountFieldBase>
   );
