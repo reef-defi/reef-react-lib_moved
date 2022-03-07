@@ -223,7 +223,6 @@ export const TransferComponent = ({
   useEffect(() => {
     // eslint-disable-next-line no-param-reassign
     if (token) {
-      console.log('TOKEN CHHHHH=', token);
       setTxToken({ ...token, amount: txToken?.amount || '0' });
     }
   }, [token]);
@@ -238,7 +237,6 @@ export const TransferComponent = ({
     if (!newTxToken) {
       [newTxToken] = tokens;
     }
-    console.log('SET 0 TTTT =', newTxToken);
     setTxToken({ ...newTxToken, amount: txToken?.amount || '0' } as TokenWithAmount);
   }, [tokens]);
 
@@ -259,14 +257,12 @@ export const TransferComponent = ({
     if (parseFloat(amt) <= 0) {
       amt = '';
     }
-    console.log('AMT CHHHH=', amt);
     setTxToken({ ...txToken, amount: toAmountInputValue(amt) });
   };
 
   const addressChanged = (_: any): Promise<void> => Promise.resolve();
 
   const tokenSelected = (tkn: Token): void => {
-    console.log('TKN selected=');
     if (tkn.address !== txToken?.address) {
       setTxToken({ ...tkn, amount: '', isEmpty: false } as TokenWithAmount);
     }
