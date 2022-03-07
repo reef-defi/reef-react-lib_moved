@@ -89,6 +89,7 @@ const SelectToken = ({
           console.log('searchTokens contract not found addr=', address);
         }
       }
+      console.log('SEEL TTTT=', tokenSearchRes);
       setFoundSearchTokens(tokenSearchRes);
     }
 
