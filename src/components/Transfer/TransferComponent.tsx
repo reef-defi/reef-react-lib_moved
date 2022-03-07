@@ -48,7 +48,7 @@ import { TxStatusHandler, TxStatusUpdate } from '../../utils/transactionUtil';
 interface TransferComponent {
   tokens: Token[];
   from: ReefSigner;
-  token: TokenWithAmount;
+  token?: TokenWithAmount;
   provider: Provider;
   onTxUpdate?: TxStatusHandler;
   accounts: ReefSigner[];
@@ -150,7 +150,7 @@ export const TransferComponent = ({
     [],
   );
   const [isLoading, setIsLoading] = useState(false);
-  const [txToken, setTxToken] = useState(token);
+  const [txToken, setTxToken] = useState(token || ({ ...tokens[0], amount: '0' } as TokenWithAmount));
   const [to, setTo] = useState('');
   const [foundToAccountAddress, setFoundToAccountAddress] = useState<ReefSigner | null>();
   const [validationError, setValidationError] = useState('');
@@ -220,21 +220,31 @@ export const TransferComponent = ({
     }
   }, [txUpdateData, lastTxIdentInProgress]);
 
-  /* useEffect(() => {
-    if (txUpdateData) {
-      onTxUpdate(txUpdateData);
-    }
-  }, [txUpdateData]);
-*/
   useEffect(() => {
     // eslint-disable-next-line no-param-reassign
-    token.amount = txToken.amount;
-    setTxToken(token);
+    if (token) {
+      console.log('TOKEN CHHHHH=', token);
+      setTxToken({ ...token, amount: txToken?.amount || '0' });
+    }
   }, [token]);
 
   useEffect(() => {
+    const reefAddress = reefTokenWithAmount().address;
+    const selectTokenAddr = txToken ? txToken.address : reefAddress;
+    let newTxToken = tokens.find((t) => t.address === selectTokenAddr);
+    if (!newTxToken) {
+      newTxToken = tokens.find((t) => t.address === reefAddress);
+    }
+    if (!newTxToken) {
+      [newTxToken] = tokens;
+    }
+    console.log('SET 0 TTTT =', newTxToken);
+    setTxToken({ ...newTxToken, amount: txToken?.amount || '0' } as TokenWithAmount);
+  }, [tokens]);
+
+  useEffect(() => {
     const exceptCurrent = filterCurrentAccount(accounts, currentAccount);
-    if (txToken.address === REEF_TOKEN.address) {
+    if (txToken?.address === REEF_TOKEN.address) {
       setAvailableTxAccounts(exceptCurrent);
       return;
     }
@@ -242,23 +252,28 @@ export const TransferComponent = ({
   }, [accounts, currentAccount, txToken]);
 
   const amountChanged = (amount: string): void => {
+    if (!txToken) {
+      return;
+    }
     let amt = amount;
     if (parseFloat(amt) <= 0) {
       amt = '';
     }
+    console.log('AMT CHHHH=', amt);
     setTxToken({ ...txToken, amount: toAmountInputValue(amt) });
   };
 
   const addressChanged = (_: any): Promise<void> => Promise.resolve();
 
   const tokenSelected = (tkn: Token): void => {
-    if (tkn.address !== txToken.address) {
+    console.log('TKN selected=');
+    if (tkn.address !== txToken?.address) {
       setTxToken({ ...tkn, amount: '', isEmpty: false } as TokenWithAmount);
     }
   };
 
   const onSendTxConfirmed = async (): Promise<void> => {
-    if (isLoading || !provider) {
+    if (isLoading || !provider || !txToken) {
       return;
     }
     try {
@@ -307,6 +322,9 @@ export const TransferComponent = ({
   };
 
   useEffect(() => {
+    if (!txToken) {
+      return;
+    }
     if (!txToken.amount || utils.parseEther(txToken.amount).isZero()) {
       setValidationError('Set amount');
       return;
@@ -365,7 +383,7 @@ export const TransferComponent = ({
   const onAccountSelect = (_: any, selected: ReefSigner): void => {
     const selectAcc = async (): Promise<void> => {
       let addr = '';
-      if (txToken.address === REEF_TOKEN.address) {
+      if (txToken?.address === REEF_TOKEN.address) {
         addr = await selected.signer.getSubstrateAddress();
       }
       if (!addr && selected.isEvmClaimed) {
@@ -426,7 +444,7 @@ export const TransferComponent = ({
                 onAddressChange={addressChanged}
                 hideSelectTokenCommonBaseView
                 afterBalanceEl={
-                  txToken.address === REEF_TOKEN.address
+                  txToken?.address === REEF_TOKEN.address
                   && isSubstrateAddress(to) ? (
                     <span>
                       {txToken.amount
@@ -482,7 +500,7 @@ export const TransferComponent = ({
             title={(
               <div>
                 Select account&nbsp;
-                {txToken.address !== REEF_TOKEN.address && (
+                {txToken?.address !== REEF_TOKEN.address && (
                   <span className="text-xs">(Ethereum VM enabled)</span>
                 )}
               </div>
@@ -495,12 +513,14 @@ export const TransferComponent = ({
             confirmFun={onSendTxConfirmed}
             confirmBtnLabel="Confirm and continue"
           >
+            {txToken && (
             <TokenAmountView
               name={txToken.name}
               amount={txToken.amount}
               usdAmount={calculateUsdAmount(txToken)}
               placeholder="Send Token"
             />
+            )}
             <Margin size="3">
               <ConfirmLabel
                 title="Send To"
