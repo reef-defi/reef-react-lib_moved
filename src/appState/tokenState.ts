@@ -38,7 +38,7 @@ const toPlainString = (num: number): string => `${+num}`.replace(
 
 const validatedTokens = { tokens: [] };
 
-export const reefPrice$: Observable<number> = timer(0, 60000).pipe(
+export const reefPrice$: Observable<number> = timer(0, 6000).pipe(
   switchMap(retrieveReefCoingeckoPrice),
   shareReplay(1),
 );
