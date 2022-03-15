@@ -10,6 +10,7 @@ import {
 import { InputAmount } from '../common/Input';
 import { ColorText, MiniText } from '../common/Text';
 import SelectToken from '../SelectToken';
+import { getData } from '../../utils';
 
 interface TokenAmountFieldProps {
   id?: string;
@@ -118,7 +119,8 @@ export const TokenAmountFieldMax = ({
   hideSelectTokenCommonBaseView,
 }: TokenAmountFieldMax): JSX.Element => {
   const { amount, price, isEmpty } = token;
-  const amo = parseFloat(amount);
+  const amountFl = parseFloat(amount);
+  const canCalcValue = (amt:number, prc:number): boolean => !Number.isNaN(amt) && !Number.isNaN(prc) && !!amt && !!prc;
 
   return (
     <TokenAmountFieldBase
@@ -148,9 +150,11 @@ export const TokenAmountFieldMax = ({
       </MiniText>
       <MiniText>
         {!isEmpty
-          && price !== 0
-          && amount !== ''
-          && `~$ ${(amo * price).toFixed(4)}`}
+          && !!price
+          && !!getData(price)
+          && !!amountFl
+          && canCalcValue(amountFl, price)
+          && `~$ ${(amountFl * price).toFixed(4)}`}
       </MiniText>
     </TokenAmountFieldBase>
   );

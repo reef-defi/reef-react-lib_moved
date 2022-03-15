@@ -6,14 +6,13 @@ import {
   Observable,
   of,
   shareReplay,
-  skip,
   startWith,
   switchMap,
   tap,
   timer,
 } from 'rxjs';
 import { BigNumber, FixedNumber, utils } from 'ethers';
-import { ApolloClient, gql, SubscriptionOptions } from '@apollo/client';
+import { ApolloClient, gql } from '@apollo/client';
 import { filter } from 'rxjs/operators';
 import { combineTokensDistinct, toTokensWithPrice } from './util';
 import { selectedSigner$ } from './accountState';
@@ -98,6 +97,7 @@ const fetchTokensData = (
   })
 // eslint-disable-next-line camelcase
   .then((verContracts) => verContracts.data.verified_contract.map(
+    // eslint-disable-next-line camelcase
     (vContract: { address: string; contract_data: any }) => ({
       address: vContract.address,
       iconUrl: vContract.contract_data.token_icon_url,
@@ -111,6 +111,7 @@ const fetchTokensData = (
 // eslint-disable-next-line camelcase
 const tokenBalancesWithContractDataCache = (apollo: ApolloClient<any>) => (
   state: { tokens: Token[]; contractData: Token[] },
+  // eslint-disable-next-line camelcase
   tokenBalances: { token_address: string; balance: number }[],
 ) => {
   const missingCacheContractDataAddresses = tokenBalances
@@ -138,6 +139,15 @@ const tokenBalancesWithContractDataCache = (apollo: ApolloClient<any>) => (
   });
 };
 
+const sortReefTokenFirst = (tokens): Token[] => {
+  const { address } = reefTokenWithAmount();
+  const reefTokenIndex = tokens.findIndex((t: Token) => t.address === address);
+  if (reefTokenIndex > 0) {
+    return [tokens[reefTokenIndex], ...tokens.slice(0, reefTokenIndex), ...tokens.slice(reefTokenIndex + 1, tokens.length)];
+  }
+  return tokens;
+};
+
 export const selectedSignerTokenBalances$: Observable<Token[]> = combineLatest([
   apolloClientInstance$,
   selectedSigner$,
@@ -158,6 +168,7 @@ export const selectedSignerTokenBalances$: Observable<Token[]> = combineLatest([
       // eslint-disable-next-line camelcase
       switchMap(
         async (
+          // eslint-disable-next-line camelcase
           tokenBalances: { token_address: string; balance: number }[],
         ) => {
           const reefTkn = reefTokenWithAmount();
@@ -190,6 +201,7 @@ export const selectedSignerTokenBalances$: Observable<Token[]> = combineLatest([
         ...t,
         iconUrl: t.iconUrl || getIconUrl(t.address),
       }))),
+      map(sortReefTokenFirst),
     ))),
 );
 
@@ -313,83 +325,5 @@ export const transferHistory$: Observable<
       }))),
     ))),
   startWith(null),
-  shareReplay(1),
-);
-
-const getGqlContractEventsQuery = (
-  contractAddress: string,
-  methodSignature?: string,
-  perPage = 1,
-  offset = 0,
-): SubscriptionOptions => {
-  const EVM_EVENT_GQL = gql`
-    subscription evmEvent(
-      $address: String_comparison_exp!
-      $perPage: Int!
-      $offset: Int!
-      $topic0: String_comparison_exp
-    ) {
-      evm_event(
-        limit: $perPage
-        offset: $offset
-        order_by: [
-          { block_id: desc }
-          { extrinsic_index: desc }
-          { event_index: desc }
-        ]
-        where: {
-          _and: [
-            { contract_address: $address }
-            { topic_0: $topic0 }
-            { method: { _eq: "Log" } }
-          ]
-        }
-      ) {
-        contract_address
-        data_parsed
-        data_raw
-        topic_0
-        topic_1
-        topic_2
-        topic_3
-        block_id
-        extrinsic_index
-        event_index
-      }
-    }
-  `;
-  return {
-    query: EVM_EVENT_GQL,
-    variables: {
-      address: { _eq: contractAddress },
-      topic0: methodSignature
-        ? { _eq: utils.keccak256(utils.toUtf8Bytes(methodSignature)) }
-        : {},
-      perPage,
-      offset,
-    },
-    fetchPolicy: 'network-only',
-  };
-};
-
-export const getEvmEvents$ = (
-  contractAddress: string,
-  methodSignature?: string,
-): Observable<any[]> => combineLatest([
-  apolloClientInstance$,
-  selectedSignerAddressUpdate$,
-  providerSubj,
-]).pipe(
-  switchMap(([apollo, signer]) => (!signer
-    ? []
-    : zenToRx(
-      apollo.subscribe(
-        getGqlContractEventsQuery(contractAddress, methodSignature),
-      ),
-    ).pipe(
-      map((res: any) => (res.data && res.data.evm_event ? res.data.evm_event : undefined)),
-    ))),
-  filter((v) => !!v),
-  skip(1),
   shareReplay(1),
 );

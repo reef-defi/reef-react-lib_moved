@@ -158,6 +158,7 @@ const EVM_ADDRESS_UPDATE_GQL = gql`
 // eslint-disable-next-line camelcase
 interface AccountEvmAddrData {
   address: string;
+  // eslint-disable-next-line camelcase
   evm_address?: string;
   isEvmClaimed?: boolean;
 }

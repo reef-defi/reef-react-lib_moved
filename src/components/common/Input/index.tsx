@@ -141,3 +141,33 @@ export const PercentageRangeAmount = ({
     onChange={(event) => onChange(parseInt(event.target.value, 10))}
   />
 );
+
+interface CheckboxInput {
+  checked: boolean;
+  disabled?: boolean;
+  onChange: (value: any) => void;
+  id: string;
+  labelText?: string;
+}
+
+export const CheckboxInput = ({
+  checked,
+  disabled,
+  onChange,
+  id,
+  labelText,
+}: CheckboxInput): JSX.Element => (
+  <div className='form-check'>
+    <input
+      className='form-check-input'
+      id={id}
+      type='checkbox'
+      checked={checked}
+      onChange={(event) => onChange(event)}
+      disabled={disabled}
+    />
+    <label htmlFor={id} className='form-check-label'>
+      {labelText}
+    </label>
+  </div>
+);

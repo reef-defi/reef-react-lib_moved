@@ -31,6 +31,7 @@ export const bindEvmAddress = (
   ) {
     // eslint-disable-next-line no-restricted-globals,no-alert
     const isDefault = generateDefault
+      // eslint-disable-next-line no-restricted-globals
       || confirm('Enable Reef chain with Ethereum VM capabilities.');
     if (displayedPopup.indexOf(signer.address) < 0) {
       displayedPopup.push(signer.address);
