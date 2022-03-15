@@ -5,6 +5,7 @@ interface Input {
   disabled?: boolean;
   maxLength?: number;
   placeholder?: string;
+  className?: string;
   onChange?: (value: string) => void;
 }
 
@@ -13,6 +14,7 @@ export const Input = ({
   disabled,
   maxLength,
   placeholder,
+  className="",
   onChange = (_) => {},
 }: Input): JSX.Element => (
   <input
@@ -20,7 +22,7 @@ export const Input = ({
     disabled={disabled}
     maxLength={maxLength}
     placeholder={placeholder}
-    className="form-control form-control-lg border-rad"
+    className={`form-control form-control-lg border-rad ${className}`}
     onChange={(event) => onChange(event.target.value)}
   />
 );
