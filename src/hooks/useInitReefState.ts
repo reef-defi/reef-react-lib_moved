@@ -25,37 +25,52 @@ const getGQLUrls = (network: Network): { ws: string; http: string }|undefined =>
     : network.graphqlUrl;
   return { ws, http };
 };
-export type UseInitReefState = [ReefSigner[] | undefined, Provider | undefined, Network | undefined, boolean, any];
+// export type UseInitReefState = [ReefSigner[] | undefined, Provider | undefined, Network | undefined, boolean, any];
 
+interface State {
+  loading: boolean;
+  signers?: ReefSigner[];
+  provider?: Provider;
+  network?: Network;
+  error?: any; // TODO!
+}
+
+interface StateOptions {
+  network: Network;
+  signers?: ReefSigner[];
+  client?: ApolloClient<any>;
+}
 export const useInitReefState = (
   applicationDisplayName: string,
-  selectNetwork: Network = availableNetworks.mainnet,
-  signersParam?: ReefSigner[],
-  apolloClient?: ApolloClient<any>,
-): UseInitReefState => {
+  {
+    network = availableNetworks.mainnet,
+    client,
+    signers,
+  }: StateOptions,
+): State => {
   const selectedNetwork: Network|undefined = useObservableState(selectedNetworkSubj);
   const [provider, isProviderLoading] = useProvider((selectedNetwork as Network)?.rpcUrl);
-  const [loadedSigners, isSignersLoading, error] = useLoadSigners(applicationDisplayName, signersParam ? undefined : provider);
+  const [loadedSigners, isSignersLoading, error] = useLoadSigners(applicationDisplayName, signers ? undefined : provider);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (selectNetwork && selectNetwork !== selectedNetwork) {
-      setCurrentNetwork(selectNetwork);
+    if (network && network !== selectedNetwork) {
+      setCurrentNetwork(network);
     }
-  }, [selectNetwork]);
+  }, [network]);
 
   useEffect(() => {
     if (selectedNetwork) {
-      if (!apolloClient) {
+      if (!client) {
         const gqlUrls = getGQLUrls(selectedNetwork);
         if (gqlUrls) {
           setApolloUrls(gqlUrls);
         }
       } else {
-        apolloClientSubj.next(apolloClient);
+        apolloClientSubj.next(client);
       }
     }
-  }, [selectedNetwork, apolloClient]);
+  }, [selectedNetwork, client]);
 
   useEffect(() => {
     if (provider) {
@@ -67,11 +82,18 @@ export const useInitReefState = (
   }, [provider]);
 
   useEffect(() => {
-    accountsSubj.next(signersParam || loadedSigners || []);
-  }, [loadedSigners, signersParam]);
+    accountsSubj.next(signers || loadedSigners || []);
+  }, [loadedSigners, signers]);
 
   useEffect(() => {
     setLoading(isProviderLoading || isSignersLoading);
   }, [isProviderLoading, isSignersLoading]);
-  return [loadedSigners, provider, selectedNetwork, loading, error];
+
+  return {
+    error,
+    loading,
+    provider,
+    network: selectedNetwork,
+    signers: loadedSigners,
+  };
 };
