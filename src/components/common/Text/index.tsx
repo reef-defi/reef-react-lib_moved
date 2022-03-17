@@ -13,19 +13,36 @@ export const LeadText: React.FC<unknown> = ({ children }): JSX.Element => (
   <span className="title-text user-select-none">{children}</span>
 );
 
-export const Text: React.FC<unknown> = ({ children }): JSX.Element => (
-  <span className="user-select-none">{children}</span>
+interface Text {
+  size?: number
+  className?: string;
+}
+
+export const Text: React.FC<Text> = ({ children, size = 1, className = '' }): JSX.Element => (
+  <span className={`user-select-none ${className}`} style={{ fontSize: `${size}em` }}>{children}</span>
 );
 
-interface ColorText {
+export const BoldText: React.FC<Text> = ({ children, className, size = 1 }): JSX.Element => (
+  <Text size={size} className={className}>
+    <b>
+      {children}
+    </b>
+  </Text>
+);
+
+interface ColorText extends Text {
   color?: Color;
 }
 
 export const ColorText: React.FC<ColorText> = ({
   children,
   color = 'success',
+  className = '',
+  size = 1,
 }): JSX.Element => (
-  <span className={`user-select-none text-${color}`}>{children}</span>
+  <Text className={`text-${color} ${className}`} size={size}>
+    {children}
+  </Text>
 );
 
 export const MiniText: React.FC<unknown> = ({ children }): JSX.Element => (

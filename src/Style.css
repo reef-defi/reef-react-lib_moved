@@ -145,12 +145,17 @@ input[type="range"]::-webkit-slider-thumb {
   background-color: #fff;
 }
 
+.bg-grey {
+  background: #00000012;
+}
+
 .nav-account {
   display: flex;
   padding: 2px;
 }
 
 .card {
+  width: 100%;
   border: 1px solid rgba(0, 0, 0, 0.125);
   box-shadow: 0 8px 20px 0 rgb(40 133 208 / 15%);
 }
