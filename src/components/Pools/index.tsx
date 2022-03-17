@@ -32,6 +32,7 @@ interface State extends DefaultState {
 }
 
 interface OpenState extends State {
+  openChart: (address: string) => void;
   openRemoveLiquidity: (address1: string, address2: string) => void;
 }
 
@@ -77,6 +78,7 @@ const CloseState = ({ pool, toggle }: State): JSX.Element => (
 const OpenState = ({
   pool,
   toggle,
+  openChart,
   openRemoveLiquidity,
 }: OpenState): JSX.Element => (
   <FullColumn>
@@ -118,6 +120,12 @@ const OpenState = ({
     <MT size="2" />
     <ContentEnd>
       <Button
+        onClick={() => openChart(pool.poolAddress)}
+      >
+        Chart
+      </Button>
+      <MS size="2" />
+      <Button
         onClick={() => openRemoveLiquidity(pool.token1.address, pool.token2.address)}
       >
         Remove supply
@@ -132,12 +140,14 @@ interface PoolsComponent {
   pools: Pool[];
   isLoading: boolean;
   openAddLiquidity: () => void;
+  openChart: (address: string) => void;
   openRemoveLiquidity: (address1: string, address2: string) => void;
 }
 
 export const PoolsComponent = ({
   pools,
   isLoading,
+  openChart,
   openAddLiquidity,
   openRemoveLiquidity,
 }: PoolsComponent): JSX.Element => {
@@ -165,6 +175,7 @@ export const PoolsComponent = ({
         <OpenState
           pool={pool}
           toggle={closeAll}
+          openChart={openChart}
           openRemoveLiquidity={openRemoveLiquidity}
         />
       ) : (

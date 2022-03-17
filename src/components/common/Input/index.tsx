@@ -5,6 +5,7 @@ interface Input {
   disabled?: boolean;
   maxLength?: number;
   placeholder?: string;
+  className?: string;
   onChange?: (value: string) => void;
 }
 
@@ -13,15 +14,15 @@ export const Input = ({
   disabled,
   maxLength,
   placeholder,
-  onChange = (_) => {
-  },
+  className = '',
+  onChange = (_) => {},
 }: Input): JSX.Element => (
   <input
     value={value}
     disabled={disabled}
     maxLength={maxLength}
     placeholder={placeholder}
-    className="form-control form-control-lg border-rad"
+    className={`form-control form-control-lg border-rad ${className}`}
     onChange={(event) => onChange(event.target.value)}
   />
 );
@@ -156,16 +157,16 @@ export const CheckboxInput = ({
   id,
   labelText,
 }: CheckboxInput): JSX.Element => (
-  <div className='form-check'>
+  <div className="form-check">
     <input
-      className='form-check-input'
+      className="form-check-input"
       id={id}
-      type='checkbox'
+      type="checkbox"
       checked={checked}
       onChange={(event) => onChange(event)}
       disabled={disabled}
     />
-    <label htmlFor={id} className='form-check-label'>
+    <label htmlFor={id} className="form-check-label">
       {labelText}
     </label>
   </div>
