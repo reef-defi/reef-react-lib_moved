@@ -14,7 +14,7 @@ export const Input = ({
   disabled,
   maxLength,
   placeholder,
-  className="",
+  className = '',
   onChange = (_) => {},
 }: Input): JSX.Element => (
   <input
@@ -157,16 +157,16 @@ export const CheckboxInput = ({
   id,
   labelText,
 }: CheckboxInput): JSX.Element => (
-  <div className='form-check'>
+  <div className="form-check">
     <input
-      className='form-check-input'
+      className="form-check-input"
       id={id}
-      type='checkbox'
+      type="checkbox"
       checked={checked}
       onChange={(event) => onChange(event)}
       disabled={disabled}
     />
-    <label htmlFor={id} className='form-check-label'>
+    <label htmlFor={id} className="form-check-label">
       {labelText}
     </label>
   </div>

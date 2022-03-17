@@ -45,8 +45,8 @@ export const useInitReefState = (
   {
     network = availableNetworks.mainnet,
     client,
-    signers
-  }: StateOptions
+    signers,
+  }: StateOptions,
 ): State => {
   const selectedNetwork: Network|undefined = useObservableState(selectedNetworkSubj);
   const [provider, isProviderLoading] = useProvider((selectedNetwork as Network)?.rpcUrl);
@@ -95,5 +95,5 @@ export const useInitReefState = (
     provider,
     network: selectedNetwork,
     signers: loadedSigners,
-  }
+  };
 };

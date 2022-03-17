@@ -18,12 +18,11 @@ interface Text {
   className?: string;
 }
 
-export const Text: React.FC<Text> = ({ children, size=1, className="" }): JSX.Element => (
+export const Text: React.FC<Text> = ({ children, size = 1, className = '' }): JSX.Element => (
   <span className={`user-select-none ${className}`} style={{ fontSize: `${size}em` }}>{children}</span>
 );
 
-
-export const BoldText: React.FC<Text> = ({children, className, size=1}): JSX.Element => (
+export const BoldText: React.FC<Text> = ({ children, className, size = 1 }): JSX.Element => (
   <Text size={size} className={className}>
     <b>
       {children}
@@ -38,8 +37,8 @@ interface ColorText extends Text {
 export const ColorText: React.FC<ColorText> = ({
   children,
   color = 'success',
-  className="",
-  size=1
+  className = '',
+  size = 1,
 }): JSX.Element => (
   <Text className={`text-${color} ${className}`} size={size}>
     {children}
