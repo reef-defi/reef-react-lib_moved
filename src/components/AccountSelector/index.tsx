@@ -44,6 +44,10 @@ export const AccountSelector = ({
     : toReefBalanceDisplay(undefined);
   const evmAddress = selectedSigner ? selectedSigner.evmAddress : '';
 
+  const confirmEvmCopy = (): void => {
+    window.alert('ONLY use this address on Reef chain! DO NOT use this Reef EVM address on any other chain!');
+  };
+
   return (
     <div className="nav-account border-rad">
       <div className="my-auto mx-2 fs-6">{balance}</div>
@@ -86,13 +90,22 @@ export const AccountSelector = ({
             </Margin>
             <MT size="2" />
             <MX size="2">
-              <CopyToClipboard text={evmAddress}>
+              <CopyToClipboard text={`${evmAddress}(ONLY for Reef chain!)`} onCopy={confirmEvmCopy}>
                 <span
                   className="form-text text-muted ms-2"
                   style={{ cursor: 'pointer' }}
                 >
                   <CopyIcon small />
-                  <MiniText>Copy EVM Address</MiniText>
+                  <MiniText>Copy Reef EVM Address</MiniText>
+                </span>
+              </CopyToClipboard>
+              <CopyToClipboard text={address}>
+                <span
+                  className="form-text text-muted ms-2"
+                  style={{ cursor: 'pointer' }}
+                >
+                  <CopyIcon small />
+                  <MiniText>Copy Address</MiniText>
                 </span>
               </CopyToClipboard>
               <a
