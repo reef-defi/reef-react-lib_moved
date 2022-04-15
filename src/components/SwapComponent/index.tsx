@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { BigNumber } from 'ethers';
 import {
-  availableNetworks,
   createEmptyTokenWithAmount,
   defaultSettings,
   ensureTokenAmount,
@@ -13,7 +12,7 @@ import {
   Token,
   TokenWithAmount,
 } from '../../state';
-import { ButtonStatus, ensure, TX_STATUS_ERROR_CODE } from '../../utils';
+import { ButtonStatus, ensure } from '../../utils';
 import {
   calculateAmount,
   calculateAmountWithPercentage,
@@ -108,6 +107,8 @@ const swapStatus = (
   }
 };
 
+export type SwapFocus = 'buy' | 'sell';
+
 const loadingStatus = (
   status: string,
   isPoolLoading: boolean,
@@ -129,13 +130,14 @@ export const SwapComponent = ({
   tokens,
   network,
   account,
-  onTxUpdate,
+  // onTxUpdate,
 }: SwapComponent): JSX.Element => {
   const [buy, setBuy] = useState(createEmptyTokenWithAmount());
   const [sell, setSell] = useState(reefTokenWithAmount());
   const [status, setStatus] = useState('');
   const [settings, setSettings] = useState(defaultSettings());
   const [isSwapLoading, setIsSwapLoading] = useState(false);
+  const [focus, setFocus] = useState<SwapFocus>('sell');
 
   const [pool, isPoolLoading] = useLoadPool(
     sell,
@@ -173,9 +175,8 @@ export const SwapComponent = ({
   });
 
   const setSellAmount = (amount: string): void => {
-    if (isLoading) {
-      return;
-    }
+    if (isLoading) { return; }
+    setFocus('sell');
     const amo = pool && amount !== ''
       ? getOutputAmount({ ...sell, amount }, pool).toFixed(4)
       : '';
@@ -184,9 +185,8 @@ export const SwapComponent = ({
     setBuy({ ...buy, amount: amo });
   };
   const setBuyAmount = (amount: string): void => {
-    if (isLoading) {
-      return;
-    }
+    if (isLoading) { return; }
+    setFocus('buy');
     const amo = pool && amount !== ''
       ? getInputAmount({ ...buy, amount }, pool).toFixed(4)
       : '';
@@ -195,34 +195,37 @@ export const SwapComponent = ({
     setSell({ ...sell, amount: amo });
   };
 
-  const changeBuyToken = (newToken: Token): void => setBuy({
-    ...newToken,
-    amount: '',
-    price: 0,
-    isEmpty: false,
-  });
-  const changeSellToken = (newToken: Token): void => setSell({
-    ...newToken,
-    amount: '',
-    price: 0,
-    isEmpty: false,
-  });
-
   const onSwitch = (): void => {
-    if (buy.isEmpty || isLoading || !pool) {
-      return;
+    if (isLoading) { return; }
+    if (focus === 'buy') {
+      const subSell = { ...sell };
+      setSell({ ...buy });
+      setBuy({ ...subSell, amount: '', price: 0 });
+      setFocus('sell');
+    } else {
+      const subBuy = { ...buy };
+      setBuy({ ...sell });
+      setSell({ ...subBuy, amount: '', price: 0 });
+      setFocus('buy');
     }
-    const subSellState = { ...sell };
-    setSell({ ...buy });
-    setBuy({ ...subSellState, amount: getOutputAmount(buy, pool).toFixed(4) });
   };
+
+  const changeBuyToken = (newToken: Token): void => (newToken.address !== sell.address
+    ? setBuy({
+      ...newToken, amount: '', price: 0, isEmpty: false,
+    })
+    : onSwitch());
+  const changeSellToken = (newToken: Token): void => (newToken.address !== buy.address
+    ? setSell({
+      ...newToken, amount: '', price: 0, isEmpty: false,
+    })
+    : onSwitch());
 
   const onSwap = async (): Promise<void> => {
     if (!isValid || !account) {
       return;
     }
     const { signer, evmAddress } = account;
-    const txIdent = Math.random().toString(10);
     try {
       setIsSwapLoading(true);
       ensureTokenAmount(sell);
@@ -234,46 +237,18 @@ export const SwapComponent = ({
       await approveTokenAmount(sell, network.routerAddress, signer);
 
       setStatus('Executing swap');
-      if (onTxUpdate) {
-        onTxUpdate({
-          txIdent,
-        });
-      }
-      await reefswapRouter
-        .swapExactTokensForTokensSupportingFeeOnTransferTokens(
-          sellAmount,
-          minBuyAmount,
-          [sell.address, buy.address],
-          evmAddress,
-          calculateDeadline(deadline),
-        )
-        .then((contractCall: any) => {
-          if (onTxUpdate) {
-            onTxUpdate({
-              txIdent,
-              txHash: contractCall.hash,
-              isInBlock: true,
-              txTypeEvm: true,
-              url: `https://${
-                network === availableNetworks.mainnet ? '' : `${network.name}.`
-              }reefscan.com/extrinsic/${contractCall.hash}`,
-              addresses: [account.address],
-            });
-          }
-          return contractCall;
-        });
+      console.log(sellAmount)
+      console.log(minBuyAmount)
+      await reefswapRouter.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+        sellAmount,
+        minBuyAmount,
+        [sell.address, buy.address],
+        evmAddress,
+        calculateDeadline(deadline),
+      );
+      console.log('Success');
     } catch (error) {
-      if (onTxUpdate) {
-        onTxUpdate({
-          txIdent,
-          error: {
-            message: error.message,
-            code: TX_STATUS_ERROR_CODE.ERROR_UNDEFINED,
-          },
-          txTypeEvm: true,
-          addresses: [account.address],
-        });
-      }
+
     } finally {
       setIsSwapLoading(false);
       setStatus('');
@@ -309,7 +284,7 @@ export const SwapComponent = ({
         />
         <MT size="2">
           <CenterColumn>
-            <OpenModalButton id="swapModalToggle">
+            <OpenModalButton id="swapModalToggle" disabled={!isValid || isLoading}>
               {isLoading ? (
                 <LoadingButtonIconWithText
                   text={loadingStatus(status, isPoolLoading, isPriceLoading)}
