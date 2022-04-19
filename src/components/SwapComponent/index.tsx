@@ -131,7 +131,7 @@ export const SwapComponent = ({
   network,
   account,
   buyToken,
-  sellToken,
+  sellToken
   // onTxUpdate,
 }: SwapComponent): JSX.Element => {
   const [buy, setBuy] = useState(buyToken);
@@ -239,8 +239,8 @@ export const SwapComponent = ({
       await approveTokenAmount(sell, network.routerAddress, signer);
 
       setStatus('Executing swap');
-      console.log(sellAmount);
-      console.log(minBuyAmount);
+      console.log(sellAmount)
+      console.log(minBuyAmount)
       await reefswapRouter.swapExactTokensForTokensSupportingFeeOnTransferTokens(
         sellAmount,
         minBuyAmount,

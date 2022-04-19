@@ -75,15 +75,15 @@ export const sendToNativeAddress = (
         substrateAddress,
         { signer: signer.signer.signingKey },
         (res) => {
-          const txHash = transfer.hash.toHex();
-          txHandler({
-            txIdent,
-            txHash,
-            isInBlock: res.isInBlock,
-            isComplete: res.isFinalized,
-            addresses: [signer.address, to],
-          });
-        },
+            const txHash = transfer.hash.toHex();
+            txHandler({
+              txIdent,
+              txHash,
+              isInBlock: res.isInBlock,
+              isComplete: res.isFinalized,
+              addresses: [signer.address, to],
+            });
+          }
       )
       .catch((e) => {
         console.log('sendToNativeAddress err=', e);

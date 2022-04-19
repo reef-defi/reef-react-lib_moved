@@ -184,8 +184,8 @@ export const RemoveLiquidityComponent = ({
             addresses: [signer.address],
           });
         }
-        console.error('Remove failed');
-        console.error(e);
+        console.error('Remove failed')
+        console.error(e)
       })
       .finally(() => {
         ensureMount(setIsRemoving, false);

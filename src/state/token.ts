@@ -40,7 +40,7 @@ export const createEmptyToken = (): Token => ({
   iconUrl: '',
 });
 
-export const createEmptyTokenWithAmount = (isEmpty = true): TokenWithAmount => ({
+export const createEmptyTokenWithAmount = (isEmpty=true): TokenWithAmount => ({
   ...createEmptyToken(),
   isEmpty,
   price: -1,

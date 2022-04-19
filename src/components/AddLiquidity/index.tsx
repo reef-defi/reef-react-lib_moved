@@ -218,13 +218,13 @@ export const AddLiquidity = ({
       const message = errorHandler(error.message)
         .replace('first', token1.name)
         .replace('second', token2.name);
-      console.error('Add liquidity error:');
-      console.error(message);
+      console.error("Add liquidity error:")
+      console.error(message)
       // toast.error(errorHandler(message));
     } finally {
       /* TODO const newTokens = await loadTokens(tokens, sgnr);
       dispatch(setAllTokensAction(newTokens)); */
-      onTxUpdate!({ txIdent: 'update' });
+      onTxUpdate!({txIdent: 'update'})
       setIsLiquidityLoading(false);
       setStatus('');
     }
