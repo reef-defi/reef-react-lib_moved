@@ -131,8 +131,8 @@ export const getExtensionSigners = async (
   //   )));
   // console.log(await Promise.all(extensionAccountPromises))
   // return await Promise.all(extensionAccountPromises).then((signersByExt) => signersByExt.reduce((all, curr) => all.concat(curr), []));
-  const extensionAccounts = await Promise.all(extensions.map(async (extension) => ({name: extension.name, sig: extension.signer, accounts: await extension.accounts.get()})));
-  const accountPromisses = extensionAccounts.flatMap(({accounts, name, sig}) => accounts.map((account) => accountToSig(account, provider, sig, name)));
+  const extensionAccounts = await Promise.all(extensions.map(async (extension) => ({ name: extension.name, sig: extension.signer, accounts: await extension.accounts.get() })));
+  const accountPromisses = extensionAccounts.flatMap(({ accounts, name, sig }) => accounts.map((account) => accountToSig(account, provider, sig, name)));
   const accounts = await Promise.all(accountPromisses);
   // const promises = extensions.flatMap((extension) => extension.accounts
   //   .get()
