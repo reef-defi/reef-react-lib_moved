@@ -21,12 +21,9 @@ import { useLoadPool } from '../../hooks/useLoadPool';
 import { useUpdateTokensPrice } from '../../hooks/useUpdateTokensPrice';
 import { useUpdateLiquidityAmount } from '../../hooks/useUpdateAmount';
 import {
-  availableNetworks,
-  createEmptyTokenWithAmount,
   defaultSettings,
   Network,
   ReefSigner,
-  reefTokenWithAmount,
   resolveSettings,
   Token,
   TokenWithAmount,
@@ -34,7 +31,6 @@ import {
 import {
   ButtonStatus,
   errorHandler,
-  TX_STATUS_ERROR_CODE,
   TxStatusHandler,
 } from '../../utils';
 import { TransactionSettings } from '../TransactionSettings';
@@ -93,15 +89,15 @@ const loadingStatus = (
 interface AddLiquidityComponent {
   tokens: Token[];
   network: Network;
-  tokenValue1?: TokenWithAmount;
-  tokenValue2?: TokenWithAmount;
+  tokenValue1: TokenWithAmount;
+  tokenValue2: TokenWithAmount;
   signer: ReefSigner;
   back: () => void;
   onTxUpdate?: TxStatusHandler;
   onAddressChangeLoad?: (address: string) => Promise<void>;
 }
 
-export const AddLiquidityComponent = ({
+export const AddLiquidity = ({
   tokens,
   network,
   tokenValue1,
@@ -117,10 +113,9 @@ export const AddLiquidityComponent = ({
   const [settings, setSettings] = useState(defaultSettings());
   const [isLiquidityLoading, setIsLiquidityLoading] = useState(false);
 
-  const [token2, setToken2] = useState(
-    tokenValue2 || createEmptyTokenWithAmount(),
-  );
-  const [token1, setToken1] = useState(tokenValue1 || reefTokenWithAmount());
+  const [token1, setToken1] = useState(tokenValue1);
+  const [token2, setToken2] = useState(tokenValue2);
+
   const { deadline, percentage } = resolveSettings(settings);
   useEffect(() => {
     if (tokenValue2) {
@@ -194,16 +189,11 @@ export const AddLiquidityComponent = ({
   };
 
   const addLiquidityClick = async (): Promise<void> => {
-    const txIdent = Math.random().toString(10);
     try {
       setIsLiquidityLoading(true);
       ensureAmount(token1);
       ensureAmount(token2);
-      if (onTxUpdate) {
-        onTxUpdate({
-          txIdent,
-        });
-      }
+
       setStatus(`Approving ${token1.name} token`);
       await approveTokenAmount(token1, network.routerAddress, sgnr);
       setStatus(`Approving ${token2.name} token`);
@@ -211,12 +201,8 @@ export const AddLiquidityComponent = ({
 
       setStatus('Adding supply');
       const reefswapRouter = getReefswapRouter(network.routerAddress, sgnr);
-      if (onTxUpdate) {
-        onTxUpdate({
-          txIdent,
-        });
-      }
-      const contractCall = await reefswapRouter.addLiquidity(
+
+      await reefswapRouter.addLiquidity(
         token1.address,
         token2.address,
         calculateAmount(token1),
@@ -226,36 +212,19 @@ export const AddLiquidityComponent = ({
         evmAddress,
         calculateDeadline(deadline),
       );
-      if (onTxUpdate) {
-        onTxUpdate({
-          txIdent,
-          txHash: contractCall.hash,
-          isInBlock: true,
-          txTypeEvm: true,
-          url: `https://${
-            network === availableNetworks.mainnet ? '' : `${network.name}.`
-          }reefscan.com/extrinsic/${contractCall.hash}`,
-          addresses: [signer.address],
-        });
-      }
+      console.log('success');
       // toast.success(`${token1.name}/${token2.name} supply added successfully!`);
     } catch (error) {
       const message = errorHandler(error.message)
         .replace('first', token1.name)
         .replace('second', token2.name);
+      console.error('Add liquidity error:');
+      console.error(message);
       // toast.error(errorHandler(message));
-      if (onTxUpdate) {
-        onTxUpdate({
-          txIdent,
-          error: { message, code: TX_STATUS_ERROR_CODE.ERROR_UNDEFINED },
-          txTypeEvm: true,
-          addresses: [signer.address],
-        });
-      }
     } finally {
       /* TODO const newTokens = await loadTokens(tokens, sgnr);
       dispatch(setAllTokensAction(newTokens)); */
-
+      onTxUpdate!({ txIdent: 'update' });
       setIsLiquidityLoading(false);
       setStatus('');
     }
@@ -385,5 +354,3 @@ export const AddLiquidityComponent = ({
     </ComponentCenter>
   );
 };
-
-export default AddLiquidityComponent;

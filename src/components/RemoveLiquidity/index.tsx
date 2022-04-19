@@ -148,13 +148,6 @@ export const RemoveLiquidityComponent = ({
         signer.signer,
       ))
       .then(() => setLoadingStatus('Removing supply'))
-      .then(() => {
-        if (onTxUpdate) {
-          onTxUpdate({
-            txIdent,
-          });
-        }
-      })
       .then(() => reefswapRouter.removeLiquidity(
         pool.token1.address,
         pool.token2.address,
@@ -178,7 +171,7 @@ export const RemoveLiquidityComponent = ({
           });
         }
       })
-      .then(() => mounted.current && back())
+      .then(() => console.log('Remove successful'))
       .catch((e) => {
         if (onTxUpdate) {
           onTxUpdate({
@@ -191,6 +184,8 @@ export const RemoveLiquidityComponent = ({
             addresses: [signer.address],
           });
         }
+        console.error('Remove failed');
+        console.error(e);
       })
       .finally(() => {
         ensureMount(setIsRemoving, false);

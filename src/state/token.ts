@@ -40,11 +40,11 @@ export const createEmptyToken = (): Token => ({
   iconUrl: '',
 });
 
-export const createEmptyTokenWithAmount = (): TokenWithAmount => ({
+export const createEmptyTokenWithAmount = (isEmpty = true): TokenWithAmount => ({
   ...createEmptyToken(),
+  isEmpty,
   price: -1,
   amount: '',
-  isEmpty: true,
 });
 
 export const toTokenAmount = (
