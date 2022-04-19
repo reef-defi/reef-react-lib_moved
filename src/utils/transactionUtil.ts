@@ -1,4 +1,4 @@
-import { Provider, handleTxResponse } from '@reef-defi/evm-provider';
+import { Provider } from '@reef-defi/evm-provider';
 import { BigNumber } from 'ethers';
 import { ReefSigner } from '../state';
 
@@ -74,24 +74,16 @@ export const sendToNativeAddress = (
       .signAndSend(
         substrateAddress,
         { signer: signer.signer.signingKey },
-        (res) => handleTxResponse(res, provider.api)
-          .then((txRes: any): void => {
-            const txHash = transfer.hash.toHex();
-            txHandler({
-              txIdent,
-              txHash,
-              isInBlock: txRes.result.status.isInBlock,
-              isComplete: txRes.result.status.isFinalized,
-              addresses: [signer.address, to],
-            });
-          })
-          .catch((rej: any) => {
-            // finalized error is ignored
-            if (rej.result.status.isInBlock) {
-              const txHash = transfer.hash.toHex();
-              handleErr(rej.message, txIdent, txHash, txHandler, signer);
-            }
-          }),
+        (res) => {
+          const txHash = transfer.hash.toHex();
+          txHandler({
+            txIdent,
+            txHash,
+            isInBlock: res.isInBlock,
+            isComplete: res.isFinalized,
+            addresses: [signer.address, to],
+          });
+        },
       )
       .catch((e) => {
         console.log('sendToNativeAddress err=', e);
