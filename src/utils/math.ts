@@ -209,7 +209,6 @@ export const ensureAmount = (token: TokenWithAmount): void => ensure(
   `Insufficient ${token.name} balance`,
 );
 
-
 export const getOutputAmount = (sell: TokenWithAmount, pool: Pool): number => {
   const inputAmount = parseFloat(assertAmount(sell.amount)) * 997;
 
@@ -233,7 +232,6 @@ export const getInputAmount = (buy: TokenWithAmount, pool: Pool): number => {
 
   return numerator / denominator;
 };
-
 
 export const calculateImpactPercentage = (
   sell: TokenWithAmount,
