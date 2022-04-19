@@ -1,13 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { BigNumber } from 'ethers';
 import {
-  createEmptyTokenWithAmount,
   defaultSettings,
   ensureTokenAmount,
   Network,
   Pool,
   ReefSigner,
-  reefTokenWithAmount,
   resolveSettings,
   Token,
   TokenWithAmount,
@@ -45,6 +43,8 @@ import { TxStatusHandler } from '../../utils/transactionUtil';
 
 interface SwapComponent {
   tokens: Token[];
+  buyToken: TokenWithAmount;
+  sellToken: TokenWithAmount;
   network: Network;
   account: ReefSigner;
   onTxUpdate?: TxStatusHandler;
@@ -130,10 +130,12 @@ export const SwapComponent = ({
   tokens,
   network,
   account,
+  buyToken,
+  sellToken
   // onTxUpdate,
 }: SwapComponent): JSX.Element => {
-  const [buy, setBuy] = useState(createEmptyTokenWithAmount());
-  const [sell, setSell] = useState(reefTokenWithAmount());
+  const [buy, setBuy] = useState(buyToken);
+  const [sell, setSell] = useState(sellToken);
   const [status, setStatus] = useState('');
   const [settings, setSettings] = useState(defaultSettings());
   const [isSwapLoading, setIsSwapLoading] = useState(false);
