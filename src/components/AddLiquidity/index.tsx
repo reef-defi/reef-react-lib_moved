@@ -21,17 +21,21 @@ import { useLoadPool } from '../../hooks/useLoadPool';
 import { useUpdateTokensPrice } from '../../hooks/useUpdateTokensPrice';
 import { useUpdateLiquidityAmount } from '../../hooks/useUpdateAmount';
 import {
+  createEmptyTokenWithAmount,
+  DefaultOptions,
+  defaultOptions,
   defaultSettings,
   Network,
+  // PartialOptions,
   ReefSigner,
   resolveSettings,
   Token,
+  TokenSelector,
   TokenWithAmount,
 } from '../../state';
 import {
   ButtonStatus,
   errorHandler,
-  TxStatusHandler,
 } from '../../utils';
 import { TransactionSettings } from '../TransactionSettings';
 import ConfirmationModal from '../common/Modal';
@@ -92,9 +96,7 @@ interface AddLiquidityComponent {
   tokenValue1: TokenWithAmount;
   tokenValue2: TokenWithAmount;
   signer: ReefSigner;
-  back: () => void;
-  onTxUpdate?: TxStatusHandler;
-  onAddressChangeLoad?: (address: string) => Promise<void>;
+  options?: Partial<DefaultOptions>;
 }
 
 export const AddLiquidity = ({
@@ -103,11 +105,10 @@ export const AddLiquidity = ({
   tokenValue1,
   tokenValue2,
   signer,
-  back,
-  onTxUpdate,
-  onAddressChangeLoad,
+  options
 }: AddLiquidityComponent): JSX.Element => {
   const { signer: sgnr, evmAddress, isEvmClaimed } = signer;
+  const {back, notify, onTokenSelect, updateTokenState, onAddressChange} = {...defaultOptions, ...options};
 
   const [status, setStatus] = useState('');
   const [settings, setSettings] = useState(defaultSettings());
@@ -118,10 +119,13 @@ export const AddLiquidity = ({
 
   const { deadline, percentage } = resolveSettings(settings);
   useEffect(() => {
-    if (tokenValue2) {
+    if (tokenValue2.address !== token2.address) {
       setToken2(tokenValue2);
     }
-  }, [tokenValue2]);
+    if (tokenValue1.address !== token1.address) {
+      setToken1(tokenValue1);
+    }
+  }, [tokenValue2.address, tokenValue2.address]);
 
   const [pool, isPoolLoading] = useLoadPool(
     token1,
@@ -154,18 +158,17 @@ export const AddLiquidity = ({
   const isLoading = isLiquidityLoading || isPoolLoading || isPriceLoading;
   const { text, isValid } = buttonStatus(token1, token2, isEvmClaimed);
 
-  const changeToken1 = (newToken: Token): void => setToken1({
-    ...newToken,
-    amount: '',
-    price: 0,
-    isEmpty: false,
-  });
-  const changeToken2 = (newToken: Token): void => setToken2({
-    ...newToken,
-    amount: '',
-    price: 0,
-    isEmpty: false,
-  });
+  const changeToken = (type: TokenSelector) => (newToken: Token): void => {
+    onTokenSelect(newToken.address, type);
+    const tokenWithamo: TokenWithAmount = {
+      ...createEmptyTokenWithAmount(false),
+      ...newToken,
+    };
+    switch(type) {
+      case 'token1': return setToken1(tokenWithamo);
+      case 'token2': return setToken2(tokenWithamo);
+    }
+  }
 
   const setAmount1 = (amount: string): void => {
     if (isLoading) {
@@ -212,19 +215,19 @@ export const AddLiquidity = ({
         evmAddress,
         calculateDeadline(deadline),
       );
-      console.log('success');
-      // toast.success(`${token1.name}/${token2.name} supply added successfully!`);
+      notify('Liquidity added successfully!');
     } catch (error) {
       const message = errorHandler(error.message)
         .replace('first', token1.name)
         .replace('second', token2.name);
-      console.error('Add liquidity error:');
-      console.error(message);
+
+      notify(message, 'error')
       // toast.error(errorHandler(message));
     } finally {
       /* TODO const newTokens = await loadTokens(tokens, sgnr);
       dispatch(setAllTokensAction(newTokens)); */
-      onTxUpdate!({ txIdent: 'update' });
+      await updateTokenState()
+        .catch(() => notify('Failed to reload token balances, please reload the page to see correct balances.', 'warning'));
       setIsLiquidityLoading(false);
       setStatus('');
     }
@@ -252,8 +255,8 @@ export const AddLiquidity = ({
           signer={signer}
           id="add-liquidity-token-1"
           onAmountChange={setAmount1}
-          onTokenSelect={changeToken1}
-          onAddressChange={onAddressChangeLoad}
+          onTokenSelect={changeToken('token1')}
+          onAddressChange={onAddressChange}
         />
         <SwitchTokenButton disabled addIcon />
 
@@ -263,8 +266,8 @@ export const AddLiquidity = ({
           signer={signer}
           id="add-liquidity-token-2"
           onAmountChange={setAmount2}
-          onTokenSelect={changeToken2}
-          onAddressChange={onAddressChangeLoad}
+          onTokenSelect={changeToken('token2')}
+          onAddressChange={onAddressChange}
         />
 
         <button
