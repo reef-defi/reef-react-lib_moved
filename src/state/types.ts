@@ -18,7 +18,7 @@ export type TokenSelector = 'token1' | 'token2';
 
 
 // const baseFun = <T, >(value: string, type: T) => {};
-type NotifyFun = (message: string, type?: Notify) => void;
+export type NotifyFun = (message: string, type?: Notify) => void;
 // type Test = BaseFun<Notify>;
 
 type OnTokenSelect = (address: string, type?: TokenSelector) => void;
