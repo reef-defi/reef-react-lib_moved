@@ -118,14 +118,14 @@ export const AddLiquidity = ({
   const [token2, setToken2] = useState(tokenValue2);
 
   const { deadline, percentage } = resolveSettings(settings);
-  useEffect(() => {
-    if (tokenValue2.address !== token2.address) {
-      setToken2(tokenValue2);
-    }
-    if (tokenValue1.address !== token1.address) {
-      setToken1(tokenValue1);
-    }
-  }, [tokenValue2.address, tokenValue2.address]);
+  useEffect(
+    () => setToken1(tokenValue1),
+    [tokenValue1.address]
+  );
+  useEffect(
+    () => setToken2(tokenValue2),
+    [tokenValue2.address]
+  );
 
   const [pool, isPoolLoading] = useLoadPool(
     token1,
@@ -197,6 +197,11 @@ export const AddLiquidity = ({
       ensureAmount(token1);
       ensureAmount(token2);
 
+      const amount1 = calculateAmount(token1);
+      const amount2 = calculateAmount(token2);
+      const percentage1 = calculateAmountWithPercentage(token1, percentage);
+      const percentage2 = calculateAmountWithPercentage(token2, percentage);
+
       setStatus(`Approving ${token1.name} token`);
       await approveTokenAmount(token1, network.routerAddress, sgnr);
       setStatus(`Approving ${token2.name} token`);
@@ -208,10 +213,10 @@ export const AddLiquidity = ({
       await reefswapRouter.addLiquidity(
         token1.address,
         token2.address,
-        calculateAmount(token1),
-        calculateAmount(token2),
-        calculateAmountWithPercentage(token1, percentage), // min amount token1
-        calculateAmountWithPercentage(token2, percentage), // min amount token2
+        amount1,
+        amount2,
+        percentage1,
+        percentage2,
         evmAddress,
         calculateDeadline(deadline),
       );
