@@ -13,11 +13,10 @@ export interface ReefSigner {
 }
 
 export type Color = 'success' | 'danger' | 'warning';
-export type Notify = 'success' | 'error' | 'warning';
+export type Notify = 'success' | 'error' | 'warning' | 'info';
 export type TokenSelector = 'token1' | 'token2';
 
 // const baseFun = <T, >(value: string, type: T) => {};
-
 type NotifyFun = (message: string, type?: Notify) => void;
 // type Test = BaseFun<Notify>;
 
