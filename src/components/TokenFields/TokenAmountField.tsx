@@ -42,6 +42,7 @@ const TokenAmountFieldBase: React.FC<TokenAmountFieldProps> = ({
 
   return (
     <SubCard>
+      <MT size='1' />
       <FlexRow>
         <SelectToken
           id={id}
@@ -64,6 +65,7 @@ const TokenAmountFieldBase: React.FC<TokenAmountFieldProps> = ({
         <MT size="2" />
         <ContentBetween>{children}</ContentBetween>
       </CenterColumn>
+      <MT size='1' />
     </SubCard>
   );
 };
