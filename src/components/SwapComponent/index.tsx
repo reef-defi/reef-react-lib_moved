@@ -312,7 +312,7 @@ export const SwapComponent = ({
           buy={buy}
           sell={sell}
           id="swapModalToggle"
-          percentage={settings.percentage}
+          percentage={percentage}
           confirmFun={onSwap}
         />
       </Card>
