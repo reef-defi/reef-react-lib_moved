@@ -1,11 +1,8 @@
-import { ApolloClient, gql } from '@apollo/client';
 import axios, { AxiosResponse } from 'axios';
 import { BigNumber } from 'ethers';
 import {
-  ERC20ContractData,
   Network, ReefSigner, reefTokenWithAmount, Token,
 } from '../state';
-import { REEF_ADDRESS } from '../utils';
 
 interface AccountTokensRes {
   tokens: AccountTokensResBalance[];
@@ -92,80 +89,3 @@ export const loadSignerTokens = async (
     return getReefTokenBalance(reefSigner);
   }
 };
-
-
-const verifiedTokenQuery = gql`
-query tokens($signer: String!) {
-  verified_contract(
-    where: {
-      type: { _eq: "ERC20" }
-    }
-  ) {
-    address
-    contract_data
-  }
-
-  token_holder(
-    where: {
-      signer: { _eq: $signer }
-    }
-  ) {
-    token_address
-    balance
-  }
-}
-`
-
-
-interface VerifiedContract {
-  address: string;
-  contract_data: ERC20ContractData;
-}
-interface TokenHolder {
-  token_address: string;
-  balance: number;
-}
-
-interface TokenQuery {
-  token_holder: TokenHolder[];
-  verified_contract: VerifiedContract[];
-};
-
-interface QueryVariable {
-  signer: string;
-}
-
-const sortTokens = (t1: Token, t2: Token): number => {
-  if (t1.address === REEF_ADDRESS) { return -1};
-  if (t2.address === REEF_ADDRESS) { return 1; }
-  return t1.balance.gte(t2.balance) ? -1 : 1;
-}
-
-export const loadVerifiedTokens = async (signer?: string, apolloClient?: ApolloClient<any>): Promise<Token[]> => {
-  if (!signer || !apolloClient) { return []; }
-
-  const results = await apolloClient.query<TokenQuery, QueryVariable>({
-    query: verifiedTokenQuery,
-    variables: { signer }
-  });
-
-  const balances = results.data.token_holder.reduce(
-    (acc, current) => ({...acc,
-      [current.token_address]: current.balance.toLocaleString('fullwide', {useGrouping:false})
-    }),
-    {} as {[key: string]: string}
-    );
-
-  const tokens = results.data.verified_contract
-    .map(({address, contract_data: {decimals, name, symbol}}): Token => ({
-      address,
-      decimals,
-      name,
-      symbol,
-      iconUrl: address === REEF_ADDRESS ? 'https://s2.coinmarketcap.com/static/img/coins/64x64/6951.png' : '',
-      balance: BigNumber.from(address in balances ? balances[address] : 0),
-    }))
-    .sort(sortTokens)
-
-  return tokens;
-}
