@@ -2,6 +2,12 @@ import { BigNumber } from 'ethers';
 import { ensure } from '../utils/utils';
 import { calculateAmount } from '../utils/math';
 
+export interface ERC20ContractData {
+  name: string;
+  symbol: string;
+  decimals: number;
+}
+
 export interface BasicToken {
   name: string;
   address: string;
