@@ -175,8 +175,9 @@ export const AddLiquidity = ({
       return;
     }
     setToken1({ ...token1, amount });
-    if (token1.price && token2.price) {
-      const newAmount = (token1.price / token2.price) * parseFloat(assertAmount(amount));
+    if (pool) {
+      const ratio = BigNumber.from(pool.reserve1).mul(10000000).div(pool.reserve2).toNumber() / 10000000;
+      const newAmount = ratio * parseFloat(assertAmount(amount));
       setToken2({ ...token2, amount: !newAmount ? '' : newAmount.toFixed(4) });
     }
   };
@@ -185,8 +186,9 @@ export const AddLiquidity = ({
       return;
     }
     setToken2({ ...token2, amount });
-    if (token1.price && token2.price) {
-      const newAmount = (token2.price / token1.price) * parseFloat(assertAmount(amount));
+    if (pool) {
+      const ratio = BigNumber.from(pool.reserve2).mul(10000000).div(pool.reserve1).toNumber() / 10000000;
+      const newAmount = ratio * parseFloat(assertAmount(amount));
       setToken1({ ...token1, amount: !newAmount ? '' : newAmount.toFixed(4) });
     }
   };
