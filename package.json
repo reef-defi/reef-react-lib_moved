@@ -83,16 +83,5 @@
     "rxjs": "^7.5.4",
     "subscriptions-transport-ws": "^0.11.0",
     "zen-observable-ts": "^1.1.0"
-  },
-  "resolutions": {
-    "@ethersproject/abstract-signer": "5.0.9",
-    "@ethersproject/abstract-provider": "5.0.9",
-    "@ethersproject/bignumber": "5.0.9",
-    "@ethersproject/bytes": "5.0.9",
-    "@ethersproject/logger": "5.0.9",
-    "@ethersproject/properties": "5.0.9",
-    "rollup-plugin-typescript2": "^0.31.1",
-    "@types/react": "17.0.2",
-    "@types/react-dom": "17.0.2"
   }
 }
