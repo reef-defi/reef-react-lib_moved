@@ -222,6 +222,7 @@ export const AddLiquidity = ({
         evmAddress,
         calculateDeadline(deadline),
       );
+      notify('Balances will reload after blocks are finalized.', 'info');
       notify('Liquidity added successfully!');
     } catch (error) {
       const message = errorHandler(error.message)

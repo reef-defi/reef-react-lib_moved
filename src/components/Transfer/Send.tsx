@@ -92,7 +92,7 @@ export const Send = ({signer, tokens, accounts, provider, notify}: Send): JSX.El
       setStatus(`Transfering tokens`);
       await tokenContract.transfer(toAddress, amount);
 
-      notify('Balances will reload after blocks are finalized.', 'info')
+      notify('Balances will reload after blocks are finalized.', 'info');
       notify('Tokens were successfull send!');
     } catch (e) {
       console.error(e);

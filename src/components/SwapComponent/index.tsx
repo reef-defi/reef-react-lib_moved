@@ -253,6 +253,7 @@ export const SwapComponent = ({
         evmAddress,
         calculateDeadline(deadline),
       );
+      notify('Balances will reload after blocks are finalized.', 'info');
       notify('Swap complete!');
     } catch (error) {
       console.error(error)
