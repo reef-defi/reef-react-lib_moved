@@ -15,6 +15,7 @@ import { AccountListModal } from "../AccountSelector/AccountListModal";
 import { Provider } from "@reef-defi/evm-provider";
 import { SwitchTokenButton } from "../common/Button";
 import { DownIcon } from "../common/Icons";
+import "./Send.css";
 
 interface Send {
   tokens: Token[];
@@ -120,15 +121,16 @@ export const Send = ({signer, tokens, accounts, provider, notify}: Send): JSX.El
               disabled={isLoading}
             />
             <div className="input-group-append">
-              <OpenModalButton
-                id="selectMyAddress"
-                disabled={isLoading}
-                className="btn-empty link-text text-xs text-primary p-0 h-100"
-              >
-                <span className="input-group-text h-100" id="basic-addon2">
+              <span className="input-group-text p-0 h-100" id="basic-addon2">
+                <OpenModalButton
+                  id="selectMyAddress"
+                  disabled={isLoading}
+                  // TODO add custom css class for border radious insted of rounded
+                  className="btn btn-reef btn-outline-secondary rounded px-3 h-100"
+                >
                   <DownIcon small />
-                </span>
-              </OpenModalButton>
+                </OpenModalButton>
+              </span>
             </div>
           </div>
           <MT size='2' />
