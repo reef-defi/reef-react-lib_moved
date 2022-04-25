@@ -8,7 +8,6 @@ import {
   shareReplay,
   startWith,
   switchMap,
-  tap,
   timer,
 } from 'rxjs';
 import { BigNumber, FixedNumber, utils } from 'ethers';
@@ -21,8 +20,11 @@ import { apolloClientInstance$, zenToRx } from '../graphql/apollo';
 import { getIconUrl } from '../utils';
 import { getReefCoinBalance, loadPools } from '../rpc';
 import { retrieveReefCoingeckoPrice } from '../api';
-import { reefTokenWithAmount, Token, TokenWithAmount } from '../state/token';
+import {
+  reefTokenWithAmount, Token, TokenNFT, TokenWithAmount,
+} from '../state/token';
 import { Pool } from '../state';
+import { resolveNftImageLinks } from '../utils/nftUtil';
 
 // TODO replace with our own from lib and remove
 const toPlainString = (num: number): string => `${+num}`.replace(
@@ -49,6 +51,7 @@ const SIGNER_TOKENS_GQL = gql`
       order_by: { balance: desc }
       where: {
         _and: [
+          { nft_id: { _is_null: true } }
           { token_address: { _is_null: false } }
           { signer: { _eq: $accountId } }
         ]
@@ -72,10 +75,20 @@ const SIGNER_NFTS_GQL = gql`
       balance
       info
       type
-      balance
+      evm_address
+      token_address
+      signer
+      contract{
+        verified_contract{
+          name
+          type
+          contract_data
+        }
+      }
     }
   }
 `;
+
 const CONTRACT_DATA_GQL = gql`
   query contract_data_query($addresses: [String!]!) {
     verified_contract(where: { address: { _in: $addresses } }) {
@@ -210,28 +223,41 @@ export const selectedSignerAddressUpdate$ = selectedSigner$.pipe(
   distinctUntilChanged((s1, s2) => s1?.address === s2?.address),
 );
 
-export const selectedSignerNFTs$: Observable<Token[]> = combineLatest([
+const parseTokenHolderArray = (resArr: any[]): TokenNFT[] => resArr.map((res) => ({
+  address: res.token_address,
+  balance: res.balance,
+  symbol: res.info.symbol,
+  name: res.info.name,
+  nftId: res.nft_id,
+  contractType: res.contract.verified_contract.type,
+  iconUrl: '',
+} as TokenNFT));
+
+export const selectedSignerNFTs$: Observable<TokenNFT[]> = combineLatest([
   apolloClientInstance$,
   selectedSignerAddressUpdate$,
   providerSubj,
-]).pipe(
-  switchMap(([apollo, signer]) => (!signer
-    ? []
-    : zenToRx(
-      apollo.subscribe({
-        query: SIGNER_NFTS_GQL,
-        variables: {
-          /* accountId: '' signer.address */
-        },
-        fetchPolicy: 'network-only',
-      }),
-    ).pipe(
-      map((res: any) => (res.data && res.data.token_holder
-        ? res.data.token_holder
-        : undefined)),
-      tap((v) => console.log('NFTs=', v)),
-    ))),
-);
+])
+  .pipe(
+    switchMap(([apollo, signer]) => (!signer
+      ? []
+      : zenToRx(
+        apollo.subscribe({
+          query: SIGNER_NFTS_GQL,
+          variables: {
+            accountId: signer.address,
+          },
+          fetchPolicy: 'network-only',
+        }),
+      )
+        .pipe(
+          map((res: any) => (res.data && res.data.token_holder
+            ? res.data.token_holder
+            : undefined)),
+          map(parseTokenHolderArray),
+          switchMap((nfts) => resolveNftImageLinks(nfts, signer.signer)),
+        ))),
+  );
 
 export const allAvailableSignerTokens$: Observable<Token[]> = combineLatest([
   selectedSignerTokenBalances$,
