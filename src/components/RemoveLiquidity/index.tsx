@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useLoadPool } from '../../hooks/useLoadPool';
 import { approveAmount, getReefswapRouter } from '../../rpc';
 import {
-  availableNetworks,
+  defaultOptions,
+  DefaultOptions,
   defaultSettings,
   Network,
   Pool,
@@ -20,8 +21,6 @@ import {
   removePoolTokenShare,
   removeSupply,
   transformAmount,
-  TX_STATUS_ERROR_CODE,
-  TxStatusHandler,
 } from '../../utils';
 import { DangerAlert } from '../common/Alert';
 import { Button } from '../common/Button';
@@ -48,10 +47,9 @@ import RemoveConfirmationModal from './RemoveConfirmationModal';
 interface RemoveLiquidityComponent {
   token1: Token;
   token2: Token;
-  signer?: ReefSigner;
   network: Network;
-  back: () => void;
-  onTxUpdate?: TxStatusHandler;
+  signer?: ReefSigner;
+  options?: Partial<DefaultOptions>;
 }
 
 const status = (percentageAmount: number, pool?: Pool): ButtonStatus => {
@@ -74,10 +72,9 @@ const status = (percentageAmount: number, pool?: Pool): ButtonStatus => {
 export const RemoveLiquidityComponent = ({
   token1,
   token2,
-  network,
   signer,
-  back,
-  onTxUpdate,
+  network,
+  options,
 }: RemoveLiquidityComponent): JSX.Element => {
   const mounted = useRef(true);
   const [isRemoving, setIsRemoving] = useState(false);
@@ -85,6 +82,7 @@ export const RemoveLiquidityComponent = ({
   const [settings, setSettings] = useState(defaultSettings());
   const [percentageAmount, setPercentageAmount] = useState(0);
 
+  const {notify, back} = {...defaultOptions, ...options};
   const [pool, isPoolLoading] = useLoadPool(
     token1,
     token2,
@@ -133,8 +131,6 @@ export const RemoveLiquidityComponent = ({
       pool.token2,
     );
 
-    const txIdent = Math.random().toString(10);
-
     Promise.resolve()
       .then(() => {
         mounted.current = true;
@@ -157,33 +153,12 @@ export const RemoveLiquidityComponent = ({
         signer.evmAddress,
         calculateDeadline(deadline),
       ))
-      .then((contractCall: any) => {
-        if (onTxUpdate) {
-          onTxUpdate({
-            txIdent,
-            txHash: contractCall.hash,
-            isInBlock: true,
-            txTypeEvm: true,
-            url: `https://${
-              network === availableNetworks.mainnet ? '' : `${network.name}.`
-            }reefscan.com/extrinsic/${contractCall.hash}`,
-            addresses: [signer.address],
-          });
-        }
+      .then(() => {
+        notify('Balances will reload after blocks are finalized.', 'info');
+        notify('Liquidity removed successfully!');
       })
-      .then(() => console.log('Remove successful'))
       .catch((e) => {
-        if (onTxUpdate) {
-          onTxUpdate({
-            txIdent,
-            error: {
-              message: e.message,
-              code: TX_STATUS_ERROR_CODE.ERROR_UNDEFINED,
-            },
-            txTypeEvm: true,
-            addresses: [signer.address],
-          });
-        }
+        notify(`There was something wrong when removing liquidity: ${e.message}`, 'error');
         console.error('Remove failed');
         console.error(e);
       })
