@@ -247,6 +247,7 @@ export const RemoveLiquidityComponent = ({
             ).toFixed(8)} ${token1.name}`}
           />
         </MX>
+        <MT size='2' />
         <OpenModalButton
           id="remove-modal-toggle"
           disabled={!isValid || isPoolLoading}
