@@ -1,5 +1,8 @@
 import { BigNumber, ethers } from 'ethers';
 
+export const REEF_ADDRESS = '0x0000000000000000000000000000000001000000';
+export const EMPTY_ADDRESS = '0x';
+
 export interface ButtonStatus {
   text: string;
   isValid: boolean;

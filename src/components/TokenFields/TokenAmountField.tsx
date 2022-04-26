@@ -37,18 +37,19 @@ const TokenAmountFieldBase: React.FC<TokenAmountFieldProps> = ({
   hideSelectTokenCommonBaseView,
 }): JSX.Element => {
   const {
-    name, isEmpty, amount, iconUrl,
+    symbol, isEmpty, amount, iconUrl,
   } = token;
 
   return (
     <SubCard>
+      <MT size="1" />
       <FlexRow>
         <SelectToken
           id={id}
           tokens={tokens}
           signer={signer}
           iconUrl={iconUrl}
-          selectedTokenName={name}
+          selectedTokenName={symbol}
           onTokenSelect={onTokenSelect}
           onAddressChange={onAddressChange}
           hideCommonBaseView={hideSelectTokenCommonBaseView}
@@ -64,6 +65,7 @@ const TokenAmountFieldBase: React.FC<TokenAmountFieldProps> = ({
         <MT size="2" />
         <ContentBetween>{children}</ContentBetween>
       </CenterColumn>
+      <MT size="1" />
     </SubCard>
   );
 };
