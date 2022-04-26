@@ -83,7 +83,7 @@ export const RemoveLiquidityComponent = ({
   const [settings, setSettings] = useState(defaultSettings());
   const [percentageAmount, setPercentageAmount] = useState(0);
 
-  const {notify, back} = {...defaultOptions, ...options};
+  const { notify, back } = { ...defaultOptions, ...options };
   const [pool, isPoolLoading] = useLoadPool(
     token1,
     token2,
@@ -247,7 +247,7 @@ export const RemoveLiquidityComponent = ({
             ).toFixed(8)} ${token1.name}`}
           />
         </MX>
-        <MT size='2' />
+        <MT size="2" />
         <OpenModalButton
           id="remove-modal-toggle"
           disabled={!isValid || isPoolLoading}

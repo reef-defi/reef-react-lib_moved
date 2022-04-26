@@ -1,4 +1,4 @@
-import { DependencyList, useEffect, useState } from "react";
+import { DependencyList, useEffect, useState } from 'react';
 
 type Loader<Type> = {
   error: string;
@@ -11,15 +11,15 @@ export const useLoader = <LoaderType, LoaderArgs extends any[]>(
   fun: (...args: LoaderArgs) => Promise<LoaderType>,
   args: LoaderArgs,
   initialState: LoaderType,
-  deps?: DependencyList
+  deps?: DependencyList,
 ): Loader<LoaderType> => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState<string>('');
   const [value, setValue] = useState(initialState);
 
   useEffect(
     () => {
-      const loader = async () => {
+      const loader = async (): Promise<void> => {
         try {
           setLoading(true);
           const value = await fun(...args);
@@ -32,7 +32,7 @@ export const useLoader = <LoaderType, LoaderArgs extends any[]>(
 
       loader();
     },
-    deps
+    deps,
   );
 
   return { error, loading, value };
@@ -43,11 +43,10 @@ export const useSoftLoader = <LoaderType, LoaderArgs extends any[]>(
   fun: (...args: LoaderArgs) => Promise<LoaderType>,
   args: LoaderArgs,
   initialState?: LoaderType,
-  deps?: DependencyList
-): Loader<LoaderType | undefined> =>
-  useLoader<LoaderType | undefined, LoaderArgs>(
-    fun,
-    args,
-    initialState,
-    deps
-  );
+  deps?: DependencyList,
+): Loader<LoaderType | undefined> => useLoader<LoaderType | undefined, LoaderArgs>(
+  fun,
+  args,
+  initialState,
+  deps,
+);

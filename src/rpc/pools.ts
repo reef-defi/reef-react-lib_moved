@@ -47,11 +47,10 @@ export const loadPool = async (
 
   const tokenBalance1 = finalReserve1
     .mul(liquidity)
-    .div(totalSupply)
+    .div(totalSupply);
   const tokenBalance2 = finalReserve2
     .mul(liquidity)
     .div(totalSupply);
-
 
   const [finalToken1, finalToken2] = token1.address === address1
     ? [

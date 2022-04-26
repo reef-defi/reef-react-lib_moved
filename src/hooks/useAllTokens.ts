@@ -1,8 +1,8 @@
-import { gql, ApolloClient, useSubscription } from "@apollo/client";
-import { useMemo } from "react";
-import { ERC20ContractData, Token } from "../state";
-import { BigNumber } from "ethers";
-import { REEF_ADDRESS } from "../utils";
+import { gql, ApolloClient, useSubscription } from '@apollo/client';
+import { useMemo } from 'react';
+import { BigNumber } from 'ethers';
+import { ERC20ContractData, Token } from '../state';
+import { REEF_ADDRESS } from '../utils';
 
 const verifiedTokenQuery = gql`
 subscription tokens {
@@ -15,7 +15,7 @@ subscription tokens {
     contract_data
   }
 }
-`
+`;
 
 const tokenBalances = gql`
 subscription balances($signer: String!) {
@@ -28,22 +28,25 @@ subscription balances($signer: String!) {
     balance
   }
 }
-`
-
+`;
 
 interface VerifiedTokens {
   address: string;
+  // eslint-disable-next-line
   contract_data: ERC20ContractData;
 }
 interface TokenHolder {
+  // eslint-disable-next-line
   token_address: string;
   balance: number;
 }
 
 interface VerifiedTokenQuery {
+  // eslint-disable-next-line
   verified_contract: VerifiedTokens[];
 }
 interface BalanceQuery {
+  // eslint-disable-next-line
   token_holder: TokenHolder[];
 }
 
@@ -52,54 +55,50 @@ interface SignerVariable {
 }
 
 const sortTokens = (t1: Token, t2: Token): number => {
-  if (t1.address === REEF_ADDRESS) { return -1};
+  if (t1.address === REEF_ADDRESS) { return -1; }
   if (t2.address === REEF_ADDRESS) { return 1; }
   return t1.balance.gte(t2.balance) ? -1 : 1;
-}
-
+};
 
 interface Balances {
   [signer: string]: string;
 }
 
 export const useAllTokens = (signer?: string, client?: ApolloClient<any>): Token[] => {
-  const {data: tokenData} = useSubscription<VerifiedTokenQuery>(
+  const { data: tokenData } = useSubscription<VerifiedTokenQuery>(
     verifiedTokenQuery,
-    { client }
+    { client },
   );
-  const {data: balanceData} = useSubscription<BalanceQuery, SignerVariable>(
+  const { data: balanceData } = useSubscription<BalanceQuery, SignerVariable>(
     tokenBalances,
-    { client, variables: { signer: signer || "" } }
-  )
-
-
-  let balances = useMemo((): Balances => balanceData
-    ? balanceData.token_holder.reduce(
-        (acc, current) => ({...acc,
-          [current.token_address]: current.balance.toLocaleString('fullwide', {useGrouping:false})
-        }),
-        {}
-      )
-    : {},
-    [balanceData]
+    { client, variables: { signer: signer || '' } },
   );
 
-  const tokens = useMemo((): Token[] => tokenData
+  const balances = useMemo((): Balances => (balanceData
+    ? balanceData.token_holder.reduce(
+      (acc, current) => ({
+        ...acc,
+        [current.token_address]: current.balance.toLocaleString('fullwide', { useGrouping: false }),
+      }),
+      {},
+    )
+    : {}),
+  [balanceData]);
+
+  const tokens = useMemo((): Token[] => (tokenData
     ? tokenData.verified_contract.map(
-        ({address, contract_data: {decimals, name, symbol}}) =>
-        ({
-          address,
-          decimals,
-          name,
-          symbol,
-          iconUrl: address === REEF_ADDRESS ? 'https://s2.coinmarketcap.com/static/img/coins/64x64/6951.png' : '',
-          balance: BigNumber.from(address in balances ? balances[address] : 0),
-        })
-      )
+      ({ address, contract_data: { decimals, name, symbol } }) => ({
+        address,
+        decimals,
+        name,
+        symbol,
+        iconUrl: address === REEF_ADDRESS ? 'https://s2.coinmarketcap.com/static/img/coins/64x64/6951.png' : '',
+        balance: BigNumber.from(address in balances ? balances[address] : 0),
+      }),
+    )
       .sort(sortTokens)
-    : [],
-    [balances, tokenData]
-  )
+    : []),
+  [balances, tokenData]);
 
   return tokens;
 };

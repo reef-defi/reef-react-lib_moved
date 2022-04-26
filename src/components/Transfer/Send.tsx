@@ -1,21 +1,26 @@
-import React, { useEffect, useState } from "react";
-import { createEmptyTokenWithAmount, ensureTokenAmount, NotifyFun, ReefSigner, reefTokenWithAmount, Token, TokenWithAmount } from "../../state";
-import { Input } from "../common/Input";
-import { Card, CardHeaderBlank, SubCard } from "../common/Card";
-import { CardHeader, CardTitle } from "../common/Card";
-import { CenterColumn, ComponentCenter, MT } from '../common/Display';
-import { OpenModalButton } from "../common/Modal";
-import SendConfirmationModal from "./SendConfirmationModal";
-import { TokenAmountFieldMax } from "../TokenFields";
-import { LoadingButtonIconWithText } from "../common/Loading";
+import React, { useEffect, useState } from 'react';
 import { Contract } from 'ethers';
-import { ERC20 } from "../../assets/abi/ERC20";
-import { ButtonStatus, calculateAmount, ensure, nativeTransfer, REEF_ADDRESS } from "../../utils";
-import { AccountListModal } from "../AccountSelector/AccountListModal";
-import { Provider } from "@reef-defi/evm-provider";
-import { SwitchTokenButton } from "../common/Button";
-import { DownIcon } from "../common/Icons";
-import "./Send.css";
+import { Provider } from '@reef-defi/evm-provider';
+import {
+  createEmptyTokenWithAmount, ensureTokenAmount, NotifyFun, ReefSigner, reefTokenWithAmount, Token, TokenWithAmount,
+} from '../../state';
+import { Input } from '../common/Input';
+import {
+  Card, CardHeaderBlank, SubCard, CardHeader, CardTitle,
+} from '../common/Card';
+import { CenterColumn, ComponentCenter, MT } from '../common/Display';
+import { OpenModalButton } from '../common/Modal';
+import SendConfirmationModal from './SendConfirmationModal';
+import { TokenAmountFieldMax } from '../TokenFields';
+import { LoadingButtonIconWithText } from '../common/Loading';
+import { ERC20 } from '../../assets/abi/ERC20';
+import {
+  ButtonStatus, calculateAmount, ensure, nativeTransfer, REEF_ADDRESS,
+} from '../../utils';
+import { AccountListModal } from '../AccountSelector/AccountListModal';
+import { SwitchTokenButton } from '../common/Button';
+import { DownIcon } from '../common/Icons';
+import './Send.css';
 
 interface Send {
   tokens: Token[];
@@ -26,34 +31,35 @@ interface Send {
   notify: NotifyFun;
 }
 
-
 const getSignerEvmAddress = async (address: string, provider: Provider): Promise<string> => {
-  if (address.length !== 48 || address[0] !== "5") {
+  if (address.length !== 48 || address[0] !== '5') {
     return address;
   }
-  const evmAddress= await provider.api.query.evmAccounts.evmAddresses(address);
+  const evmAddress = await provider.api.query.evmAccounts.evmAddresses(address);
   const addr = (evmAddress as any).toString();
 
   if (!addr) {
     throw new Error('EVM address does not exist');
   }
   return addr;
-}
+};
 
 const sendStatus = (to: string, token: TokenWithAmount): ButtonStatus => {
   try {
     ensure(to.length !== 0, 'Missing destination address');
-    ensure(to.length === 42 || (to.length === 48  && to[0] === '5'), 'Incorrect destination address');
-    ensure(token.amount !== "", "Insert amount");
+    ensure(to.length === 42 || (to.length === 48 && to[0] === '5'), 'Incorrect destination address');
+    ensure(token.amount !== '', 'Insert amount');
     ensureTokenAmount(token);
 
-    return { isValid: true, text: 'Confirm Send' }
+    return { isValid: true, text: 'Confirm Send' };
   } catch (e) {
     return { isValid: false, text: e.message };
   }
-}
+};
 
-export const Send = ({signer, tokens, accounts, provider, notify}: Send): JSX.Element => {
+export const Send = ({
+  signer, tokens, accounts, provider, notify,
+}: Send): JSX.Element => {
   const [to, setTo] = useState('');
   const [status, setStatus] = useState('');
   const [isLoading, setLoading] = useState(false);
@@ -61,22 +67,19 @@ export const Send = ({signer, tokens, accounts, provider, notify}: Send): JSX.El
   const [token, setToken] = useState(reefTokenWithAmount());
 
   useEffect(() => {
-    const alignedToken = tokens.find(({address}) => address === token.address);
+    const alignedToken = tokens.find(({ address }) => address === token.address);
 
     if (alignedToken) {
-      setToken({...token, balance: alignedToken.balance})
+      setToken({ ...token, balance: alignedToken.balance });
     }
   }, [tokens]);
 
   const tokenContract = new Contract(token.address, ERC20, signer.signer);
-  const {text, isValid} = sendStatus(to, token);
+  const { text, isValid } = sendStatus(to, token);
 
-  const onTokenSelect = (newToken: Token) =>
-    setToken({...createEmptyTokenWithAmount(false), ...newToken})
+  const onTokenSelect = (newToken: Token): void => setToken({ ...createEmptyTokenWithAmount(false), ...newToken });
 
-  const onAmountChange = (amount: string) =>
-    setToken({...token, amount});
-
+  const onAmountChange = (amount: string): void => setToken({ ...token, amount });
 
   const onSend = async (): Promise<void> => {
     try {
@@ -85,7 +88,7 @@ export const Send = ({signer, tokens, accounts, provider, notify}: Send): JSX.El
       const amount = calculateAmount(token);
 
       if (token.address === REEF_ADDRESS && to.length === 48) {
-        setStatus(`Transfering native REEF`);
+        setStatus('Transfering native REEF');
         await nativeTransfer(amount, to, provider, signer);
       } else {
         setStatus('Extracting evm address');
@@ -115,7 +118,7 @@ export const Send = ({signer, tokens, accounts, provider, notify}: Send): JSX.El
           <CardHeaderBlank />
         </CardHeader>
         <SubCard>
-          <MT size='1' />
+          <MT size="1" />
           <div className="input-group">
             <Input
               value={to}
@@ -137,7 +140,7 @@ export const Send = ({signer, tokens, accounts, provider, notify}: Send): JSX.El
               </span>
             </div>
           </div>
-          <MT size='2' />
+          <MT size="2" />
         </SubCard>
         <SwitchTokenButton disabled addIcon />
         <TokenAmountFieldMax
@@ -152,9 +155,8 @@ export const Send = ({signer, tokens, accounts, provider, notify}: Send): JSX.El
           <CenterColumn>
             <OpenModalButton id="send-confirmation-modal-toggle" disabled={isLoading || !isValid}>
               {isLoading
-                ? (<LoadingButtonIconWithText text={status}/>)
-                : (text)
-              }
+                ? (<LoadingButtonIconWithText text={status} />)
+                : (text)}
             </OpenModalButton>
           </CenterColumn>
         </MT>
@@ -174,5 +176,5 @@ export const Send = ({signer, tokens, accounts, provider, notify}: Send): JSX.El
         />
       </Card>
     </ComponentCenter>
-  )
-}
+  );
+};

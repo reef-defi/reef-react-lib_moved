@@ -74,9 +74,9 @@ const SelectToken = ({
     }
     async function searchTokens(): Promise<void> {
       let tokenSearchRes = [...tokens].filter(
-        (token) => (token.address.toLowerCase().startsWith(address.toLowerCase()) ||
-        token.name.toLowerCase().startsWith(address.toLowerCase()) ||
-        token.symbol.toLowerCase().startsWith(address.toLowerCase()))
+        (token) => (token.address.toLowerCase().startsWith(address.toLowerCase())
+        || token.name.toLowerCase().startsWith(address.toLowerCase())
+        || token.symbol.toLowerCase().startsWith(address.toLowerCase())),
       );
       if (!tokenSearchRes.length && utils.isAddress(address)) {
         setFoundSearchTokens(DataProgress.LOADING);

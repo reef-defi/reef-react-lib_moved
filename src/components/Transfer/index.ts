@@ -1,2 +1,2 @@
-export * from "./Send";
-export * from "./TransferComponent";
+export * from './Send';
+export * from './TransferComponent';

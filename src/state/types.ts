@@ -16,7 +16,6 @@ export type Color = 'success' | 'danger' | 'warning';
 export type Notify = 'success' | 'error' | 'warning' | 'info';
 export type TokenSelector = 'token1' | 'token2';
 
-
 // const baseFun = <T, >(value: string, type: T) => {};
 export type NotifyFun = (message: string, type?: Notify) => void;
 // type Test = BaseFun<Notify>;
@@ -32,14 +31,13 @@ export type OptionalPick<T, K extends keyof T> = {
 // Enables option to select desired keys to be optional
 export type SelectPartial<T, K extends keyof T> = OptionalPick<T, K> | Pick<T, Exclude<keyof T, K>>;
 
-
 export interface DefaultOptions {
   back: () => void;
   notify: NotifyFun;
   onTokenSelect: OnTokenSelect;
   updateTokenState: () => Promise<void>;
   onAddressChange: (address: string) => Promise<void>;
-};
+}
 
 // export type PartialOptions = SelectedPartial<DefaultOptions, "back" | "notify">;
 export type PartialOptions = Partial<DefaultOptions>;
@@ -50,4 +48,4 @@ export const defaultOptions: DefaultOptions = {
   onTokenSelect: () => {},
   onAddressChange: async () => {},
   updateTokenState: async () => {},
-}
+};

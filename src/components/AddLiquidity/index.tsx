@@ -105,10 +105,12 @@ export const AddLiquidity = ({
   tokenValue1,
   tokenValue2,
   signer,
-  options
+  options,
 }: AddLiquidityComponent): JSX.Element => {
   const { signer: sgnr, evmAddress, isEvmClaimed } = signer;
-  const {back, notify, onTokenSelect, updateTokenState, onAddressChange} = {...defaultOptions, ...options};
+  const {
+    back, notify, onTokenSelect, updateTokenState, onAddressChange,
+  } = { ...defaultOptions, ...options };
 
   const [status, setStatus] = useState('');
   const [settings, setSettings] = useState(defaultSettings());
@@ -120,11 +122,11 @@ export const AddLiquidity = ({
   const { deadline, percentage } = resolveSettings(settings);
   useEffect(
     () => setToken1(tokenValue1),
-    [tokenValue1.address]
+    [tokenValue1.address],
   );
   useEffect(
     () => setToken2(tokenValue2),
-    [tokenValue2.address]
+    [tokenValue2.address],
   );
 
   const [pool, isPoolLoading] = useLoadPool(
@@ -158,17 +160,19 @@ export const AddLiquidity = ({
   const isLoading = isLiquidityLoading || isPoolLoading || isPriceLoading;
   const { text, isValid } = buttonStatus(token1, token2, isEvmClaimed);
 
+  // eslint-disable-next-line
   const changeToken = (type: TokenSelector) => (newToken: Token): void => {
     onTokenSelect(newToken.address, type);
     const tokenWithamo: TokenWithAmount = {
       ...createEmptyTokenWithAmount(false),
       ...newToken,
     };
-    switch(type) {
+    switch (type) {
       case 'token1': return setToken1(tokenWithamo);
       case 'token2': return setToken2(tokenWithamo);
+      default:
     }
-  }
+  };
 
   const setAmount1 = (amount: string): void => {
     if (isLoading) {
@@ -229,7 +233,7 @@ export const AddLiquidity = ({
         .replace('first', token1.name)
         .replace('second', token2.name);
 
-      notify(message, 'error')
+      notify(message, 'error');
       // toast.error(errorHandler(message));
     } finally {
       /* TODO const newTokens = await loadTokens(tokens, sgnr);

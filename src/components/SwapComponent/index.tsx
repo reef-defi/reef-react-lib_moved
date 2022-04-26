@@ -136,7 +136,7 @@ export const SwapComponent = ({
   buyToken,
   sellToken,
   // onTxUpdate,
-  options
+  options,
 }: SwapComponent): JSX.Element => {
   const [buy, setBuy] = useState(buyToken);
   const [sell, setSell] = useState(sellToken);
@@ -145,7 +145,9 @@ export const SwapComponent = ({
   const [isSwapLoading, setIsSwapLoading] = useState(false);
   const [focus, setFocus] = useState<SwapFocus>('sell');
 
-  const {notify, onAddressChange, onTokenSelect, updateTokenState} = {...defaultOptions, ...options};
+  const {
+    notify, onAddressChange, onTokenSelect, updateTokenState,
+  } = { ...defaultOptions, ...options };
 
   const [pool, isPoolLoading] = useLoadPool(
     sell,
@@ -218,17 +220,19 @@ export const SwapComponent = ({
     }
   };
 
+  // eslint-disable-next-line
   const changeToken = (type: TokenSelector) => (newToken: Token): void => {
     onTokenSelect(newToken.address, type);
     const tokenWithamo: TokenWithAmount = {
       ...createEmptyTokenWithAmount(false),
       ...newToken,
     };
-    switch(type) {
+    switch (type) {
       case 'token1': return setSell(tokenWithamo);
       case 'token2': return setBuy(tokenWithamo);
+      default:
     }
-  }
+  };
 
   const onSwap = async (): Promise<void> => {
     if (!isValid || !account) {
@@ -256,12 +260,11 @@ export const SwapComponent = ({
       notify('Balances will reload after blocks are finalized.', 'info');
       notify('Swap complete!');
     } catch (error) {
-      console.error(error)
+      console.error(error);
       notify(`There was an error when swapping: ${error.message}`, 'error');
     } finally {
-
       await updateTokenState()
-        .catch(() => notify('Token balances were not updated, to do so reload page.', 'warning'))
+        .catch(() => notify('Token balances were not updated, to do so reload page.', 'warning'));
       setIsSwapLoading(false);
       setStatus('');
     }
