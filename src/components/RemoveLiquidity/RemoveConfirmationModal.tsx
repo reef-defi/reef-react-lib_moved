@@ -3,8 +3,8 @@ import { Pool } from '../../state';
 import {
   calculatePoolRatio,
   calculatePoolShare,
-  removePoolTokenShare,
   removeUserPoolSupply,
+  showRemovePoolTokenShare,
 } from '../../utils';
 import { SubCard } from '../common/Card';
 import { Margin, MT, MX } from '../common/Display';
@@ -43,18 +43,14 @@ const RemoveConfirmationModal = ({
           <ConfirmLabel
             titleSize="h4"
             valueSize="h6"
-            title={removePoolTokenShare(percentageAmount, pool?.token1).toFixed(
-              8,
-            )}
+            title={showRemovePoolTokenShare(percentageAmount, pool?.token1)}
             value={name1}
           />
           <PlusIcon />
           <ConfirmLabel
             titleSize="h4"
             valueSize="h6"
-            title={removePoolTokenShare(percentageAmount, pool?.token2).toFixed(
-              8,
-            )}
+            title={showRemovePoolTokenShare(percentageAmount, pool?.token2)}
             value={name2}
           />
         </SubCard>

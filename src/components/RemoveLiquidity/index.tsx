@@ -20,6 +20,7 @@ import {
   ensureVoidRun,
   removePoolTokenShare,
   removeSupply,
+  showRemovePoolTokenShare,
   transformAmount,
 } from '../../utils';
 import { DangerAlert } from '../common/Alert';
@@ -148,8 +149,8 @@ export const RemoveLiquidityComponent = ({
         pool.token1.address,
         pool.token2.address,
         removedLiquidity,
-        transformAmount(token1.decimals, `${minimumTokenAmount1}`),
-        transformAmount(token2.decimals, `${minimumTokenAmount2}`),
+        minimumTokenAmount1,
+        minimumTokenAmount2,
         signer.evmAddress,
         calculateDeadline(deadline),
       ))
@@ -211,19 +212,19 @@ export const RemoveLiquidityComponent = ({
         <SubCard>
           <Margin size="3">
             <ConfirmLabel
-              title={removePoolTokenShare(
+              title={showRemovePoolTokenShare(
                 percentageAmount,
                 pool?.token1,
-              ).toFixed(8)}
+              )}
               value={token1.name}
               titleSize="title-text"
               valueSize="title-text"
             />
             <ConfirmLabel
-              title={removePoolTokenShare(
+              title={showRemovePoolTokenShare(
                 percentageAmount,
                 pool?.token2,
-              ).toFixed(8)}
+              )}
               value={token2.name}
               titleSize="title-text"
               valueSize="title-text"
