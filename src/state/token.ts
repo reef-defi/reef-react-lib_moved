@@ -2,6 +2,12 @@ import { BigNumber } from 'ethers';
 import { ensure } from '../utils/utils';
 import { calculateAmount } from '../utils/math';
 
+export enum ContractType {
+  ERC20 = 'ERC20',
+  ERC721 = 'ERC721',
+  ERC1155 = 'ERC1155',
+  other = 'other'
+}
 export interface ERC20ContractData {
   name: string;
   symbol: string;
@@ -24,6 +30,12 @@ export interface TokenWithAmount extends Token {
   amount: string;
   price: number;
   isEmpty: boolean;
+}
+
+export interface TokenNFT extends Token {
+  nftId: string;
+  contractType: ContractType;
+  mimetype?: string;
 }
 
 export interface TokenState {
