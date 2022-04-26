@@ -8,6 +8,7 @@ export enum ContractType {
   ERC1155 = 'ERC1155',
   other = 'other'
 }
+
 export interface ERC20ContractData {
   name: string;
   symbol: string;
