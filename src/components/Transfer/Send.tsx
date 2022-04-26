@@ -10,7 +10,7 @@ import { TokenAmountFieldMax } from "../TokenFields";
 import { LoadingButtonIconWithText } from "../common/Loading";
 import { Contract } from 'ethers';
 import { ERC20 } from "../../assets/abi/ERC20";
-import { ButtonStatus, calculateAmount, ensure } from "../../utils";
+import { ButtonStatus, calculateAmount, ensure, nativeTransfer, REEF_ADDRESS } from "../../utils";
 import { AccountListModal } from "../AccountSelector/AccountListModal";
 import { Provider } from "@reef-defi/evm-provider";
 import { SwitchTokenButton } from "../common/Button";
@@ -84,13 +84,17 @@ export const Send = ({signer, tokens, accounts, provider, notify}: Send): JSX.El
       ensureTokenAmount(token);
       const amount = calculateAmount(token);
 
-      setStatus('Extracting evm destination account');
-      const toAddress = to.length === 48
-        ? await getSignerEvmAddress(to, provider)
-        : to;
-
-      setStatus(`Transfering tokens`);
-      await tokenContract.transfer(toAddress, amount);
+      if (token.address === REEF_ADDRESS && to.length === 48) {
+        setStatus(`Transfering native REEF`);
+        await nativeTransfer(amount, to, provider, signer);
+      } else {
+        setStatus('Extracting evm address');
+        const toAddress = to.length === 48
+          ? await getSignerEvmAddress(to, provider)
+          : to;
+        setStatus(`Transfering ${token.symbol}`);
+        await tokenContract.transfer(toAddress, amount);
+      }
 
       notify('Balances will reload after blocks are finalized.', 'info');
       notify('Tokens were successfull send!');
@@ -165,7 +169,7 @@ export const Send = ({signer, tokens, accounts, provider, notify}: Send): JSX.El
         <AccountListModal
           id="selectMyAddress"
           accounts={accounts}
-          selectAccount={(_, signer) => setTo(signer.evmAddress)}
+          selectAccount={(_, signer) => setTo(signer.address)}
           title="Select Account"
         />
       </Card>
