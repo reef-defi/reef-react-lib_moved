@@ -10955,7 +10955,7 @@ micro-base@^0.9.0:
   resolved "https://registry.yarnpkg.com/micro-base/-/micro-base-0.9.0.tgz#09cfe20285bec0ea97f41dc3d10e3fba3d0266ee"
   integrity sha512-4+tOMKidYT5nQ6/UNmYrGVO5PMcnJdfuR4NC8HK8s2H61B4itOhA9yrsjBdqGV7ecdtej36x3YSIfPLRmPrspg==
 
-microbundle-crl@^0.13.10:
+microbundle-crl@^0.13.11:
   version "0.13.11"
   resolved "https://registry.yarnpkg.com/microbundle-crl/-/microbundle-crl-0.13.11.tgz#8a3a3613685502c2a52dfde10e0390386eab4bff"
   integrity sha512-3roSSgtJdIvvIOJdhefWD8BoEjHkbInkJzUoSE+ER6NGcpTuPWXNFyAbXamCL9Qg8rTU4urbYtXusk/d1ZpteA==
