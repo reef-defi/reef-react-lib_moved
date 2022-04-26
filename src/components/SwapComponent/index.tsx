@@ -1,6 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { BigNumber } from 'ethers';
 import {
+  createEmptyTokenWithAmount,
+  DefaultOptions,
+  defaultOptions,
   defaultSettings,
   ensureTokenAmount,
   Network,
@@ -8,6 +11,7 @@ import {
   ReefSigner,
   resolveSettings,
   Token,
+  TokenSelector,
   TokenWithAmount,
 } from '../../state';
 import { ButtonStatus, ensure } from '../../utils';
@@ -39,7 +43,6 @@ import { CenterColumn, ComponentCenter, MT } from '../common/Display';
 import { OpenModalButton } from '../common/Modal';
 import { LoadingButtonIconWithText } from '../common/Loading';
 import { TransactionSettings } from '../TransactionSettings';
-import { TxStatusHandler } from '../../utils/transactionUtil';
 
 interface SwapComponent {
   tokens: Token[];
@@ -47,7 +50,7 @@ interface SwapComponent {
   sellToken: TokenWithAmount;
   network: Network;
   account: ReefSigner;
-  onTxUpdate?: TxStatusHandler;
+  options?: Partial<DefaultOptions>;
 }
 
 const swapStatus = (
@@ -133,6 +136,7 @@ export const SwapComponent = ({
   buyToken,
   sellToken,
   // onTxUpdate,
+  options,
 }: SwapComponent): JSX.Element => {
   const [buy, setBuy] = useState(buyToken);
   const [sell, setSell] = useState(sellToken);
@@ -140,6 +144,10 @@ export const SwapComponent = ({
   const [settings, setSettings] = useState(defaultSettings());
   const [isSwapLoading, setIsSwapLoading] = useState(false);
   const [focus, setFocus] = useState<SwapFocus>('sell');
+
+  const {
+    notify, onAddressChange, onTokenSelect, updateTokenState,
+  } = { ...defaultOptions, ...options };
 
   const [pool, isPoolLoading] = useLoadPool(
     sell,
@@ -212,16 +220,19 @@ export const SwapComponent = ({
     }
   };
 
-  const changeBuyToken = (newToken: Token): void => (newToken.address !== sell.address
-    ? setBuy({
-      ...newToken, amount: '', price: 0, isEmpty: false,
-    })
-    : onSwitch());
-  const changeSellToken = (newToken: Token): void => (newToken.address !== buy.address
-    ? setSell({
-      ...newToken, amount: '', price: 0, isEmpty: false,
-    })
-    : onSwitch());
+  // eslint-disable-next-line
+  const changeToken = (type: TokenSelector) => (newToken: Token): void => {
+    onTokenSelect(newToken.address, type);
+    const tokenWithamo: TokenWithAmount = {
+      ...createEmptyTokenWithAmount(false),
+      ...newToken,
+    };
+    switch (type) {
+      case 'token1': return setSell(tokenWithamo);
+      case 'token2': return setBuy(tokenWithamo);
+      default:
+    }
+  };
 
   const onSwap = async (): Promise<void> => {
     if (!isValid || !account) {
@@ -239,8 +250,6 @@ export const SwapComponent = ({
       await approveTokenAmount(sell, network.routerAddress, signer);
 
       setStatus('Executing swap');
-      console.log(sellAmount);
-      console.log(minBuyAmount);
       await reefswapRouter.swapExactTokensForTokensSupportingFeeOnTransferTokens(
         sellAmount,
         minBuyAmount,
@@ -248,10 +257,14 @@ export const SwapComponent = ({
         evmAddress,
         calculateDeadline(deadline),
       );
-      console.log('Success');
+      notify('Balances will reload after blocks are finalized.', 'info');
+      notify('Swap complete!');
     } catch (error) {
-
+      console.error(error);
+      notify(`There was an error when swapping: ${error.message}`, 'error');
     } finally {
+      await updateTokenState()
+        .catch(() => notify('Token balances were not updated, to do so reload page.', 'warning'));
       setIsSwapLoading(false);
       setStatus('');
     }
@@ -272,7 +285,8 @@ export const SwapComponent = ({
           signer={account}
           id="sell-token-field"
           onAmountChange={setSellAmount}
-          onTokenSelect={changeSellToken}
+          onTokenSelect={changeToken('token1')}
+          onAddressChange={onAddressChange}
         />
         <SwitchTokenButton onClick={onSwitch} />
         <TokenAmountFieldImpactPrice
@@ -282,7 +296,8 @@ export const SwapComponent = ({
           id="buy-token-field"
           percentage={calculateImpactPercentage(sell, buy)}
           onAmountChange={setBuyAmount}
-          onTokenSelect={changeBuyToken}
+          onTokenSelect={changeToken('token2')}
+          onAddressChange={onAddressChange}
         />
         <MT size="2">
           <CenterColumn>
@@ -301,7 +316,7 @@ export const SwapComponent = ({
           buy={buy}
           sell={sell}
           id="swapModalToggle"
-          percentage={settings.percentage}
+          percentage={percentage}
           confirmFun={onSwap}
         />
       </Card>

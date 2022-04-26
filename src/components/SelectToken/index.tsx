@@ -45,7 +45,7 @@ interface SelectToken {
   signer: ReefSigner;
 }
 
-const COMMON_BASES = ['REEF'];
+const COMMON_BASES = ['0x0000000000000000000000000000000001000000'];
 
 const emptyFunction = async (): Promise<void> => {};
 
@@ -74,8 +74,9 @@ const SelectToken = ({
     }
     async function searchTokens(): Promise<void> {
       let tokenSearchRes = [...tokens].filter(
-        (token) => token.name.toLowerCase().startsWith(address.toLowerCase())
-          || token.address.toLowerCase().startsWith(address.toLowerCase()),
+        (token) => (token.address.toLowerCase().startsWith(address.toLowerCase())
+        || token.name.toLowerCase().startsWith(address.toLowerCase())
+        || token.symbol.toLowerCase().startsWith(address.toLowerCase())),
       );
       if (!tokenSearchRes.length && utils.isAddress(address)) {
         setFoundSearchTokens(DataProgress.LOADING);
@@ -95,7 +96,6 @@ const SelectToken = ({
     searchTokens();
   }, [address, tokens]);
 
-  // let foundAvailableTokens = tokens.filter((token) => token.name.toLowerCase().startsWith(address.toLowerCase()) || token.address.toLowerCase().startsWith(address.toLowerCase()));
   const tokensView = getData(foundSearchTokens)?.map((token) => (
     <ListItemDismissModal
       key={token.address}
@@ -107,7 +107,7 @@ const SelectToken = ({
         </CenterRow>
         <MS size="3">
           <FlexColumn>
-            <LeadText>{token.name}</LeadText>
+            <LeadText>{token.symbol}</LeadText>
             <MutedText>
               <MiniText>{trim(token.address, 20)}</MiniText>
             </MutedText>
@@ -123,12 +123,12 @@ const SelectToken = ({
   ));
 
   const commonBasesView = tokens
-    ?.filter((token) => COMMON_BASES.includes(token.name))
+    .filter((token) => COMMON_BASES.includes(token.address))
     .map((token) => (
       <IconButton onClick={() => onTokenSelect(token)} key={token.address}>
         <TokenIcon src={token.iconUrl} />
         <MS size="2">
-          <Text>{token.name}</Text>
+          <Text>{token.symbol}</Text>
         </MS>
       </IconButton>
     ));

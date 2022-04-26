@@ -60,6 +60,12 @@ export const handleErr = (
   });
 };
 
+export const nativeTransfer = async (amount: string, destinationAddress: string, provider: Provider, signer: ReefSigner): Promise<void> => {
+  await provider.api.tx.balances
+    .transfer(destinationAddress, amount)
+    .signAndSend(signer.address, { signer: signer.signer.signingKey });
+};
+
 export const sendToNativeAddress = (
   provider: Provider,
   signer: ReefSigner,
