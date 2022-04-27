@@ -7,7 +7,7 @@ import {
   of,
   shareReplay,
   startWith,
-  switchMap,
+  switchMap, tap,
   timer,
 } from 'rxjs';
 import { BigNumber, FixedNumber, utils } from 'ethers';
@@ -21,9 +21,10 @@ import { getIconUrl } from '../utils';
 import { getReefCoinBalance, loadPools } from '../rpc';
 import { retrieveReefCoingeckoPrice } from '../api';
 import {
+  ContractType,
   reefTokenWithAmount, Token, TokenNFT, TokenWithAmount,
 } from '../state/token';
-import { Pool } from '../state';
+import { Pool, ReefSigner } from '../state';
 import { resolveNftImageLinks } from '../utils/nftUtil';
 
 // TODO replace with our own from lib and remove
@@ -300,15 +301,36 @@ const TRANSFER_HISTORY_GQL = gql`
       from_address
       to_address
       timestamp
+      nft_id
       token {
         address
         verified_contract {
+          name
+          type
           contract_data
         }
       }
     }
   }
 `;
+
+const resolveTransferHistoryNfts = (transfers: (Token | TokenNFT)[], signer: ReefSigner): Observable<(Token | TokenNFT)[]> => {
+  const nftOrNull: (TokenNFT|null)[] = transfers.map((tr) => ('contractType' in tr && (tr.contractType === ContractType.ERC1155 || tr.contractType === ContractType.ERC721) ? tr : null));
+  if (!nftOrNull.filter((v) => !!v).length) {
+    return of(transfers);
+  }
+  return of(nftOrNull)
+    .pipe(
+      switchMap((nfts) => resolveNftImageLinks(nfts, signer.signer)),
+      map((nftOrNullResolved: (TokenNFT | null)[]) => {
+        const resolvedNftTransfers: (Token | TokenNFT)[] = [];
+        nftOrNullResolved.forEach((nftOrN, i) => {
+          resolvedNftTransfers.push(nftOrN || transfers[i]);
+        });
+        return resolvedNftTransfers;
+      }),
+    );
+};
 
 export const transferHistory$: Observable<
   | null
@@ -330,6 +352,7 @@ export const transferHistory$: Observable<
       }),
     ).pipe(
       map((res: any) => (res.data && res.data.transfer ? res.data.transfer : undefined)),
+      tap((v) => console.log('TTTT', v)),
       map((res: any[]) => res.map((transfer) => ({
         from: transfer.from_address,
         to: transfer.to_address,
@@ -337,7 +360,7 @@ export const transferHistory$: Observable<
                 transfer.to_address === signer.evmAddress
                 || transfer.to_address === signer.address,
         timestamp: transfer.timestamp,
-        token: {
+        token: transfer.token.verified_contract.type === ContractType.ERC20 ? {
           address: transfer.token_address,
           balance: BigNumber.from(toPlainString(transfer.amount)),
           name: transfer.token.verified_contract.contract_data.name,
@@ -347,8 +370,25 @@ export const transferHistory$: Observable<
           iconUrl:
                   transfer.token.verified_contract.contract_data.icon_url
                   || getIconUrl(transfer.token_address),
-        },
+        } as Token
+          : {
+            address: transfer.token_address,
+            balance: BigNumber.from(toPlainString(transfer.amount)),
+            name: transfer.token.verified_contract.contract_data.name,
+            symbol: transfer.token.verified_contract.contract_data.symbol,
+            decimals:
+                  transfer.token.verified_contract.contract_data.decimals,
+            iconUrl: '',
+            nftId: transfer.nft_id,
+            contractType: transfer.token.verified_contract.type,
+          } as TokenNFT,
       }))),
+      switchMap((transfers: ) => {
+        of(transfers).pipe(
+
+        )
+        resolveTransferHistoryNfts(transfers, signer);
+      }),
     ))),
   startWith(null),
   shareReplay(1),

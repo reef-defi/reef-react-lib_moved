@@ -1,14 +1,15 @@
-import { forkJoin, map, Observable } from 'rxjs';
+import { forkJoin, Observable } from 'rxjs';
 import { Contract } from 'ethers';
 import axios from 'axios';
 import { Signer } from '@reef-defi/evm-provider';
 import { getContractTypeAbi } from '../appState/util';
 import { TokenNFT } from '../state';
 
+const development = true;
 const extractIpfsHash = (ipfsUri: string): string|null => {
   const ipfsProtocol = 'ipfs://';
-  if (ipfsUri?.startsWith(ipfsProtocol)) {
-    return ipfsUri.substring(ipfsProtocol.length);
+  if (ipfsUri?.startsWith(ipfsProtocol) || development) {
+    return development ? ipfsUri : ipfsUri.substring(ipfsProtocol.length);
   }
   return null;
 };
@@ -45,7 +46,26 @@ const resolveImageData = (metadata: any, nft: TokenNFT): { iconUrl:string; name:
   return { iconUrl: resolveUriToUrl(imageVal, nft), name: metadata.name, mimetype: metadata.mimetype };
 };
 
-export const resolveNftImageLinks = (nfts: TokenNFT[], signer: Signer) :Observable<TokenNFT[]> => forkJoin(nfts.map((nft) => {
+export const getResolveNftPromise = (nft: TokenNFT|null, signer: Signer): Promise<TokenNFT|null> => {
+  if (!nft) {
+    return Promise.resolve(null);
+  }
+  const contractTypeAbi = getContractTypeAbi(nft.contractType);
+  const contract = new Contract(nft.address, contractTypeAbi, signer);
+  const uriPromise = (contractTypeAbi as any).some((fn) => fn.name === 'uri') ? contract.uri(nft.nftId)
+    : contract.tokenURI(nft.nftId);
+  return uriPromise
+    .then((metadataUri) => resolveUriToUrl(metadataUri, nft))
+    .then(axios.get)
+    .then((jsonStr) => resolveImageData(jsonStr.data, nft))
+    .then((nftUri) => ({ ...nft, ...nftUri }));
+};
+
+export const resolveNftImageLinks = (nfts: (TokenNFT|null)[], signer: Signer) :Observable<(TokenNFT|null)[]> => forkJoin(nfts.map((nft) => getResolveNftPromise(nft, signer)));
+/* export const resolveNftImageLinks = (nfts: (TokenNFT|null)[], signer: Signer) :Observable<TokenNFT[]> => forkJoin(nfts.map((nft) => {
+  if (!nft) {
+    return of(null);
+  }
   const contractTypeAbi = getContractTypeAbi(nft.contractType);
   const contract = new Contract(nft.address, contractTypeAbi, signer);
   const uriPromise = (contractTypeAbi as any).some((fn) => fn.name === 'uri') ? contract.uri(nft.nftId)
@@ -55,8 +75,8 @@ export const resolveNftImageLinks = (nfts: TokenNFT[], signer: Signer) :Observab
     .then(axios.get)
     .then((jsonStr) => resolveImageData(jsonStr.data, nft));
 })).pipe(
-  map((nftUris) => nfts.map((nft: TokenNFT, i: number) => ({
+  map((nftUris:any|null) => nfts.map((nft: TokenNFT|null, i: number) => (nft ? ({
     ...nft,
     ...nftUris[i],
-  }))),
-);
+  }) : null))),
+); */
