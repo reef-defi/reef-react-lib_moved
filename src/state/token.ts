@@ -38,6 +38,14 @@ export interface TokenState {
   price: number;
 }
 
+export interface TokenTransfer {
+  from: string;
+  to: string;
+  inbound: boolean;
+  timestamp: number;
+  token: Token|TokenNFT;
+}
+
 export const defaultTokenState = (index = 0): TokenState => ({
   index,
   amount: '',
