@@ -1,4 +1,4 @@
-import { forkJoin, map, Observable } from 'rxjs';
+import { forkJoin, Observable } from 'rxjs';
 import { Contract } from 'ethers';
 import axios from 'axios';
 import { Signer } from '@reef-defi/evm-provider';
@@ -45,7 +45,10 @@ const resolveImageData = (metadata: any, nft: TokenNFT): { iconUrl:string; name:
   return { iconUrl: resolveUriToUrl(imageVal, nft), name: metadata.name, mimetype: metadata.mimetype };
 };
 
-export const resolveNftImageLinks = (nfts: TokenNFT[], signer: Signer) :Observable<TokenNFT[]> => forkJoin(nfts.map((nft) => {
+export const getResolveNftPromise = (nft: TokenNFT|null, signer: Signer): Promise<TokenNFT|null> => {
+  if (!nft) {
+    return Promise.resolve(null);
+  }
   const contractTypeAbi = getContractTypeAbi(nft.contractType);
   const contract = new Contract(nft.address, contractTypeAbi, signer);
   const uriPromise = (contractTypeAbi as any).some((fn) => fn.name === 'uri') ? contract.uri(nft.nftId)
@@ -53,10 +56,8 @@ export const resolveNftImageLinks = (nfts: TokenNFT[], signer: Signer) :Observab
   return uriPromise
     .then((metadataUri) => resolveUriToUrl(metadataUri, nft))
     .then(axios.get)
-    .then((jsonStr) => resolveImageData(jsonStr.data, nft));
-})).pipe(
-  map((nftUris) => nfts.map((nft: TokenNFT, i: number) => ({
-    ...nft,
-    ...nftUris[i],
-  }))),
-);
+    .then((jsonStr) => resolveImageData(jsonStr.data, nft))
+    .then((nftUri) => ({ ...nft, ...nftUri }));
+};
+
+export const resolveNftImageLinks = (nfts: (TokenNFT|null)[], signer: Signer) :Observable<(TokenNFT|null)[]> => forkJoin(nfts.map((nft) => getResolveNftPromise(nft, signer)));
