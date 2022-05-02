@@ -17,13 +17,14 @@ import { combineTokensDistinct, toTokensWithPrice } from './util';
 import { selectedSigner$ } from './accountState';
 import { providerSubj, selectedNetworkSubj } from './providerState';
 import { apolloClientInstance$, zenToRx } from '../graphql/apollo';
-import { getIconUrl } from '../utils';
+import { getExtrinsicUrl, getIconUrl } from '../utils';
 import { getReefCoinBalance, loadPools } from '../rpc';
 import { retrieveReefCoingeckoPrice } from '../api';
 import {
-  reefTokenWithAmount, Token, TokenNFT, TokenWithAmount,
+  ContractType,
+  reefTokenWithAmount, Token, TokenNFT, TokenTransfer, TokenWithAmount,
 } from '../state/token';
-import { Pool } from '../state';
+import { Network, Pool, ReefSigner } from '../state';
 import { resolveNftImageLinks } from '../utils/nftUtil';
 
 // TODO replace with our own from lib and remove
@@ -255,7 +256,7 @@ export const selectedSignerNFTs$: Observable<TokenNFT[]> = combineLatest([
             ? res.data.token_holder
             : undefined)),
           map(parseTokenHolderArray),
-          switchMap((nfts) => resolveNftImageLinks(nfts, signer.signer)),
+          switchMap((nfts: TokenNFT[]) => (resolveNftImageLinks(nfts, signer.signer) as Observable<TokenNFT[]>)),
         ))),
   );
 
@@ -300,27 +301,81 @@ const TRANSFER_HISTORY_GQL = gql`
       from_address
       to_address
       timestamp
+      nft_id
       token {
         address
         verified_contract {
+          name
+          type
           contract_data
         }
+      }
+      extrinsic{
+        block_id
+        index
+        hash
       }
     }
   }
 `;
 
+const resolveTransferHistoryNfts = (tokens: (Token | TokenNFT)[], signer: ReefSigner): Observable<(Token | TokenNFT)[]> => {
+  const nftOrNull: (TokenNFT|null)[] = tokens.map((tr) => ('contractType' in tr && (tr.contractType === ContractType.ERC1155 || tr.contractType === ContractType.ERC721) ? tr : null));
+  if (!nftOrNull.filter((v) => !!v).length) {
+    return of(tokens);
+  }
+  return of(nftOrNull)
+    .pipe(
+      switchMap((nfts) => resolveNftImageLinks(nfts, signer.signer)),
+      map((nftOrNullResolved: (TokenNFT | null)[]) => {
+        const resolvedNftTransfers: (Token | TokenNFT)[] = [];
+        nftOrNullResolved.forEach((nftOrN, i) => {
+          resolvedNftTransfers.push(nftOrN || tokens[i]);
+        });
+        return resolvedNftTransfers;
+      }),
+    );
+};
+
+const toTransferToken = (transfer): Token|TokenNFT => (transfer.token.verified_contract.type === ContractType.ERC20 ? {
+  address: transfer.token_address,
+  balance: BigNumber.from(toPlainString(transfer.amount)),
+  name: transfer.token.verified_contract.contract_data.name,
+  symbol: transfer.token.verified_contract.contract_data.symbol,
+  decimals:
+      transfer.token.verified_contract.contract_data.decimals,
+  iconUrl:
+        transfer.token.verified_contract.contract_data.icon_url
+        || getIconUrl(transfer.token_address),
+} as Token
+  : {
+    address: transfer.token_address,
+    balance: BigNumber.from(toPlainString(transfer.amount)),
+    name: transfer.token.verified_contract.contract_data.name,
+    symbol: transfer.token.verified_contract.contract_data.symbol,
+    decimals: 0,
+    iconUrl: '',
+    nftId: transfer.nft_id,
+    contractType: transfer.token.verified_contract.type,
+  } as TokenNFT);
+
+const toTokenTransfers = (resTransferData: any[], signer, network: Network): TokenTransfer[] => resTransferData.map((transferData): TokenTransfer => ({
+  from: transferData.from_address,
+  to: transferData.to_address,
+  inbound:
+    transferData.to_address === signer.evmAddress
+    || transferData.to_address === signer.address,
+  timestamp: transferData.timestamp,
+  token: toTransferToken(transferData),
+  url: getExtrinsicUrl(transferData.extrinsic.hash, network),
+  extrinsic: { blockId: transferData.extrinsic.block_id, hash: transferData.extrinsic.hash, index: transferData.extrinsic.index },
+}));
+
 export const transferHistory$: Observable<
   | null
-  | {
-      from: string;
-      to: string;
-      token: Token;
-      timestamp: number;
-      inbound: boolean;
-    }[]
-> = combineLatest([apolloClientInstance$, selectedSigner$]).pipe(
-  switchMap(([apollo, signer]) => (!signer
+  | TokenTransfer[]
+> = combineLatest([apolloClientInstance$, selectedSigner$, selectedNetworkSubj]).pipe(
+  switchMap(([apollo, signer, network]) => (!signer
     ? []
     : zenToRx(
       apollo.subscribe({
@@ -328,28 +383,21 @@ export const transferHistory$: Observable<
         variables: { accountId: signer.address },
         fetchPolicy: 'network-only',
       }),
-    ).pipe(
-      map((res: any) => (res.data && res.data.transfer ? res.data.transfer : undefined)),
-      map((res: any[]) => res.map((transfer) => ({
-        from: transfer.from_address,
-        to: transfer.to_address,
-        inbound:
-                transfer.to_address === signer.evmAddress
-                || transfer.to_address === signer.address,
-        timestamp: transfer.timestamp,
-        token: {
-          address: transfer.token_address,
-          balance: BigNumber.from(toPlainString(transfer.amount)),
-          name: transfer.token.verified_contract.contract_data.name,
-          symbol: transfer.token.verified_contract.contract_data.symbol,
-          decimals:
-                  transfer.token.verified_contract.contract_data.decimals,
-          iconUrl:
-                  transfer.token.verified_contract.contract_data.icon_url
-                  || getIconUrl(transfer.token_address),
-        },
-      }))),
-    ))),
+    )
+      .pipe(
+        map((res: any) => (res.data && res.data.transfer ? res.data.transfer : undefined)),
+        map((resData: any) => toTokenTransfers(resData, signer, network)),
+        switchMap((transfers: TokenTransfer[]) => {
+          const tokens = transfers.map((tr: TokenTransfer) => tr.token);
+          return resolveTransferHistoryNfts(tokens, signer)
+            .pipe(
+              map((resolvedTokens: (Token | TokenNFT)[]) => resolvedTokens.map((resToken: Token | TokenNFT, i) => ({
+                ...transfers[i],
+                token: resToken,
+              }))),
+            );
+        }),
+      ))),
   startWith(null),
   shareReplay(1),
 );

@@ -1,7 +1,6 @@
 import { Provider } from '@reef-defi/evm-provider';
 import { BigNumber } from 'ethers';
-import { handleTxResponse } from '@reef-defi/evm-provider/utils';
-import { ReefSigner } from '../state';
+import { availableNetworks, Network, ReefSigner } from '../state';
 
 export type TxStatusHandler = (status: TxStatusUpdate) => void;
 
@@ -81,24 +80,16 @@ export const sendToNativeAddress = (
       .signAndSend(
         substrateAddress,
         { signer: signer.signer.signingKey },
-        (res) => handleTxResponse(res, provider.api)
-          .then((txRes: any): void => {
-            const txHash = transfer.hash.toHex();
-            txHandler({
-              txIdent,
-              txHash,
-              isInBlock: txRes.result.status.isInBlock,
-              isComplete: txRes.result.status.isFinalized,
-              addresses: [signer.address, to],
-            });
-          })
-          .catch((rej: any) => {
-            // finalized error is ignored
-            if (rej.result.status.isInBlock) {
-              const txHash = transfer.hash.toHex();
-              handleErr(rej.message, txIdent, txHash, txHandler, signer);
-            }
-          }),
+        (res) => {
+          const txHash = transfer.hash.toHex();
+          txHandler({
+            txIdent,
+            txHash,
+            isInBlock: res.isInBlock,
+            isComplete: res.isFinalized,
+            addresses: [signer.address, to],
+          });
+        },
       )
       .catch((e) => {
         console.log('sendToNativeAddress err=', e);
@@ -108,3 +99,5 @@ export const sendToNativeAddress = (
 
   return txIdent;
 };
+
+export const getExtrinsicUrl = (hash: string, network: Network = availableNetworks.mainnet): string => `${network.reefscanFrontendUrl}/extrinsic/${hash}`;
