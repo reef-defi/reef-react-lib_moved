@@ -38,6 +38,18 @@ export interface TokenState {
   price: number;
 }
 
+export interface TransferExtrinsic { blockId: string; index: number; hash: string; }
+
+export interface TokenTransfer {
+  from: string;
+  to: string;
+  inbound: boolean;
+  timestamp: number;
+  token: Token|TokenNFT;
+  extrinsic: TransferExtrinsic;
+  url: string;
+}
+
 export const defaultTokenState = (index = 0): TokenState => ({
   index,
   amount: '',

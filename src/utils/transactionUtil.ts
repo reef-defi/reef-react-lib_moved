@@ -1,6 +1,6 @@
 import { Provider } from '@reef-defi/evm-provider';
 import { BigNumber } from 'ethers';
-import { ReefSigner } from '../state';
+import { availableNetworks, Network, ReefSigner } from '../state';
 
 export type TxStatusHandler = (status: TxStatusUpdate) => void;
 
@@ -93,3 +93,5 @@ export const sendToNativeAddress = (
 
   return txIdent;
 };
+
+export const getExtrinsicUrl = (hash: string, network: Network = availableNetworks.mainnet): string => `${network.reefscanFrontendUrl}/extrinsic/${hash}`;
