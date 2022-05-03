@@ -1,8 +1,8 @@
 {
   "name": "@reef-defi/react-lib",
-  "version": "1.0.41",
+  "version": "1.0.42",
   "description": "Reef React Library",
-  "author": "Frenkiee",
+  "author": "Reef chain",
   "license": "MIT",
   "repository": "git@github.com:reef-defi/reef-react-lib.git",
   "main": "dist/index.js",
