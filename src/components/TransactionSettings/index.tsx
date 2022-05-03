@@ -55,7 +55,6 @@ export const TransactionSettings: React.FC<TransactionSettings> = ({
             min={0}
             max={100}
             step={0.1}
-            className="border-right-0"
             placeholder={`${defaultSlippageTolerance}`}
             onChange={(value) => setSettings({
               ...settings,
