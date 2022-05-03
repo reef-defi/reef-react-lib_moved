@@ -1,8 +1,8 @@
 {
   "name": "@reef-defi/react-lib",
-  "version": "1.0.40",
+  "version": "1.0.42",
   "description": "Reef React Library",
-  "author": "Frenkiee",
+  "author": "Reef chain",
   "license": "MIT",
   "repository": "git@github.com:reef-defi/reef-react-lib.git",
   "main": "dist/index.js",
@@ -85,5 +85,14 @@
     "rxjs": "^7.5.4",
     "subscriptions-transport-ws": "^0.11.0",
     "zen-observable-ts": "^1.1.0"
+  },
+  "resolutions": {
+    "@ethersproject/abstract-signer": "5.0.9",
+    "@ethersproject/abstract-provider": "5.0.9",
+    "@ethersproject/bignumber": "5.0.9",
+    "@ethersproject/bytes": "5.0.9",
+    "@ethersproject/logger": "5.0.9",
+    "@ethersproject/properties": "5.0.9",
+    "rollup-plugin-typescript2": "^0.31.1"
   }
 }
