@@ -8,6 +8,13 @@ export enum ContractType {
   ERC1155 = 'ERC1155',
   other = 'other'
 }
+
+export interface ERC20ContractData {
+  name: string;
+  symbol: string;
+  decimals: number;
+}
+
 export interface BasicToken {
   name: string;
   address: string;
@@ -15,7 +22,7 @@ export interface BasicToken {
 }
 
 export interface Token extends BasicToken {
-  symbol?: string;
+  symbol: string;
   balance: BigNumber;
   decimals: number;
 }
@@ -62,6 +69,7 @@ export const createEmptyToken = (): Token => ({
   balance: BigNumber.from('0'),
   decimals: -1,
   iconUrl: '',
+  symbol: 'Select token',
 });
 
 export const createEmptyTokenWithAmount = (isEmpty = true): TokenWithAmount => ({
@@ -92,6 +100,7 @@ export const reefTokenWithAmount = (): TokenWithAmount => toTokenAmount(
     iconUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/6951.png',
     balance: BigNumber.from(0),
     decimals: 18,
+    symbol: 'REEF',
   },
   {
     amount: '',

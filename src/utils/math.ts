@@ -109,7 +109,12 @@ export const removeSupply = (
 export const removePoolTokenShare = (
   percentage: number,
   token?: Token,
-): number => removeSupply(percentage, token?.balance.toString(), token?.decimals);
+): string => (token
+  ? token.balance.mul(percentage).div(100).toString()
+  : '0');
+export const showRemovePoolTokenShare = (percentage: number, token?: Token): string => (token
+  ? convert2Normal(18, removePoolTokenShare(percentage, token)).toFixed(8)
+  : '0');
 
 export const removeUserPoolSupply = (percentage: number, pool?: Pool): number => removeSupply(percentage, pool?.userPoolBalance, 18);
 

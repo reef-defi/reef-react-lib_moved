@@ -7,5 +7,5 @@ export * from './SwapComponent';
 export * from './AccountSelector';
 export * from './AccountSelector/AccountListModal';
 export * from './RemoveLiquidity';
-export * from './Transfer/TransferComponent';
+export * from './Transfer';
 export * from './EvmBind/EvmBindComponent';

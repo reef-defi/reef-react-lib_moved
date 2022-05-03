@@ -1,8 +1,8 @@
 import { Signer } from '@reef-defi/evm-provider';
-import { BigNumber, Contract } from 'ethers';
+import { Contract } from 'ethers';
 import { ensure, uniqueCombinations } from '../utils/utils';
 import { ReefswapPair } from '../assets/abi/ReefswapPair';
-import { balanceOf, getReefswapFactory } from './rpc';
+import { getReefswapFactory } from './rpc';
 import { Token, Pool } from '..';
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
@@ -41,8 +41,16 @@ export const loadPool = async (
 
   const address1 = await contract.token1();
 
-  const tokenBalance1 = (await balanceOf(token1.address, address, signer)) || BigNumber.from('0');
-  const tokenBalance2 = (await balanceOf(token2.address, address, signer)) || BigNumber.from('0');
+  const [finalReserve1, finalReserve2] = token1.address === address1
+    ? [reserves[0], reserves[1]]
+    : [reserves[1], reserves[0]];
+
+  const tokenBalance1 = finalReserve1
+    .mul(liquidity)
+    .div(totalSupply);
+  const tokenBalance2 = finalReserve2
+    .mul(liquidity)
+    .div(totalSupply);
 
   const [finalToken1, finalToken2] = token1.address === address1
     ? [
@@ -53,10 +61,6 @@ export const loadPool = async (
       { ...token2, balance: tokenBalance2 },
       { ...token1, balance: tokenBalance1 },
     ];
-
-  const [finalReserve1, finalReserve2] = token1.address === address1
-    ? [reserves[0], reserves[1]]
-    : [reserves[1], reserves[0]];
 
   return {
     poolAddress: address,
