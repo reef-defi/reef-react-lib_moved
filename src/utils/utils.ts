@@ -49,3 +49,5 @@ export const ensureVoidRun = (canRun: boolean) => <I>(fun: (obj: I) => void, obj
     fun(obj);
   }
 };
+
+export const removeUndefinedItem = <Type, >(item: (Type|undefined)): item is Type => item !== undefined;
