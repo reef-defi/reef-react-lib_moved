@@ -22,7 +22,7 @@ export const useLoadPools = (
         mounted.current = true;
       })
       .then(() => setIsLoading(true))
-      .then(() => loadPools(tokens, signer, settings))
+      .then(() => loadPools(tokens, signer, settings.factoryAddress))
       .then((res) => ensureMounted(setPools, res))
       .catch(() => ensureMounted(setPools, []))
       .finally(() => ensureMounted(setIsLoading, false));
