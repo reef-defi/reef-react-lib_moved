@@ -45,6 +45,13 @@ export interface TokenState {
   price: number;
 }
 
+export interface NFTMetadata{
+  image?: string;
+  iconUrl?:string;
+  name?: string;
+  mimetype?: string;
+}
+
 export interface TransferExtrinsic { blockId: string; index: number; hash: string; }
 
 export interface TokenTransfer {
