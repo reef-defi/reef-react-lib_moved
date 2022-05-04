@@ -6,7 +6,7 @@ export enum DataProgress {
 export type DataWithProgress<T> = T | DataProgress;
 
 // eslint-disable-next-line no-prototype-builtins
-export const isDataSet = (dataOrProgress: DataWithProgress<any>): boolean => !Object.keys(DataProgress).some((k) => DataProgress[k] === dataOrProgress);
+export const isDataSet = (dataOrProgress: DataWithProgress<any>): boolean => !Object.keys(DataProgress).some((k:string) => (DataProgress as any)[k] === dataOrProgress);
 export const getData = <T>(
   dataOrProgress: DataWithProgress<T>,
 ): T | undefined => (isDataSet(dataOrProgress) ? (dataOrProgress as T) : undefined);
