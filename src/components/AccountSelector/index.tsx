@@ -39,9 +39,7 @@ export const AccountSelector = ({
 }: AccountSelector): JSX.Element => {
   const name = selectedSigner ? selectedSigner.name : '';
   const address = selectedSigner ? selectedSigner.address : '';
-  const balance = selectedSigner
-    ? toReefBalanceDisplay(selectedSigner.balance)
-    : toReefBalanceDisplay(undefined);
+  const balance = toReefBalanceDisplay(selectedSigner?.balance);
   const evmAddress = selectedSigner ? selectedSigner.evmAddress : '';
 
   const confirmEvmCopy = (): void => {

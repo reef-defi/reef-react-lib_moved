@@ -11,7 +11,7 @@ import {
   timer,
 } from 'rxjs';
 import { BigNumber, FixedNumber, utils } from 'ethers';
-import { ApolloClient, gql } from '@apollo/client';
+import { gql } from '@apollo/client';
 import { filter } from 'rxjs/operators';
 import { combineTokensDistinct, toTokensWithPrice } from './util';
 import { selectedSigner$ } from './accountState';
@@ -101,7 +101,8 @@ const CONTRACT_DATA_GQL = gql`
 
 // eslint-disable-next-line camelcase
 const fetchTokensData = (
-  apollo: ApolloClient<any>,
+  // apollo: ApolloClient<any>,
+  apollo: any,
   missingCacheContractDataAddresses: string[],
   state: { tokens: Token[]; contractData: Token[] },
 ): Promise<Token[]> => apollo
@@ -123,7 +124,8 @@ const fetchTokensData = (
   .then((newTokens) => newTokens.concat(state.contractData));
 
 // eslint-disable-next-line camelcase
-const tokenBalancesWithContractDataCache = (apollo: ApolloClient<any>) => (
+// const tokenBalancesWithContractDataCache = (apollo: ApolloClient<any>) => (
+const tokenBalancesWithContractDataCache = (apollo: any) => (
   state: { tokens: Token[]; contractData: Token[] },
   // eslint-disable-next-line camelcase
   tokenBalances: { token_address: string; balance: number }[],
