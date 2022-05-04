@@ -1,25 +1,30 @@
-import { Provider, Signer } from '@reef-defi/evm-provider';
-import type { InjectedAccount, InjectedAccountWithMeta, InjectedExtension } from '@polkadot/extension-inject/types';
+import { Provider, Signer } from "@reef-defi/evm-provider";
 import type {
-  InjectedAccount as InjectedAccountReef,
+  InjectedExtension,
+  InjectedAccountWithMeta,
+} from "@polkadot/extension-inject/types";
+import type {
+  InjectedAccount,
   InjectedAccountWithMeta as InjectedAccountWithMetaReef,
   InjectedExtension as InjectedExtensionReef,
-} from '@reef-defi/extension-inject/types';
-import type { Signer as InjectedSigner } from '@polkadot/api/types';
-import { DeriveBalancesAccountData } from '@polkadot/api-derive/balances/types';
-import { BigNumber } from 'ethers';
-import { firstValueFrom } from 'rxjs';
-import { web3FromSource } from '@reef-defi/extension-dapp';
-import { ensure } from '../utils/utils';
-import { ReefSigner } from '../state/types';
-import { selectedSigner$ } from '../appState/accountState';
+} from "@reef-defi/extension-inject/types";
+import type { Signer as InjectedSigner } from "@polkadot/api/types";
+import { DeriveBalancesAccountData } from "@polkadot/api-derive/balances/types";
+import { BigNumber } from "ethers";
+// import { firstValueFrom } from 'rxjs';
+import { web3FromSource } from "@reef-defi/extension-dapp";
+import { ensure, removeUndefinedItem } from "../utils/utils";
+import { ReefSigner } from "../state/types";
+// import { selectedSigner$ } from '../appState/accountState';
 
 const accountSourceSigners = new Map<string, InjectedSigner>();
-const getAccountInjectedSigner = async (source: string): Promise<InjectedSigner|void> => {
+const getAccountInjectedSigner = async (
+  source: string
+): Promise<InjectedSigner | undefined> => {
   if (!accountSourceSigners.has(source)) {
     const signer = await web3FromSource(source)
       .then((injected) => injected?.signer)
-      .catch((err) => console.error('getAccountSigner error =', err));
+      .catch((err) => console.error("getAccountSigner error =", err));
     if (signer) {
       accountSourceSigners.set(source, signer);
     }
@@ -27,97 +32,140 @@ const getAccountInjectedSigner = async (source: string): Promise<InjectedSigner|
   return accountSourceSigners.get(source);
 };
 
-export const getAccountSigner = async (address: string, source: string, provider: Provider, injSigner?: InjectedSigner): Promise<Signer|undefined> => {
-  const iSigner = injSigner || await getAccountInjectedSigner(source);
+export const getAccountSigner = async (
+  address: string,
+  source: string,
+  provider: Provider,
+  injSigner?: InjectedSigner
+): Promise<Signer | undefined> => {
+  const iSigner = injSigner || (await getAccountInjectedSigner(source));
   return iSigner ? new Signer(provider, address, iSigner) : undefined;
 };
 
 export const getReefCoinBalance = async (
   address: string,
-  provider?: Provider,
+  provider: Provider
 ): Promise<BigNumber> => {
-  const selectedSigner = await firstValueFrom(selectedSigner$);
-  if (selectedSigner && selectedSigner.address === address) {
-    return selectedSigner.balance;
-  }
-  if (!provider) {
-    return BigNumber.from('0');
-  }
   const balance = await provider.api.derive.balances
     .all(address)
-    .then((res: DeriveBalancesAccountData) => BigNumber.from(res.freeBalance.toString(10)));
+    .then((res: DeriveBalancesAccountData) =>
+      BigNumber.from(res.freeBalance.toString(10))
+    );
   return balance;
 };
 
-export const accountToSigner = async (
-  account: InjectedAccountWithMeta | InjectedAccountWithMetaReef,
+interface SignerInfo {
+  name: string;
+  source: string;
+  address: string;
+  genesisHash: string;
+}
+const signerToReefSigner = async (
+  signer: Signer,
   provider: Provider,
-  injSigner?: InjectedSigner,
-): Promise<ReefSigner|undefined> => {
-  const { source } = account.meta;
-  const signer = await getAccountSigner(account.address, source, provider, injSigner);
-  if (!signer) {
-    return undefined;
-  }
+  {address, name, source, genesisHash}: SignerInfo
+) => {
   const evmAddress = await signer.getAddress();
   const isEvmClaimed = await signer.isClaimed();
 
-  const balance = await getReefCoinBalance(account.address, provider);
+  const balance = await getReefCoinBalance(address, provider);
 
   return {
     signer,
     balance,
     evmAddress,
     isEvmClaimed,
-    name: account.meta.name || '',
-    address: account.address,
+    name,
+    address,
     source,
-    genesisHash: account.meta.genesisHash!,
+    genesisHash: genesisHash!,
   };
 };
 
-export const accountsToSigners = async (
-  accounts: InjectedAccountWithMeta[] | InjectedAccountWithMetaReef[],
+export const metaAccountToSigner = async (
+  account: InjectedAccountWithMeta | InjectedAccountWithMetaReef,
+  provider: Provider,
+  injSigner: InjectedSigner
+): Promise<ReefSigner | undefined> => {
+  const { source } = account.meta;
+  const signer = await getAccountSigner(
+    account.address,
+    source,
+    provider,
+    injSigner
+  );
+  if (!signer) {
+    return undefined;
+  }
+  return signerToReefSigner(
+    signer,
+    provider,
+    {
+      source,
+      address: account.address,
+      name: account.meta.name || "",
+      genesisHash: account.meta.genesisHash || "",
+    }
+  )
+};
+
+export const metaAccountsToSigners = async (
+  accounts: (InjectedAccountWithMeta | InjectedAccountWithMetaReef)[],
+  provider: Provider,
+  sign: InjectedSigner
+): Promise<ReefSigner[]> => {
+  const signers = await Promise.all(
+    accounts
+      .filter((account) => provider.api.genesisHash.toString() === account.meta.genesisHash)
+      .map((account) => metaAccountToSigner(account, provider, sign))
+  );
+
+  return signers.filter(removeUndefinedItem);
+}
+
+export const accountToSigner = async (
+  account: InjectedAccount,
   provider: Provider,
   sign: InjectedSigner,
-): Promise<ReefSigner[]> => Promise.all(
-  accounts.filter((acc) => !provider || !provider.api.genesisHash.toString() || !acc.meta.genesisHash || acc.meta.genesisHash === provider.api.genesisHash.toString())
-    .map((account) => accountToSigner(account, provider, sign)),
-).then((signers) => signers.filter((sig) => !!sig) as ReefSigner[]);
-
-function toAccountWithMeta(
-  sourceExtension: InjectedExtension | InjectedExtensionReef,
-  accounts: InjectedAccount[] | InjectedAccountReef[],
-): InjectedAccountWithMeta[] | InjectedAccountWithMetaReef[] {
-  return accounts.map((acc) => ({
-    address: acc.address,
-    type: acc.type,
-    meta: {
-      source: sourceExtension.name,
-      name: acc.name,
-      genesisHash: acc.genesisHash,
-    },
-  }));
-}
+  source: string
+): Promise<ReefSigner> => {
+  const signer = new Signer(provider, account.address, sign);
+  return signerToReefSigner(
+    signer,
+    provider,
+    {
+      source,
+      address: account.address,
+      name: account.name || "",
+      genesisHash: account.genesisHash || "",
+    }
+  )
+};
 
 export const getExtensionSigners = async (
   extensions: InjectedExtension[] | InjectedExtensionReef[],
-  provider: Provider,
+  provider: Provider
 ): Promise<ReefSigner[]> => {
-  const extensionAccountPromises = extensions.map((ext) => ext.accounts
-    .get()
-    .then((extAccounts) => accountsToSigners(
-      toAccountWithMeta(ext, extAccounts),
-      provider,
-      ext.signer as any,
-    )));
-  return Promise.all(extensionAccountPromises).then((signersByExt) => signersByExt.reduce((all, curr) => all.concat(curr), []));
+  const extensionAccounts = await Promise.all(
+    extensions.map(async (extension) => ({
+      name: extension.name,
+      sig: extension.signer,
+      accounts: await extension.accounts.get(),
+    }))
+  );
+  const accountPromisses = extensionAccounts.flatMap(
+    ({ accounts, name, sig }) =>
+      accounts.map((account) => accountToSigner(account, provider, sig, name))
+  );
+  const accounts = await Promise.all(accountPromisses);
+  return accounts;
 };
 
 export const bindSigner = async (signer: Signer): Promise<void> => {
   const hasEvmAddress = await signer.isClaimed();
-  ensure(!hasEvmAddress, 'Account already has EVM address!');
+  ensure(!hasEvmAddress, "Account already has EVM address!");
   await signer.claimDefaultAccount();
 };
 
-export const getSignerIdent = (signer: ReefSigner): string => `${signer.source}_${signer.address}`;
+export const getSignerIdent = (signer: ReefSigner): string =>
+  `${signer.source}_${signer.address}`;
