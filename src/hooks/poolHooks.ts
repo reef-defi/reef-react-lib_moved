@@ -1,8 +1,8 @@
 import { gql, useQuery, useSubscription } from "@apollo/client";
 
 // Data interfaces
-export type BasePoolTransactionTypes = 'Swap' | 'Mint' | 'Burn'
-export type TransactionTypes = BasePoolTransactionTypes | 'All'
+export type BasePoolTransactionTypes = "Swap" | "Mint" | "Burn";
+export type TransactionTypes = BasePoolTransactionTypes | "All";
 
 interface Supply {
   total_supply: number;
@@ -68,12 +68,12 @@ interface PoolTransaction {
   pool: {
     token_contract_1: {
       verified_contract: null | {
-        contract_data: ContractData
+        contract_data: ContractData;
       };
     };
     token_contract_2: {
       verified_contract: null | {
-        contract_data: ContractData
+        contract_data: ContractData;
       };
     };
   };
@@ -91,8 +91,8 @@ interface PoolTransactionCount {
   verified_pool_event_aggregate: {
     aggregate: {
       count: number;
-    }
-  }
+    };
+  };
 }
 
 interface PoolCount {
@@ -134,22 +134,22 @@ interface FeeVar extends FromVar, AddressVar {}
 interface VolumeVar extends FeeVar {
   toTime: string;
 }
-interface PoolVar extends FromVar {
-  offset: number;
+interface OptionalSearchVar {
   search: { _ilike?: string };
+}
+interface PoolVar extends FromVar, OptionalSearchVar {
+  offset: number;
 }
 
 interface BasicTransactionVar {
   address: { _ilike?: string };
-  type: BasePoolTransactionTypes[]
+  type: BasePoolTransactionTypes[];
 }
 
 interface TransactionVar extends BasicTransactionVar {
   offset: number;
   limit: number;
 }
-
-
 
 // Graphql statements
 const POOL_SUPPLY_GQL = gql`
@@ -284,64 +284,65 @@ const POOLS_GQL = gql`
   }
 `;
 
-
 const POOL_TRANSACTIONS_GQL = gql`
-subscription transactions($address: String_comparison_exp!, $type: [pooltype!], $offset: Int!, $limit: Int!) {
-  verified_pool_event(
-    order_by: { timestamp: desc }
-    where: {
-      pool: { address: $address }
-      type: { _in: $type }
-    }
-    limit: $limit
-    offset: $offset
+  subscription transactions(
+    $address: String_comparison_exp!
+    $type: [pooltype!]
+    $offset: Int!
+    $limit: Int!
   ) {
-    amount_1
-    amount_2
-    amount_in_1
-    amount_in_2
-    sender_address
-    to_address
-    timestamp
-    type
-    pool {
-      token_contract_2 {
-        verified_contract {
-          contract_data
+    verified_pool_event(
+      order_by: { timestamp: desc }
+      where: { pool: { address: $address }, type: { _in: $type } }
+      limit: $limit
+      offset: $offset
+    ) {
+      amount_1
+      amount_2
+      amount_in_1
+      amount_in_2
+      sender_address
+      to_address
+      timestamp
+      type
+      pool {
+        token_contract_2 {
+          verified_contract {
+            contract_data
+          }
+        }
+        token_contract_1 {
+          verified_contract {
+            contract_data
+          }
         }
       }
-      token_contract_1 {
-        verified_contract {
-          contract_data
-        }
-      }
-    }
-    evm_event {
-      event {
-        id
-        extrinsic {
-          hash
-          signer
+      evm_event {
+        event {
+          id
+          extrinsic {
+            hash
+            signer
+          }
         }
       }
     }
   }
-}
 `;
 
 const POOL_TRANSACTION_COUNT_GQL = gql`
-subscription transaction_count($address: String_comparison_exp!, $type: [pooltype]!) {
-  verified_pool_event_aggregate(
-    where: {
-      pool: { address: $address }
-      type: { _in: $type }
-    }
+  subscription transaction_count(
+    $address: String_comparison_exp!
+    $type: [pooltype]!
   ) {
-    aggregate {
-      count
+    verified_pool_event_aggregate(
+      where: { pool: { address: $address }, type: { _in: $type } }
+    ) {
+      aggregate {
+        count
+      }
     }
   }
-}
 `;
 
 const POOL_COUNT_GQL = gql`
@@ -403,24 +404,38 @@ export const usePools = (fromTime: string, offset: number, search?: string) =>
       search: search ? { _ilike: `${search}%` } : {},
     },
   });
-export const usePoolCount = () => useQuery<PoolCount>(POOL_COUNT_GQL);
+export const usePoolCount = (search?: string) =>
+  useQuery<PoolCount, OptionalSearchVar>(POOL_COUNT_GQL, {
+    variables: { search: search ? { _ilike: `${search}%` } : {} },
+  });
 
-const resolveTransactionVariables = (address: string|undefined, type: TransactionTypes): BasicTransactionVar => ({
+const resolveTransactionVariables = (
+  address: string | undefined,
+  type: TransactionTypes
+): BasicTransactionVar => ({
   address: address ? { _ilike: address } : {},
-  type: (type === 'All' ? ['Swap', 'Mint', 'Burn'] : [type]),
-})
-export const usePoolTransactionCountSubscription = (address: string|undefined, type: TransactionTypes) => useSubscription<PoolTransactionCount, BasicTransactionVar>(
-  POOL_TRANSACTION_COUNT_GQL,
-  {
-    variables: resolveTransactionVariables(address, type)
-  }
-);
-export const usePoolTransactionSubscription = (address: string|undefined, type: TransactionTypes, pageIndex=0, limit=10) => useSubscription<PoolTransactionQuery, TransactionVar>(
-  POOL_TRANSACTIONS_GQL,
-  {
-    variables: {...resolveTransactionVariables(address, type),
-      limit,
-      offset: pageIndex*limit,
+  type: type === "All" ? ["Swap", "Mint", "Burn"] : [type],
+});
+export const usePoolTransactionCountSubscription = (
+  address: string | undefined,
+  type: TransactionTypes
+) =>
+  useSubscription<PoolTransactionCount, BasicTransactionVar>(
+    POOL_TRANSACTION_COUNT_GQL,
+    {
+      variables: resolveTransactionVariables(address, type),
     }
-  }
-)
+  );
+export const usePoolTransactionSubscription = (
+  address: string | undefined,
+  type: TransactionTypes,
+  pageIndex = 0,
+  limit = 10
+) =>
+  useSubscription<PoolTransactionQuery, TransactionVar>(POOL_TRANSACTIONS_GQL, {
+    variables: {
+      ...resolveTransactionVariables(address, type),
+      limit,
+      offset: pageIndex * limit,
+    },
+  });
