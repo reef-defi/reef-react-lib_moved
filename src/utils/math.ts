@@ -214,11 +214,16 @@ export const ensureAmount = (token: TokenWithAmount): void => ensure(
   `Insufficient ${token.name} balance`,
 );
 
-export const getOutputAmount = (sell: TokenWithAmount, pool: Pool): number => {
-  const inputAmount = parseFloat(assertAmount(sell.amount)) * 997;
+const getReserve = (pool: Pool, first = true): number => (first
+  ? convert2Normal(pool.token1.decimals, pool.reserve1)
+  : convert2Normal(pool.token2.decimals, pool.reserve2));
 
-  const inputReserve = convert2Normal(pool.token2.decimals, pool.reserve2);
-  const outputReserve = convert2Normal(pool.token1.decimals, pool.reserve1);
+export const getOutputAmount = (token: TokenWithAmount, pool: Pool): number => {
+  const inputAmount = parseFloat(assertAmount(token.amount)) * 997;
+
+  const [inputReserve, outputReserve] = token.address === pool.token1.address
+    ? [getReserve(pool), getReserve(pool, false)]
+    : [getReserve(pool, false), getReserve(pool)];
 
   const numerator = inputAmount * outputReserve;
   const denominator = inputReserve * 1000 + inputAmount;
@@ -226,11 +231,12 @@ export const getOutputAmount = (sell: TokenWithAmount, pool: Pool): number => {
   return numerator / denominator;
 };
 
-export const getInputAmount = (buy: TokenWithAmount, pool: Pool): number => {
-  const outputAmount = parseFloat(assertAmount(buy.amount));
+export const getInputAmount = (token: TokenWithAmount, pool: Pool): number => {
+  const outputAmount = parseFloat(assertAmount(token.amount));
 
-  const inputReserve = convert2Normal(pool.token2.decimals, pool.reserve2);
-  const outputReserve = convert2Normal(pool.token1.decimals, pool.reserve1);
+  const [inputReserve, outputReserve] = token.address !== pool.token1.address
+    ? [getReserve(pool), getReserve(pool, false)]
+    : [getReserve(pool, false), getReserve(pool)];
 
   const numerator = inputReserve * outputAmount * 1000;
   const denominator = (outputReserve - outputAmount) * 997;
