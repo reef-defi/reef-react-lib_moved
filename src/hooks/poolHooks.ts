@@ -1,6 +1,9 @@
-import { gql, useQuery } from "@apollo/client";
+import { gql, useQuery, useSubscription } from "@apollo/client";
 
 // Data interfaces
+export type BasePoolTransactionTypes = 'Swap' | 'Mint' | 'Burn'
+export type TransactionTypes = BasePoolTransactionTypes | 'All'
+
 interface Supply {
   total_supply: number;
   supply: number;
@@ -53,6 +56,45 @@ interface PoolData {
   };
 }
 
+interface PoolTransaction {
+  amount_1: number;
+  amount_2: number;
+  amount_in_1: number;
+  amount_in_2: number;
+  sender_address: string;
+  to_address: string | null;
+  timestamp: string;
+  type: BasePoolTransactionTypes;
+  pool: {
+    token_contract_1: {
+      verified_contract: null | {
+        contract_data: ContractData
+      };
+    };
+    token_contract_2: {
+      verified_contract: null | {
+        contract_data: ContractData
+      };
+    };
+  };
+  evm_event: {
+    event: {
+      id: number;
+      extrinsic: {
+        hash: string;
+        signer: string;
+      };
+    };
+  };
+}
+interface PoolTransactionCount {
+  verified_pool_event_aggregate: {
+    aggregate: {
+      count: number;
+    }
+  }
+}
+
 interface PoolCount {
   verified_pool_aggregate: {
     aggregate: {
@@ -77,6 +119,7 @@ type FeeQuery = {
 type PoolQuery = { pool: PoolData[] };
 type PoolsQuery = { verified_pool: Pool[] };
 type ReservesQuery = { pool_event: Reserves[] };
+type PoolTransactionQuery = { verified_pool_event: PoolTransaction[] };
 
 // Query variable interfaces
 interface FromVar {
@@ -95,6 +138,18 @@ interface PoolVar extends FromVar {
   offset: number;
   search: { _ilike?: string };
 }
+
+interface BasicTransactionVar {
+  address: { _ilike?: string };
+  type: BasePoolTransactionTypes[]
+}
+
+interface TransactionVar extends BasicTransactionVar {
+  offset: number;
+  limit: number;
+}
+
+
 
 // Graphql statements
 const POOL_SUPPLY_GQL = gql`
@@ -229,6 +284,66 @@ const POOLS_GQL = gql`
   }
 `;
 
+
+const POOL_TRANSACTIONS_GQL = gql`
+subscription transactions($address: String_comparison_exp!, $type: [pooltype!], $offset: Int!, $limit: Int!) {
+  verified_pool_event(
+    order_by: { timestamp: desc }
+    where: {
+      pool: { address: $address }
+      type: { _in: $type }
+    }
+    limit: $limit
+    offset: $offset
+  ) {
+    amount_1
+    amount_2
+    amount_in_1
+    amount_in_2
+    sender_address
+    to_address
+    timestamp
+    type
+    pool {
+      token_contract_2 {
+        verified_contract {
+          contract_data
+        }
+      }
+      token_contract_1 {
+        verified_contract {
+          contract_data
+        }
+      }
+    }
+    evm_event {
+      event {
+        id
+        extrinsic {
+          hash
+          signer
+        }
+      }
+    }
+  }
+}
+`;
+
+const POOL_TRANSACTION_COUNT_GQL = gql`
+subscription transaction_count($address: String_comparison_exp!, $type: [pooltype]!) {
+  verified_pool_event_aggregate(
+    where: {
+      pool: { address: $address }
+      type: { _in: $type }
+    }
+  ) {
+    aggregate {
+      count
+    }
+  }
+}
+`;
+
 const POOL_COUNT_GQL = gql`
   query pool_count($search: String_comparison_exp!) {
     verified_pool_aggregate(
@@ -289,3 +404,23 @@ export const usePools = (fromTime: string, offset: number, search?: string) =>
     },
   });
 export const usePoolCount = () => useQuery<PoolCount>(POOL_COUNT_GQL);
+
+const resolveTransactionVariables = (address: string|undefined, type: TransactionTypes): BasicTransactionVar => ({
+  address: address ? { _ilike: address } : {},
+  type: (type === 'All' ? ['Swap', 'Mint', 'Burn'] : [type]),
+})
+export const usePoolTransactionCountSubscription = (address: string|undefined, type: TransactionTypes) => useSubscription<PoolTransactionCount, BasicTransactionVar>(
+  POOL_TRANSACTION_COUNT_GQL,
+  {
+    variables: resolveTransactionVariables(address, type)
+  }
+);
+export const usePoolTransactionSubscription = (address: string|undefined, type: TransactionTypes, pageIndex=0, limit=10) => useSubscription<PoolTransactionQuery, TransactionVar>(
+  POOL_TRANSACTIONS_GQL,
+  {
+    variables: {...resolveTransactionVariables(address, type),
+      limit,
+      offset: pageIndex*limit,
+    }
+  }
+)
