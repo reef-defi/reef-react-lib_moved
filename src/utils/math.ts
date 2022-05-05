@@ -297,3 +297,15 @@ export const formatAmount = (amount: number, decimals: number): string => toHuma
     decimals,
   ),
 );
+
+
+export const mean = (arr: number[]): number => arr.reduce((acc, v) => acc + v) / arr.length;
+export const variance = (arr: number[]): number => {
+  const avg = mean(arr);
+  const squareDiffs = arr.map((v) => {
+    const diff = avg - v;
+    return diff * diff;
+  });
+  return mean(squareDiffs);
+};
+export const std = (arr: number[]): number => Math.sqrt(variance(arr));

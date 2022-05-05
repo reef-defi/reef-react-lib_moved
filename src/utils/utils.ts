@@ -73,3 +73,22 @@ export const formatAgoDate = (timestamp: number|string): string => {
   }
   return date.toDateString();
 };
+
+export const dropDuplicatesMultiKey = <Obj, Key extends keyof Obj>(
+  objects: Obj[],
+  keys: Key[],
+): Obj[] => {
+  const existingKeys = new Set<string>();
+  const filtered: Obj[] = [];
+
+  for (let index = objects.length - 1; index >= 0; index -= 1) {
+    const obj = objects[index];
+    const ids = keys.map((key) => obj[key]).join(', ');
+    if (!existingKeys.has(ids)) {
+      filtered.push(obj);
+      existingKeys.add(ids);
+    }
+  }
+
+  return filtered;
+};
