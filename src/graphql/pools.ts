@@ -4,6 +4,7 @@ import { gql } from "@apollo/client";
 export type BasePoolTransactionTypes = "Swap" | "Mint" | "Burn";
 export type TransactionTypes = BasePoolTransactionTypes | "All";
 
+// Pool information interfaces
 interface Supply {
   total_supply: number;
   supply: number;
@@ -88,23 +89,30 @@ interface PoolTransaction {
   };
 }
 
+// Charts interfaces
+interface TVLData {
+  total_supply: number;
+  timeframe: string;
+}
+
+
 // Query result interfaces
-export type VolumeQuery = {
+export type PoolVolumeQuery = {
   pool_hour_volume_aggregate: { aggregate: { sum: Volume } };
 };
-export type SupplyQuery = { pool_minute_supply: Supply[] };
-export type FeeQuery = {
+export type PoolSupplyQuery = { pool_minute_supply: Supply[] };
+export type PoolFeeQuery = {
   pool_hour_fee_aggregate: {
     aggregate: {
       sum: Fee;
     };
   };
 };
-
 export type PoolQuery = { pool: PoolData[] };
 export type PoolsQuery = { verified_pool: Pool[] };
-export type ReservesQuery = { pool_event: Reserves[] };
+export type PoolReservesQuery = { pool_event: Reserves[] };
 export type PoolTransactionQuery = { verified_pool_event: PoolTransaction[] };
+export type PoolTvlQuery = { pool_hour_supply: TVLData[] };
 export type PoolTransactionCountQuery = {
   verified_pool_event_aggregate: {
     aggregate: {
@@ -121,34 +129,40 @@ export type PoolCountQuery = {
 }
 
 // Query variable interfaces
-export interface FromVar {
+interface FromVar {
   fromTime: string;
 }
-
-export interface AddressVar {
+interface AddressVar {
   address: string;
 }
-
-export interface FeeVar extends FromVar, AddressVar {}
-export interface VolumeVar extends FeeVar {
+interface ToVar {
   toTime: string;
 }
-export interface OptionalSearchVar {
+interface OptionalSearchVar {
   search: { _ilike?: string };
 }
-export interface PoolVar extends FromVar, OptionalSearchVar {
+interface OffsetVar {
   offset: number;
 }
-
-export interface BasicTransactionVar {
-  address: { _ilike?: string };
+interface LimitVar {
+  limit: number;
+}
+interface TransactionTypeVar {
   type: BasePoolTransactionTypes[];
 }
 
-export interface TransactionVar extends BasicTransactionVar {
-  offset: number;
-  limit: number;
-}
+
+export interface PoolVar extends AddressVar { }
+export interface PoolSupplyVar extends AddressVar { }
+export interface PoolReservesVar extends AddressVar { }
+export interface PoolFeeVar extends AddressVar, FromVar { }
+export interface PoolTvlVar extends AddressVar, FromVar { }
+export interface PoolCountVar extends OptionalSearchVar { }
+export interface PoolVolumeVar extends PoolFeeVar, ToVar { }
+export interface PoolsVar extends FromVar, OffsetVar, OptionalSearchVar { };
+export interface PoolBasicTransactionVar extends OptionalSearchVar, TransactionTypeVar { }
+export interface PoolTransactionCountVar extends OptionalSearchVar, TransactionTypeVar { }
+export interface PoolTransactionVar extends PoolBasicTransactionVar, OffsetVar, LimitVar { }
 
 // Graphql statements
 export const POOL_SUPPLY_GQL = gql`
@@ -331,11 +345,11 @@ export const POOL_TRANSACTIONS_GQL = gql`
 
 export const POOL_TRANSACTION_COUNT_GQL = gql`
   subscription transaction_count(
-    $address: String_comparison_exp!
+    $search: String_comparison_exp!
     $type: [pooltype]!
   ) {
     verified_pool_event_aggregate(
-      where: { pool: { address: $address }, type: { _in: $type } }
+      where: { pool: { address: $search }, type: { _in: $type } }
     ) {
       aggregate {
         count
@@ -363,3 +377,18 @@ export const POOL_COUNT_GQL = gql`
     }
   }
 `;
+
+// Charts queryes & subscriptions
+export const POOL_TVL_GQL = gql`
+query pool_supply($address: String!, $fromTime: timestamptz!) {
+  pool_hour_supply(
+    where: {
+      pool: { address: { _ilike: $address } }
+      timeframe: { _gte: $fromTime }
+    }
+    order_by: { timeframe: asc }
+  ) {
+    total_supply
+    timeframe
+  }
+}`;
