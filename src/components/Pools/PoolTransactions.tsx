@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { BasePoolTransactionTypes, TransactionTypes, usePoolTransactionCountSubscription, usePoolTransactionSubscription } from "../../hooks";
+import { BasePoolTransactionTypes, TransactionTypes } from "../../graphql/pools";
+import { usePoolTransactionCountSubscription, usePoolTransactionSubscription } from "../../hooks";
 import { formatAgoDate, formatAmount, shortAddress } from "../../utils";
 import { Card } from "../common";
 import { EmptyButton } from "../common/Button";
@@ -15,7 +16,6 @@ interface PoolTransactions {
 const PoolTransactions = ({ address, reefscanFrontendUrl } : PoolTransactions): JSX.Element => {
   const [pageIndex, setPageIndex] = useState(0);
   const [type, setType] = useState<TransactionTypes>('All');
-
 
   const { loading: loadingTransactions, data: transactionData } = usePoolTransactionSubscription(address, type, pageIndex, 10);
   const { data } = usePoolTransactionCountSubscription(address, type);
