@@ -272,3 +272,28 @@ export const getHashSumLastNr = (address: string): number => {
 
   return parseInt(summ.substring(summ.length - 1), 10);
 };
+
+export const toHumanAmount = (amount: string): string => {
+  const head = amount.slice(0, amount.indexOf('.'));
+  const amo = amount.replace('.', '');
+
+  if (head.length > 9) {
+    return `${amo.slice(0, head.length - 9)}.${amo.slice(head.length - 9, head.length - 9 + 2)} B`;
+  }
+  if (head.length > 6) {
+    return `${amo.slice(0, head.length - 6)}.${amo.slice(head.length - 6, head.length - 6 + 2)} M`;
+  }
+  if (head.length > 3) {
+    return `${amo.slice(0, head.length - 3)}.${amo.slice(head.length - 3, head.length - 3 + 2)} k`;
+  }
+  return amount.slice(0, head.length + 4);
+};
+
+export const formatAmount = (amount: number, decimals: number): string => toHumanAmount(
+  utils.formatUnits(
+    BigNumber.from(
+      amount.toLocaleString('fullwide', { useGrouping: false }),
+    ).toString(),
+    decimals,
+  ),
+);
