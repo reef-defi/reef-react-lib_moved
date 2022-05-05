@@ -1,6 +1,4 @@
 import React, { useMemo } from 'react';
-import { useQuery, gql } from '@apollo/client';
-import { Components } from '@reef-defi/react-lib';
 // @ts-ignore
 import { timeFormat } from 'd3-time-format';
 // @ts-ignore
@@ -14,41 +12,20 @@ import { SingleValueTooltip } from 'react-stockcharts/lib/tooltip';
 import './Chart.css';
 // @ts-ignore
 import { ScatterSeries, SquareMarker, LineSeries } from 'react-stockcharts/lib/series';
-import { AddressVar } from '../poolTypes';
-import {
-  dropDuplicatesMultiKey, formatAmount, std, toTimestamp,
-} from '../../../utils/utils';
+// import {
+//   dropDuplicatesMultiKey, formatAmount, std, toTimestamp,
+// } from '../../../utils/utils';
 import DefaultChart from './DefaultChart';
+import { formatAmount, std } from '../../utils/math';
+import { useHourTvl } from '../../hooks';
+import { Loading } from '../common/Loading';
+import { dropDuplicatesMultiKey } from '../../utils/utils';
 
-const { Loading } = Components.Loading;
 
 interface TVLChart {
   address: string;
 }
 
-const TVL_GQL = gql`
-query pool_supply($address: String!, $fromTime: timestamptz!) {
-  pool_hour_supply(
-    where: { 
-      pool: { address: { _ilike: $address } }
-      timeframe: { _gte: $fromTime }
-    }
-    order_by: { timeframe: asc }
-  ) {
-    total_supply
-    timeframe
-  }
-}`;
-
-interface TVLData {
-  total_supply: number;
-  timeframe: string;
-}
-
-type TVLQuery = { pool_hour_supply: TVLData[] }
-interface TVlVar extends AddressVar {
-  fromTime: string;
-}
 
 interface Data {
   amount: number;
@@ -59,15 +36,7 @@ const TVLChart = ({ address } : TVLChart): JSX.Element => {
   const toDate = useMemo(() => Date.now(), []);
   const fromDate = toDate - 50 * 60 * 60 * 1000; // last 50 hour
 
-  const { loading, data } = useQuery<TVLQuery, TVlVar>(
-    TVL_GQL,
-    {
-      variables: {
-        address,
-        fromTime: new Date(fromDate).toISOString(),
-      },
-    },
-  );
+  const { loading, data } = useHourTvl(address, fromDate)
 
   const tvl = data
     ? data.pool_hour_supply

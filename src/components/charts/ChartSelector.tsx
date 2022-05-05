@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
+import { BasicPoolInfo } from '../../state/pool';
 import FeeChart from './FeeChart';
 import TokenCandlestickChart from './TokenCandlestickChart';
 import TVLChart from './TVLChart';
-import { BasicPoolInfo } from './types';
 import VolumeChart from './VolumeChart';
 
 type ChartSwitch = 'Token 1' | 'Token 2' | 'Volume' | 'TVL' | 'Fee';
