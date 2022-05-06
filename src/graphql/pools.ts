@@ -1,8 +1,8 @@
-import { gql } from "@apollo/client";
+import { gql } from '@apollo/client';
 
 // Data interfaces
-export type BasePoolTransactionTypes = "Swap" | "Mint" | "Burn";
-export type TransactionTypes = BasePoolTransactionTypes | "All";
+export type BasePoolTransactionTypes = 'Swap' | 'Mint' | 'Burn';
+export type TransactionTypes = BasePoolTransactionTypes | 'All';
 
 // Pool information interfaces
 interface Supply {
@@ -98,7 +98,6 @@ interface TVLData {
   timeframe: string;
 }
 
-
 export interface CandlestickData {
   pool_id: number,
   timeframe: string;
@@ -122,9 +121,6 @@ interface Fee {
   fee_2: number;
   timeframe: string;
 }
-
-
-
 
 // Query result interfaces
 export type PoolQuery = { pool: PoolData[] };
@@ -187,16 +183,16 @@ interface WhichTokenVar {
   whichToken: number;
 }
 
-export interface PoolVar extends AddressVar { }
-export interface PoolSupplyVar extends AddressVar { }
-export interface PoolReservesVar extends AddressVar { }
+export type PoolVar = AddressVar
+export type PoolSupplyVar = AddressVar
+export type PoolReservesVar = AddressVar
 export interface PoolFeeVar extends AddressVar, FromVar { }
 export interface PoolTvlVar extends AddressVar, FromVar { }
-export interface PoolCountVar extends OptionalSearchVar { }
+export type PoolCountVar = OptionalSearchVar
 export interface PoolHourFeeVar extends AddressVar, FromVar { }
 export interface PoolHourVolumeVar extends AddressVar, FromVar { }
 export interface PoolVolumeAggregateVar extends PoolFeeVar, ToVar { }
-export interface PoolsVar extends FromVar, OffsetVar, OptionalSearchVar { };
+export interface PoolsVar extends FromVar, OffsetVar, OptionalSearchVar { }
 export interface PoolHourCandlestickVar extends AddressVar, FromVar, WhichTokenVar { }
 export interface PoolBasicTransactionVar extends OptionalSearchVar, TransactionTypeVar { }
 export interface PoolTransactionCountVar extends OptionalSearchVar, TransactionTypeVar { }
@@ -472,7 +468,6 @@ query candlestick($address: String!, $whichToken: Int!, $fromTime: timestamptz!)
   }
 }
 `;
-
 
 export const POOL_HOUR_FEE_SUBSCRIPTION_GQL = gql`
 subscription fee($address: String!, $fromTime: timestamptz!) {

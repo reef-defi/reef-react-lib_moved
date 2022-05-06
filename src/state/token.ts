@@ -79,7 +79,7 @@ export const createEmptyToken = (): Token => ({
   symbol: 'Select token',
 });
 
-export const createEmptyTokenWithAmount = (isEmpty=true): TokenWithAmount => ({
+export const createEmptyTokenWithAmount = (isEmpty = true): TokenWithAmount => ({
   ...createEmptyToken(),
   isEmpty,
   price: -1,

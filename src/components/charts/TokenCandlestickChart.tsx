@@ -25,7 +25,6 @@ import { std } from '../../utils/math';
 import { CandlestickData } from '../../graphql/pools';
 import { Loading } from '../common/Loading';
 
-
 interface OHLC {
   date: Date;
   open: number;
@@ -33,7 +32,6 @@ interface OHLC {
   high: number;
   low: number;
 }
-
 
 const token1Values = ({
   close_1, high_1, timeframe, low_1, open_1,

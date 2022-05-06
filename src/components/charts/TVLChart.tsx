@@ -21,11 +21,9 @@ import { useHourTvl } from '../../hooks';
 import { Loading } from '../common/Loading';
 import { dropDuplicatesMultiKey } from '../../utils/utils';
 
-
 interface TVLChart {
   address: string;
 }
-
 
 interface Data {
   amount: number;
@@ -36,7 +34,7 @@ const TVLChart = ({ address } : TVLChart): JSX.Element => {
   const toDate = useMemo(() => Date.now(), []);
   const fromDate = toDate - 50 * 60 * 60 * 1000; // last 50 hour
 
-  const { loading, data } = useHourTvl(address, fromDate)
+  const { loading, data } = useHourTvl(address, fromDate);
 
   const tvl = data
     ? data.pool_hour_supply
