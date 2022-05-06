@@ -13,7 +13,7 @@ interface PoolList {
   openPool: (address: string) => void;
 }
 
-const PoolList = ({openAddLiquidity, openPool}: PoolList): JSX.Element => {
+export const PoolList = ({openAddLiquidity, openPool}: PoolList): JSX.Element => {
   const [search, setSearch] = useState('');
   const [pageIndex, setPageIndex] = useState(0);
 
@@ -106,5 +106,3 @@ const PoolList = ({openAddLiquidity, openPool}: PoolList): JSX.Element => {
     </>
   );
 };
-
-export default PoolList;

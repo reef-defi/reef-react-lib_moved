@@ -54,7 +54,7 @@ const VolumeChart = ({
   const f = scaleOrdinal(schemeCategory10)
     .domain(set(volumeData.map((d) => d.date)));
 
-  const fill = (d: Data, i: any): any => f(i);
+  const fill = (_d: Data, i: any): any => f(i);
   return (
 
     <DefaultChart

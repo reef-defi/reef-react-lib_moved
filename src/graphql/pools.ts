@@ -350,14 +350,14 @@ export const POOLS_GQL = gql`
 
 export const POOL_TRANSACTIONS_GQL = gql`
   subscription transactions(
-    $address: String_comparison_exp!
+    $search: String_comparison_exp!
     $type: [pooltype!]
     $offset: Int!
     $limit: Int!
   ) {
     verified_pool_event(
       order_by: { timestamp: desc }
-      where: { pool: { address: $address }, type: { _in: $type } }
+      where: { pool: { address: $search }, type: { _in: $type } }
       limit: $limit
       offset: $offset
     ) {

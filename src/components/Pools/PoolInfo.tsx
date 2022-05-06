@@ -61,7 +61,7 @@ const InfoPercentageLine = ({
   </InfoLine>
 );
 
-const PoolInfo = ({
+export const PoolInfo = ({
   address, decimal1, decimal2, symbol1, symbol2, reserved1, reserved2, icon1, icon2,
 } : PoolInfo): JSX.Element => {
   const currentTime = useMemo(() => new Date(Date.now()).toISOString(), []);
@@ -169,5 +169,3 @@ const PoolInfo = ({
     </>
   );
 };
-
-export default PoolInfo;
