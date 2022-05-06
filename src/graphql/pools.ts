@@ -13,6 +13,9 @@ interface Volume {
   amount_1: number;
   amount_2: number;
 }
+interface TimeframedVolume extends Volume {
+  timeframe: string;
+}
 interface Fee {
   fee_1: number;
   fee_2: number;
@@ -96,11 +99,46 @@ interface TVLData {
 }
 
 
+export interface CandlestickData {
+  pool_id: number,
+  timeframe: string;
+  close_1: number;
+  close_2: number;
+  high_1: number;
+  high_2: number;
+  open_1: number;
+  open_2: number;
+  low_1: number;
+  low_2: number;
+  which_token: number;
+  pool: {
+    token_1: string;
+    token_2: string;
+  }
+}
+
+interface Fee {
+  fee_1: number;
+  fee_2: number;
+  timeframe: string;
+}
+
+
+
+
 // Query result interfaces
-export type PoolVolumeQuery = {
+export type PoolQuery = { pool: PoolData[] };
+export type PoolsQuery = { verified_pool: Pool[] };
+export type PoolHourFeeQuery = { pool_hour_fee: Fee[] };
+export type PoolTvlQuery = { pool_hour_supply: TVLData[] };
+export type PoolReservesQuery = { pool_event: Reserves[] };
+export type PoolSupplyQuery = { pool_minute_supply: Supply[] };
+export type PoolHourVolumeQuery = { pool_hour_volume: TimeframedVolume[] };
+export type PoolTransactionQuery = { verified_pool_event: PoolTransaction[] };
+export type PoolHourCandlestickQuery = { pool_hour_candlestick: CandlestickData[]; }
+export type PoolVolumeAggregateQuery = {
   pool_hour_volume_aggregate: { aggregate: { sum: Volume } };
 };
-export type PoolSupplyQuery = { pool_minute_supply: Supply[] };
 export type PoolFeeQuery = {
   pool_hour_fee_aggregate: {
     aggregate: {
@@ -108,11 +146,6 @@ export type PoolFeeQuery = {
     };
   };
 };
-export type PoolQuery = { pool: PoolData[] };
-export type PoolsQuery = { verified_pool: Pool[] };
-export type PoolReservesQuery = { pool_event: Reserves[] };
-export type PoolTransactionQuery = { verified_pool_event: PoolTransaction[] };
-export type PoolTvlQuery = { pool_hour_supply: TVLData[] };
 export type PoolTransactionCountQuery = {
   verified_pool_event_aggregate: {
     aggregate: {
@@ -150,7 +183,9 @@ interface LimitVar {
 interface TransactionTypeVar {
   type: BasePoolTransactionTypes[];
 }
-
+interface WhichTokenVar {
+  whichToken: number;
+}
 
 export interface PoolVar extends AddressVar { }
 export interface PoolSupplyVar extends AddressVar { }
@@ -158,12 +193,14 @@ export interface PoolReservesVar extends AddressVar { }
 export interface PoolFeeVar extends AddressVar, FromVar { }
 export interface PoolTvlVar extends AddressVar, FromVar { }
 export interface PoolCountVar extends OptionalSearchVar { }
-export interface PoolVolumeVar extends PoolFeeVar, ToVar { }
+export interface PoolHourFeeVar extends AddressVar, FromVar { }
+export interface PoolHourVolumeVar extends AddressVar, FromVar { }
+export interface PoolVolumeAggregateVar extends PoolFeeVar, ToVar { }
 export interface PoolsVar extends FromVar, OffsetVar, OptionalSearchVar { };
+export interface PoolHourCandlestickVar extends AddressVar, FromVar, WhichTokenVar { }
 export interface PoolBasicTransactionVar extends OptionalSearchVar, TransactionTypeVar { }
 export interface PoolTransactionCountVar extends OptionalSearchVar, TransactionTypeVar { }
 export interface PoolTransactionVar extends PoolBasicTransactionVar, OffsetVar, LimitVar { }
-
 // Graphql statements
 export const POOL_SUPPLY_GQL = gql`
   query pool_supply($address: String!) {
@@ -179,7 +216,7 @@ export const POOL_SUPPLY_GQL = gql`
   }
 `;
 
-export const POOL_VOLUME_GQL = gql`
+export const POOL_VOLUME_AGGREGATE_GQL = gql`
   query pool_volume(
     $address: String!
     $fromTime: timestamptz!
@@ -203,7 +240,21 @@ export const POOL_VOLUME_GQL = gql`
     }
   }
 `;
-
+export const POOL_HOUR_VOLUME_GQL = gql`
+query volume($address: String!, $fromTime: timestamptz!) {
+  pool_hour_volume(
+    where: {
+      timeframe: { _gte: $fromTime }
+      pool: { address: { _ilike: $address } }
+    }
+    order_by: { timeframe: asc }
+  ) {
+    amount_1
+    amount_2
+    timeframe
+  }
+}
+`;
 export const POOL_FEES_GQL = gql`
   query pool_fee($address: String!, $fromTime: timestamptz!) {
     pool_hour_fee_aggregate(
@@ -392,3 +443,49 @@ query pool_supply($address: String!, $fromTime: timestamptz!) {
     timeframe
   }
 }`;
+
+export const POOL_HOUR_CANDLESTICK_GQL = gql`
+query candlestick($address: String!, $whichToken: Int!, $fromTime: timestamptz!) {
+  pool_hour_candlestick(
+    order_by: { timeframe: asc }
+    where: {
+      pool: { address: { _ilike: $address } }
+      which_token: { _eq: $whichToken }
+      timeframe: { _gte: $fromTime }
+    }
+  ) {
+    pool_id
+    timeframe
+    close_1
+    close_2
+    high_1
+    high_2
+    low_1
+    low_2
+    open_1
+    open_2
+    which_token
+    pool {
+      token_1
+      token_2
+    }
+  }
+}
+`;
+
+
+export const POOL_HOUR_FEE_SUBSCRIPTION_GQL = gql`
+subscription fee($address: String!, $fromTime: timestamptz!) {
+  pool_hour_fee(
+    where: {
+      timeframe: { _gte: $fromTime }
+      pool: { address: { _ilike: $address } }
+    }
+    order_by: { timeframe: asc }
+  ) {
+    fee_1
+    fee_2
+    timeframe
+  }
+}
+`;

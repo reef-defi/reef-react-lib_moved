@@ -1,8 +1,8 @@
 import { useQuery, useSubscription } from "@apollo/client";
 import {
-  PoolVolumeQuery,
-  PoolVolumeVar,
-  POOL_VOLUME_GQL,
+  PoolVolumeAggregateQuery,
+  PoolVolumeAggregateVar,
+  POOL_VOLUME_AGGREGATE_GQL,
   TransactionTypes,
   PoolSupplyQuery,
   POOL_SUPPLY_GQL,
@@ -31,6 +31,15 @@ import {
   PoolTvlQuery,
   PoolTvlVar,
   POOL_TVL_GQL,
+  PoolHourVolumeQuery,
+  PoolHourVolumeVar,
+  POOL_HOUR_VOLUME_GQL,
+  PoolHourCandlestickQuery,
+  PoolHourCandlestickVar,
+  POOL_HOUR_CANDLESTICK_GQL,
+  PoolHourFeeQuery,
+  PoolHourFeeVar,
+  POOL_HOUR_FEE_SUBSCRIPTION_GQL,
 } from "../graphql/pools";
 
 // Intermediat query hooks
@@ -39,7 +48,7 @@ export const useDayVolume = (
   fromTime: string,
   toTime: string
 ) =>
-  useQuery<PoolVolumeQuery, PoolVolumeVar>(POOL_VOLUME_GQL, {
+  useQuery<PoolVolumeAggregateQuery, PoolVolumeAggregateVar>(POOL_VOLUME_AGGREGATE_GQL, {
     variables: {
       address,
       fromTime,
@@ -110,6 +119,36 @@ export const usePoolTransactionSubscription = (
 
 export const useHourTvl = (address: string, fromTime: number) => useQuery<PoolTvlQuery, PoolTvlVar>(
   POOL_TVL_GQL,
+  {
+    variables: {
+      address,
+      fromTime: new Date(fromTime).toISOString(),
+    }
+  }
+)
+export const useHourVolume = (address: string, fromTime: number) => useQuery<PoolHourVolumeQuery, PoolHourVolumeVar>(
+  POOL_HOUR_VOLUME_GQL,
+  {
+    variables: {
+      address,
+      fromTime: new Date(fromTime).toISOString(),
+    }
+  }
+)
+
+export const useHourCandlestick = (address: string, fromTime: number, whichToken: number) => useQuery<PoolHourCandlestickQuery, PoolHourCandlestickVar>(
+  POOL_HOUR_CANDLESTICK_GQL,
+  {
+    variables: {
+      address,
+      whichToken,
+      fromTime: new Date(fromTime).toISOString(),
+    }
+  }
+)
+
+export const useHourFeeSubscription = (address: string, fromTime: number) => useSubscription<PoolHourFeeQuery, PoolHourFeeVar>(
+  POOL_HOUR_FEE_SUBSCRIPTION_GQL,
   {
     variables: {
       address,
