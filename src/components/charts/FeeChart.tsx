@@ -1,6 +1,4 @@
 import React, { useMemo } from 'react';
-import { useQuery, useSubscription, gql } from '@apollo/client';
-import { Components } from '@reef-defi/react-lib';
 // @ts-ignore
 import { timeFormat } from 'd3-time-format';
 // @ts-ignore
@@ -18,36 +16,13 @@ import { set } from 'd3-collection';
 import { XAxis, YAxis } from 'react-stockcharts/lib/axes';
 // @ts-ignore
 import { SingleValueTooltip } from 'react-stockcharts/lib/tooltip';
-import { AddressVar, BasicVar } from '../poolTypes';
-import { formatAmount, std, toTimestamp } from '../../../utils/utils';
 import DefaultChart from './DefaultChart';
-import { BasicPoolInfo } from './types';
+import { BasicPoolInfo } from '../../state/pool';
+import { useHourFeeSubscription } from '../../hooks';
+import { Loading } from '../common/Loading';
+import { formatAmount, std } from '../../utils/math';
 
-const { Loading } = Components.Loading;
 
-const FEE_GQL = gql`
-subscription fee($address: String!, $fromTime: timestamptz!) {
-  pool_hour_fee(
-    where: { 
-      timeframe: { _gte: $fromTime }
-      pool: { address: { _ilike: $address } } 
-    }
-    order_by: { timeframe: asc }
-  ) {
-    fee_1
-    fee_2
-    timeframe
-  }
-}
-`;
-
-interface Fee {
-  fee_1: number;
-  fee_2: number;
-  timeframe: string;
-}
-
-type FeeQuery = { pool_hour_fee: Fee[] };
 
 interface Data {
   fee_1: number;
@@ -61,15 +36,7 @@ const FeeChart = ({
   const toDate = Date.now();
   const fromDate = useMemo(() => toDate - 50 * 60 * 60 * 1000, []); // last 50 hour
 
-  const { data, loading } = useSubscription<FeeQuery, BasicVar>(
-    FEE_GQL,
-    {
-      variables: {
-        address,
-        fromTime: new Date(fromDate).toISOString(),
-      },
-    },
-  );
+  const { data, loading } = useHourFeeSubscription(address, fromDate);
 
   if (loading || !data) {
     return <Loading />;

@@ -1,6 +1,4 @@
 import React, { useMemo } from 'react';
-import { useQuery, gql } from '@apollo/client';
-import { Components } from '@reef-defi/react-lib';
 // @ts-ignore
 import { timeFormat } from 'd3-time-format';
 // @ts-ignore
@@ -17,38 +15,12 @@ import { set } from 'd3-collection';
 import { XAxis, YAxis } from 'react-stockcharts/lib/axes';
 // @ts-ignore
 import { SingleValueTooltip } from 'react-stockcharts/lib/tooltip';
-import { BasicVar } from '../poolTypes';
-import {
-  dropDuplicatesMultiKey, formatAmount, std,
-} from '../../../utils/utils';
 import DefaultChart from './DefaultChart';
-import { BasicPoolInfo } from './types';
-
-const { Loading } = Components.Loading;
-
-const VOLUME_GQL = gql`
-query volume($address: String!, $fromTime: timestamptz!) {
-  pool_hour_volume(
-    where: { 
-      timeframe: { _gte: $fromTime }
-      pool: { address: { _ilike: $address } }
-    }
-    order_by: { timeframe: asc }
-  ) {
-    amount_1
-    amount_2
-    timeframe
-  }
-}
-`;
-
-interface Volume {
-  amount_1: number;
-  amount_2: number;
-  timeframe: string;
-}
-
-type VolumeQuery = { pool_hour_volume: Volume[] };
+import { useHourVolume } from '../../hooks/poolHooks';
+import { BasicPoolInfo } from '../../state/pool';
+import { dropDuplicatesMultiKey } from '../../utils/utils';
+import { Loading } from '../common/Loading';
+import { formatAmount, std } from '../../utils/math';
 
 interface Data {
   date: string;
@@ -62,15 +34,7 @@ const VolumeChart = ({
   const toDate = useMemo(() => Date.now(), []);
   const fromDate = toDate - 50 * 60 * 60 * 1000; // last 50 hour
 
-  const { data, loading } = useQuery<VolumeQuery, BasicVar>(
-    VOLUME_GQL,
-    {
-      variables: {
-        address,
-        fromTime: new Date(fromDate).toISOString(),
-      },
-    },
-  );
+  const { data, loading } = useHourVolume(address, fromDate);
 
   if (loading || !data) {
     return <Loading />;
