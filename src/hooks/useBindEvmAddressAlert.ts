@@ -8,8 +8,9 @@ export const useBindEvmAddressAlert = (
   provider: Provider | undefined,
 ): void => {
   useEffect(() => {
-    if (currentSigner && provider) {
-      bindEvmAddress(currentSigner, provider);
+    if (!currentSigner || !provider) {
+      return;
     }
-  }, [currentSigner]);
+    bindEvmAddress(currentSigner, provider);
+  }, [currentSigner, provider]);
 };

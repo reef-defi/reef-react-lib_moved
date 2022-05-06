@@ -214,11 +214,16 @@ export const ensureAmount = (token: TokenWithAmount): void => ensure(
   `Insufficient ${token.name} balance`,
 );
 
-export const getOutputAmount = (sell: TokenWithAmount, pool: Pool): number => {
-  const inputAmount = parseFloat(assertAmount(sell.amount)) * 997;
+const getReserve = (pool: Pool, first = true): number => (first
+  ? convert2Normal(pool.token1.decimals, pool.reserve1)
+  : convert2Normal(pool.token2.decimals, pool.reserve2));
 
-  const inputReserve = convert2Normal(pool.token2.decimals, pool.reserve2);
-  const outputReserve = convert2Normal(pool.token1.decimals, pool.reserve1);
+export const getOutputAmount = (token: TokenWithAmount, pool: Pool): number => {
+  const inputAmount = parseFloat(assertAmount(token.amount)) * 997;
+
+  const [inputReserve, outputReserve] = token.address === pool.token1.address
+    ? [getReserve(pool), getReserve(pool, false)]
+    : [getReserve(pool, false), getReserve(pool)];
 
   const numerator = inputAmount * outputReserve;
   const denominator = inputReserve * 1000 + inputAmount;
@@ -226,11 +231,12 @@ export const getOutputAmount = (sell: TokenWithAmount, pool: Pool): number => {
   return numerator / denominator;
 };
 
-export const getInputAmount = (buy: TokenWithAmount, pool: Pool): number => {
-  const outputAmount = parseFloat(assertAmount(buy.amount));
+export const getInputAmount = (token: TokenWithAmount, pool: Pool): number => {
+  const outputAmount = parseFloat(assertAmount(token.amount));
 
-  const inputReserve = convert2Normal(pool.token2.decimals, pool.reserve2);
-  const outputReserve = convert2Normal(pool.token1.decimals, pool.reserve1);
+  const [inputReserve, outputReserve] = token.address !== pool.token1.address
+    ? [getReserve(pool), getReserve(pool, false)]
+    : [getReserve(pool, false), getReserve(pool)];
 
   const numerator = inputReserve * outputAmount * 1000;
   const denominator = (outputReserve - outputAmount) * 997;
@@ -266,3 +272,39 @@ export const getHashSumLastNr = (address: string): number => {
 
   return parseInt(summ.substring(summ.length - 1), 10);
 };
+
+export const toHumanAmount = (amount: string): string => {
+  const head = amount.slice(0, amount.indexOf('.'));
+  const amo = amount.replace('.', '');
+
+  if (head.length > 9) {
+    return `${amo.slice(0, head.length - 9)}.${amo.slice(head.length - 9, head.length - 9 + 2)} B`;
+  }
+  if (head.length > 6) {
+    return `${amo.slice(0, head.length - 6)}.${amo.slice(head.length - 6, head.length - 6 + 2)} M`;
+  }
+  if (head.length > 3) {
+    return `${amo.slice(0, head.length - 3)}.${amo.slice(head.length - 3, head.length - 3 + 2)} k`;
+  }
+  return amount.slice(0, head.length + 4);
+};
+
+export const formatAmount = (amount: number, decimals: number): string => toHumanAmount(
+  utils.formatUnits(
+    BigNumber.from(
+      amount.toLocaleString('fullwide', { useGrouping: false }),
+    ).toString(),
+    decimals,
+  ),
+);
+
+export const mean = (arr: number[]): number => arr.reduce((acc, v) => acc + v) / arr.length;
+export const variance = (arr: number[]): number => {
+  const avg = mean(arr);
+  const squareDiffs = arr.map((v) => {
+    const diff = avg - v;
+    return diff * diff;
+  });
+  return mean(squareDiffs);
+};
+export const std = (arr: number[]): number => Math.sqrt(variance(arr));
