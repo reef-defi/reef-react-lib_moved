@@ -1,15 +1,15 @@
-import React from "react";
-import { useCurrentPoolReserve, usePoolQuery } from "../../hooks";
-import {BigNumber} from "ethers";
-import { ContentBetween, FullRow, ME } from "../common/Display";
-import { BoldText, LeadText } from "../common/Text";
-import { TokenIcon } from "../common/Icons";
-import { Button } from "../common/Button";
-import { formatAmount } from "../../utils/math";
-import { BasicPoolInfo } from "../../state/pool";
-import {PoolInfo} from "./PoolInfo";
-import ChartSelector from "../charts/ChartSelector";
-import {PoolTransactions} from "./PoolTransactions";
+import React from 'react';
+import { BigNumber } from 'ethers';
+import { useCurrentPoolReserve, usePoolQuery } from '../../hooks';
+import { ContentBetween, FullRow, ME } from '../common/Display';
+import { BoldText, LeadText } from '../common/Text';
+import { TokenIcon } from '../common/Icons';
+import { Button } from '../common/Button';
+import { formatAmount } from '../../utils/math';
+import { BasicPoolInfo } from '../../state/pool';
+import { PoolInfo } from './PoolInfo';
+import ChartSelector from '../charts/ChartSelector';
+import { PoolTransactions } from './PoolTransactions';
 
 type Open = (address1: string, address2: string) => void;
 
@@ -23,7 +23,9 @@ interface PoolPage {
   // Put images inside of the lib and make appropriate loader for them which includes icons when the app loads
   getIconUrl: (address: string) => string;
 }
-export const PoolPage = ({address, reefscanFrontendUrl, openTrade, openAddLiquidity, openRemoveLiquidity, getIconUrl}: PoolPage): JSX.Element => {
+export const PoolPage = ({
+  address, reefscanFrontendUrl, openTrade, openAddLiquidity, openRemoveLiquidity, getIconUrl,
+}: PoolPage): JSX.Element => {
   const { data: poolData } = usePoolQuery(address);
   const { data: reservesData } = useCurrentPoolReserve(address);
 
@@ -88,7 +90,6 @@ export const PoolPage = ({address, reefscanFrontendUrl, openTrade, openAddLiquid
       .div(BigNumber.from(BigNumber.from(reservesData.pool_event[0].reserved_2.toLocaleString('fullwide', { useGrouping: false }))))
       .toNumber() / 1000
     : -1;
-
 
   return (
 
@@ -191,7 +192,7 @@ export const PoolPage = ({address, reefscanFrontendUrl, openTrade, openAddLiquid
           </div>
         </div>
 
-        <PoolTransactions address={address} reefscanFrontendUrl={reefscanFrontendUrl}/>
+        <PoolTransactions address={address} reefscanFrontendUrl={reefscanFrontendUrl} />
       </div>
     </div>
   );

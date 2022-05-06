@@ -1,19 +1,19 @@
-import React, { useMemo, useState } from "react";
-import { usePoolCount, usePools } from "../../hooks";
-import { formatAmount } from "../../utils/math";
-import { Button, EmptyButton } from "../common/Button";
-import { Card } from "../common/Card";
-import { ContentBetween, MT } from "../common/Display";
-import { Input } from "../common/Input";
-import { Loading } from "../common/Loading";
-import { BoldText } from "../common/Text";
+import React, { useMemo, useState } from 'react';
+import { usePoolCount, usePools } from '../../hooks';
+import { formatAmount } from '../../utils/math';
+import { Button, EmptyButton } from '../common/Button';
+import { Card } from '../common/Card';
+import { ContentBetween, MT } from '../common/Display';
+import { Input } from '../common/Input';
+import { Loading } from '../common/Loading';
+import { BoldText } from '../common/Text';
 
 interface PoolList {
   openAddLiquidity: () => void;
   openPool: (address: string) => void;
 }
 
-export const PoolList = ({openAddLiquidity, openPool}: PoolList): JSX.Element => {
+export const PoolList = ({ openAddLiquidity, openPool }: PoolList): JSX.Element => {
   const [search, setSearch] = useState('');
   const [pageIndex, setPageIndex] = useState(0);
 

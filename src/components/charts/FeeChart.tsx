@@ -22,8 +22,6 @@ import { useHourFeeSubscription } from '../../hooks';
 import { Loading } from '../common/Loading';
 import { formatAmount, std } from '../../utils/math';
 
-
-
 interface Data {
   fee_1: number;
   fee_2: number;

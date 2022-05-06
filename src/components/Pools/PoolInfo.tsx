@@ -1,9 +1,11 @@
-import React, { useMemo } from "react";
-import { useCurrentPoolSupply, useDayFee, useDayVolume } from "../../hooks";
-import { formatAmount } from "../../utils";
-import { Icons, Card } from "../common";
-import { FullRow, ContentBetween, ME, MT } from "../common/Display";
-import { BoldText, ColorText, Text } from "../common/Text";
+import React, { useMemo } from 'react';
+import { useCurrentPoolSupply, useDayFee, useDayVolume } from '../../hooks';
+import { formatAmount } from '../../utils';
+import { Icons, Card } from '../common';
+import {
+  FullRow, ContentBetween, ME, MT,
+} from '../common/Display';
+import { BoldText, ColorText, Text } from '../common/Text';
 
 interface PoolInfo {
   icon1: string;

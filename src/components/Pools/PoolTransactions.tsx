@@ -1,12 +1,12 @@
-import React, { useState } from "react";
-import { BasePoolTransactionTypes, TransactionTypes } from "../../graphql/pools";
-import { usePoolTransactionCountSubscription, usePoolTransactionSubscription } from "../../hooks";
-import { formatAgoDate, formatAmount, shortAddress } from "../../utils";
-import { Card } from "../common";
-import { EmptyButton } from "../common/Button";
-import { MT } from "../common/Display";
-import { Loading } from "../common/Loading";
-import { BoldText } from "../common/Text";
+import React, { useState } from 'react';
+import { BasePoolTransactionTypes, TransactionTypes } from '../../graphql/pools';
+import { usePoolTransactionCountSubscription, usePoolTransactionSubscription } from '../../hooks';
+import { formatAgoDate, formatAmount, shortAddress } from '../../utils';
+import { Card } from '../common';
+import { EmptyButton } from '../common/Button';
+import { MT } from '../common/Display';
+import { Loading } from '../common/Loading';
+import { BoldText } from '../common/Text';
 
 interface PoolTransactions {
   address?: string;
@@ -118,4 +118,3 @@ export const PoolTransactions = ({ address, reefscanFrontendUrl } : PoolTransact
     </>
   );
 };
-

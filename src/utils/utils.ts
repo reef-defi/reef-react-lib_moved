@@ -18,7 +18,6 @@ export const shortAddress = (address: string): string => (address.length > 10
   ? `${address.slice(0, 5)}...${address.slice(address.length - 5, address.length)}`
   : address);
 
-
 export const ensure = (condition: boolean, message: string): void => {
   if (!condition) {
     throw new Error(message);
