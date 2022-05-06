@@ -57,10 +57,8 @@ export const useLoadSigners = (
           code: 1,
           ...installExtensionMessage,
         });
-        setIsLoading(false);
         return;
       }
-
       const web3accounts = await web3Accounts();
       if (web3accounts.length < 1) {
         setError({
@@ -68,7 +66,6 @@ export const useLoadSigners = (
           message:
             'App requires at least one account in browser extension. Please create or import account/s and refresh the page.',
         });
-        setIsLoading(false);
         return;
       }
 

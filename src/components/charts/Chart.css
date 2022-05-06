@@ -1,0 +1,8 @@
+
+.react-stockcharts-tooltip-label {
+  display: none;
+}
+.react-stockcharts-tooltip {
+  cursor: none !important;  
+  pointer-events: none !important;
+}

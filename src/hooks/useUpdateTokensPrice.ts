@@ -1,6 +1,5 @@
 import { Signer } from '@reef-defi/evm-provider';
 import { useEffect, useRef, useState } from 'react';
-import { BigNumber } from 'ethers';
 import { retrieveReefCoingeckoPrice } from '../api';
 import { loadPool } from '../rpc';
 import {
@@ -50,32 +49,28 @@ export const useUpdateTokensPrice = ({
         mounted.current = true;
         setIsLoading(true);
         const reefPrice = await retrieveReefCoingeckoPrice();
-
-        // const baseRatio = poolRatio(pool);
+        const baseRatio = poolRatio(pool);
         if (token1.address === REEF_TOKEN.address) {
-          const ratio = BigNumber.from(pool.reserve1).mul(1000000).div(pool.reserve2).toNumber() / 1000000;
-          updateTokens(reefPrice, reefPrice * ratio);
+          updateTokens(reefPrice, reefPrice / baseRatio);
         } else if (token2.address === REEF_TOKEN.address) {
-          const ratio = BigNumber.from(pool.reserve2).mul(1000000).div(pool.reserve1).toNumber() / 1000000;
-          updateTokens(reefPrice * ratio, reefPrice);
+          updateTokens(reefPrice, reefPrice * baseRatio);
         } else {
+          // const sellPool = await poolContract(tokens[0], token1, signer, settings);
           const sellPool = await loadPool(
             tokens[0],
             token1,
             signer,
             factoryAddress,
           );
-
-          const ratio = BigNumber.from(pool.reserve1).mul(1000000).div(pool.reserve2).toNumber() / 1000000;
           const sellRatio = poolRatio(sellPool);
           updateTokens(
-            reefPrice * sellRatio,
-            reefPrice * sellRatio * ratio,
+            reefPrice / sellRatio,
+            (reefPrice / sellRatio) * baseRatio,
           );
         }
       } catch (error) {
         console.error(error);
-        updateTokens(1, 1);
+        updateTokens(0, 0);
       } finally {
         ensureMount(setIsLoading, false);
       }
