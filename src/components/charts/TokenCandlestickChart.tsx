@@ -1,8 +1,6 @@
 import React, { useMemo } from 'react';
-import { useSubscription, useQuery, gql } from '@apollo/client';
-import { Components } from '@reef-defi/react-lib/';
 
-import { utcDay, utcMinute, utcHour } from 'd3-time';
+import { utcHour } from 'd3-time';
 // @ts-ignore
 import { timeFormat } from 'd3-time-format';
 // @ts-ignore
@@ -21,37 +19,12 @@ import { SingleValueTooltip } from 'react-stockcharts/lib/tooltip';
 // @ts-ignore
 import { timeIntervalBarWidth } from 'react-stockcharts/lib/utils';
 import DefaultChart from './DefaultChart';
-import { dropDuplicatesMultiKey, std } from '../../../utils/utils';
+import { useHourCandlestick } from '../../hooks';
+import { dropDuplicatesMultiKey } from '../../utils/utils';
+import { std } from '../../utils/math';
+import { CandlestickData } from '../../graphql/pools';
+import { Loading } from '../common/Loading';
 
-const { Loading } = Components.Loading;
-
-interface CandlestickData {
-  pool_id: number,
-  timeframe: string;
-  close_1: number;
-  close_2: number;
-  high_1: number;
-  high_2: number;
-  open_1: number;
-  open_2: number;
-  low_1: number;
-  low_2: number;
-  which_token: number;
-  pool: {
-    token_1: string;
-    token_2: string;
-  }
-}
-
-interface CandlestickQuery {
-  pool_hour_candlestick: CandlestickData[];
-}
-
-interface CandlestickVar {
-  address: string;
-  whereToken: number;
-  fromTime: string;
-}
 
 interface OHLC {
   date: Date;
@@ -61,34 +34,6 @@ interface OHLC {
   low: number;
 }
 
-const DAY_CANDLESTICK_GQL = gql`
-query candlestick($address: String!, $whereToken: Int!, $fromTime: timestamptz!) {
-  pool_hour_candlestick(
-    order_by: { timeframe: asc }
-    where: { 
-      pool: { address: { _ilike: $address } } 
-      which_token: { _eq: $whereToken }
-      timeframe: { _gte: $fromTime }
-    }
-  ) {
-    pool_id
-    timeframe
-    close_1
-    close_2
-    high_1
-    high_2
-    low_1
-    low_2
-    open_1
-    open_2
-    which_token
-    pool {
-      token_1
-      token_2
-    }
-  }
-}
-`;
 
 const token1Values = ({
   close_1, high_1, timeframe, low_1, open_1,
@@ -118,16 +63,7 @@ const TokenCandlestickChart = ({ whichToken, address } : TokenCandlestickChart):
   const toDate = useMemo(() => Date.now(), []);
   const fromDate = toDate - 50 * 60 * 60 * 1000; // last 50 hour
 
-  const { loading, data, error } = useQuery<CandlestickQuery, CandlestickVar>(
-    DAY_CANDLESTICK_GQL,
-    {
-      variables: {
-        address,
-        whereToken: whichToken,
-        fromTime: new Date(fromDate).toISOString(),
-      },
-    },
-  );
+  const { loading, data } = useHourCandlestick(address, fromDate, whichToken);
 
   const candlestick = data
     ? data.pool_hour_candlestick
