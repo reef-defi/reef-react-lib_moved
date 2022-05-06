@@ -55,7 +55,7 @@ const FeeChart = ({
   const f = scaleOrdinal(schemeCategory10)
     .domain(set(feeData.map((d) => d.timeframe)));
 
-  const fill = (d: Data, i: any): any => f(i);
+  const fill = (_d: Data, i: any): any => f(i);
   return (
     <DefaultChart
       data={feeData}

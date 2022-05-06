@@ -13,7 +13,7 @@ interface PoolTransactions {
   reefscanFrontendUrl: string;
 }
 
-const PoolTransactions = ({ address, reefscanFrontendUrl } : PoolTransactions): JSX.Element => {
+export const PoolTransactions = ({ address, reefscanFrontendUrl } : PoolTransactions): JSX.Element => {
   const [pageIndex, setPageIndex] = useState(0);
   const [type, setType] = useState<TransactionTypes>('All');
 
@@ -21,7 +21,7 @@ const PoolTransactions = ({ address, reefscanFrontendUrl } : PoolTransactions): 
   const { data } = usePoolTransactionCountSubscription(address, type);
 
   const maxPage = data
-    ? Math.round(data.verified_pool_event_aggregate.aggregate.count / 10)
+    ? Math.ceil(data.verified_pool_event_aggregate.aggregate.count / 10)
     : 1;
 
   const nextPage = (): void => setPageIndex(Math.min(maxPage - 1, pageIndex + 1));
@@ -119,4 +119,3 @@ const PoolTransactions = ({ address, reefscanFrontendUrl } : PoolTransactions): 
   );
 };
 
-export default PoolTransactions;

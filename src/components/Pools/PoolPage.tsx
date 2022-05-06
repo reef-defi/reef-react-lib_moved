@@ -7,9 +7,9 @@ import { TokenIcon } from "../common/Icons";
 import { Button } from "../common/Button";
 import { formatAmount } from "../../utils/math";
 import { BasicPoolInfo } from "../../state/pool";
-import PoolInfo from "./PoolInfo";
+import {PoolInfo} from "./PoolInfo";
 import ChartSelector from "../charts/ChartSelector";
-import PoolTransactions from "./PoolTransactions";
+import {PoolTransactions} from "./PoolTransactions";
 
 type Open = (address1: string, address2: string) => void;
 
@@ -23,7 +23,7 @@ interface PoolPage {
   // Put images inside of the lib and make appropriate loader for them which includes icons when the app loads
   getIconUrl: (address: string) => string;
 }
-const PoolPage = ({address, reefscanFrontendUrl, openTrade, openAddLiquidity, openRemoveLiquidity, getIconUrl}: PoolPage): JSX.Element => {
+export const PoolPage = ({address, reefscanFrontendUrl, openTrade, openAddLiquidity, openRemoveLiquidity, getIconUrl}: PoolPage): JSX.Element => {
   const { data: poolData } = usePoolQuery(address);
   const { data: reservesData } = useCurrentPoolReserve(address);
 
@@ -198,4 +198,4 @@ const PoolPage = ({address, reefscanFrontendUrl, openTrade, openAddLiquidity, op
 };
 
 // These needs to be removed
-export default PoolPage;
+// export default PoolPage;
