@@ -14,6 +14,10 @@ export const trim = (value: string, size = 19): string => (value.length < size
 
 export const toAddressShortDisplay = (address: string): string => trim(address, 7);
 
+export const shortAddress = (address: string): string => (address.length > 10
+  ? `${address.slice(0, 5)}...${address.slice(address.length - 5, address.length)}`
+  : address);
+
 export const ensure = (condition: boolean, message: string): void => {
   if (!condition) {
     throw new Error(message);
@@ -51,3 +55,39 @@ export const ensureVoidRun = (canRun: boolean) => <I>(fun: (obj: I) => void, obj
 };
 
 export const removeUndefinedItem = <Type, >(item: (Type|undefined)): item is Type => item !== undefined;
+
+export const formatAgoDate = (timestamp: number|string): string => {
+  const now = new Date(Date.now());
+  const date = new Date(timestamp);
+
+  const difference = now.getTime() - date.getTime();
+  if (difference < 1000 * 60) {
+    return `${Math.round(difference / 1000)}sec ago`;
+  }
+  if (difference < 1000 * 60 * 60) {
+    return `${Math.round(difference / 60000)}min ago`;
+  }
+  if (difference < 1000 * 60 * 60 * 24) {
+    return `${Math.round(difference / 3600000)}h ago`;
+  }
+  return date.toDateString();
+};
+
+export const dropDuplicatesMultiKey = <Obj, Key extends keyof Obj>(
+  objects: Obj[],
+  keys: Key[],
+): Obj[] => {
+  const existingKeys = new Set<string>();
+  const filtered: Obj[] = [];
+
+  for (let index = objects.length - 1; index >= 0; index -= 1) {
+    const obj = objects[index];
+    const ids = keys.map((key) => obj[key]).join(', ');
+    if (!existingKeys.has(ids)) {
+      filtered.push(obj);
+      existingKeys.add(ids);
+    }
+  }
+
+  return filtered;
+};
