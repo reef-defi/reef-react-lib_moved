@@ -205,7 +205,7 @@ export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindCom
                     className="btn btn-reef btn-lg border-rad"
                     onClick={() => transfer(transferBalanceFrom, bindSigner, MIN_BALANCE, getUpdateTxCallback([onTxUpdate as TxStatusHandler, setTxStatus]))}
                   >
-                    Continue
+                    <span>Continue</span>
                   </button>
                 </div>
                 )}
@@ -220,7 +220,7 @@ export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindCom
                   className="btn btn-reef btn-lg border-rad"
                   onClick={() => bindAccount(getUpdateTxCallback([onTxUpdate as TxStatusHandler, setTxStatus]))}
                 >
-                  Continue
+                  <span>Continue</span>
                 </button>
               </div>
               )}
