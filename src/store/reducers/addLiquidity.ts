@@ -13,6 +13,7 @@ import {
   SET_LOADING,
   SET_NEW_POOL_SUPPLY,
   SET_POOL,
+  SET_SETTINGS,
   SET_STATUS,
   SET_TOKEN1,
   SET_TOKEN1_AMOUNT,
@@ -44,8 +45,8 @@ export const initialAddLiquidityState: AddLiquidityState = {
   token2: createEmptyTokenWithAmount(),
 };
 
-const calculateOtherAmount = (amount: string, first: boolean, pool?: Pool): string => {
-  if (!pool || !amount) { return ''; }
+const calculateOtherAmount = (amount: string, currentAmount: string, first: boolean, pool?: Pool): string => {
+  if (!pool || !amount || !pool) { return currentAmount; }
 
   const [r1, r2] = first
     ? [pool.reserve1, pool.reserve2]
@@ -74,12 +75,12 @@ export const addLiquidityReducer = (
     case SET_TOKEN1_AMOUNT:
       return {...state,
         token1: {...token1, amount: action.amount},
-        token2: {...token2, amount: calculateOtherAmount(action.amount, true, pool)},
+        token2: {...token2, amount: calculateOtherAmount(action.amount, token2.amount, true, pool)},
       };
     case SET_TOKEN2_AMOUNT:
       return {...state,
         token2: {...token2, amount: action.amount},
-        token1: {...token1, amount: calculateOtherAmount(action.amount, false, pool)},
+        token1: {...token1, amount: calculateOtherAmount(action.amount, token1.amount, false, pool)},
       };
     case SET_STATUS:
       return { ...state, status: action.status };
@@ -91,6 +92,8 @@ export const addLiquidityReducer = (
       return {...state, pool: action.pool};
     case SET_NEW_POOL_SUPPLY:
       return {...state, newPoolSupply: action.supply};
+    case SET_SETTINGS:
+      return {...state, settings: {...action.settings}};
     case CLEAR_TOKEN_AMOUNTS:
       return {...state,
         token1: {...token1, amount: ''},
