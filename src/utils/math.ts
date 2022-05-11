@@ -214,8 +214,8 @@ export const ensureAmount = (token: TokenWithAmount): void => ensure(
   `Insufficient ${token.name} balance`,
 );
 
-export const getOutputAmount = (sell: TokenWithAmount, pool: Pool): number => {
-  const inputAmount = parseFloat(assertAmount(sell.amount)) * 997;
+export const getOutputAmount = (token: TokenWithAmount, pool: Pool): number => {
+  const inputAmount = parseFloat(assertAmount(token.amount)) * 997;
 
   const inputReserve = convert2Normal(pool.token2.decimals, pool.reserve2);
   const outputReserve = convert2Normal(pool.token1.decimals, pool.reserve1);
