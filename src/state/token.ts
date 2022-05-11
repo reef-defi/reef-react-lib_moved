@@ -72,7 +72,7 @@ export const defaultTokenState = (index = 0): TokenState => ({
 
 export const createEmptyToken = (): Token => ({
   name: 'Select token',
-  address: '',
+  address: '0x',
   balance: BigNumber.from('0'),
   decimals: -1,
   iconUrl: '',
