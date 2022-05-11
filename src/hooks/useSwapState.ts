@@ -12,10 +12,8 @@ import {
   Token,
   TokenWithAmount
 } from "../state";
-import {
-  clearTokenAmountsAction,
-  setCompleteStatusAction, setLoadingAction, setPoolAction, setStatusAction, setToken1Action, setToken2Action, SwapAction
-} from "../store/actions/swap";
+import { SwapAction } from "../store";
+import { setToken2Action, setToken1Action, setPoolAction, setCompleteStatusAction, setLoadingAction, setStatusAction, clearTokenAmountsAction } from "../store/actions/defaultActions";
 import { SwapState } from "../store/reducers/swap";
 import {
   ButtonStatus,
@@ -150,7 +148,6 @@ export const useSwapState = ({
   }, [loadedPool]);
 
   useEffect(() => {
-    console.log("Callback triggered!");
     let [currentStatus, currentIsValid, currentIsLoading] = [
       "",
       isValid,
@@ -173,7 +170,6 @@ export const useSwapState = ({
       currentIsValid = isValid;
       currentIsLoading = false;
     }
-    console.log("Callback: ", currentStatus);
     dispatch(
       setCompleteStatusAction(currentStatus, currentIsValid, currentIsLoading)
     );
