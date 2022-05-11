@@ -1,9 +1,5 @@
 import { BigNumber } from "ethers";
-import { Dispatch, useCallback } from "react";
-import { useLoadPool } from "./useLoadPool";
-import { useUpdateSwapAmount } from "./useUpdateAmount";
-import { useUpdateBalance } from "./useUpdateBalance";
-import { useUpdateTokensPrice } from "./useUpdateTokensPrice";
+import { Dispatch, useEffect } from "react";
 import { approveTokenAmount, getReefswapRouter } from "../rpc";
 import {
   ensureTokenAmount,
@@ -14,8 +10,12 @@ import {
   resolveSettings,
   Settings,
   Token,
-  TokenWithAmount,
+  TokenWithAmount
 } from "../state";
+import {
+  clearTokenAmountsAction,
+  setCompleteStatusAction, setLoadingAction, setPoolAction, setStatusAction, setToken1Action, setToken2Action, SwapAction
+} from "../store/actions/swap";
 import { SwapState } from "../store/reducers/swap";
 import {
   ButtonStatus,
@@ -23,18 +23,13 @@ import {
   calculateAmountWithPercentage,
   calculateDeadline,
   convert2Normal,
-  ensure,
+  ensure
 } from "../utils";
-import {
-  setToken2Action,
-  setPoolAction,
-  setToken1Action,
-  setCompleteStatusAction,
-  SwapAction,
-  setLoadingAction,
-  setStatusAction,
-} from "../store/actions/swap";
+import { useLoadPool } from "./useLoadPool";
 import { useTokensFinder } from "./useTokensFinder";
+import { useUpdateSwapAmount } from "./useUpdateAmount";
+import { useUpdateBalance } from "./useUpdateBalance";
+import { useUpdateTokensPrice } from "./useUpdateTokensPrice";
 
 const swapStatus = (
   sell: TokenWithAmount,
@@ -148,12 +143,14 @@ export const useSwapState = ({
     setToken1: setSell,
     setToken2: setBuy,
   });
-  useCallback(() => {
+  useEffect(() => {
     if (loadedPool) {
       dispatch(setPoolAction(loadedPool));
     }
   }, [loadedPool]);
-  useCallback(() => {
+
+  useEffect(() => {
+    console.log("Callback triggered!");
     let [currentStatus, currentIsValid, currentIsLoading] = [
       "",
       isValid,
@@ -176,10 +173,11 @@ export const useSwapState = ({
       currentIsValid = isValid;
       currentIsLoading = false;
     }
+    console.log("Callback: ", currentStatus);
     dispatch(
       setCompleteStatusAction(currentStatus, currentIsValid, currentIsLoading)
     );
-  }, [sell, buy, account?.isEvmClaimed, pool, isPoolLoading, isPriceLoading]);
+  }, [sell, buy, sell.amount, buy.amount, account?.isEvmClaimed, pool, isPoolLoading, isPriceLoading]);
 };
 
 interface OnSwap {
@@ -231,6 +229,6 @@ export const onSwap =
         )
       );
       dispatch(setLoadingAction(false));
-      dispatch(setStatusAction(""));
+      dispatch(clearTokenAmountsAction());
     }
   };

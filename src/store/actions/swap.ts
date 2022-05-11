@@ -1,5 +1,6 @@
 import { createEmptyTokenWithAmount, Pool, Settings, Token, TokenWithAmount } from "../../state";
 import {
+  CLEAR_TOKEN_AMOUNTS,
   SET_COMPLETE_STATUS, SET_FOCUS, SET_LOADING, SET_POOL, SET_SETTINGS, SET_STATUS, SET_TOKEN1, SET_TOKEN1_AMOUNT, SET_TOKEN2, SET_TOKEN2_AMOUNT, SET_VALIDITY, SWITCH_TOKENS
 } from "../actionTypes";
 
@@ -31,7 +32,7 @@ type SwitchTokens = {
 };
 type SetPool = {
   type: typeof SET_POOL;
-  pool: Pool;
+  pool?: Pool;
 };
 type SetLoading = {
   type: typeof SET_LOADING;
@@ -51,6 +52,9 @@ type SetValidity = {
   type: typeof SET_VALIDITY;
   isValid: boolean;
 }
+type ClearTokenAmounts = {
+  type: typeof CLEAR_TOKEN_AMOUNTS;
+}
 
 export type SwapAction =
   | SetToken2
@@ -64,10 +68,11 @@ export type SwapAction =
   | SwitchTokens
   | SetToken2Amount
   | SetCompleteStatus
+  | ClearTokenAmounts
   | SetToken1Amount;
 
 // Action creators
-export const setPoolAction = (pool: Pool): SetPool => ({
+export const setPoolAction = (pool?: Pool): SetPool => ({
   pool,
   type: SET_POOL,
 });
@@ -116,6 +121,10 @@ export const setValidityAction = (isValid: boolean): SetValidity => ({
   type: SET_VALIDITY,
   isValid,
 });
+export const clearTokenAmountsAction = (): ClearTokenAmounts => ({
+  type: CLEAR_TOKEN_AMOUNTS,
+});
+
 
 export interface SwapComponentActions {
   onSwap: () => Promise<void>;
