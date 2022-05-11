@@ -49,7 +49,7 @@ const COMMON_BASES = ['0x0000000000000000000000000000000001000000'];
 
 const emptyFunction = async (): Promise<void> => {};
 
-const SelectToken = ({
+export const SelectToken = ({
   id = 'exampleModal',
   tokens,
   selectedTokenName,
@@ -199,5 +199,3 @@ const SelectToken = ({
     </div>
   );
 };
-
-export default SelectToken;
