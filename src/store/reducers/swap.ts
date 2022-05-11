@@ -1,7 +1,7 @@
 import { Settings, TokenWithAmount, defaultSettings, reefTokenWithAmount, createEmptyTokenWithAmount, Pool } from "../../state";
 import { getInputAmount, getOutputAmount } from "../../utils";
 import { SwapAction, SwapFocus } from "../actions/swap";
-import { SET_TOKEN2_AMOUNT, SET_LOADING, SET_POOL, SET_TOKEN1, SET_STATUS, SET_VALIDITY, SWITCH_TOKENS, SET_TOKEN2, SET_TOKEN1_AMOUNT, SET_COMPLETE_STATUS } from "../actionTypes";
+import { SET_TOKEN2_AMOUNT, SET_LOADING, SET_POOL, SET_TOKEN1, SET_STATUS, SET_VALIDITY, SWITCH_TOKENS, SET_TOKEN2, SET_TOKEN1_AMOUNT, SET_COMPLETE_STATUS, CLEAR_TOKEN_AMOUNTS } from "../actionTypes";
 
 export interface SwapState {
   status: string;
@@ -21,35 +21,35 @@ export const initialSwapState: SwapState = {
   isValid: false,
   isLoading: false,
   settings: defaultSettings(),
-  token1: reefTokenWithAmount(), // sell token
-  token2: createEmptyTokenWithAmount(), // buy token
+  token1: reefTokenWithAmount(), // token1 token
+  token2: createEmptyTokenWithAmount(), // token2 token
 }
 
 export const swapReducer = (state=initialSwapState, action: SwapAction): SwapState => {
-  const {token1: sell, token2: buy, pool, focus} = state;
+  const {token1, token2, pool, focus} = state;
   switch(action.type) {
     case SET_TOKEN1_AMOUNT: return {...state,
         focus: 'sell',
-        token1: {...sell, amount: action.amount},
-        token2: {...buy,
+        token1: {...token1, amount: action.amount},
+        token2: {...token2,
           amount: pool && action.amount
-            ? getOutputAmount({...sell, amount: action.amount}, pool).toFixed(4)
+            ? getOutputAmount({...token1, amount: action.amount}, pool).toFixed(4)
             : ''
         }
       };
     case SET_TOKEN2_AMOUNT: return {...state,
       focus: 'buy',
-      token2: {...buy, amount: action.amount},
-      token1: {...sell,
+      token2: {...token2, amount: action.amount},
+      token1: {...token1,
         amount: pool && action.amount
-          ? getInputAmount({...buy, amount: action.amount}, pool).toFixed(4)
+          ? getInputAmount({...token2, amount: action.amount}, pool).toFixed(4)
           : ''
       }
     }
     case SWITCH_TOKENS: return {...state,
-      token1: {...buy},
-      token2: {...sell},
-      focus: focus === 'buy' ? 'sell' : 'buy',
+      token1: {...token2},
+      token2: {...token1},
+      focus: focus === 'sell' ? 'buy' : 'sell',
     }
     case SET_TOKEN1: return {...state,
       token1: {...createEmptyTokenWithAmount(false), ...action.token},
@@ -65,6 +65,10 @@ export const swapReducer = (state=initialSwapState, action: SwapAction): SwapSta
       isLoading: action.isLoading,
       isValid: action.isValid,
       status: action.status,
+    };
+    case CLEAR_TOKEN_AMOUNTS: return {...state,
+      token1: {...token1, amount: ''},
+      token2: {...token2, amount: ''},
     }
     default: return state;
   }
