@@ -13,3 +13,4 @@ export * from './useAllTokens';
 export * from './poolHooks';
 export * from "./useSwapState";
 export * from './useAddLiquidity';
+export * from './useRemoveLiquidity';
