@@ -9,7 +9,7 @@ import {
 } from '../common/Display';
 import { InputAmount } from '../common/Input';
 import { ColorText, MiniText } from '../common/Text';
-import SelectToken from '../SelectToken';
+import {SelectToken} from '../SelectToken';
 import { getData } from '../../utils';
 
 interface TokenAmountFieldProps {
