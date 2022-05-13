@@ -103,7 +103,7 @@ export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindCom
           </CardHeader>
           <SubCard>
             <p>
-              Creating Ethereum VM address for
+              Creating Ethereum VM address for&nbsp;
               {bindFor.name}
               <MiniText>
                 (
@@ -215,7 +215,6 @@ export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindCom
               {(!txStatus) && hasBalanceForBinding(bindFor.balance)
               && (
               <div>
-                <p>Account is ready to create Ethereum VM address.</p>
                 <button
                   type="button"
                   className="btn btn-reef btn-lg border-rad"
