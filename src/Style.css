@@ -219,10 +219,3 @@ input[type="range"]::-webkit-slider-thumb {
   transition: none;
   filter: brightness(1.2);
 }
-
-.selected-topic {
-  color: #111
-}
-.unselected-topic {
-  color: #666;
-}
