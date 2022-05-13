@@ -1,8 +1,8 @@
-import { Provider, Signer } from "@reef-defi/evm-provider";
+import { Provider, Signer } from '@reef-defi/evm-provider';
 import type {
   InjectedExtension,
   InjectedAccountWithMeta,
-} from "@polkadot/extension-inject/types";
+} from '@polkadot/extension-inject/types';
 import type {
   InjectedAccount,
   InjectedAccountWithMeta as InjectedAccountWithMetaReef,
@@ -12,19 +12,19 @@ import type { Signer as InjectedSigner } from "@polkadot/api/types";
 import { DeriveBalancesAccountData } from "@polkadot/api-derive/balances/types";
 import { BigNumber } from "ethers";
 // import { firstValueFrom } from 'rxjs';
-import { web3FromSource } from "@reef-defi/extension-dapp";
-import { ensure, removeUndefinedItem } from "../utils/utils";
-import { ReefSigner } from "../state/types";
+import { web3FromSource } from '@reef-defi/extension-dapp';
+import { ensure, removeUndefinedItem } from '../utils/utils';
+import { ReefSigner } from '../state/types';
 // import { selectedSigner$ } from '../appState/accountState';
 
 const accountSourceSigners = new Map<string, InjectedSigner>();
 const getAccountInjectedSigner = async (
-  source: string
+  source: string,
 ): Promise<InjectedSigner | undefined> => {
   if (!accountSourceSigners.has(source)) {
     const signer = await web3FromSource(source)
       .then((injected) => injected?.signer)
-      .catch((err) => console.error("getAccountSigner error =", err));
+      .catch((err) => console.error('getAccountSigner error =', err));
     if (signer) {
       accountSourceSigners.set(source, signer);
     }
@@ -36,7 +36,7 @@ export const getAccountSigner = async (
   address: string,
   source: string,
   provider: Provider,
-  injSigner?: InjectedSigner
+  injSigner?: InjectedSigner,
 ): Promise<Signer | undefined> => {
   const iSigner = injSigner || (await getAccountInjectedSigner(source));
   return iSigner ? new Signer(provider, address, iSigner) : undefined;
@@ -63,8 +63,10 @@ interface SignerInfo {
 const signerToReefSigner = async (
   signer: Signer,
   provider: Provider,
-  {address, name, source, genesisHash}: SignerInfo
-) => {
+  {
+    address, name, source, genesisHash,
+  }: SignerInfo,
+): Promise<ReefSigner> => {
   const evmAddress = await signer.getAddress();
   const isEvmClaimed = await signer.isClaimed();
 
@@ -85,14 +87,14 @@ const signerToReefSigner = async (
 export const metaAccountToSigner = async (
   account: InjectedAccountWithMeta | InjectedAccountWithMetaReef,
   provider: Provider,
-  injSigner: InjectedSigner
+  injSigner: InjectedSigner,
 ): Promise<ReefSigner | undefined> => {
   const { source } = account.meta;
   const signer = await getAccountSigner(
     account.address,
     source,
     provider,
-    injSigner
+    injSigner,
   );
   if (!signer) {
     return undefined;
@@ -103,31 +105,31 @@ export const metaAccountToSigner = async (
     {
       source,
       address: account.address,
-      name: account.meta.name || "",
-      genesisHash: account.meta.genesisHash || "",
-    }
-  )
+      name: account.meta.name || '',
+      genesisHash: account.meta.genesisHash || '',
+    },
+  );
 };
 
 export const metaAccountsToSigners = async (
   accounts: (InjectedAccountWithMeta | InjectedAccountWithMetaReef)[],
   provider: Provider,
-  sign: InjectedSigner
+  sign: InjectedSigner,
 ): Promise<ReefSigner[]> => {
   const signers = await Promise.all(
     accounts
       .filter((account) => provider.api.genesisHash.toString() === account.meta.genesisHash)
-      .map((account) => metaAccountToSigner(account, provider, sign))
+      .map((account) => metaAccountToSigner(account, provider, sign)),
   );
 
   return signers.filter(removeUndefinedItem);
-}
+};
 
 export const accountToSigner = async (
   account: InjectedAccount,
   provider: Provider,
   sign: InjectedSigner,
-  source: string
+  source: string,
 ): Promise<ReefSigner> => {
   const signer = new Signer(provider, account.address, sign);
   return signerToReefSigner(
@@ -136,10 +138,10 @@ export const accountToSigner = async (
     {
       source,
       address: account.address,
-      name: account.name || "",
-      genesisHash: account.genesisHash || "",
-    }
-  )
+      name: account.name || '',
+      genesisHash: account.genesisHash || '',
+    },
+  );
 };
 
 export const getExtensionSigners = async (
@@ -151,11 +153,10 @@ export const getExtensionSigners = async (
       name: extension.name,
       sig: extension.signer,
       accounts: await extension.accounts.get(),
-    }))
+    })),
   );
   const accountPromisses = extensionAccounts.flatMap(
-    ({ accounts, name, sig }) =>
-      accounts.map((account) => accountToSigner(account, provider, sig, name))
+    ({ accounts, name, sig }) => accounts.map((account) => accountToSigner(account, provider, sig, name)),
   );
   const accounts = await Promise.all(accountPromisses);
   return accounts;

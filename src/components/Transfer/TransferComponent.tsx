@@ -379,9 +379,6 @@ export const TransferComponent = ({
   const onAccountSelect = (_: any, selected: ReefSigner): void => {
     const selectAcc = async (): Promise<void> => {
       let addr = '';
-      if (txToken?.address === REEF_TOKEN.address) {
-        addr = await selected.signer.getSubstrateAddress();
-      }
       if (!addr && selected.isEvmClaimed) {
         addr = selected.evmAddress;
       }

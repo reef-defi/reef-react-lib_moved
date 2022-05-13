@@ -12,3 +12,13 @@ export interface Pool {
   userPoolBalance: string;
   minimumLiquidity: string;
 }
+
+export interface BasicPoolInfo {
+  address: string; // Pool address
+  address1: string; // Token1 address
+  address2: string; // Token1 address
+  symbol1: string;
+  symbol2: string;
+  decimal1: number;
+  decimal2: number;
+}
