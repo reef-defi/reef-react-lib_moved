@@ -103,7 +103,7 @@ export const Send = ({
       notify('Tokens sent successfully!');
     } catch (e) {
       console.error(e);
-      notify(`There was an error when sending tokens: ${e.message}`, 'error');
+      notify(`There was an error while sending tokens: ${e.message}`, 'error');
     } finally {
       setLoading(false);
     }
