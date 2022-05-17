@@ -65,10 +65,7 @@ export const useTokensFinder = ({
         address: address1,
         defaultAmountValue: reefTokenWithAmount(),
       })
-        .then((token) => {
-          console.log('Url: ', token.iconUrl)
-          setToken1(token)
-        })
+        .then(setToken1)
         .catch((_e) => console.error(`Token: ${address1} was not found`));
 
       await findToken({
