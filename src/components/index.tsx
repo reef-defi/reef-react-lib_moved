@@ -4,7 +4,7 @@ export * from './SelectToken';
 export * from './TokenFields';
 export * from './AddLiquidity';
 export * from './SwapComponent';
-export * from './AccountSelector';
+export * from './AccountSelector/AccountSelector';
 export * from './AccountSelector/AccountListModal';
 export * from './RemoveLiquidity';
 export * from './Transfer';
