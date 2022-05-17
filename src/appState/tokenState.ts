@@ -15,7 +15,7 @@ import { gql } from '@apollo/client';
 import { filter } from 'rxjs/operators';
 import { combineTokensDistinct, toTokensWithPrice } from './util';
 import { selectedSigner$ } from './accountState';
-import { providerSubj, selectedNetworkSubj } from './providerState';
+import { currentProvider$, currentNetwork$ } from './providerState';
 import { apolloClientInstance$, zenToRx } from '../graphql/apollo';
 import { getExtrinsicUrl, getIconUrl } from '../utils';
 import { getReefCoinBalance, loadPools } from '../rpc';
@@ -167,7 +167,7 @@ const sortReefTokenFirst = (tokens): Token[] => {
 export const selectedSignerTokenBalances$: Observable<Token[]> = combineLatest([
   apolloClientInstance$,
   selectedSigner$,
-  providerSubj,
+  currentProvider$,
 ]).pipe(
   switchMap(([apollo, signer, provider]) => (!signer
     ? []
@@ -239,7 +239,7 @@ const parseTokenHolderArray = (resArr: any[]): TokenNFT[] => resArr.map((res) =>
 export const selectedSignerNFTs$: Observable<TokenNFT[]> = combineLatest([
   apolloClientInstance$,
   selectedSignerAddressUpdate$,
-  providerSubj,
+  currentProvider$,
 ])
   .pipe(
     switchMap(([apollo, signer]) => (!signer
@@ -270,7 +270,7 @@ export const allAvailableSignerTokens$: Observable<Token[]> = combineLatest([
 // TODO when network changes signer changes as well? this could make 2 requests unnecessary - check
 export const pools$: Observable<Pool[]> = combineLatest([
   allAvailableSignerTokens$,
-  selectedNetworkSubj,
+  currentNetwork$,
   selectedSigner$,
 ]).pipe(
   switchMap(([tkns, network, signer]) => (signer ? loadPools(tkns, signer.signer, network.factoryAddress) : [])),
@@ -376,7 +376,7 @@ const toTokenTransfers = (resTransferData: any[], signer, network: Network): Tok
 export const transferHistory$: Observable<
   | null
   | TokenTransfer[]
-> = combineLatest([apolloClientInstance$, selectedSigner$, selectedNetworkSubj]).pipe(
+> = combineLatest([apolloClientInstance$, selectedSigner$, currentNetwork$]).pipe(
   switchMap(([apollo, signer, network]) => (!signer
     ? []
     : zenToRx(
