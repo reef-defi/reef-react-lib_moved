@@ -5,9 +5,8 @@ import { useObservableState } from './useObservableState';
 import { availableNetworks, Network, ReefSigner } from '../state';
 import { useProvider } from './useProvider';
 import {
-  providerSubj,
-  selectedNetworkSubj,
-  setCurrentNetwork,
+  currentNetwork$,
+  setCurrentNetwork, setCurrentProvider,
 } from '../appState/providerState';
 import { apolloClientSubj, setApolloUrls } from '../graphql';
 import { accountsSubj } from '../appState/accountState';
@@ -48,7 +47,7 @@ export const useInitReefState = (
     signers,
   }: StateOptions,
 ): State => {
-  const selectedNetwork: Network|undefined = useObservableState(selectedNetworkSubj);
+  const selectedNetwork: Network|undefined = useObservableState(currentNetwork$);
   const [provider, isProviderLoading] = useProvider((selectedNetwork as Network)?.rpcUrl);
   const [loadedSigners, isSignersLoading, error] = useLoadSigners(applicationDisplayName, signers ? undefined : provider);
   const [loading, setLoading] = useState(false);
@@ -74,7 +73,7 @@ export const useInitReefState = (
 
   useEffect(() => {
     if (provider) {
-      providerSubj.next(provider);
+      setCurrentProvider(provider);
     }
     return () => {
       provider?.api.disconnect();
