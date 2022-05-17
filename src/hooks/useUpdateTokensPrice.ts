@@ -7,6 +7,7 @@ import {
 } from '../state';
 import { ensureVoidRun } from '../utils';
 import { poolRatio } from '../utils/math';
+import { BigNumber } from 'ethers';
 
 interface UpdateTokensPriceHook {
   pool?: Pool;
@@ -49,13 +50,15 @@ export const useUpdateTokensPrice = ({
         mounted.current = true;
         setIsLoading(true);
         const reefPrice = await retrieveReefCoingeckoPrice();
-        const baseRatio = poolRatio(pool);
+
         if (token1.address === REEF_TOKEN.address) {
-          updateTokens(reefPrice, reefPrice / baseRatio);
+          const ratio = BigNumber.from(pool.reserve2).mul(1000000).div(pool.reserve1).toNumber() / 1000000;
+          updateTokens(reefPrice, reefPrice * ratio);
         } else if (token2.address === REEF_TOKEN.address) {
-          updateTokens(reefPrice, reefPrice * baseRatio);
+          const ratio = BigNumber.from(pool.reserve1).mul(1000000).div(pool.reserve2).toNumber() / 1000000;
+          updateTokens(reefPrice * ratio, reefPrice);
         } else {
-          // const sellPool = await poolContract(tokens[0], token1, signer, settings);
+
           const sellPool = await loadPool(
             tokens[0],
             token1,
@@ -63,13 +66,13 @@ export const useUpdateTokensPrice = ({
             factoryAddress,
           );
           const sellRatio = poolRatio(sellPool);
+          const ratio = BigNumber.from(pool.reserve1).mul(1000000).div(pool.reserve2).toNumber() / 1000000;
           updateTokens(
-            reefPrice / sellRatio,
-            (reefPrice / sellRatio) * baseRatio,
+            reefPrice * sellRatio,
+            reefPrice * sellRatio * ratio
           );
         }
       } catch (error) {
-        console.error(error);
         updateTokens(0, 0);
       } finally {
         ensureMount(setIsLoading, false);
