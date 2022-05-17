@@ -40,5 +40,6 @@ export const removeLiquidityReducer = (state = initialRemoveLiquidityState, acti
     case SET_COMPLETE_STATUS: return {
       ...state, status: action.status, isLoading: action.isLoading, isValid: action.isValid,
     };
+    default: return state;
   }
 };

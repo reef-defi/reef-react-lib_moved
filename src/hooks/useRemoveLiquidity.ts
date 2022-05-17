@@ -47,7 +47,7 @@ const removeStatus = (percentageAmount: number, pool?: Pool): ButtonStatus => {
 
 export const useRemoveLiquidity = ({
   address1, address2, state, signer, network, tokens, dispatch,
-}: UseRemoveLiquidity) => {
+}: UseRemoveLiquidity): void => {
   const {
     percentage, token1, token2, pool, isLoading, isValid, status,
   } = state;

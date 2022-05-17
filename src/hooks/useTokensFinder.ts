@@ -53,7 +53,7 @@ const findToken = async ({
 
 export const useTokensFinder = ({
   address1, address2, tokens, signer, setToken1, setToken2,
-}: UseTokensFinder) => {
+}: UseTokensFinder): void => {
   useEffect(() => {
     const reset = async (): Promise<void> => {
       if (!tokens || tokens.length === 0 || !signer) {
