@@ -1,16 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { rpc } from '..';
 import { ReefSigner, TokenWithAmount, createEmptyTokenWithAmount, reefTokenWithAmount, Token } from '../state';
-
-type State = 'Init' | 'Loading' | 'Success';
+import { REEF_ADDRESS } from '../utils';
 
 interface UseTokensFinder {
   tokens?: Token[]
   address1?: string;
   address2?: string;
   signer?: ReefSigner;
-  currentAddress1: string;
-  currentAddress2: string;
   setToken1: (token: TokenWithAmount) => void;
   setToken2: (token: TokenWithAmount) => void;
 }
@@ -37,6 +34,9 @@ const findToken = async ({
   const existingToken = tokensCombined
     .find(((token) => token.address.toLowerCase() === address.toLowerCase()));
 
+  if (address === REEF_ADDRESS) {
+    console.log('Token: ', existingToken)
+  }
   if (existingToken) {
     return { ...defaultAmountValue, ...existingToken, isEmpty: false };
   }
@@ -50,40 +50,35 @@ const findToken = async ({
 };
 
 export const useTokensFinder = ({
-  address1, address2, currentAddress1, currentAddress2, tokens, signer, setToken1, setToken2
+  address1, address2, tokens, signer, setToken1, setToken2
 }: UseTokensFinder) => {
-  const [state, setState] = useState<State>('Init');
 
   useEffect(() => {
     const reset = async (): Promise<void> => {
-      if (!tokens || !signer || state !== 'Init') {
+      if (!tokens || tokens.length === 0 || !signer) {
         return;
       }
 
-      setState('Loading');
-      if (address1 && address1 !== currentAddress1) {
-        await findToken({
-          signer,
-          tokens,
-          address: address1,
-          defaultAmountValue: reefTokenWithAmount(),
+      await findToken({
+        signer,
+        tokens,
+        address: address1,
+        defaultAmountValue: reefTokenWithAmount(),
+      })
+        .then((token) => {
+          console.log('Url: ', token.iconUrl)
+          setToken1(token)
         })
-          .then(setToken1)
-          .catch((_e) => console.error(`Token: ${address1} was not found`));
-      }
+        .catch((_e) => console.error(`Token: ${address1} was not found`));
 
-      if (address2 && address2 !== currentAddress2) {
-        await findToken({
-          signer,
-          tokens,
-          address: address2,
-          defaultAmountValue: createEmptyTokenWithAmount(),
-        })
-          .then(setToken2)
-          .catch((_e) => console.error(`Token: ${address2} was not found`));
-      }
-
-      setState('Success');
+      await findToken({
+        signer,
+        tokens,
+        address: address2,
+        defaultAmountValue: createEmptyTokenWithAmount(),
+      })
+        .then(setToken2)
+        .catch((_e) => console.error(`Token: ${address2} was not found`));
     };
     reset();
   }, [address2, address1, tokens, signer]);
