@@ -4,7 +4,6 @@ import { Network, ReefSigner } from '../../state';
 import { toReefBalanceDisplay, trim } from '../../utils';
 import {
   Border,
-  ContentBetween,
   FlexRow,
   Margin,
   MT,
@@ -25,6 +24,7 @@ import {
 import { AccountListModal } from './AccountListModal';
 import { currentNetwork$ } from '../../appState/providerState';
 import { useObservableState } from '../../hooks';
+import './AccountSelector.css';
 
 interface AccountSelector {
   reefscanUrl: string;
@@ -85,18 +85,11 @@ export const AccountSelector = ({
         <ModalBody>
           <Border size="2">
             <Margin size="2">
-              <ContentBetween>
-                <MutedText>
-                  <MiniText>
-                    {`Connected with ${selectedSigner?.source} extension,`}
-                  </MiniText>
-                  <br />
-                  <MiniText>
-                    selected network
-                    {' '}
-                    {currentNetwork?.name}
-                  </MiniText>
-                </MutedText>
+              <FlexRow className="account-selector__account-address">
+                <div className="d-flex">
+                  <ReefAddressIcon address={address} />
+                  <LeadText>{trim(evmAddress, 11)}</LeadText>
+                </div>
                 <button
                   type="button"
                   className="btn btn-sm btn-reef border-rad"
@@ -105,28 +98,37 @@ export const AccountSelector = ({
                 >
                   <span>Switch account</span>
                 </button>
-              </ContentBetween>
-            </Margin>
-            {selectNetwork && availableNetworks?.length && (
-            <Margin size="2">
-              <ContentBetween>
-                <FlexRow>
-                  {availableNetworks.filter((n) => n.rpcUrl !== currentNetwork?.rpcUrl).map((network) => (
-                    <button type="button" className="btn btn-sm btn-reef border-rad" data-bs-dismiss="modal" key={network.rpcUrl} onClick={() => selectCurrNetwork(network)}>
-                      Switch to
-                      {' '}
-                      {network.name}
-                    </button>
-                  ))}
-                </FlexRow>
-              </ContentBetween>
-            </Margin>
-            )}
-            <Margin size="2">
-              <FlexRow>
-                <ReefAddressIcon address={address} />
-                <LeadText>{trim(evmAddress, 11)}</LeadText>
               </FlexRow>
+            </Margin>
+            <Margin size="2">
+              <div className="account-selector__network-info">
+                <MutedText>
+                  <MiniText>
+                    {'Connected with '}
+                  </MiniText>
+                  {selectedSigner?.source}
+                  {' '}
+                  extension,
+                  <br />
+                  <MiniText>
+                    selected network
+                    {' '}
+                  </MiniText>
+                  {currentNetwork?.name}
+                  {' '}
+                  {selectNetwork && availableNetworks?.length
+                  && (
+                  <MiniText>
+                    switch to
+                    {availableNetworks.filter((n) => n.rpcUrl !== currentNetwork?.rpcUrl).map((network) => (
+                      <button type="button" className="btn btn-link account-selector__select-network" data-bs-dismiss="modal" key={network.rpcUrl} onClick={() => selectCurrNetwork(network)}>
+                        {network.name}
+                      </button>
+                    ))}
+                  </MiniText>
+                  )}
+                </MutedText>
+              </div>
             </Margin>
             <MT size="2" />
             <MX size="2">

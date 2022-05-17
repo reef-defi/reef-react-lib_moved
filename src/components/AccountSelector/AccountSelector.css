@@ -1,0 +1,13 @@
+.account-selector__network-info{
+  width: 100%;
+  text-align: center;
+}
+.account-selector__select-network{
+  padding: 0 0 0.3em 0.2em;
+  font-size: 1.2em;
+}
+
+.account-selector__account-address{
+  align-items: baseline;
+  justify-content: space-between;
+}
