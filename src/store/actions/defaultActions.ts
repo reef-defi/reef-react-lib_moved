@@ -4,7 +4,7 @@ import {
   Settings,
   Token,
   TokenWithAmount,
-} from "../../state";
+} from '../../state';
 import {
   CLEAR_TOKEN_AMOUNTS,
   SET_COMPLETE_STATUS,
@@ -18,7 +18,7 @@ import {
   SET_TOKEN2_AMOUNT,
   SET_VALIDITY,
   SWITCH_TOKENS,
-} from "../actionTypes";
+} from '../actionTypes';
 
 type SetAmount<T> = {
   type: T;
@@ -103,7 +103,7 @@ export const setStatusAction = (status: string): SetStatus => ({
 export const setCompleteStatusAction = (
   status: string,
   isValid: boolean,
-  isLoading: boolean
+  isLoading: boolean,
 ): SetCompleteStatus => ({
   type: SET_COMPLETE_STATUS,
   status,

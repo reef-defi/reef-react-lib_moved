@@ -3,13 +3,13 @@ import {
   // PartialOptions,
   ReefSigner,
   resolveSettings,
-  Token
+  Token,
 } from '../../state';
 import { AddLiquidityComponentActions, AddLiquidityState } from '../../store';
 import { calculatePoolShare } from '../../utils/math';
 import { SwitchTokenButton } from '../common/Button';
 import {
-  Card, CardBack, CardHeader, CardTitle
+  Card, CardBack, CardHeader, CardTitle,
 } from '../common/Card';
 import { ComponentCenter } from '../common/Display';
 import { ConfirmLabel } from '../common/Label';
@@ -17,7 +17,6 @@ import { LoadingButtonIconWithText } from '../common/Loading';
 import ConfirmationModal from '../common/Modal';
 import { TokenAmountField } from '../TokenFields';
 import { TransactionSettings } from '../TransactionSettings';
-
 
 interface AddLiquidityComponent {
   tokens: Token[];
@@ -39,10 +38,12 @@ export const AddLiquidity = ({
     onAddressChange,
     setToken1Amount,
     setToken2Amount,
-  }
+  },
 }: AddLiquidityComponent): JSX.Element => {
-  const {settings, token1, token2, isLoading, isValid, newPoolSupply, pool, status} = state;
-  const {percentage} = resolveSettings(settings);
+  const {
+    settings, token1, token2, isLoading, isValid, newPoolSupply, pool, status,
+  } = state;
+  const { percentage } = resolveSettings(settings);
   return (
     <ComponentCenter>
       <Card>

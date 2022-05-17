@@ -1,10 +1,16 @@
-import { Dispatch, useEffect } from "react";
-import { getReefswapRouter, approveAmount } from "../rpc";
-import { Network, NotifyFun, Pool, ReefSigner, REMOVE_DEFAULT_SLIPPAGE_TOLERANCE, resolveSettings, Token } from "../state";
-import { RemoveLiquidityActions, RemoveLiquidityState, setCompleteStatusAction, setLoadingAction, setPercentageAction, setPoolAction, setStatusAction, setToken1Action, setToken2Action } from "../store"
-import { ButtonStatus, calculateDeadline, ensure, removePoolTokenShare, removeSupply, transformAmount } from "../utils";
-import { useLoadPool } from "./useLoadPool";
-import { useTokensFinder } from "./useTokensFinder";
+import { Dispatch, useEffect } from 'react';
+import { getReefswapRouter, approveAmount } from '../rpc';
+import {
+  Network, NotifyFun, Pool, ReefSigner, REMOVE_DEFAULT_SLIPPAGE_TOLERANCE, resolveSettings, Token,
+} from '../state';
+import {
+  RemoveLiquidityActions, RemoveLiquidityState, setCompleteStatusAction, setLoadingAction, setPercentageAction, setPoolAction, setStatusAction, setToken1Action, setToken2Action,
+} from '../store';
+import {
+  ButtonStatus, calculateDeadline, ensure, removePoolTokenShare, removeSupply, transformAmount,
+} from '../utils';
+import { useLoadPool } from './useLoadPool';
+import { useTokensFinder } from './useTokensFinder';
 
 interface DefaultVariables {
   network?: Network;
@@ -21,7 +27,6 @@ interface UseRemoveLiquidity extends DefaultVariables {
   address2: string;
   tokens: Token[];
 }
-
 
 const removeStatus = (percentageAmount: number, pool?: Pool): ButtonStatus => {
   try {
@@ -40,8 +45,12 @@ const removeStatus = (percentageAmount: number, pool?: Pool): ButtonStatus => {
   }
 };
 
-export const useRemoveLiquidity = ({address1, address2, state, signer, network, tokens, dispatch}: UseRemoveLiquidity) => {
-  const {percentage, token1, token2, pool, isLoading, isValid, status} = state;
+export const useRemoveLiquidity = ({
+  address1, address2, state, signer, network, tokens, dispatch,
+}: UseRemoveLiquidity) => {
+  const {
+    percentage, token1, token2, pool, isLoading, isValid, status,
+  } = state;
   // Find tokens
   useTokensFinder({
     address1,
@@ -50,7 +59,7 @@ export const useRemoveLiquidity = ({address1, address2, state, signer, network, 
     setToken2: (token) => dispatch(setToken2Action(token)),
     signer,
     tokens,
-  })
+  });
   // Find pool
   const [loadedPool, isPoolLoading] = useLoadPool(
     token1,
@@ -70,7 +79,7 @@ export const useRemoveLiquidity = ({address1, address2, state, signer, network, 
     let [currentStatus, currentIsValid, currentIsLoading] = [
       status,
       isValid,
-      isLoading
+      isLoading,
     ];
     if (isPoolLoading) {
       currentIsLoading = true;
@@ -81,24 +90,23 @@ export const useRemoveLiquidity = ({address1, address2, state, signer, network, 
       currentIsValid = res.isValid;
       currentIsLoading = false;
     }
-    dispatch(setCompleteStatusAction(currentStatus, currentIsValid, currentIsLoading))
-  }, [percentage, pool, isPoolLoading])
-}
-
+    dispatch(setCompleteStatusAction(currentStatus, currentIsValid, currentIsLoading));
+  }, [percentage, pool, isPoolLoading]);
+};
 
 export const onRemoveLiquidity = ({
   state,
   dispatch,
   network,
   signer,
-  notify
+  notify,
 }: OnRemoveLiquidity) => async (): Promise<void> => {
-  const {pool, percentage: percentageAmount, settings} = state;
+  const { pool, percentage: percentageAmount, settings } = state;
   if (!pool || !signer || !network || percentageAmount === 0) { return; }
 
-  const {percentage, deadline} = resolveSettings(
+  const { percentage, deadline } = resolveSettings(
     settings,
-    REMOVE_DEFAULT_SLIPPAGE_TOLERANCE
+    REMOVE_DEFAULT_SLIPPAGE_TOLERANCE,
   );
 
   const reefswapRouter = getReefswapRouter(
@@ -128,7 +136,7 @@ export const onRemoveLiquidity = ({
       pool.poolAddress,
       network.routerAddress,
       removedLiquidity,
-      signer.signer
+      signer.signer,
     );
     dispatch(setStatusAction('Removing supply'));
     await reefswapRouter.removeLiquidity(
@@ -138,16 +146,14 @@ export const onRemoveLiquidity = ({
       minimumTokenAmount1,
       minimumTokenAmount2,
       signer.evmAddress,
-      calculateDeadline(deadline)
-    )
+      calculateDeadline(deadline),
+    );
     notify('Balances will reload after blocks are finalized.', 'info');
     notify('Liquidity removed successfully!');
-
   } catch (e) {
     notify(`There was something wrong when removing liquidity: ${e.message}`, 'error');
   } finally {
     dispatch(setLoadingAction(false));
     dispatch(setPercentageAction(0));
   }
-}
-
+};
