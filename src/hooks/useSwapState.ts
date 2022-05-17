@@ -112,6 +112,8 @@ export const useSwapState = ({
     address1,
     address2,
     signer: account,
+    currentAddress1: sell.address,
+    currentAddress2: buy.address,
     setToken1: setSell,
     setToken2: setBuy,
   });
