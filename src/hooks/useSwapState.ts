@@ -7,14 +7,12 @@ import {
   NotifyFun,
   Pool,
   ReefSigner,
-  resolveSettings,
-  Settings,
-  Token,
+  resolveSettings, Token,
   TokenWithAmount,
 } from '../state';
 import { SwapAction } from '../store';
 import {
-  setToken2Action, setToken1Action, setPoolAction, setCompleteStatusAction, setLoadingAction, setStatusAction, clearTokenAmountsAction,
+  clearTokenAmountsAction, setCompleteStatusAction, setLoadingAction, setPoolAction, setStatusAction, setToken1Action, setToken2Action,
 } from '../store/actions/defaultActions';
 import { SwapState } from '../store/reducers/swap';
 import {
@@ -105,13 +103,12 @@ export const useSwapState = ({
   address1,
   address2,
   dispatch,
-}: UseSwapState) => {
+}: UseSwapState): void => {
   const {
     token2: buy, token1: sell, pool, isLoading, isValid,
   } = state;
-  const setBuy = (token: TokenWithAmount) => dispatch(setToken2Action(token));
-  const setSell = (token: TokenWithAmount) => dispatch(setToken1Action(token));
-  const setSettings = (settings: Settings) => dispatch(setSettings(settings));
+  const setBuy = (token: TokenWithAmount): void => dispatch(setToken2Action(token));
+  const setSell = (token: TokenWithAmount): void => dispatch(setToken1Action(token));
 
   useTokensFinder({
     tokens,

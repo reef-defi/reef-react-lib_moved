@@ -109,5 +109,6 @@ export const addLiquidityReducer = (
         isValid: action.isValid,
         status: action.status,
       };
+    default: return state;
   }
 };

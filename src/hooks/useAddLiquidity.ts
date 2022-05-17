@@ -81,7 +81,7 @@ export const useAddLiquidity = ({
   tokens,
   signer,
   network,
-}: UseAddLiquidityState) => {
+}: UseAddLiquidityState): void => {
   const {
     token1, token2, pool, isLoading, isValid,
   } = state;
@@ -93,8 +93,8 @@ export const useAddLiquidity = ({
   );
   const newPoolSupply = calculatePoolSupply(token1, token2, pool);
 
-  const setToken1 = (token: TokenWithAmount) => dispatch(setToken1Action(token));
-  const setToken2 = (token: TokenWithAmount) => dispatch(setToken2Action(token));
+  const setToken1 = (token: TokenWithAmount): void => dispatch(setToken1Action(token));
+  const setToken2 = (token: TokenWithAmount): void => dispatch(setToken2Action(token));
 
   // find and set tokens based on addresses
   useTokensFinder({
