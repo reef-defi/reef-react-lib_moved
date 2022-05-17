@@ -1,16 +1,16 @@
 import React from 'react';
 import {
   REMOVE_DEFAULT_SLIPPAGE_TOLERANCE,
-  resolveSettings
+  resolveSettings,
 } from '../../state';
 import { RemoveLiquidityComponentActions, RemoveLiquidityState } from '../../store';
 import {
-  calculatePoolRatio, showRemovePoolTokenShare
+  calculatePoolRatio, showRemovePoolTokenShare,
 } from '../../utils';
 import { DangerAlert } from '../common/Alert';
 import { Button } from '../common/Button';
 import {
-  Card, CardBack, CardHeader, CardTitle, SubCard
+  Card, CardBack, CardHeader, CardTitle, SubCard,
 } from '../common/Card';
 import {
   ComponentCenter,
@@ -18,7 +18,7 @@ import {
   ContentCenter,
   Margin,
   MT,
-  MX
+  MX,
 } from '../common/Display';
 import { DownIcon } from '../common/Icons';
 import { PercentageRangeAmount } from '../common/Input';
@@ -43,16 +43,16 @@ export const RemoveLiquidityComponent = ({
     percentage: percentageAmount,
     status,
     token1,
-    token2
+    token2,
   },
   actions: {
     back,
     onRemoveLiquidity,
     setPercentage,
-    setSettings
-  }
+    setSettings,
+  },
 }: RemoveLiquidityComponent): JSX.Element => {
-  const {percentage} = resolveSettings(settings);
+  const { percentage } = resolveSettings(settings);
   return (
     <ComponentCenter>
       <Card>

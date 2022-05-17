@@ -1,3 +1,4 @@
+import { BigNumber } from 'ethers';
 import {
   createEmptyTokenWithAmount,
   defaultSettings,
@@ -5,8 +6,8 @@ import {
   reefTokenWithAmount,
   Settings,
   TokenWithAmount,
-} from "../../state";
-import { AddLiquidityActions } from "../actions/addLiquidity";
+} from '../../state';
+import { AddLiquidityActions } from '../actions/addLiquidity';
 import {
   CLEAR_TOKEN_AMOUNTS,
   SET_COMPLETE_STATUS,
@@ -20,8 +21,7 @@ import {
   SET_TOKEN2,
   SET_TOKEN2_AMOUNT,
   SET_VALIDITY,
-} from "../actionTypes";
-import {BigNumber} from "ethers";
+} from '../actionTypes';
 
 export interface AddLiquidityState {
   status: string;
@@ -35,7 +35,7 @@ export interface AddLiquidityState {
 }
 
 export const initialAddLiquidityState: AddLiquidityState = {
-  status: "",
+  status: '',
   isValid: false,
   isLoading: false,
   pool: undefined,
@@ -54,13 +54,13 @@ const calculateOtherAmount = (amount: string, currentAmount: string, first: bool
 
   const ratio = BigNumber.from(r1).mul(10000000).div(r2).toNumber() / 10000000;
   return (ratio * parseFloat(amount)).toFixed(4);
-}
+};
 
 export const addLiquidityReducer = (
   state = initialAddLiquidityState,
-  action: AddLiquidityActions
+  action: AddLiquidityActions,
 ): AddLiquidityState => {
-  const {token1, token2, pool} = state;
+  const { token1, token2, pool } = state;
   switch (action.type) {
     case SET_TOKEN1:
       return {
@@ -73,14 +73,16 @@ export const addLiquidityReducer = (
         token2: { ...createEmptyTokenWithAmount(false), ...action.token },
       };
     case SET_TOKEN1_AMOUNT:
-      return {...state,
-        token1: {...token1, amount: action.amount},
-        token2: {...token2, amount: calculateOtherAmount(action.amount, token2.amount, true, pool)},
+      return {
+        ...state,
+        token1: { ...token1, amount: action.amount },
+        token2: { ...token2, amount: calculateOtherAmount(action.amount, token2.amount, true, pool) },
       };
     case SET_TOKEN2_AMOUNT:
-      return {...state,
-        token2: {...token2, amount: action.amount},
-        token1: {...token1, amount: calculateOtherAmount(action.amount, token1.amount, false, pool)},
+      return {
+        ...state,
+        token2: { ...token2, amount: action.amount },
+        token1: { ...token1, amount: calculateOtherAmount(action.amount, token1.amount, false, pool) },
       };
     case SET_STATUS:
       return { ...state, status: action.status };
@@ -89,15 +91,16 @@ export const addLiquidityReducer = (
     case SET_LOADING:
       return { ...state, isLoading: action.loading };
     case SET_POOL:
-      return {...state, pool: action.pool};
+      return { ...state, pool: action.pool };
     case SET_NEW_POOL_SUPPLY:
-      return {...state, newPoolSupply: action.supply};
+      return { ...state, newPoolSupply: action.supply };
     case SET_SETTINGS:
-      return {...state, settings: {...action.settings}};
+      return { ...state, settings: { ...action.settings } };
     case CLEAR_TOKEN_AMOUNTS:
-      return {...state,
-        token1: {...token1, amount: ''},
-        token2: {...token2, amount: ''},
+      return {
+        ...state,
+        token1: { ...token1, amount: '' },
+        token2: { ...token2, amount: '' },
       };
     case SET_COMPLETE_STATUS:
       return {

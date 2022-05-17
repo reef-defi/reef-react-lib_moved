@@ -1,6 +1,8 @@
-import { Settings, Token } from "../../state";
-import { SET_NEW_POOL_SUPPLY } from "../actionTypes";
-import { ClearTokenAmounts, SetCompleteStatus, SetLoading, SetPool, SetSettings, SetStatus, SetToken1, SetToken1Amount, SetToken2, SetToken2Amount, SetValidity } from "./defaultActions";
+import { Settings, Token } from '../../state';
+import { SET_NEW_POOL_SUPPLY } from '../actionTypes';
+import {
+  ClearTokenAmounts, SetCompleteStatus, SetLoading, SetPool, SetSettings, SetStatus, SetToken1, SetToken1Amount, SetToken2, SetToken2Amount, SetValidity,
+} from './defaultActions';
 
 type SetNewPoolSupply = {
   type: typeof SET_NEW_POOL_SUPPLY;
@@ -10,7 +12,7 @@ type SetNewPoolSupply = {
 export const SetNewPoolSupplyAction = (supply: string): SetNewPoolSupply => ({
   supply,
   type: SET_NEW_POOL_SUPPLY,
-})
+});
 
 export type AddLiquidityActions =
   | SetPool

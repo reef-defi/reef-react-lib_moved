@@ -1,23 +1,23 @@
 import React from 'react';
 import {
   ReefSigner,
-  resolveSettings, Token
+  resolveSettings, Token,
 } from '../../state';
 import { SwapComponentActions } from '../../store/actions/swap';
 import { SwapState } from '../../store/reducers/swap';
 import {
-  calculateImpactPercentage
+  calculateImpactPercentage,
 } from '../../utils/math';
 import { SwitchTokenButton } from '../common/Button';
 import {
-  Card, CardHeader, CardHeaderBlank, CardTitle
+  Card, CardHeader, CardHeaderBlank, CardTitle,
 } from '../common/Card';
 import { CenterColumn, ComponentCenter, MT } from '../common/Display';
 import { LoadingButtonIconWithText } from '../common/Loading';
 import { OpenModalButton } from '../common/Modal';
 import {
   TokenAmountFieldImpactPrice,
-  TokenAmountFieldMax
+  TokenAmountFieldMax,
 } from '../TokenFields';
 import { TransactionSettings } from '../TransactionSettings';
 import SwapConfirmationModal from './SwapConfirmationModal';
@@ -49,9 +49,9 @@ export const SwapComponent = ({
     setToken1Amount,
     setToken2Amount,
     onAddressChange,
-  }
+  },
 }: SwapComponent): JSX.Element => {
-  const {percentage} = resolveSettings(settings);
+  const { percentage } = resolveSettings(settings);
   return (
     <ComponentCenter>
       <Card>
