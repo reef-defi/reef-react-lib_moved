@@ -6,7 +6,7 @@ import {
   bindEvmAddress, sendToNativeAddress, toAddressShortDisplay, toReefBalanceDisplay, TxStatusHandler, TxStatusUpdate,
 } from '../../utils';
 import { useObservableState } from '../../hooks';
-import { providerSubj } from '../../appState/providerState';
+import { currentProvider$ } from '../../appState/providerState';
 import { ComponentCenter, FlexRow } from '../common/Display';
 import {
   Card, CardHeader, CardHeaderBlank, CardTitle, SubCard,
@@ -38,7 +38,7 @@ function getSignersWithEnoughBalance(signers: ReefSigner[], bindFor: ReefSigner)
 }
 
 export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindComponent): JSX.Element => {
-  const provider: Provider|undefined = useObservableState(providerSubj);
+  const provider: Provider|undefined = useObservableState(currentProvider$);
   const [bindFor, setBindFor] = useState(bindSigner);
   const [availableTxAccounts, setAvailableTxAccounts] = useState<ReefSigner[]>([]);
   const [transferBalanceFrom, setTransferBalanceFrom] = useState<ReefSigner>();

@@ -23,7 +23,7 @@ import {
   replaceUpdatedSigners,
   updateSignersEvmBindings,
 } from './accountStateUtil';
-import { providerSubj } from './providerState';
+import { currentProvider$ } from './providerState';
 import { ReefSigner } from '../state';
 import { apolloClientInstance$, zenToRx } from '../graphql/apollo';
 
@@ -83,7 +83,7 @@ const signersLocallyUpdatedData$: Observable<ReefSigner[]> = reloadSignersSubj.p
 );
 
 const signersWithUpdatedBalances$ = combineLatest([
-  providerSubj,
+  currentProvider$,
   signersInjected$,
 ]).pipe(
   mergeScan(
