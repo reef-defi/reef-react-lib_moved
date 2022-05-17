@@ -8,7 +8,6 @@ import {
 } from '../state';
 import { ensureVoidRun } from '../utils';
 import { poolRatio } from '../utils/math';
-import { BigNumber } from 'ethers';
 
 interface UpdateTokensPriceHook {
   pool?: Pool;
@@ -59,7 +58,6 @@ export const useUpdateTokensPrice = ({
           const ratio = BigNumber.from(pool.reserve1).mul(1000000).div(pool.reserve2).toNumber() / 1000000;
           updateTokens(reefPrice * ratio, reefPrice);
         } else {
-
           const sellPool = await loadPool(
             tokens[0],
             token1,
@@ -72,7 +70,7 @@ export const useUpdateTokensPrice = ({
           const ratio = BigNumber.from(pool.reserve1).mul(1000000).div(pool.reserve2).toNumber() / 1000000;
           updateTokens(
             reefPrice * sellRatio,
-            reefPrice * sellRatio * ratio
+            reefPrice * sellRatio * ratio,
           );
         }
       } catch (error) {
