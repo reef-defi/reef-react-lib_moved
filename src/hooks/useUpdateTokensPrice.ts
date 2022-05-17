@@ -76,7 +76,6 @@ export const useUpdateTokensPrice = ({
           );
         }
       } catch (error) {
-        console.error(error);
         updateTokens(0, 0);
       } finally {
         ensureMount(setIsLoading, false);
