@@ -145,7 +145,7 @@ const SelectToken = ({
       <button
         type="button"
         className={`btn btn-select border-rad ${fullWidth && 'w-100'} ${
-          isEmpty ? 'btn-reef' : 'btn-token-select'
+          isEmpty ? '' : 'btn-token-select'
         }`}
         data-bs-toggle="modal"
         data-bs-target={`#${id}`}
