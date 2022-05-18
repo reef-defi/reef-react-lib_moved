@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { rpc } from '..';
-import { createEmptyTokenWithAmount, ReefSigner, reefTokenWithAmount, Token, TokenWithAmount } from '../state';
+import {
+  createEmptyTokenWithAmount, ReefSigner, reefTokenWithAmount, Token, TokenWithAmount,
+} from '../state';
 
 interface UseTokensFinder {
   tokens?: Token[]

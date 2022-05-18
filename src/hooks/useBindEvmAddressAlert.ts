@@ -11,5 +11,5 @@ export const useBindEvmAddressAlert = (
     if (currentSigner && provider) {
       bindEvmAddress(currentSigner, provider);
     }
-  }, [currentSigner, provider]);
+  }, [currentSigner]);
 };

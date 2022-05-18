@@ -3,7 +3,7 @@ import {
   createEmptyTokenWithAmount,
   defaultSettings,
   Pool, Settings,
-  TokenWithAmount
+  TokenWithAmount,
 } from '../../state';
 import { AddLiquidityActions } from '../actions/addLiquidity';
 import {
@@ -18,7 +18,7 @@ import {
   SET_TOKEN1_AMOUNT,
   SET_TOKEN2,
   SET_TOKEN2_AMOUNT,
-  SET_VALIDITY
+  SET_VALIDITY,
 } from '../actionTypes';
 
 export interface AddLiquidityState {

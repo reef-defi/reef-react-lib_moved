@@ -63,10 +63,8 @@ export const useUpdateTokensPrice = ({
             signer,
             factoryAddress,
           );
-
           const ratio = BigNumber.from(pool.reserve1).mul(1000000).div(pool.reserve2).toNumber() / 1000000;
           const sellRatio = poolRatio(sellPool);
-          const ratio = BigNumber.from(pool.reserve1).mul(1000000).div(pool.reserve2).toNumber() / 1000000;
           updateTokens(
             reefPrice * sellRatio,
             reefPrice * sellRatio * ratio,
