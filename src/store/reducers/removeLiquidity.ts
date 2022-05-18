@@ -1,9 +1,9 @@
 import {
-  createEmptyTokenWithAmount, defaultSettings, Pool, Settings, TokenWithAmount
+  createEmptyTokenWithAmount, defaultSettings, Pool, Settings, TokenWithAmount,
 } from '../../state';
 import { RemoveLiquidityActions } from '../actions';
 import {
-  SET_COMPLETE_STATUS, SET_LOADING, SET_PERCENTAGE, SET_POOL, SET_SETTINGS, SET_STATUS, SET_TOKEN1, SET_TOKEN2, SET_VALIDITY
+  SET_COMPLETE_STATUS, SET_LOADING, SET_PERCENTAGE, SET_POOL, SET_SETTINGS, SET_STATUS, SET_TOKEN1, SET_TOKEN2, SET_VALIDITY,
 } from '../actionTypes';
 
 export interface RemoveLiquidityState {

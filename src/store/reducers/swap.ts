@@ -1,7 +1,11 @@
-import { createEmptyTokenWithAmount, defaultSettings, Pool, Settings, TokenWithAmount } from '../../state';
+import {
+  createEmptyTokenWithAmount, defaultSettings, Pool, Settings, TokenWithAmount,
+} from '../../state';
 import { getInputAmount, getOutputAmount } from '../../utils';
 import { SwapAction, SwapFocus } from '../actions/swap';
-import { CLEAR_TOKEN_AMOUNTS, SET_COMPLETE_STATUS, SET_LOADING, SET_POOL, SET_STATUS, SET_TOKEN1, SET_TOKEN1_AMOUNT, SET_TOKEN2, SET_TOKEN2_AMOUNT, SET_VALIDITY, SWITCH_TOKENS } from '../actionTypes';
+import {
+  CLEAR_TOKEN_AMOUNTS, SET_COMPLETE_STATUS, SET_LOADING, SET_POOL, SET_STATUS, SET_TOKEN1, SET_TOKEN1_AMOUNT, SET_TOKEN2, SET_TOKEN2_AMOUNT, SET_VALIDITY, SWITCH_TOKENS,
+} from '../actionTypes';
 
 export interface SwapState {
   status: string;
