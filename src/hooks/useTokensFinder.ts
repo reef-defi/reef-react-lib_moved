@@ -1,9 +1,6 @@
 import { useEffect } from 'react';
 import { rpc } from '..';
-import {
-  ReefSigner, TokenWithAmount, createEmptyTokenWithAmount, reefTokenWithAmount, Token,
-} from '../state';
-import { REEF_ADDRESS } from '../utils';
+import { createEmptyTokenWithAmount, ReefSigner, reefTokenWithAmount, Token, TokenWithAmount } from '../state';
 
 interface UseTokensFinder {
   tokens?: Token[]
@@ -36,9 +33,6 @@ const findToken = async ({
   const existingToken = tokensCombined
     .find(((token) => token.address.toLowerCase() === address.toLowerCase()));
 
-  if (address === REEF_ADDRESS) {
-    console.log('Token: ', existingToken);
-  }
   if (existingToken) {
     return { ...defaultAmountValue, ...existingToken, isEmpty: false };
   }
