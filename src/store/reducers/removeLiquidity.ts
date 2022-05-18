@@ -1,10 +1,10 @@
 import {
-  createEmptyTokenWithAmount, defaultSettings, Pool, reefTokenWithAmount, Settings, TokenWithAmount,
+  createEmptyTokenWithAmount, defaultSettings, Pool, Settings, TokenWithAmount
 } from '../../state';
-import {
-  SET_COMPLETE_STATUS, SET_LOADING, SET_PERCENTAGE, SET_POOL, SET_SETTINGS, SET_STATUS, SET_TOKEN1, SET_TOKEN2, SET_VALIDITY,
-} from '../actionTypes';
 import { RemoveLiquidityActions } from '../actions';
+import {
+  SET_COMPLETE_STATUS, SET_LOADING, SET_PERCENTAGE, SET_POOL, SET_SETTINGS, SET_STATUS, SET_TOKEN1, SET_TOKEN2, SET_VALIDITY
+} from '../actionTypes';
 
 export interface RemoveLiquidityState {
   token1: TokenWithAmount;
@@ -23,7 +23,7 @@ export const initialRemoveLiquidityState: RemoveLiquidityState = {
   isLoading: false,
   isValid: false,
   settings: defaultSettings(),
-  token1: reefTokenWithAmount(),
+  token1: createEmptyTokenWithAmount(),
   token2: createEmptyTokenWithAmount(),
 };
 

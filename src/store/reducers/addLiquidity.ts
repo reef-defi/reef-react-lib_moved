@@ -2,10 +2,8 @@ import { BigNumber } from 'ethers';
 import {
   createEmptyTokenWithAmount,
   defaultSettings,
-  Pool,
-  reefTokenWithAmount,
-  Settings,
-  TokenWithAmount,
+  Pool, Settings,
+  TokenWithAmount
 } from '../../state';
 import { AddLiquidityActions } from '../actions/addLiquidity';
 import {
@@ -20,7 +18,7 @@ import {
   SET_TOKEN1_AMOUNT,
   SET_TOKEN2,
   SET_TOKEN2_AMOUNT,
-  SET_VALIDITY,
+  SET_VALIDITY
 } from '../actionTypes';
 
 export interface AddLiquidityState {
@@ -41,7 +39,7 @@ export const initialAddLiquidityState: AddLiquidityState = {
   pool: undefined,
   newPoolSupply: '',
   settings: defaultSettings(),
-  token1: reefTokenWithAmount(),
+  token1: createEmptyTokenWithAmount(),
   token2: createEmptyTokenWithAmount(),
 };
 
