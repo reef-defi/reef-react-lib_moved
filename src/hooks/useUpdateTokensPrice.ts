@@ -50,7 +50,6 @@ export const useUpdateTokensPrice = ({
         mounted.current = true;
         setIsLoading(true);
         const reefPrice = await retrieveReefCoingeckoPrice();
-
         if (token1.address === REEF_TOKEN.address) {
           const ratio = BigNumber.from(pool.reserve2).mul(1000000).div(pool.reserve1).toNumber() / 1000000;
           updateTokens(reefPrice, reefPrice * ratio);
