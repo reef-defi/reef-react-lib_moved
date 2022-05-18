@@ -22,3 +22,10 @@ export interface BasicPoolInfo {
   decimal1: number;
   decimal2: number;
 }
+
+export interface LastPoolReserves {
+  reserved_1: number;
+  reserved_2: number;
+  token_1: string;
+  token_2: string;
+}
