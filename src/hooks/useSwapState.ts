@@ -176,7 +176,7 @@ export const useSwapState = ({
     dispatch(
       setCompleteStatusAction(currentStatus, currentIsValid, currentIsLoading),
     );
-  }, [sell, buy, sell.amount, buy.amount, account?.isEvmClaimed, pool, isPoolLoading, isPriceLoading]);
+  }, [sell.amount, buy.amount, account?.isEvmClaimed, pool, isPoolLoading, isPriceLoading]);
 };
 
 interface OnSwap {

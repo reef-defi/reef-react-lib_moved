@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { rpc } from '..';
 import {
   createEmptyTokenWithAmount, ReefSigner, reefTokenWithAmount, Token, TokenWithAmount,
@@ -50,29 +50,37 @@ const findToken = async ({
 export const useTokensFinder = ({
   address1, address2, tokens, signer, setToken1, setToken2,
 }: UseTokensFinder): void => {
+  const [currentAddress1, setCurrentAddress1] = useState<string>();
+  const [currentAddress2, setCurrentAddress2] = useState<string>();
+
   useEffect(() => {
     const reset = async (): Promise<void> => {
       if (!tokens || tokens.length === 0 || !signer) {
         return;
       }
 
-      await findToken({
-        signer,
-        tokens,
-        address: address1,
-        defaultAmountValue: reefTokenWithAmount(),
-      })
-        .then(setToken1)
-        .catch((_e) => console.error(`Token: ${address1} was not found`));
-
-      await findToken({
-        signer,
-        tokens,
-        address: address2,
-        defaultAmountValue: createEmptyTokenWithAmount(),
-      })
-        .then(setToken2)
-        .catch((_e) => console.error(`Token: ${address2} was not found`));
+      if (currentAddress1 !== address1) {
+        await findToken({
+          signer,
+          tokens,
+          address: address1,
+          defaultAmountValue: reefTokenWithAmount(),
+        })
+          .then(setToken1)
+          .then(() => setCurrentAddress1(address1))
+          .catch((_e) => console.error(`Token: ${address1} was not found`));
+      }
+      if (currentAddress2 !== address2) {
+        await findToken({
+          signer,
+          tokens,
+          address: address2,
+          defaultAmountValue: createEmptyTokenWithAmount(),
+        })
+          .then(setToken2)
+          .then(() => setCurrentAddress2(address2))
+          .catch((_e) => console.error(`Token: ${address2} was not found`));
+      }
     };
     reset();
   }, [address2, address1, tokens, signer]);
