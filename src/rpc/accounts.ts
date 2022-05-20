@@ -7,10 +7,10 @@ import type {
   InjectedAccount,
   InjectedAccountWithMeta as InjectedAccountWithMetaReef,
   InjectedExtension as InjectedExtensionReef,
-} from "@reef-defi/extension-inject/types";
-import type { Signer as InjectedSigner } from "@polkadot/api/types";
-import { DeriveBalancesAccountData } from "@polkadot/api-derive/balances/types";
-import { BigNumber } from "ethers";
+} from '@reef-defi/extension-inject/types';
+import type { Signer as InjectedSigner } from '@polkadot/api/types';
+import { DeriveBalancesAccountData } from '@polkadot/api-derive/balances/types';
+import { BigNumber } from 'ethers';
 // import { firstValueFrom } from 'rxjs';
 import { web3FromSource } from '@reef-defi/extension-dapp';
 import { ensure, removeUndefinedItem } from '../utils/utils';
@@ -44,13 +44,11 @@ export const getAccountSigner = async (
 
 export const getReefCoinBalance = async (
   address: string,
-  provider: Provider
+  provider: Provider,
 ): Promise<BigNumber> => {
   const balance = await provider.api.derive.balances
     .all(address)
-    .then((res: DeriveBalancesAccountData) =>
-      BigNumber.from(res.freeBalance.toString(10))
-    );
+    .then((res: DeriveBalancesAccountData) => BigNumber.from(res.freeBalance.toString(10)));
   return balance;
 };
 
@@ -146,7 +144,7 @@ export const accountToSigner = async (
 
 export const getExtensionSigners = async (
   extensions: InjectedExtension[] | InjectedExtensionReef[],
-  provider: Provider
+  provider: Provider,
 ): Promise<ReefSigner[]> => {
   const extensionAccounts = await Promise.all(
     extensions.map(async (extension) => ({
@@ -164,9 +162,8 @@ export const getExtensionSigners = async (
 
 export const bindSigner = async (signer: Signer): Promise<void> => {
   const hasEvmAddress = await signer.isClaimed();
-  ensure(!hasEvmAddress, "Account already has EVM address!");
+  ensure(!hasEvmAddress, 'Account already has EVM address!');
   await signer.claimDefaultAccount();
 };
 
-export const getSignerIdent = (signer: ReefSigner): string =>
-  `${signer.source}_${signer.address}`;
+export const getSignerIdent = (signer: ReefSigner): string => `${signer.source}_${signer.address}`;

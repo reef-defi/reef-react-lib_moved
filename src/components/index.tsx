@@ -2,7 +2,7 @@ export * from './common';
 export * from './Pools/index';
 export * from './SelectToken';
 export * from './TokenFields';
-export * from './AddLiquidity';
+export * from './AddLiquidity/AddLiquidityComponent';
 export * from './SwapComponent';
 export * from './AccountSelector/AccountSelector';
 export * from './AccountSelector/AccountListModal';
