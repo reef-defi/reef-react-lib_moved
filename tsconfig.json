@@ -16,7 +16,8 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "jsxFactory": "React.createElement",  
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist", "example"]

@@ -144,7 +144,7 @@ export const SwapComponent = ({
   const [settings, setSettings] = useState(defaultSettings());
   const [isSwapLoading, setIsSwapLoading] = useState(false);
   const [focus, setFocus] = useState<SwapFocus>('sell');
-
+console.log('yyyyy')
   const {
     notify, onAddressChange, onTokenSelect, updateTokenState,
   } = { ...defaultOptions, ...options };

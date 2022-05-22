@@ -44,10 +44,14 @@ const getSignerEvmAddress = async (address: string, provider: Provider): Promise
   return addr;
 };
 
-const sendStatus = (to: string, token: TokenWithAmount): ButtonStatus => {
+const sendStatus = (to: string, token: TokenWithAmount, signer: ReefSigner): ButtonStatus => {
   try {
-    ensure(to.length !== 0, 'Missing destination address');
-    ensure(to.length === 42 || (to.length === 48 && to[0] === '5'), 'Incorrect destination address');
+    const toAddress = to.trim();
+    ensure(toAddress.length !== 0, 'Missing destination address');
+    ensure(toAddress.length === 42 || (toAddress.length === 48 && toAddress[0] === '5'), 'Incorrect destination address');
+    if (toAddress.startsWith('0x')) {
+      ensure(signer.isEvmClaimed, 'Bind account');
+    }
     ensure(token.amount !== '', 'Insert amount');
     ensureTokenAmount(token);
 
@@ -75,7 +79,7 @@ export const Send = ({
   }, [tokens]);
 
   const tokenContract = new Contract(token.address, ERC20, signer.signer);
-  const { text, isValid } = sendStatus(to, token);
+  const { text, isValid } = sendStatus(to, token, signer);
 
   const onTokenSelect = (newToken: Token): void => setToken({ ...createEmptyTokenWithAmount(false), ...newToken });
 
@@ -100,10 +104,10 @@ export const Send = ({
       }
 
       notify('Balances will reload after blocks are finalized.', 'info');
-      notify('Tokens were successfull send!');
+      notify('Tokens sent successfully!');
     } catch (e) {
       console.error(e);
-      notify(`There was an error when sending tokens: ${e.message}`, 'error');
+      notify(`There was an error while sending tokens: ${e.message}`, 'error');
     } finally {
       setLoading(false);
     }

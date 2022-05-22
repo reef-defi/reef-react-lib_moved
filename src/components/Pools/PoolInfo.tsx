@@ -102,7 +102,7 @@ export const PoolInfo = ({
     : '-';
 
   return (
-    <>
+    <div>
       <MT size="2" />
       <Card.Card>
         <div className="d-flex flex-column">
@@ -168,6 +168,6 @@ export const PoolInfo = ({
           amount={fee2}
         />
       </Card.Card>
-    </>
+    </div>
   );
 };
