@@ -101,3 +101,4 @@ export const sendToNativeAddress = (
 };
 
 export const getExtrinsicUrl = (hash: string, network: Network = availableNetworks.mainnet): string => `${network.reefscanFrontendUrl}/extrinsic/${hash}`;
+export const getContractUrl = (address: string, network: Network = availableNetworks.mainnet): string => `${network.reefscanFrontendUrl}/contract/${address}`;
