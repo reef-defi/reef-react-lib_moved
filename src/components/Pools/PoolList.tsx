@@ -50,7 +50,7 @@ export const PoolList = ({ openAddLiquidity, openPool }: PoolList): JSX.Element 
     : [];
 
   return (
-    <>
+    <div>
       <ContentBetween>
         <BoldText size={1.6}>Pools</BoldText>
         <Input
@@ -103,6 +103,6 @@ export const PoolList = ({ openAddLiquidity, openPool }: PoolList): JSX.Element 
           </div>
         </div>
       </Card>
-    </>
+    </div>
   );
 };

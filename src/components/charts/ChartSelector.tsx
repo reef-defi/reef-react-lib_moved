@@ -25,7 +25,7 @@ const SelectButton: React.FC<SelectedButton> = ({ name, onClick, selected }): JS
   </button>
 );
 
-const ChartSelector = (pool: BasicPoolInfo): JSX.Element => {
+export const ChartSelector = (pool: BasicPoolInfo): JSX.Element => {
   const [chart, setChart] = useState<ChartSwitch>('Token 1');
   const {
     address,
@@ -37,7 +37,7 @@ const ChartSelector = (pool: BasicPoolInfo): JSX.Element => {
     symbol2,
   } = pool;
   return (
-    <>
+    <div>
       <div className="d-flex justify-content-end mt-1 me-1">
         <div className="btn-group">
           <SelectButton name="Token 1" onClick={setChart} selected={chart} />
@@ -78,8 +78,6 @@ const ChartSelector = (pool: BasicPoolInfo): JSX.Element => {
           />
         )}
       </div>
-    </>
+    </div>
   );
 };
-
-export default ChartSelector;

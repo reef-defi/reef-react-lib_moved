@@ -152,9 +152,9 @@ export const TokenAmountFieldMax = ({
       </MiniText>
       <MiniText>
         {!isEmpty
-          && !!price
+          && !!price && price > 0
           && !!getData(price)
-          && !!amountFl
+          && !!amountFl && amountFl > 0
           && canCalcValue(amountFl, price)
           && `~$ ${(amountFl * price).toFixed(4)}`}
       </MiniText>

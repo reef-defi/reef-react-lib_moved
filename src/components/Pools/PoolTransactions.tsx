@@ -67,7 +67,7 @@ export const PoolTransactions = ({ address, reefscanFrontendUrl } : PoolTransact
     : [];
 
   return (
-    <>
+    <div>
       <MT size="4" />
       <BoldText size={1.6}>Transactions</BoldText>
       <MT size="2" />
@@ -76,7 +76,7 @@ export const PoolTransactions = ({ address, reefscanFrontendUrl } : PoolTransact
           loadingTransactions
             ? <Loading />
             : (
-              <>
+              <div>
                 <table className="table table-hover">
                   <thead>
                     <tr>
@@ -111,10 +111,10 @@ export const PoolTransactions = ({ address, reefscanFrontendUrl } : PoolTransact
                     <EmptyButton onClick={() => setPageIndex(maxPage - 1)}>{'>>'}</EmptyButton>
                   </div>
                 </div>
-              </>
+              </div>
             )
         }
       </Card.Card>
-    </>
+    </div>
   );
 };

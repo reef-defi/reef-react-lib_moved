@@ -192,19 +192,67 @@ export const toBalance = ({ balance, decimals }: ToBalance): number => {
 
 export const toUnits = ({ balance, decimals }: ToBalance): string => utils.formatUnits(balance.toString(), decimals);
 
+export const exponentNrSplit = (numberVal: string): { isExponent: boolean, split: string[] } => {
+  const split = numberVal.split(/[eE]/);
+  return {
+    isExponent: split.length === 2,
+    split,
+  };
+};
+export const noExponents = (valueNr: string): string => {
+  let [leader, mag, multiplier, num, sign, str, z, expVal, res] = Array(0);
+
+  const { split: data, isExponent } = exponentNrSplit(valueNr);
+  if (!isExponent) {
+    return valueNr;
+  }
+  z = '';
+  sign = valueNr.slice(0, 1) === '-' ? '-' : '';
+  str = data[0].replace('.', '');
+  expVal = data[1].startsWith('+') ? data[1].substring(1) : data[1];
+  mag = Number(expVal) + 1;
+  if (mag <= 0) {
+    z = `${sign}0.`;
+    while (!(mag >= 0)) {
+      z += '0';
+      mag += 1;
+    }
+
+    num = z + str.replace(/^-/, '');
+    return num;
+  }
+  if (str.length <= mag) {
+    mag -= str.length;
+    while (!(mag <= 0)) {
+      z += 0;
+      mag -= 1;
+    }
+    num = str + z;
+    return num;
+  }
+  leader = utils.parseEther(data[0]);
+  multiplier = BigNumber.from('10').pow(BigNumber.from(expVal));
+  res = leader.mul(multiplier).toString();
+  return utils.formatEther(res).toString();
+};
+
 export const toDecimalPlaces = (
   value: string,
   maxDecimalPlaces: number,
 ): string => {
   const decimalDelim = value.indexOf('.');
+  const exponentSplit = exponentNrSplit(value);
   if (
     !value
-    || decimalDelim < 1
+    || (decimalDelim < 1 && !exponentSplit.isExponent)
     || value.length - decimalDelim < maxDecimalPlaces
   ) {
     return value;
   }
-  return value.substring(0, decimalDelim + 1 + maxDecimalPlaces);
+
+  const noExpValue = noExponents(value);
+
+  return noExpValue.substring(0, decimalDelim + 1 + maxDecimalPlaces);
 };
 
 export const poolRatio = ({ token1, token2 }: Pool): number => toBalance(token2) / toBalance(token1);

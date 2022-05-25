@@ -123,10 +123,9 @@ export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindCom
                   )
                 </MiniText>
                 {' '}
-                already
                 has Ethereum VM address
                 <br />
-                {bindFor.evmAddress}
+                {toAddressShortDisplay(bindFor.evmAddress)}
                 <br />
                 Use this address ONLY on Reef chain.
               </p>
