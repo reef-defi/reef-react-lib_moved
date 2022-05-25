@@ -41,6 +41,9 @@ export interface DefaultOptions {
 
 // export type PartialOptions = SelectedPartial<DefaultOptions, "back" | "notify">;
 export type PartialOptions = Partial<DefaultOptions>;
+export type AddressToNumber<T> = {
+  [address: string]: T;
+};
 
 export const defaultOptions: DefaultOptions = {
   back: () => {},
