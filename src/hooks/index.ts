@@ -11,3 +11,8 @@ export * from './useObservableState';
 export * from './useLoader';
 export * from './useAllTokens';
 export * from './poolHooks';
+export * from './useSwapState';
+export * from './useAddLiquidity';
+export * from './useRemoveLiquidity';
+export * from './useAllPools';
+export * from './usePriceEstimator';

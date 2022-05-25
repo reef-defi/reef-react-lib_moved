@@ -1,27 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useLoadPool } from '../../hooks/useLoadPool';
-import { approveAmount, getReefswapRouter } from '../../rpc';
+import React from 'react';
 import {
-  defaultOptions,
-  DefaultOptions,
-  defaultSettings,
-  Network,
-  Pool,
-  ReefSigner,
   REMOVE_DEFAULT_SLIPPAGE_TOLERANCE,
   resolveSettings,
-  Token,
 } from '../../state';
+import { RemoveLiquidityComponentActions, RemoveLiquidityState } from '../../store';
 import {
-  ButtonStatus,
-  calculateDeadline,
-  calculatePoolRatio,
-  ensure,
-  ensureVoidRun,
-  removePoolTokenShare,
-  removeSupply,
-  showRemovePoolTokenShare,
-  transformAmount,
+  calculatePoolRatio, showRemovePoolTokenShare,
 } from '../../utils';
 import { DangerAlert } from '../common/Alert';
 import { Button } from '../common/Button';
@@ -46,129 +30,29 @@ import { TransactionSettings } from '../TransactionSettings';
 import RemoveConfirmationModal from './RemoveConfirmationModal';
 
 interface RemoveLiquidityComponent {
-  token1: Token;
-  token2: Token;
-  network: Network;
-  signer?: ReefSigner;
-  options?: Partial<DefaultOptions>;
+  state: RemoveLiquidityState;
+  actions: RemoveLiquidityComponentActions
 }
 
-const status = (percentageAmount: number, pool?: Pool): ButtonStatus => {
-  try {
-    ensure(!!pool, 'Invalid Pair');
-    ensure(pool?.userPoolBalance !== '0', 'Insufficient pool balance');
-    ensure(percentageAmount > 0, 'Enter an amount');
-    return {
-      isValid: true,
-      text: 'Confirm remove',
-    };
-  } catch (e) {
-    return {
-      isValid: false,
-      text: e.message,
-    };
-  }
-};
-
 export const RemoveLiquidityComponent = ({
-  token1,
-  token2,
-  signer,
-  network,
-  options,
-}: RemoveLiquidityComponent): JSX.Element => {
-  const mounted = useRef(true);
-  const [isRemoving, setIsRemoving] = useState(false);
-  const [loadingStatus, setLoadingStatus] = useState('');
-  const [settings, setSettings] = useState(defaultSettings());
-  const [percentageAmount, setPercentageAmount] = useState(0);
-
-  const { notify, back } = { ...defaultOptions, ...options };
-  const [pool, isPoolLoading] = useLoadPool(
+  state: {
+    settings,
+    pool,
+    isLoading,
+    isValid,
+    percentage: percentageAmount,
+    status,
     token1,
     token2,
-    network.factoryAddress,
-    signer?.signer,
-  );
-  const { isValid, text } = status(percentageAmount, pool);
-  const { percentage, deadline } = resolveSettings(
-    settings,
-    REMOVE_DEFAULT_SLIPPAGE_TOLERANCE,
-  );
-
-  const isLoading = isRemoving || isPoolLoading;
-
-  const ensureMount = ensureVoidRun(mounted.current);
-
-  useEffect(
-    () => () => {
-      mounted.current = false;
-    },
-    [],
-  );
-
-  const onRemove = async (): Promise<void> => {
-    if (!pool || percentageAmount === 0 || !signer) {
-      return;
-    }
-
-    const reefswapRouter = getReefswapRouter(
-      network.routerAddress,
-      signer.signer,
-    );
-    const normalRemovedSupply = removeSupply(
-      percentageAmount,
-      pool.userPoolBalance,
-      18,
-    );
-    const removedLiquidity = transformAmount(18, `${normalRemovedSupply}`);
-
-    const minimumTokenAmount1 = removePoolTokenShare(
-      Math.max(percentageAmount - percentage, 0),
-      pool.token1,
-    );
-    const minimumTokenAmount2 = removePoolTokenShare(
-      Math.max(percentageAmount - percentage, 0),
-      pool.token2,
-    );
-
-    Promise.resolve()
-      .then(() => {
-        mounted.current = true;
-      })
-      .then(() => setIsRemoving(true))
-      .then(() => setLoadingStatus('Approving remove'))
-      .then(() => approveAmount(
-        pool.poolAddress,
-        network.routerAddress,
-        removedLiquidity,
-        signer.signer,
-      ))
-      .then(() => setLoadingStatus('Removing supply'))
-      .then(() => reefswapRouter.removeLiquidity(
-        pool.token1.address,
-        pool.token2.address,
-        removedLiquidity,
-        minimumTokenAmount1,
-        minimumTokenAmount2,
-        signer.evmAddress,
-        calculateDeadline(deadline),
-      ))
-      .then(() => {
-        notify('Balances will reload after blocks are finalized.', 'info');
-        notify('Liquidity removed successfully!');
-      })
-      .catch((e) => {
-        notify(`There was something wrong when removing liquidity: ${e.message}`, 'error');
-        console.error('Remove failed');
-        console.error(e);
-      })
-      .finally(() => {
-        ensureMount(setIsRemoving, false);
-        ensureMount(setLoadingStatus, '');
-      });
-  };
-
+  },
+  actions: {
+    back,
+    onRemoveLiquidity,
+    setPercentage,
+    setSettings,
+  },
+}: RemoveLiquidityComponent): JSX.Element => {
+  const { percentage } = resolveSettings(settings);
   return (
     <ComponentCenter>
       <Card>
@@ -192,15 +76,15 @@ export const RemoveLiquidityComponent = ({
           <PercentageRangeAmount
             disabled={!pool}
             value={percentageAmount}
-            onChange={(value) => setPercentageAmount(value)}
+            onChange={(value) => setPercentage(value)}
           />
           <MT size="2" />
           <MX size="3">
             <ContentBetween>
-              <Button onClick={() => setPercentageAmount(25)}>25%</Button>
-              <Button onClick={() => setPercentageAmount(50)}>50%</Button>
-              <Button onClick={() => setPercentageAmount(75)}>75%</Button>
-              <Button onClick={() => setPercentageAmount(100)}>100%</Button>
+              <Button onClick={() => setPercentage(25)}>25%</Button>
+              <Button onClick={() => setPercentage(50)}>50%</Button>
+              <Button onClick={() => setPercentage(75)}>75%</Button>
+              <Button onClick={() => setPercentage(100)}>100%</Button>
             </ContentBetween>
           </MX>
         </SubCard>
@@ -250,12 +134,12 @@ export const RemoveLiquidityComponent = ({
         <MT size="2" />
         <OpenModalButton
           id="remove-modal-toggle"
-          disabled={!isValid || isPoolLoading}
+          disabled={!isValid || isLoading}
         >
           {isLoading ? (
-            <LoadingButtonIconWithText text={loadingStatus} />
+            <LoadingButtonIconWithText text={status} />
           ) : (
-            text
+            status
           )}
         </OpenModalButton>
         <RemoveConfirmationModal
@@ -263,7 +147,7 @@ export const RemoveLiquidityComponent = ({
           slipperage={percentage}
           id="remove-modal-toggle"
           percentageAmount={percentageAmount}
-          onRemove={onRemove}
+          onRemove={onRemoveLiquidity}
         />
       </Card>
     </ComponentCenter>

@@ -24,9 +24,13 @@ interface Fee {
 interface Reserves {
   reserved_1: number;
   reserved_2: number;
-  total_supply: number;
 }
-
+interface AllPool extends Reserves {
+  pool: {
+    token_1: string;
+    token_2: string;
+  }
+}
 interface ContractData {
   symbol: string;
   name: string;
@@ -128,6 +132,7 @@ export type PoolsQuery = { verified_pool: Pool[] };
 export type PoolHourFeeQuery = { pool_hour_fee: Fee[] };
 export type PoolTvlQuery = { pool_hour_supply: TVLData[] };
 export type PoolReservesQuery = { pool_event: Reserves[] };
+export type AllPoolSubscription = { pool_event: AllPool[] }
 export type PoolSupplyQuery = { pool_minute_supply: Supply[] };
 export type PoolHourVolumeQuery = { pool_hour_volume: TimeframedVolume[] };
 export type PoolTransactionQuery = { verified_pool_event: PoolTransaction[] };
@@ -481,6 +486,40 @@ subscription fee($address: String!, $fromTime: timestamptz!) {
     fee_1
     fee_2
     timeframe
+  }
+}
+`;
+
+export const POOL_RESERVES_SUBSCRITION = gql`
+  subscription pool_event {
+    pool_event(
+      where: { type: { _eq: "Sync" } }
+      distinct_on: [pool_id]
+      order_by: { timestamp: desc, pool_id: asc }
+    ) {
+      reserved_1
+      reserved_2
+      pool {
+        token_1
+        token_2
+      }
+    }
+  }
+`;
+// Subscriptions
+export const ALL_POOL_SUBSCRITION = gql`
+subscription pool_event {
+  pool_event(
+    where: { type: { _eq: "Sync" } }
+    distinct_on: [pool_id]
+    order_by: { timestamp: desc, pool_id: asc }
+  ) {
+    reserved_1
+    reserved_2
+    pool {
+      token_1
+      token_2
+    }
   }
 }
 `;

@@ -9,7 +9,7 @@ import {
 } from '../common/Display';
 import { InputAmount } from '../common/Input';
 import { ColorText, MiniText } from '../common/Text';
-import SelectToken from '../SelectToken';
+import { SelectToken } from '../SelectToken';
 import { getData } from '../../utils';
 
 interface TokenAmountFieldProps {
@@ -152,9 +152,9 @@ export const TokenAmountFieldMax = ({
       </MiniText>
       <MiniText>
         {!isEmpty
-          && !!price
+          && !!price && price > 0
           && !!getData(price)
-          && !!amountFl
+          && !!amountFl && amountFl > 0
           && canCalcValue(amountFl, price)
           && `~$ ${(amountFl * price).toFixed(4)}`}
       </MiniText>
