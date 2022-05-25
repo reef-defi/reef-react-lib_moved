@@ -17,7 +17,7 @@ export const useUpdateTokensPrice = ({
   tokenPrices,
 }: UpdateTokensPriceHook): void => {
   useEffect(() => {
-    setToken1({...token1, price: tokenPrices[token1.address] || 0})
-    setToken2({...token2, price: tokenPrices[token2.address] || 0})
-  }, [token1.address, token2.address, tokenPrices])
+    setToken1({ ...token1, price: tokenPrices[token1.address] || 0 });
+    setToken2({ ...token2, price: tokenPrices[token2.address] || 0 });
+  }, [token1.address, token2.address, tokenPrices]);
 };
