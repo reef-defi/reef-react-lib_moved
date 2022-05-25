@@ -505,7 +505,7 @@ export const POOL_RESERVES_SUBSCRITION = gql`
       }
     }
   }
-`
+`;
 // Subscriptions
 export const ALL_POOL_SUBSCRITION = gql`
 subscription pool_event {

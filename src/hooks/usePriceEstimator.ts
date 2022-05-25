@@ -1,6 +1,6 @@
-import BigNumber from "bignumber.js";
-import { LastPoolReserves, Token } from "../state";
-import { REEF_ADDRESS } from "../utils";
+import BigNumber from 'bignumber.js';
+import { LastPoolReserves, Token } from '../state';
+import { REEF_ADDRESS } from '../utils';
 
 type AddressToNumber<T> = {
   [address: string]: T;
@@ -9,48 +9,33 @@ type AddressToNumber<T> = {
 const emptyMatrix = (
   width: number,
   height: number,
-  defaultValue = 0
-): number[][] =>
-  Array(height)
-    .fill(undefined)
-    .map(() => Array(width).fill(defaultValue));
+  defaultValue = 0,
+): number[][] => Array(height)
+  .fill(undefined)
+  .map(() => Array(width).fill(defaultValue));
 
-const dot = (matrix: number[][], vector: number[]): number[] =>
-  matrix.map((row) =>
-    row.reduce((acc, current, index) => acc + current * vector[index], 0)
-  );
+const dot = (matrix: number[][], vector: number[]): number[] => matrix.map((row) => row.reduce((acc, current, index) => acc + current * vector[index], 0));
 
-const createTokenPositions = (tokens: Token[]): AddressToNumber<number> =>
-  tokens.reduce(
-    (prev, curr, index) => ({ ...prev, [curr.address]: index }),
-    {}
-  );
+const createTokenPositions = (tokens: Token[]): AddressToNumber<number> => tokens.reduce(
+  (prev, curr, index) => ({ ...prev, [curr.address]: index }),
+  {},
+);
 
 const findVerifiedPools = (
   pools: LastPoolReserves[],
-  tokens: Token[]
-): LastPoolReserves[] =>
-  pools.filter(
-    ({ token_1, token_2 }) =>
-      tokens.find((token) => token.address === token_1) !== undefined &&
-      tokens.find((token) => token.address === token_2) !== undefined
-  );
+  tokens: Token[],
+): LastPoolReserves[] => pools.filter(
+  ({ token_1, token_2 }) => tokens.find((token) => token.address === token_1) !== undefined
+      && tokens.find((token) => token.address === token_2) !== undefined,
+);
 
-const findPoolTokens = (pools: LastPoolReserves[], tokens: Token[]): Token[] =>
-  tokens.filter((token) =>
-    pools.find(
-      ({ token_1, token_2 }) =>
-        token.address === token_1 || token.address === token_2
-    )
-  );
+const findPoolTokens = (pools: LastPoolReserves[], tokens: Token[]): Token[] => tokens.filter((token) => pools.find(
+  ({ token_1, token_2 }) => token.address === token_1 || token.address === token_2,
+));
 
 const normalizeMatrixByNodeDegree = (matrix: number[][]): number[][] => {
-  const matrixRowSum = matrix.map((row) =>
-    row.reduce((acc, col) => acc + (col == 0 ? 0 : 1), 0)
-  );
-  return matrix.map((row, index) =>
-    row.map((col) => col / matrixRowSum[index])
-  );
+  const matrixRowSum = matrix.map((row) => row.reduce((acc, col) => acc + (col === 0 ? 0 : 1), 0));
+  return matrix.map((row, index) => row.map((col) => col / matrixRowSum[index]));
 };
 
 const extractTokenPrices = (tokens: Token[], priceVector: number[], tokenPosition: AddressToNumber<number>): AddressToNumber<number> => tokens.reduce(
@@ -58,14 +43,14 @@ const extractTokenPrices = (tokens: Token[], priceVector: number[], tokenPositio
     ...prev,
     [curr.address]: priceVector[tokenPosition[curr.address]],
   }),
-  {}
+  {},
 );
 
 export const estimatePrice = (
   tokens: Token[],
   pools: LastPoolReserves[],
-  reefPrice: number
-) => {
+  reefPrice: number,
+): AddressToNumber<number> => {
   if (tokens.length === 0 || pools.length === 0) {
     return {};
   }
@@ -84,7 +69,9 @@ export const estimatePrice = (
   priceVector[reefTokenPointer] = reefPrice;
 
   // Setting reserved matrix
-  verifiedPools.forEach(({ reserved_1, reserved_2, token_1, token_2 }) => {
+  verifiedPools.forEach(({
+    reserved_1, reserved_2, token_1, token_2,
+  }) => {
     const position1 = tokenPosition[token_1];
     const position2 = tokenPosition[token_2];
 
@@ -106,7 +93,7 @@ export const estimatePrice = (
   // Here the distribution of pool2 is almost non-existing
   ratioMatrix = normalizeMatrixByNodeDegree(ratioMatrix);
 
-  for (let iter = 0; iter < 50; iter++) {
+  for (let iter = 0; iter < 50; iter += 1) {
     // Setting locked price of reef token
     priceVector = dot(ratioMatrix, priceVector);
     priceVector[reefTokenPointer] = reefPrice;
