@@ -2,6 +2,7 @@ import { BigNumber } from 'ethers';
 import { Dispatch, useEffect } from 'react';
 import { approveTokenAmount, getReefswapRouter } from '../rpc';
 import {
+  AddressToNumber,
   ensureTokenAmount,
   Network,
   NotifyFun,
@@ -93,6 +94,7 @@ interface UseSwapState {
   tokens: Token[];
   network?: Network;
   account?: ReefSigner;
+  tokenPrices: AddressToNumber<number>;
   dispatch: Dispatch<SwapAction>;
 }
 export const useSwapState = ({
@@ -102,6 +104,7 @@ export const useSwapState = ({
   network,
   address1,
   address2,
+  tokenPrices,
   dispatch,
 }: UseSwapState): void => {
   const {
@@ -135,12 +138,9 @@ export const useSwapState = ({
     setToken1: setSell,
   });
   const isPriceLoading = useUpdateTokensPrice({
-    pool,
+    tokenPrices,
     token1: sell,
     token2: buy,
-    tokens,
-    signer: account?.signer,
-    factoryAddress: network?.factoryAddress || '',
     setToken1: setSell,
     setToken2: setBuy,
   });
@@ -158,9 +158,6 @@ export const useSwapState = ({
     ];
     if (isPoolLoading) {
       currentStatus = 'Loading pool';
-      currentIsLoading = true;
-    } else if (isPriceLoading) {
-      currentStatus = 'Loading prices';
       currentIsLoading = true;
     } else {
       const { isValid, text } = swapStatus(

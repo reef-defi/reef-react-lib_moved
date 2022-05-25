@@ -2,6 +2,7 @@ import { BigNumber } from 'ethers';
 import { Dispatch, useEffect } from 'react';
 import { approveTokenAmount, getReefswapRouter } from '../rpc';
 import {
+  AddressToNumber,
   Network,
   NotifyFun, ReefSigner,
   resolveSettings,
@@ -45,6 +46,7 @@ interface UseAddLiquidityState {
   tokens: Token[];
   network?: Network;
   signer?: ReefSigner;
+  tokenPrices: AddressToNumber<number>;
   dispatch: Dispatch<AddLiquidityActions>;
 }
 
@@ -81,6 +83,7 @@ export const useAddLiquidity = ({
   tokens,
   signer,
   network,
+  tokenPrices,
 }: UseAddLiquidityState): void => {
   const {
     token1, token2, pool, isLoading, isValid,
@@ -111,14 +114,11 @@ export const useAddLiquidity = ({
   useUpdateBalance(token2, tokens, setToken2);
   // update token prices
   const isPriceLoading = useUpdateTokensPrice({
-    pool,
     token1,
     token2,
-    tokens,
-    signer: signer?.signer,
+    tokenPrices,
     setToken1,
     setToken2,
-    factoryAddress: network?.factoryAddress || '',
   });
   // update liquidity amount based on price
   useUpdateLiquidityAmount({
@@ -147,9 +147,6 @@ export const useAddLiquidity = ({
     ];
     if (isPoolLoading) {
       currentStatus = 'Loading pool';
-      currentIsLoading = true;
-    } else if (isPriceLoading) {
-      currentStatus = 'Loading prices';
       currentIsLoading = true;
     } else {
       const { isValid, text } = status(

@@ -1,10 +1,6 @@
 import BigNumber from 'bignumber.js';
-import { LastPoolReserves, Token } from '../state';
+import { AddressToNumber, LastPoolReserves, Token } from '../state';
 import { REEF_ADDRESS } from '../utils';
-
-type AddressToNumber<T> = {
-  [address: string]: T;
-};
 
 const emptyMatrix = (
   width: number,
