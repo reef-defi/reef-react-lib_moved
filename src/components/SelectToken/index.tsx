@@ -49,7 +49,7 @@ const COMMON_BASES = ['0x0000000000000000000000000000000001000000'];
 
 const emptyFunction = async (): Promise<void> => {};
 
-const SelectToken = ({
+export const SelectToken = ({
   id = 'exampleModal',
   tokens,
   selectedTokenName,
@@ -145,7 +145,7 @@ const SelectToken = ({
       <button
         type="button"
         className={`btn btn-select border-rad ${fullWidth && 'w-100'} ${
-          isEmpty ? 'btn-reef' : 'btn-token-select'
+          isEmpty ? '' : 'btn-token-select'
         }`}
         data-bs-toggle="modal"
         data-bs-target={`#${id}`}
@@ -199,5 +199,3 @@ const SelectToken = ({
     </div>
   );
 };
-
-export default SelectToken;

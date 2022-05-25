@@ -50,13 +50,11 @@ export const useUpdateTokensPrice = ({
         mounted.current = true;
         setIsLoading(true);
         const reefPrice = await retrieveReefCoingeckoPrice();
-
-        // const baseRatio = poolRatio(pool);
         if (token1.address === REEF_TOKEN.address) {
-          const ratio = BigNumber.from(pool.reserve1).mul(1000000).div(pool.reserve2).toNumber() / 1000000;
+          const ratio = BigNumber.from(pool.reserve2).mul(1000000).div(pool.reserve1).toNumber() / 1000000;
           updateTokens(reefPrice, reefPrice * ratio);
         } else if (token2.address === REEF_TOKEN.address) {
-          const ratio = BigNumber.from(pool.reserve2).mul(1000000).div(pool.reserve1).toNumber() / 1000000;
+          const ratio = BigNumber.from(pool.reserve1).mul(1000000).div(pool.reserve2).toNumber() / 1000000;
           updateTokens(reefPrice * ratio, reefPrice);
         } else {
           const sellPool = await loadPool(
@@ -65,7 +63,6 @@ export const useUpdateTokensPrice = ({
             signer,
             factoryAddress,
           );
-
           const ratio = BigNumber.from(pool.reserve1).mul(1000000).div(pool.reserve2).toNumber() / 1000000;
           const sellRatio = poolRatio(sellPool);
           updateTokens(
@@ -74,8 +71,7 @@ export const useUpdateTokensPrice = ({
           );
         }
       } catch (error) {
-        console.error(error);
-        updateTokens(1, 1);
+        updateTokens(0, 0);
       } finally {
         ensureMount(setIsLoading, false);
       }
