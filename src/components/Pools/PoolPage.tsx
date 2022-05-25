@@ -8,7 +8,7 @@ import { Button } from '../common/Button';
 import { formatAmount } from '../../utils/math';
 import { BasicPoolInfo } from '../../state/pool';
 import { PoolInfo } from './PoolInfo';
-import {ChartSelector} from '../charts/ChartSelector';
+import { ChartSelector } from '../charts/ChartSelector';
 import { PoolTransactions } from './PoolTransactions';
 
 type Open = (address1: string, address2: string) => void;
