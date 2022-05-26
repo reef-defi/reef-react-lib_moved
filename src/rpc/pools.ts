@@ -59,8 +59,8 @@ export const loadPool = async (
     totalSupply: totalSupply.toString(),
     userPoolBalance: liquidity.toString(),
     minimumLiquidity: minimumLiquidity.toString(),
-    token1: {...token1, balance: tokenBalance1},
-    token2: {...token2, balance: tokenBalance2},
+    token1: { ...token1, balance: tokenBalance1 },
+    token2: { ...token2, balance: tokenBalance2 },
   };
 };
 
