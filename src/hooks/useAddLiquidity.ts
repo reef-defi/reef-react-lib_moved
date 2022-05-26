@@ -7,11 +7,11 @@ import {
   NotifyFun, ReefSigner,
   resolveSettings,
   Token,
-  TokenWithAmount
+  TokenWithAmount,
 } from '../state';
 import {
   AddLiquidityActions,
-  SetNewPoolSupplyAction
+  SetNewPoolSupplyAction,
 } from '../store/actions/addLiquidity';
 import {
   clearTokenAmountsAction,
@@ -20,7 +20,7 @@ import {
   setPoolAction,
   setStatusAction,
   setToken1Action,
-  setToken2Action
+  setToken2Action,
 } from '../store/actions/defaultActions';
 import { AddLiquidityState } from '../store/reducers/addLiquidity';
 import {
@@ -31,7 +31,7 @@ import {
   calculatePoolSupply,
   ensure,
   ensureAmount,
-  errorHandler
+  errorHandler,
 } from '../utils';
 import { useKeepTokenUpdated } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';

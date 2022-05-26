@@ -9,11 +9,11 @@ import {
   Pool,
   ReefSigner,
   resolveSettings, Token,
-  TokenWithAmount
+  TokenWithAmount,
 } from '../state';
 import { SwapAction } from '../store';
 import {
-  clearTokenAmountsAction, setCompleteStatusAction, setLoadingAction, setPoolAction, setStatusAction, setToken1Action, setToken2Action
+  clearTokenAmountsAction, setCompleteStatusAction, setLoadingAction, setPoolAction, setStatusAction, setToken1Action, setToken2Action,
 } from '../store/actions/defaultActions';
 import { SwapState } from '../store/reducers/swap';
 import {
@@ -22,7 +22,7 @@ import {
   calculateAmountWithPercentage,
   calculateDeadline,
   convert2Normal,
-  ensure
+  ensure,
 } from '../utils';
 import { useKeepTokenUpdated } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';

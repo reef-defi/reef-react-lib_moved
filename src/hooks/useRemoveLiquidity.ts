@@ -2,13 +2,13 @@ import { Dispatch, useEffect } from 'react';
 import { approveAmount, getReefswapRouter } from '../rpc';
 import {
   AddressToNumber,
-  Network, NotifyFun, Pool, ReefSigner, REMOVE_DEFAULT_SLIPPAGE_TOLERANCE, resolveSettings, Token
+  Network, NotifyFun, Pool, ReefSigner, REMOVE_DEFAULT_SLIPPAGE_TOLERANCE, resolveSettings, Token,
 } from '../state';
 import {
-  RemoveLiquidityActions, RemoveLiquidityState, setCompleteStatusAction, setLoadingAction, setPercentageAction, setPoolAction, setStatusAction, setToken1Action, setToken2Action
+  RemoveLiquidityActions, RemoveLiquidityState, setCompleteStatusAction, setLoadingAction, setPercentageAction, setPoolAction, setStatusAction, setToken1Action, setToken2Action,
 } from '../store';
 import {
-  ButtonStatus, calculateDeadline, ensure, removePoolTokenShare, removeSupply, transformAmount
+  ButtonStatus, calculateDeadline, ensure, removePoolTokenShare, removeSupply, transformAmount,
 } from '../utils';
 import { useKeepTokenUpdated } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
@@ -54,8 +54,8 @@ export const useRemoveLiquidity = ({
     percentage, token1, token2, pool, isLoading, isValid, status,
   } = state;
   // Updating tokens
-  useKeepTokenUpdated(address1, tokens, tokenPrices, (token) => dispatch(setToken1Action(token)))
-  useKeepTokenUpdated(address2, tokens, tokenPrices, (token) => dispatch(setToken2Action(token)))
+  useKeepTokenUpdated(address1, tokens, tokenPrices, (token) => dispatch(setToken1Action(token)));
+  useKeepTokenUpdated(address2, tokens, tokenPrices, (token) => dispatch(setToken2Action(token)));
   // Find pool
   const [loadedPool, isPoolLoading] = useLoadPool(
     token1,
