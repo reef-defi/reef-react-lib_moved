@@ -33,11 +33,9 @@ import {
   ensureAmount,
   errorHandler,
 } from '../utils';
+import { useKeepTokenUpdated } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
-import { useTokensFinder } from './useTokensFinder';
 import { useUpdateLiquidityAmount } from './useUpdateAmount';
-import { useUpdateBalance } from './useUpdateBalance';
-import { useUpdateTokensPrice } from './useUpdateTokensPrice';
 
 interface UseAddLiquidityState {
   address1: string;
@@ -100,26 +98,18 @@ export const useAddLiquidity = ({
   const setToken2 = (token: TokenWithAmount): void => dispatch(setToken2Action(token));
 
   // find and set tokens based on addresses
-  useTokensFinder({
-    address1,
-    address2,
-    tokens,
-    signer,
-    setToken1,
-    setToken2,
-  });
-  // update token1 balance
-  useUpdateBalance(token1, tokens, setToken1);
-  // update token2 balance
-  useUpdateBalance(token2, tokens, setToken2);
-  // update token prices
-  const isPriceLoading = useUpdateTokensPrice({
-    token1,
-    token2,
-    tokenPrices,
-    setToken1,
-    setToken2,
-  });
+  // useTokensFinder({
+  //   address1,
+  //   address2,
+  //   tokens,
+  //   signer,
+  //   setToken1,
+  //   setToken2,
+  // });
+  // Keeping tokens updated
+  useKeepTokenUpdated(address1, tokens, tokenPrices, setToken1);
+  useKeepTokenUpdated(address2, tokens, tokenPrices, setToken2);
+
   // update liquidity amount based on price
   useUpdateLiquidityAmount({
     pool,
@@ -167,7 +157,6 @@ export const useAddLiquidity = ({
     signer?.isEvmClaimed,
     pool,
     isPoolLoading,
-    isPriceLoading,
   ]);
 };
 
