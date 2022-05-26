@@ -1,16 +1,17 @@
 import { Dispatch, useEffect } from 'react';
-import { getReefswapRouter, approveAmount } from '../rpc';
+import { approveAmount, getReefswapRouter } from '../rpc';
 import {
-  Network, NotifyFun, Pool, ReefSigner, REMOVE_DEFAULT_SLIPPAGE_TOLERANCE, resolveSettings, Token,
+  AddressToNumber,
+  Network, NotifyFun, Pool, ReefSigner, REMOVE_DEFAULT_SLIPPAGE_TOLERANCE, resolveSettings, Token
 } from '../state';
 import {
-  RemoveLiquidityActions, RemoveLiquidityState, setCompleteStatusAction, setLoadingAction, setPercentageAction, setPoolAction, setStatusAction, setToken1Action, setToken2Action,
+  RemoveLiquidityActions, RemoveLiquidityState, setCompleteStatusAction, setLoadingAction, setPercentageAction, setPoolAction, setStatusAction, setToken1Action, setToken2Action
 } from '../store';
 import {
-  ButtonStatus, calculateDeadline, ensure, removePoolTokenShare, removeSupply, transformAmount,
+  ButtonStatus, calculateDeadline, ensure, removePoolTokenShare, removeSupply, transformAmount
 } from '../utils';
+import { useKeepTokenUpdated } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
-import { useTokensFinder } from './useTokensFinder';
 
 interface DefaultVariables {
   network?: Network;
@@ -26,6 +27,7 @@ interface UseRemoveLiquidity extends DefaultVariables {
   address1: string;
   address2: string;
   tokens: Token[];
+  tokenPrices: AddressToNumber<number>;
 }
 
 const removeStatus = (percentageAmount: number, pool?: Pool): ButtonStatus => {
@@ -46,20 +48,14 @@ const removeStatus = (percentageAmount: number, pool?: Pool): ButtonStatus => {
 };
 
 export const useRemoveLiquidity = ({
-  address1, address2, state, signer, network, tokens, dispatch,
+  address1, address2, state, signer, network, tokens, tokenPrices, dispatch,
 }: UseRemoveLiquidity): void => {
   const {
     percentage, token1, token2, pool, isLoading, isValid, status,
   } = state;
-  // Find tokens
-  useTokensFinder({
-    address1,
-    address2,
-    setToken1: (token) => dispatch(setToken1Action(token)),
-    setToken2: (token) => dispatch(setToken2Action(token)),
-    signer,
-    tokens,
-  });
+  // Updating tokens
+  useKeepTokenUpdated(address1, tokens, tokenPrices, (token) => dispatch(setToken1Action(token)))
+  useKeepTokenUpdated(address2, tokens, tokenPrices, (token) => dispatch(setToken2Action(token)))
   // Find pool
   const [loadedPool, isPoolLoading] = useLoadPool(
     token1,
