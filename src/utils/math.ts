@@ -265,8 +265,8 @@ export const ensureAmount = (token: TokenWithAmount): void => ensure(
 export const getOutputAmount = (token: TokenWithAmount, pool: Pool): number => {
   const inputAmount = parseFloat(assertAmount(token.amount)) * 997;
 
-  const inputReserve = convert2Normal(pool.token2.decimals, pool.reserve2);
-  const outputReserve = convert2Normal(pool.token1.decimals, pool.reserve1);
+  const inputReserve = convert2Normal(pool.token1.decimals, pool.reserve1);
+  const outputReserve = convert2Normal(pool.token2.decimals, pool.reserve2);
 
   const numerator = inputAmount * outputReserve;
   const denominator = inputReserve * 1000 + inputAmount;
@@ -277,8 +277,8 @@ export const getOutputAmount = (token: TokenWithAmount, pool: Pool): number => {
 export const getInputAmount = (token: TokenWithAmount, pool: Pool): number => {
   const outputAmount = parseFloat(assertAmount(token.amount));
 
-  const inputReserve = convert2Normal(pool.token2.decimals, pool.reserve2);
-  const outputReserve = convert2Normal(pool.token1.decimals, pool.reserve1);
+  const inputReserve = convert2Normal(pool.token1.decimals, pool.reserve1);
+  const outputReserve = convert2Normal(pool.token2.decimals, pool.reserve2);
 
   const numerator = inputReserve * outputAmount * 1000;
   const denominator = (outputReserve - outputAmount) * 997;

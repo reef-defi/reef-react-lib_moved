@@ -4,6 +4,7 @@ import { ensure, uniqueCombinations } from '../utils/utils';
 import { ReefswapPair } from '../assets/abi/ReefswapPair';
 import { getReefswapFactory } from './rpc';
 import { Token, Pool } from '..';
+import { ERC20 } from '../assets/abi/ERC20';
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 
@@ -32,6 +33,8 @@ export const loadPool = async (
   );
   ensure(address !== EMPTY_ADDRESS, 'Pool does not exist!');
   const contract = new Contract(address, ReefswapPair, signer);
+  const tokenContract1 = new Contract(token1.address, ERC20, signer);
+  const tokenContract2 = new Contract(token2.address, ERC20, signer);
 
   const decimals = await contract.decimals();
   const reserves = await contract.getReserves();
@@ -41,26 +44,12 @@ export const loadPool = async (
 
   const address1 = await contract.token1();
 
-  const [finalReserve1, finalReserve2] = token1.address === address1
+  const [finalReserve1, finalReserve2] = token1.address !== address1
     ? [reserves[0], reserves[1]]
     : [reserves[1], reserves[0]];
 
-  const tokenBalance1 = finalReserve1
-    .mul(liquidity)
-    .div(totalSupply);
-  const tokenBalance2 = finalReserve2
-    .mul(liquidity)
-    .div(totalSupply);
-
-  const [finalToken1, finalToken2] = token1.address === address1
-    ? [
-      { ...token1, balance: tokenBalance1 },
-      { ...token2, balance: tokenBalance2 },
-    ]
-    : [
-      { ...token2, balance: tokenBalance2 },
-      { ...token1, balance: tokenBalance1 },
-    ];
+  const tokenBalance1 = await tokenContract1.balanceOf(address);
+  const tokenBalance2 = await tokenContract2.balanceOf(address);
 
   return {
     poolAddress: address,
@@ -70,8 +59,8 @@ export const loadPool = async (
     totalSupply: totalSupply.toString(),
     userPoolBalance: liquidity.toString(),
     minimumLiquidity: minimumLiquidity.toString(),
-    token1: finalToken1,
-    token2: finalToken2,
+    token1: {...token1, balance: tokenBalance1},
+    token2: {...token2, balance: tokenBalance2},
   };
 };
 
