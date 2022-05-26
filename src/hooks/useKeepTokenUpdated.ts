@@ -22,6 +22,7 @@ const findToken = (address: string, tokens: Token[], defaultAmountValue = create
 
 export const useKeepTokenUpdated = (
   address: string,
+  token: TokenWithAmount,
   tokens: Token[],
   tokenPrices: AddressToNumber<number>,
   setToken: (token: TokenWithAmount) => void,
@@ -29,6 +30,6 @@ export const useKeepTokenUpdated = (
   useEffect(() => {
     const foundToken = findToken(address, tokens);
     const price = tokenPrices[address];
-    setToken({ ...foundToken, price });
+    setToken({ ...foundToken, amount: token.amount, price });
   }, [address, tokens, tokenPrices[address]]);
 };

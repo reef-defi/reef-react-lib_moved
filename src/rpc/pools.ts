@@ -1,10 +1,9 @@
 import { Signer } from '@reef-defi/evm-provider';
 import { Contract } from 'ethers';
-import { ensure, uniqueCombinations } from '../utils/utils';
+import { Pool, Token } from '..';
 import { ReefswapPair } from '../assets/abi/ReefswapPair';
+import { ensure, uniqueCombinations } from '../utils/utils';
 import { getReefswapFactory } from './rpc';
-import { Token, Pool } from '..';
-import { ERC20 } from '../assets/abi/ERC20';
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 
@@ -33,8 +32,6 @@ export const loadPool = async (
   );
   ensure(address !== EMPTY_ADDRESS, 'Pool does not exist!');
   const contract = new Contract(address, ReefswapPair, signer);
-  const tokenContract1 = new Contract(token1.address, ERC20, signer);
-  const tokenContract2 = new Contract(token2.address, ERC20, signer);
 
   const decimals = await contract.decimals();
   const reserves = await contract.getReserves();
@@ -48,8 +45,8 @@ export const loadPool = async (
     ? [reserves[0], reserves[1]]
     : [reserves[1], reserves[0]];
 
-  const tokenBalance1 = await tokenContract1.balanceOf(address);
-  const tokenBalance2 = await tokenContract2.balanceOf(address);
+  const tokenBalance1 = finalReserve1.mul(liquidity).div(totalSupply);
+  const tokenBalance2 = finalReserve2.mul(liquidity).div(totalSupply);
 
   return {
     poolAddress: address,
