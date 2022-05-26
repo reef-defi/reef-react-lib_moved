@@ -24,11 +24,8 @@ import {
   convert2Normal,
   ensure,
 } from '../utils';
+import { useKeepTokenUpdated } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
-import { useTokensFinder } from './useTokensFinder';
-import { useUpdateSwapAmount } from './useUpdateAmount';
-import { useUpdateBalance } from './useUpdateBalance';
-import { useUpdateTokensPrice } from './useUpdateTokensPrice';
 
 const swapStatus = (
   sell: TokenWithAmount,
@@ -113,43 +110,24 @@ export const useSwapState = ({
   const setBuy = (token: TokenWithAmount): void => dispatch(setToken2Action(token));
   const setSell = (token: TokenWithAmount): void => dispatch(setToken1Action(token));
 
-  useTokensFinder({
-    tokens,
-    address1,
-    address2,
-    signer: account,
-    setToken1: setSell,
-    setToken2: setBuy,
-  });
-
+  // Updating swap pool
   const [loadedPool, isPoolLoading] = useLoadPool(
     sell,
     buy,
     network?.factoryAddress || '',
     account?.signer,
   );
-  useUpdateBalance(buy, tokens, setBuy);
-  useUpdateBalance(sell, tokens, setSell);
-  useUpdateSwapAmount({
-    pool,
-    token2: buy,
-    token1: sell,
-    setToken2: setBuy,
-    setToken1: setSell,
-  });
-  const isPriceLoading = useUpdateTokensPrice({
-    tokenPrices,
-    token1: sell,
-    token2: buy,
-    setToken1: setSell,
-    setToken2: setBuy,
-  });
   useEffect(() => {
     if (loadedPool) {
       dispatch(setPoolAction(loadedPool));
     }
   }, [loadedPool]);
 
+  // Updating swap tokens
+  useKeepTokenUpdated(address2, tokens, tokenPrices, setBuy);
+  useKeepTokenUpdated(address1, tokens, tokenPrices, setSell);
+
+  // Updating swap state
   useEffect(() => {
     let [currentStatus, currentIsValid, currentIsLoading] = [
       '',
@@ -173,7 +151,7 @@ export const useSwapState = ({
     dispatch(
       setCompleteStatusAction(currentStatus, currentIsValid, currentIsLoading),
     );
-  }, [sell.amount, buy.amount, account?.isEvmClaimed, pool, isPoolLoading, isPriceLoading]);
+  }, [sell.amount, buy.amount, account?.isEvmClaimed, pool, isPoolLoading]);
 };
 
 interface OnSwap {

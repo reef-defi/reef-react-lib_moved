@@ -82,7 +82,7 @@ export const createEmptyToken = (): Token => ({
 export const createEmptyTokenWithAmount = (isEmpty = true): TokenWithAmount => ({
   ...createEmptyToken(),
   isEmpty,
-  price: -1,
+  price: 0,
   amount: '',
 });
 
