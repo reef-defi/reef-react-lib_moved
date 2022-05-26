@@ -45,8 +45,8 @@ export const loadPool = async (
     ? [reserves[0], reserves[1]]
     : [reserves[1], reserves[0]];
 
-  const tokenBalance1 = finalReserve1.mul(liquidity).div(totalSupply)
-  const tokenBalance2 = finalReserve2.mul(liquidity).div(totalSupply)
+  const tokenBalance1 = finalReserve1.mul(liquidity).div(totalSupply);
+  const tokenBalance2 = finalReserve2.mul(liquidity).div(totalSupply);
 
   return {
     poolAddress: address,

@@ -74,7 +74,7 @@ export const swapReducer = (state = initialSwapState, action: SwapAction): SwapS
     case SET_STATUS: return { ...state, status: action.status };
     case SET_LOADING: return { ...state, isLoading: action.loading };
     case SET_VALIDITY: return { ...state, isValid: action.isValid };
-    case SET_SETTINGS: return {...state, settings: {...action.settings}};
+    case SET_SETTINGS: return { ...state, settings: { ...action.settings } };
     case SET_COMPLETE_STATUS: return {
       ...state,
       isLoading: action.isLoading,

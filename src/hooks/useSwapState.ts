@@ -49,7 +49,7 @@ const swapStatus = (
     );
 
     // Because of aboves ensure pool would not need explenation mark. Typescript broken...
-    const { reserve1, reserve2, } = pool!;
+    const { reserve1, reserve2 } = pool!;
     const amountOut1 = BigNumber.from(calculateAmount(sell));
     const amountOut2 = BigNumber.from(calculateAmount(buy));
     const reserved1 = BigNumber.from(reserve1).sub(amountOut1);
