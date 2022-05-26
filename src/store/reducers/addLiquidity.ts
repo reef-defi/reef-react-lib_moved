@@ -74,13 +74,13 @@ export const addLiquidityReducer = (
       return {
         ...state,
         token1: { ...token1, amount: action.amount },
-        token2: { ...token2, amount: calculateOtherAmount(action.amount, token2.amount, true, pool) },
+        token2: { ...token2, amount: calculateOtherAmount(action.amount, token2.amount, false, pool) },
       };
     case SET_TOKEN2_AMOUNT:
       return {
         ...state,
         token2: { ...token2, amount: action.amount },
-        token1: { ...token1, amount: calculateOtherAmount(action.amount, token1.amount, false, pool) },
+        token1: { ...token1, amount: calculateOtherAmount(action.amount, token1.amount, true, pool) },
       };
     case SET_STATUS:
       return { ...state, status: action.status };
