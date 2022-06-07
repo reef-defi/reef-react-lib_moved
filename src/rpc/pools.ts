@@ -1,9 +1,9 @@
 import { Signer } from '@reef-defi/evm-provider';
 import { Contract } from 'ethers';
-import { ensure, uniqueCombinations } from '../utils/utils';
+import { Pool, Token } from '..';
 import { ReefswapPair } from '../assets/abi/ReefswapPair';
+import { ensure, uniqueCombinations } from '../utils/utils';
 import { getReefswapFactory } from './rpc';
-import { Token, Pool } from '..';
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 
@@ -41,26 +41,12 @@ export const loadPool = async (
 
   const address1 = await contract.token1();
 
-  const [finalReserve1, finalReserve2] = token1.address === address1
+  const [finalReserve1, finalReserve2] = token1.address !== address1
     ? [reserves[0], reserves[1]]
     : [reserves[1], reserves[0]];
 
-  const tokenBalance1 = finalReserve1
-    .mul(liquidity)
-    .div(totalSupply);
-  const tokenBalance2 = finalReserve2
-    .mul(liquidity)
-    .div(totalSupply);
-
-  const [finalToken1, finalToken2] = token1.address === address1
-    ? [
-      { ...token1, balance: tokenBalance1 },
-      { ...token2, balance: tokenBalance2 },
-    ]
-    : [
-      { ...token2, balance: tokenBalance2 },
-      { ...token1, balance: tokenBalance1 },
-    ];
+  const tokenBalance1 = finalReserve1.mul(liquidity).div(totalSupply);
+  const tokenBalance2 = finalReserve2.mul(liquidity).div(totalSupply);
 
   return {
     poolAddress: address,
@@ -70,8 +56,8 @@ export const loadPool = async (
     totalSupply: totalSupply.toString(),
     userPoolBalance: liquidity.toString(),
     minimumLiquidity: minimumLiquidity.toString(),
-    token1: finalToken1,
-    token2: finalToken2,
+    token1: { ...token1, balance: tokenBalance1 },
+    token2: { ...token2, balance: tokenBalance2 },
   };
 };
 

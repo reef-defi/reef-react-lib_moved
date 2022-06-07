@@ -49,23 +49,13 @@ const swapStatus = (
     );
 
     // Because of aboves ensure pool would not need explenation mark. Typescript broken...
-    const {
-      token1, token2, reserve1, reserve2,
-    } = pool!;
+    const { reserve1, reserve2 } = pool!;
     const amountOut1 = BigNumber.from(calculateAmount(sell));
     const amountOut2 = BigNumber.from(calculateAmount(buy));
-    const reserved1 = BigNumber.from(reserve1); // .sub(amountOut1);
-    const reserved2 = BigNumber.from(reserve2); // .sub(amountOut2);
+    const reserved1 = BigNumber.from(reserve1).sub(amountOut1);
+    const reserved2 = BigNumber.from(reserve2).sub(amountOut2);
 
-    const amountIn1 = token1.balance.gt(reserved1.sub(amountOut1))
-      ? token1.balance.sub(reserved1.sub(amountOut1))
-      : BigNumber.from(0);
-
-    const amountIn2 = token2.balance.gt(reserved2.sub(amountOut2))
-      ? token2.balance.sub(reserved2.sub(amountOut2))
-      : BigNumber.from(0);
-
-    ensure(amountIn1.gt(0) || amountIn2.gt(0), 'Insufficient amounts');
+    ensure(reserved1.gt(0) || reserved2.gt(0), 'Insufficient amounts');
 
     // WIP checking for ReefswapV2: K error
     // Temporary solution was with `swapExactTokensForTokensSupportingFeeOnTransferTokens` function!
@@ -124,8 +114,8 @@ export const useSwapState = ({
   }, [loadedPool]);
 
   // Updating swap tokens
-  useKeepTokenUpdated(address2, tokens, tokenPrices, setBuy);
-  useKeepTokenUpdated(address1, tokens, tokenPrices, setSell);
+  useKeepTokenUpdated(address2, buy, tokens, tokenPrices, setBuy);
+  useKeepTokenUpdated(address1, sell, tokens, tokenPrices, setSell);
 
   // Updating swap state
   useEffect(() => {

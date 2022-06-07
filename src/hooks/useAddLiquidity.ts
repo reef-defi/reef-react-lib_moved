@@ -107,8 +107,8 @@ export const useAddLiquidity = ({
   //   setToken2,
   // });
   // Keeping tokens updated
-  useKeepTokenUpdated(address1, tokens, tokenPrices, setToken1);
-  useKeepTokenUpdated(address2, tokens, tokenPrices, setToken2);
+  useKeepTokenUpdated(address1, token1, tokens, tokenPrices, setToken1);
+  useKeepTokenUpdated(address2, token2, tokens, tokenPrices, setToken2);
 
   // update liquidity amount based on price
   useUpdateLiquidityAmount({
