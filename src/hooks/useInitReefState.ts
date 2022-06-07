@@ -11,7 +11,10 @@ import {
 import { apolloClientSubj, setApolloUrls } from '../graphql';
 import { accountsSubj } from '../appState/accountState';
 import { useLoadSigners } from './useLoadSigners';
+import { disconnectProvider } from '../utils/providerUtil';
+import { getGQLUrls, initApolloClient, State, StateOptions } from '../appState/util';
 
+/*
 const getGQLUrls = (network: Network): { ws: string; http: string }|undefined => {
   if (!network.graphqlUrl) {
     return undefined;
@@ -38,7 +41,7 @@ interface StateOptions {
   network: Network;
   signers?: ReefSigner[];
   client?: ApolloClient<any>;
-}
+}*/
 export const useInitReefState = (
   applicationDisplayName: string,
   {
@@ -59,16 +62,7 @@ export const useInitReefState = (
   }, [network]);
 
   useEffect(() => {
-    if (selectedNetwork) {
-      if (!client) {
-        const gqlUrls = getGQLUrls(selectedNetwork);
-        if (gqlUrls) {
-          setApolloUrls(gqlUrls);
-        }
-      } else {
-        apolloClientSubj.next(client);
-      }
-    }
+    initApolloClient(selectedNetwork, client);
   }, [selectedNetwork, client]);
 
   useEffect(() => {
@@ -76,7 +70,12 @@ export const useInitReefState = (
       setCurrentProvider(provider);
     }
     return () => {
-      provider?.api.disconnect();
+      if(provider){
+        const disc = async(prov) => {
+          await disconnectProvider(prov);
+        };
+        disc(provider);
+      }
     };
   }, [provider]);
 
