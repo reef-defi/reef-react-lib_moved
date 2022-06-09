@@ -1,17 +1,17 @@
-import { BigNumber, ContractInterface } from 'ethers';
+import { ContractInterface } from 'ethers';
 import { ContractType, Token, TokenWithAmount } from '../state/token';
 import { accountsSubj, reloadSignersSubj } from './accountState';
 import { UpdateAction } from './updateStateModel';
 import { availableNetworks, Network, Pool, ReefSigner } from '../state';
-import { calculateTokenPrice, TxStatusUpdate } from '../utils';
+import { calculateTokenPrice, disconnectProvider, TxStatusUpdate } from '../utils';
 import { ERC20 } from '../assets/abi/ERC20';
 import { ERC721Uri } from '../assets/abi/ERC721Uri';
 import { ERC1155Uri } from '../assets/abi/ERC1155Uri';
-import { Provider, Signer } from '@reef-defi/evm-provider';
+import { Provider } from '@reef-defi/evm-provider';
 import { ApolloClient } from '@apollo/client';
-import { disconnectProvider, initProvider } from '../utils/providerUtil';
+import { initProvider } from '../utils/providerUtil';
 import { currentNetwork$, setCurrentNetwork, setCurrentProvider } from './providerState';
-import { switchMap, tap } from 'rxjs';
+import { defer, finalize, Observable, scan, switchMap, tap } from 'rxjs';
 import { apolloClientSubj, setApolloUrls } from '../graphql';
 
 export const combineTokensDistinct = ([tokens1, tokens2]: [
@@ -82,7 +82,7 @@ export interface State {
 }
 
 export interface StateOptions {
-  network: Network;
+  network?: Network;
   signers?: ReefSigner[];
   client?: ApolloClient<any>;
 }
@@ -99,34 +99,42 @@ export function initApolloClient(selectedNetwork?: Network, client?: ApolloClien
     }
   }
 }
-export const initReefState = async(applicationDisplayName: string,
+
+type destroyConnection = ()=>void;
+export const initReefState = (//applicationDisplayName: string,
   {
-    network = availableNetworks.mainnet,
+    network,
     client,
     signers,
-  }: StateOptions,) => {
-  currentNetwork$.pipe(
+  }: StateOptions,): destroyConnection => {
+  const subscription = currentNetwork$.pipe(
     switchMap((network) => initProvider(network.rpcUrl)
       .then(provider => ({
         provider,
         network
       }))),
-    tap((p_n) => setCurrentProvider(p_n.provider)),
+    scan((state: { provider: Provider }, newVal: { provider: Provider }) => {
+      if (state.provider) {
+        disconnectProvider(state.provider);
+      }
+      return { provider: newVal.provider };
+    }, {}),
+    tap((p_n: { provider: Provider, network: Network }) => setCurrentProvider(p_n.provider)),
     tap((p_n) => initApolloClient(p_n.network, client)),
-    tap((p_n) => {
-      accountsSubj.next(signers || [{
-        name: 'test1',
-        signer: null,
-        balance: BigNumber.from('0'),
-        address: '0xfb730ec3f38aB358AafA2EdD3fB2C17a5337dD7C',
-        evmAddress: '',
-        isEvmClaimed: false,
-        source: 'mobileApp',
-        genesisHash: null
-      } as ReefSigner]);
-    })
+    finalizeWithValue((p_n => disconnectProvider(p_n.provider))),
+  )
+    .subscribe();
+  setCurrentNetwork(network||availableNetworks.mainnet);
+  accountsSubj.next(signers || null);
+  return () => subscription.unsubscribe();
+}
 
-//TODO disconnect provider!!!
-  ).subscribe(null, (err)=>disconnectProvider(), ()=>{disconnectProvider()});
-  setCurrentNetwork(network);
+function finalizeWithValue<T>(callback: (value: T) => void) {
+  return (source: Observable<T>) => defer(() => {
+    let lastValue: T;
+    return source.pipe(
+      tap(value => lastValue = value),
+      finalize(() => callback(lastValue)),
+    )
+  })
 }

@@ -163,7 +163,7 @@ const sortReefTokenFirst = (tokens): Token[] => {
   }
   return tokens;
 };
-
+apolloClientInstance$.subscribe((e) => console.log('APOLLO=', e));
 export const selectedSignerTokenBalances$: Observable<Token[]> = combineLatest([
   apolloClientInstance$,
   selectedSigner$,

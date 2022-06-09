@@ -1,4 +1,6 @@
 import {
+  BehaviorSubject,
+  catchError,
   combineLatest,
   distinctUntilChanged,
   map,
@@ -19,10 +21,7 @@ import { BigNumber } from 'ethers';
 import { filter } from 'rxjs/operators';
 import { gql } from '@apollo/client';
 import { UpdateDataCtx } from './updateStateModel';
-import {
-  replaceUpdatedSigners,
-  updateSignersEvmBindings,
-} from './accountStateUtil';
+import { replaceUpdatedSigners, updateSignersEvmBindings, } from './accountStateUtil';
 import { currentProvider$ } from './providerState';
 import { ReefSigner } from '../state';
 import { apolloClientInstance$, zenToRx } from '../graphql/apollo';
@@ -79,6 +78,10 @@ const signersLocallyUpdatedData$: Observable<ReefSigner[]> = reloadSignersSubj.p
   filter((val: any) => !!val.lastUpdated.length),
   map((val: any): any => val.all),
   startWith([]),
+  catchError(err=>{
+    console.log('signersLocallyUpdatedData$ ERROR=',err.message);
+    return of([]);
+  }),
   shareReplay(1),
 );
 
@@ -142,6 +145,10 @@ const signersWithUpdatedBalances$ = combineLatest([
       return sig;
     }))),
   shareReplay(1),
+  catchError(err=>{
+    console.log('signersWithUpdatedBalances$ ERROR=',err.message);
+    return of([]);
+  })
 );
 
 const EVM_ADDRESS_UPDATE_GQL = gql`
@@ -236,14 +243,28 @@ const signersWithUpdatedData$ = combineLatest([
 
 export const signers$: Observable<ReefSigner[]> = signersWithUpdatedData$;
 
-export const selectAddressSubj: ReplaySubject<string | undefined> = new ReplaySubject<string | undefined>(1);
+export const selectAddressSubj: BehaviorSubject<string | undefined> = new BehaviorSubject<string | undefined>(undefined);
+export const currentSelectedAddress$: Observable<string|undefined> = selectAddressSubj.asObservable().pipe(
+  distinctUntilChanged(),
+  shareReplay(1)
+);
 signers$.pipe(take(1)).subscribe((signers: any): any => {
-  selectAddressSubj.next(
-    localStorage.getItem('selected_address_reef') || signers[0],
-  );
+    let saved: string|undefined = undefined;
+    try {
+      saved = localStorage?.getItem('selected_address_reef') || undefined;
+    }catch (e){
+      // getting error in Flutter: 'The operation is insecure'
+      // console.log('Flutter error=',e.message);
+    }
+    if(!selectAddressSubj.getValue()){
+      let firstSigner = signers && signers[0] ? signers[0].address: undefined;
+      selectAddressSubj.next(
+        saved||firstSigner
+      );
+    }
 });
 export const selectedSigner$: Observable<ReefSigner | undefined> = combineLatest([
-  selectAddressSubj.pipe(distinctUntilChanged()),
+  currentSelectedAddress$,
   signers$,
 ]).pipe(
   map(([selectedAddress, signers]) => {
@@ -253,13 +274,23 @@ export const selectedSigner$: Observable<ReefSigner | undefined> = combineLatest
     if (!foundSigner) {
       foundSigner = signers ? signers[0] : undefined;
     }
-    if (foundSigner) {
-      localStorage.setItem(
-        'selected_address_reef',
-        foundSigner.address || '',
-      );
+    try {
+      if (foundSigner) {
+        localStorage.setItem(
+          'selected_address_reef',
+          foundSigner.address || '',
+        );
+      }
+    }catch (e){
+      // getting error in Flutter: 'The operation is insecure'
+      // console.log('Flutter error=',e.message);
     }
     return foundSigner ? { ...foundSigner } : undefined;
   }),
+  catchError((err)=>{
+    console.log('selectedSigner$ ERROR=',err.message);
+    return of(undefined);
+  }),
   shareReplay(1),
 );
+

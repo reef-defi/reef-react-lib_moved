@@ -1,18 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Provider } from '@reef-defi/evm-provider';
-import { ApolloClient } from '@apollo/client';
 import { useObservableState } from './useObservableState';
-import { availableNetworks, Network, ReefSigner } from '../state';
+import { availableNetworks, Network } from '../state';
 import { useProvider } from './useProvider';
-import {
-  currentNetwork$,
-  setCurrentNetwork, setCurrentProvider,
-} from '../appState/providerState';
-import { apolloClientSubj, setApolloUrls } from '../graphql';
+import { currentNetwork$, setCurrentNetwork, setCurrentProvider, } from '../appState/providerState';
 import { accountsSubj } from '../appState/accountState';
 import { useLoadSigners } from './useLoadSigners';
 import { disconnectProvider } from '../utils/providerUtil';
-import { getGQLUrls, initApolloClient, State, StateOptions } from '../appState/util';
+import { initApolloClient, State, StateOptions } from '../appState/util';
 
 /*
 const getGQLUrls = (network: Network): { ws: string; http: string }|undefined => {
