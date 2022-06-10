@@ -113,17 +113,24 @@ export const initReefState = (//applicationDisplayName: string,
         provider,
         network
       }))),
-    scan((state: { provider: Provider }, newVal: { provider: Provider }) => {
+    scan((state: { provider: Provider }, newVal: { provider: Provider, network }) => {
       if (state.provider) {
         disconnectProvider(state.provider);
       }
-      return { provider: newVal.provider };
+      return { provider: newVal.provider, network: newVal.network };
     }, {}),
-    tap((p_n: { provider: Provider, network: Network }) => setCurrentProvider(p_n.provider)),
-    tap((p_n) => initApolloClient(p_n.network, client)),
+    tap((p_n: { provider: Provider, network: Network }) => {
+        setCurrentProvider(p_n.provider)}),
+    tap((p_n) => {
+      initApolloClient(p_n.network, client);
+    }),
     finalizeWithValue((p_n => disconnectProvider(p_n.provider))),
   )
-    .subscribe();
+    .subscribe({
+      error: (e) => {
+        console.log('initReefState ERR=', e.message);
+      }
+    });
   setCurrentNetwork(network||availableNetworks.mainnet);
   accountsSubj.next(signers || null);
   return () => subscription.unsubscribe();
