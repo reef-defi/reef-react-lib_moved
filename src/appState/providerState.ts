@@ -9,5 +9,10 @@ export const currentProvider$ = providerSubj.asObservable();
 export const setCurrentProvider = (provider: Provider): void => providerSubj.next(provider);
 
 export const currentNetwork$ = selectedNetworkSubj.asObservable();
-export const setCurrentNetwork = (network: Network): void => selectedNetworkSubj.next(network);
+export const setCurrentNetwork = (network: Network): void => {
+  if (network != null) {
+    localStorage.setItem('reef-app-active-network', JSON.stringify(network));
+  }
+  selectedNetworkSubj.next(network);
+};
 currentNetwork$.subscribe((network) => console.log('SELECTED NETWORK=', network.rpcUrl));
