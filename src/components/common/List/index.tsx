@@ -39,6 +39,20 @@ export const ListItemDismissModal: React.FC<ListItem> = ({
   </li>
 );
 
+export const ListItemActionModal: React.FC<ListItem> = ({
+  children,
+  onClick,
+}): JSX.Element => (
+  <li
+    onClick={onClick}
+    className={`list-group-item list-group-item-action d-flex justify-content-between border-rad ${
+      onClick && 'pointer'
+    }`}
+  >
+    {children}
+  </li>
+);
+
 export const ListEmptyItem = (): JSX.Element => (
   <li className="list-group-item px-2" />
 );
