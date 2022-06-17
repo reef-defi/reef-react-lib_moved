@@ -1,12 +1,18 @@
 import { ContractInterface } from 'ethers';
 import { ContractType, Token, TokenWithAmount } from '../state/token';
-import { reloadSignersSubj } from './accountState';
+import { accountsSubj, reloadSignersSubj } from './accountState';
 import { UpdateAction } from './updateStateModel';
-import { Pool } from '../state';
-import { calculateTokenPrice, TxStatusUpdate } from '../utils';
+import { availableNetworks, Network, Pool, ReefSigner } from '../state';
+import { calculateTokenPrice, disconnectProvider, TxStatusUpdate } from '../utils';
 import { ERC20 } from '../assets/abi/ERC20';
 import { ERC721Uri } from '../assets/abi/ERC721Uri';
 import { ERC1155Uri } from '../assets/abi/ERC1155Uri';
+import { Provider } from '@reef-defi/evm-provider';
+import { ApolloClient } from '@apollo/client';
+import { initProvider } from '../utils/providerUtil';
+import { currentNetwork$, setCurrentNetwork, setCurrentProvider } from './providerState';
+import { defer, finalize, Observable, scan, switchMap, tap } from 'rxjs';
+import { apolloClientSubj, setApolloUrls } from '../graphql';
 
 export const combineTokensDistinct = ([tokens1, tokens2]: [
   Token[],
@@ -52,3 +58,90 @@ export const getContractTypeAbi = (contractType: ContractType): ContractInterfac
       return [] as ContractInterface;
   }
 };
+
+
+export const getGQLUrls = (network: Network): { ws: string; http: string }|undefined => {
+  if (!network.graphqlUrl) {
+    return undefined;
+  }
+  const ws = network.graphqlUrl.startsWith('http')
+    ? network.graphqlUrl.replace('http', 'ws')
+    : network.graphqlUrl;
+  const http = network.graphqlUrl.startsWith('ws')
+    ? network.graphqlUrl.replace('ws', 'http')
+    : network.graphqlUrl;
+  return { ws, http };
+};
+
+export interface State {
+  loading: boolean;
+  signers?: ReefSigner[];
+  provider?: Provider;
+  network?: Network;
+  error?: any; // TODO!
+}
+
+export interface StateOptions {
+  network?: Network;
+  signers?: ReefSigner[];
+  client?: ApolloClient<any>;
+}
+
+export function initApolloClient(selectedNetwork?: Network, client?: ApolloClient<any> ) {
+  if (selectedNetwork) {
+    if (!client) {
+      const gqlUrls = getGQLUrls(selectedNetwork);
+      if (gqlUrls) {
+        setApolloUrls(gqlUrls);
+      }
+    } else {
+      apolloClientSubj.next(client);
+    }
+  }
+}
+
+type destroyConnection = ()=>void;
+export const initReefState = (//applicationDisplayName: string,
+  {
+    network,
+    client,
+    signers,
+  }: StateOptions,): destroyConnection => {
+  const subscription = currentNetwork$.pipe(
+    switchMap((network) => initProvider(network.rpcUrl)
+      .then(provider => ({
+        provider,
+        network
+      }))),
+    scan((state: { provider: Provider }, newVal: { provider: Provider, network }) => {
+      if (state.provider) {
+        disconnectProvider(state.provider);
+      }
+      return { provider: newVal.provider, network: newVal.network };
+    }, {}),
+    tap((p_n: { provider: Provider, network: Network }) => {
+        setCurrentProvider(p_n.provider)}),
+    tap((p_n) => {
+      initApolloClient(p_n.network, client);
+    }),
+    finalizeWithValue((p_n => disconnectProvider(p_n.provider))),
+  )
+    .subscribe({
+      error: (e) => {
+        console.log('initReefState ERR=', e.message);
+      }
+    });
+  setCurrentNetwork(network||availableNetworks.mainnet);
+  accountsSubj.next(signers || null);
+  return () => subscription.unsubscribe();
+}
+
+function finalizeWithValue<T>(callback: (value: T) => void) {
+  return (source: Observable<T>) => defer(() => {
+    let lastValue: T;
+    return source.pipe(
+      tap(value => lastValue = value),
+      finalize(() => callback(lastValue)),
+    )
+  })
+}

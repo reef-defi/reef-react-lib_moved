@@ -6,3 +6,4 @@ export * from '../graphql/gql';
 export * from './tokenUtil';
 export * from './transactionUtil';
 export * from './bindUtil';
+export * from './providerUtil';

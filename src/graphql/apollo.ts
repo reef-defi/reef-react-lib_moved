@@ -31,7 +31,6 @@ const splitLink$ = apolloUrlsSubj.pipe(
       },
       uri: urls.ws,
     });
-
     return split(
       ({ query }) => {
         const definition = getMainDefinition(query);
@@ -45,8 +44,8 @@ const splitLink$ = apolloUrlsSubj.pipe(
       httpLink,
     );
   }),
+  shareReplay(1)
 );
-
 const apolloLinksClientInstance$: Observable<ApolloClient<any>> = splitLink$.pipe(
   map(
     (splitLink) => new ApolloClient({

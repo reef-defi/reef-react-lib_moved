@@ -1,17 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Provider } from '@reef-defi/evm-provider';
-import { ApolloClient } from '@apollo/client';
 import { useObservableState } from './useObservableState';
-import { availableNetworks, Network, ReefSigner } from '../state';
+import { availableNetworks, Network } from '../state';
 import { useProvider } from './useProvider';
-import {
-  currentNetwork$,
-  setCurrentNetwork, setCurrentProvider,
-} from '../appState/providerState';
-import { apolloClientSubj, setApolloUrls } from '../graphql';
+import { currentNetwork$, setCurrentNetwork, setCurrentProvider, } from '../appState/providerState';
 import { accountsSubj } from '../appState/accountState';
 import { useLoadSigners } from './useLoadSigners';
+import { disconnectProvider } from '../utils/providerUtil';
+import { initApolloClient, State, StateOptions } from '../appState/util';
 
+/*
 const getGQLUrls = (network: Network): { ws: string; http: string }|undefined => {
   if (!network.graphqlUrl) {
     return undefined;
@@ -38,7 +35,7 @@ interface StateOptions {
   network: Network;
   signers?: ReefSigner[];
   client?: ApolloClient<any>;
-}
+}*/
 export const useInitReefState = (
   applicationDisplayName: string,
   {
@@ -59,16 +56,7 @@ export const useInitReefState = (
   }, [network]);
 
   useEffect(() => {
-    if (selectedNetwork) {
-      if (!client) {
-        const gqlUrls = getGQLUrls(selectedNetwork);
-        if (gqlUrls) {
-          setApolloUrls(gqlUrls);
-        }
-      } else {
-        apolloClientSubj.next(client);
-      }
-    }
+    initApolloClient(selectedNetwork, client);
   }, [selectedNetwork, client]);
 
   useEffect(() => {
@@ -76,7 +64,12 @@ export const useInitReefState = (
       setCurrentProvider(provider);
     }
     return () => {
-      provider?.api.disconnect();
+      if(provider){
+        const disc = async(prov) => {
+          await disconnectProvider(prov);
+        };
+        disc(provider);
+      }
     };
   }, [provider]);
 
