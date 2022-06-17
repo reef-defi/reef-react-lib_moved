@@ -8,7 +8,7 @@ export type UseProvider = [Provider | undefined, boolean, string, Function|undef
 // should be used only once per url in app
 export const useProvider = (providerUrl?: string | undefined): UseProvider => {
   const [provider, setProvider] = useState<Provider>();
-  const [providerDestroyFn, setProviderDestroyFn] = useState<Function>();
+  const [providerDestroyFn] = useState<Function>();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -24,10 +24,11 @@ export const useProvider = (providerUrl?: string | undefined): UseProvider => {
       })
       .then((prov)=>{
         if (provider && providerDestroyFn) {
-          providerDestroyFn();
+          console.log('PROV DDDDD=',provider, providerDestroyFn);
+          // providerDestroyFn();
         }
         setProvider(prov);
-        setProviderDestroyFn(prov.api.disconnect);
+        // setProviderDestroyFn(prov.api.disconnect);
       })
       .catch((e) => setError(e.message))
       .finally(() => setIsLoading(false));

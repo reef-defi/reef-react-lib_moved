@@ -1,10 +1,11 @@
 import { Provider } from '@reef-defi/evm-provider';
 import { web3Accounts, web3Enable } from '@reef-defi/extension-dapp';
 import { InjectedExtension } from '@reef-defi/extension-inject/types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ReefSigner } from '../state';
 import { useAsyncEffect } from './useAsyncEffect';
 import { getExtensionSigners } from '../rpc';
+import { setCurrentAddress } from '../appState/accountState';
 
 function getBrowserExtensionUrl(): string | undefined {
   const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
@@ -82,5 +83,18 @@ export const useLoadSigners = (
       setIsLoading(false);
     }
   }, [provider]);
+
+  useEffect(() => {
+    if (!signers.length) {
+      return;
+    }
+    let storedAddr = localStorage.getItem('selected_address_reef');
+    if(storedAddr && signers.some((s)=>storedAddr===s.address)){
+      setCurrentAddress(storedAddr);
+      return;
+    }
+    setCurrentAddress(signers[0].address);
+  }, [signers]);
+
   return [signers, isLoading, error];
 };
