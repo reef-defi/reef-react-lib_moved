@@ -15,7 +15,7 @@ import { TokenAmountFieldMax } from '../TokenFields';
 import { LoadingButtonIconWithText } from '../common/Loading';
 import { ERC20 } from '../../assets/abi/ERC20';
 import {
-  ButtonStatus, calculateAmount, ensure, nativeTransfer, REEF_ADDRESS,
+  ButtonStatus, calculateAmount, ensure, nativeTransfer, REEF_ADDRESS, removeReefSpecificStringFromAddress,
 } from '../../utils';
 import { AccountListModal } from '../AccountSelector/AccountListModal';
 import { SwitchTokenButton } from '../common/Button';
@@ -127,7 +127,7 @@ export const Send = ({
             <Input
               value={to}
               maxLength={70}
-              onChange={(toVal: string) => setTo(toVal.trim())}
+              onChange={(toVal: string) => setTo(removeReefSpecificStringFromAddress(toVal))}
               placeholder="Send to address"
               disabled={isLoading}
             />

@@ -3,6 +3,7 @@ import { utils } from 'ethers';
 import { useAsyncEffect } from '../../hooks';
 import { ReefSigner, Token } from '../../state';
 import {
+  addReefSpecificStringFromAddress,
   DataProgress,
   DataWithProgress,
   getData,
@@ -35,7 +36,7 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { closeModal, openModal } from '../../utils/modalUtil';
 
 interface SelectToken {
-  id?: string;
+  id: string;
   iconUrl: string;
   fullWidth?: boolean;
   selectedTokenName: string;
@@ -48,8 +49,6 @@ interface SelectToken {
 
 const COMMON_BASES = ['0x0000000000000000000000000000000001000000'];
 
-const emptyFunction = async (): Promise<void> => {};
-
 export const SelectToken = ({
   id = 'exampleModal',
   tokens,
@@ -57,7 +56,7 @@ export const SelectToken = ({
   onTokenSelect,
   fullWidth = false,
   iconUrl,
-  onAddressChange = emptyFunction,
+  onAddressChange,
   hideCommonBaseView,
   signer,
 }: SelectToken): JSX.Element => {
@@ -116,7 +115,7 @@ export const SelectToken = ({
             <LeadText>{token.symbol}</LeadText>
             <MutedText>
               <MiniText>{trim(token.address, 20)}</MiniText>
-              <CopyToClipboard text={token.address}>
+              <CopyToClipboard text={addReefSpecificStringFromAddress(token.address)}>
                 <span
                   onClick={(event) => event.stopPropagation()}
                   className="form-text ms-2"
@@ -150,7 +149,11 @@ export const SelectToken = ({
   useAsyncEffect(async () => {
     await Promise.resolve()
       .then(() => setIsLoading(true))
-      .then(() => onAddressChange(address))
+      .then(() => {
+        if(onAddressChange) {
+          onAddressChange(address);
+        };
+      })
       .finally(() => setIsLoading(false));
   }, [address]);
 

@@ -2,6 +2,7 @@ import { BigNumber, ethers } from 'ethers';
 
 export const REEF_ADDRESS = '0x0000000000000000000000000000000001000000';
 export const EMPTY_ADDRESS = '0x';
+export const REEF_ADDRESS_SPECIFIC_STRING = "(ONLY for Reef chain!)";
 
 export interface ButtonStatus {
   text: string;
@@ -91,3 +92,6 @@ export const dropDuplicatesMultiKey = <Obj, Key extends keyof Obj>(
 
   return filtered;
 };
+
+export const removeReefSpecificStringFromAddress = (address: string): string => address.replace(REEF_ADDRESS_SPECIFIC_STRING, "").trim();
+export const addReefSpecificStringFromAddress = (address: string): string => `${address}${REEF_ADDRESS_SPECIFIC_STRING}`;
