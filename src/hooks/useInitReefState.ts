@@ -8,6 +8,7 @@ import { useLoadSigners } from './useLoadSigners';
 import { disconnectProvider } from '../utils/providerUtil';
 import { initApolloClient, State, StateOptions } from '../appState/util';
 
+const ACTIVE_NETWORK_KEY = 'reef-app-active-network';
 /*
 const getGQLUrls = (network: Network): { ws: string; http: string }|undefined => {
   if (!network.graphqlUrl) {
@@ -21,7 +22,11 @@ const getGQLUrls = (network: Network): { ws: string; http: string }|undefined =>
     : network.graphqlUrl;
   return { ws, http };
 };
-// export type UseInitReefState = [ReefSigner[] | undefined, Provider | undefined, Network | undefined, boolean, any];
+
+const getNetworkFallback = (): Network => {
+  const storedNetwork = localStorage.getItem(ACTIVE_NETWORK_KEY);
+  return storedNetwork != null ? JSON.parse(storedNetwork) : availableNetworks.mainnet;
+};
 
 interface State {
   loading: boolean;
@@ -32,26 +37,24 @@ interface State {
 }
 
 interface StateOptions {
-  network: Network;
+  network?: Network;
   signers?: ReefSigner[];
   client?: ApolloClient<any>;
 }*/
 export const useInitReefState = (
   applicationDisplayName: string,
-  {
-    network = availableNetworks.mainnet,
-    client,
-    signers,
-  }: StateOptions,
+  options: StateOptions = {},
 ): State => {
+  const { network, client, signers } = options;
   const selectedNetwork: Network|undefined = useObservableState(currentNetwork$);
   const [provider, isProviderLoading] = useProvider((selectedNetwork as Network)?.rpcUrl);
   const [loadedSigners, isSignersLoading, error] = useLoadSigners(applicationDisplayName, signers ? undefined : provider);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (network && network !== selectedNetwork) {
-      setCurrentNetwork(network);
+    const newNetwork = network ?? getNetworkFallback();
+    if (newNetwork !== selectedNetwork) {
+      setCurrentNetwork(newNetwork);
     }
   }, [network]);
 
