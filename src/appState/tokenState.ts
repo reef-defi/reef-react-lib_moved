@@ -1,4 +1,5 @@
 import {
+  catchError,
   combineLatest,
   distinctUntilChanged,
   map,
@@ -163,8 +164,7 @@ const sortReefTokenFirst = (tokens): Token[] => {
   }
   return tokens;
 };
-
-export const selectedSignerTokenBalances$: Observable<Token[]> = combineLatest([
+export const selectedSignerTokenBalances$: Observable<Token[]|null> = combineLatest([
   apolloClientInstance$,
   selectedSigner$,
   currentProvider$,
@@ -219,6 +219,10 @@ export const selectedSignerTokenBalances$: Observable<Token[]> = combineLatest([
       }))),
       map(sortReefTokenFirst),
     ))),
+  catchError((err => {
+    console.log('selectedSignerTokenBalances$ ERROR=',err.message);
+    return of(null);
+  }))
 );
 
 export const selectedSignerAddressUpdate$ = selectedSigner$.pipe(

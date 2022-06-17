@@ -3,6 +3,7 @@ import { utils } from 'ethers';
 import { useAsyncEffect } from '../../hooks';
 import { ReefSigner, Token } from '../../state';
 import {
+  addReefSpecificStringFromAddress,
   DataProgress,
   DataWithProgress,
   getData,
@@ -13,16 +14,15 @@ import {
 import { IconButton } from '../common/Button';
 import {
   CenterRow,
-  ContentEnd,
   FlexColumn,
   FlexRow,
   FullRow,
   Margin,
   MS,
 } from '../common/Display';
-import { DownIcon, TokenIcon } from '../common/Icons';
+import { CopyIcon, DownIcon, TokenIcon } from '../common/Icons';
 import { Input } from '../common/Input';
-import { List, ListEmptyItem, ListItemDismissModal } from '../common/List';
+import { List, ListEmptyItem, ListItemActionModal } from '../common/List';
 import { Loading } from '../common/Loading';
 import {
   Modal, ModalBody, ModalClose, ModalHeader,
@@ -32,9 +32,11 @@ import {
 } from '../common/Text';
 import { QuestionTooltip } from '../common/Tooltip';
 import { loadToken } from '../../rpc';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { closeModal, openModal } from '../../utils/modalUtil';
 
 interface SelectToken {
-  id?: string;
+  id: string;
   iconUrl: string;
   fullWidth?: boolean;
   selectedTokenName: string;
@@ -47,8 +49,6 @@ interface SelectToken {
 
 const COMMON_BASES = ['0x0000000000000000000000000000000001000000'];
 
-const emptyFunction = async (): Promise<void> => {};
-
 export const SelectToken = ({
   id = 'exampleModal',
   tokens,
@@ -56,7 +56,7 @@ export const SelectToken = ({
   onTokenSelect,
   fullWidth = false,
   iconUrl,
-  onAddressChange = emptyFunction,
+  onAddressChange,
   hideCommonBaseView,
   signer,
 }: SelectToken): JSX.Element => {
@@ -67,6 +67,11 @@ export const SelectToken = ({
   >([...tokens]);
 
   const isEmpty = selectedTokenName === 'Select token';
+
+  const handleSelectToken = (token) => {
+    closeModal(id);
+    onTokenSelect(token);
+  }
 
   useEffect(() => {
     if (!signer) {
@@ -97,29 +102,37 @@ export const SelectToken = ({
   }, [address, tokens]);
 
   const tokensView = getData(foundSearchTokens)?.map((token) => (
-    <ListItemDismissModal
+    <ListItemActionModal
       key={token.address}
-      onClick={() => onTokenSelect(token)}
+      onClick={() => handleSelectToken(token)}
     >
       <FullRow>
         <CenterRow>
           <TokenIcon src={token.iconUrl} />
         </CenterRow>
-        <MS size="3">
+        <div className={"flex-grow-1 ms-3"}>
           <FlexColumn>
             <LeadText>{token.symbol}</LeadText>
             <MutedText>
               <MiniText>{trim(token.address, 20)}</MiniText>
+              <CopyToClipboard text={addReefSpecificStringFromAddress(token.address)}>
+                <span
+                  onClick={(event) => event.stopPropagation()}
+                  className="form-text ms-2"
+                  style={{ cursor: 'pointer' }}
+                >
+                  <CopyIcon small />
+                  <MiniText>Copy Address</MiniText>
+                </span>
+              </CopyToClipboard>
             </MutedText>
           </FlexColumn>
-        </MS>
-        <ContentEnd>
-          <CenterRow>
-            <Text>{toBalance(token).toFixed(4)}</Text>
-          </CenterRow>
-        </ContentEnd>
+        </div>
+        <CenterRow>
+          <Text>{toBalance(token).toFixed(4)}</Text>
+        </CenterRow>
       </FullRow>
-    </ListItemDismissModal>
+    </ListItemActionModal>
   ));
 
   const commonBasesView = tokens
@@ -136,7 +149,11 @@ export const SelectToken = ({
   useAsyncEffect(async () => {
     await Promise.resolve()
       .then(() => setIsLoading(true))
-      .then(() => onAddressChange(address))
+      .then(() => {
+        if(onAddressChange) {
+          onAddressChange(address);
+        };
+      })
       .finally(() => setIsLoading(false));
   }, [address]);
 
@@ -147,8 +164,7 @@ export const SelectToken = ({
         className={`btn btn-select border-rad ${fullWidth && 'w-100'} ${
           isEmpty ? '' : 'btn-token-select'
         }`}
-        data-bs-toggle="modal"
-        data-bs-target={`#${id}`}
+        onClick={() => openModal(id)}
       >
         {!isEmpty && <TokenIcon src={iconUrl} />}
         <div className={`my-auto ${!isEmpty ? 'mx-2' : 'me-2'}`}>

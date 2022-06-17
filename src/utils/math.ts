@@ -128,15 +128,11 @@ export const calculatePoolRatio = (pool?: Pool, first = true): number => {
   if (!pool) {
     return 0;
   }
-  const amount1 = convert2Normal(
-    pool.token1.decimals,
-    pool.token1.balance.toString(),
-  );
-  const amount2 = convert2Normal(
-    pool.token2.decimals,
-    pool.token2.balance.toString(),
-  );
-  return first ? amount1 / amount2 : amount2 / amount1;
+  const a1 = BigNumber.from(pool.reserve1);
+  const a2 = BigNumber.from(pool.reserve2);
+  const r1 = a1.mul(1000000).div(a2).toNumber() / 1000000;
+  const r2 = a2.mul(1000000).div(a1).toNumber() / 1000000;
+  return first ? r1 : r2;
 };
 
 export const calculatePoolShare = (pool?: Pool): number => {
@@ -265,8 +261,8 @@ export const ensureAmount = (token: TokenWithAmount): void => ensure(
 export const getOutputAmount = (token: TokenWithAmount, pool: Pool): number => {
   const inputAmount = parseFloat(assertAmount(token.amount)) * 997;
 
-  const inputReserve = convert2Normal(pool.token2.decimals, pool.reserve2);
-  const outputReserve = convert2Normal(pool.token1.decimals, pool.reserve1);
+  const inputReserve = convert2Normal(pool.token1.decimals, pool.reserve1);
+  const outputReserve = convert2Normal(pool.token2.decimals, pool.reserve2);
 
   const numerator = inputAmount * outputReserve;
   const denominator = inputReserve * 1000 + inputAmount;
@@ -277,8 +273,8 @@ export const getOutputAmount = (token: TokenWithAmount, pool: Pool): number => {
 export const getInputAmount = (token: TokenWithAmount, pool: Pool): number => {
   const outputAmount = parseFloat(assertAmount(token.amount));
 
-  const inputReserve = convert2Normal(pool.token2.decimals, pool.reserve2);
-  const outputReserve = convert2Normal(pool.token1.decimals, pool.reserve1);
+  const inputReserve = convert2Normal(pool.token1.decimals, pool.reserve1);
+  const outputReserve = convert2Normal(pool.token2.decimals, pool.reserve2);
 
   const numerator = inputReserve * outputAmount * 1000;
   const denominator = (outputReserve - outputAmount) * 997;

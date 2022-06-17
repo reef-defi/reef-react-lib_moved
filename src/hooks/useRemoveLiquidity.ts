@@ -54,8 +54,8 @@ export const useRemoveLiquidity = ({
     percentage, token1, token2, pool, isLoading, isValid, status,
   } = state;
   // Updating tokens
-  useKeepTokenUpdated(address1, tokens, tokenPrices, (token) => dispatch(setToken1Action(token)));
-  useKeepTokenUpdated(address2, tokens, tokenPrices, (token) => dispatch(setToken2Action(token)));
+  useKeepTokenUpdated(address1, token1, tokens, tokenPrices, (token) => dispatch(setToken1Action(token)));
+  useKeepTokenUpdated(address2, token2, tokens, tokenPrices, (token) => dispatch(setToken2Action(token)));
   // Find pool
   const [loadedPool, isPoolLoading] = useLoadPool(
     token1,

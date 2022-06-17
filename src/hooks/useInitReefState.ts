@@ -1,74 +1,42 @@
 import { useEffect, useState } from 'react';
-import { Provider } from '@reef-defi/evm-provider';
-import { ApolloClient } from '@apollo/client';
 import { useObservableState } from './useObservableState';
-import { availableNetworks, Network, ReefSigner } from '../state';
+import { availableNetworks, Network } from '../state';
 import { useProvider } from './useProvider';
 import {
+  ACTIVE_NETWORK_LS_KEY,
   currentNetwork$,
-  setCurrentNetwork, setCurrentProvider,
+  setCurrentNetwork,
+  setCurrentProvider,
 } from '../appState/providerState';
-import { apolloClientSubj, setApolloUrls } from '../graphql';
 import { accountsSubj } from '../appState/accountState';
 import { useLoadSigners } from './useLoadSigners';
+import { disconnectProvider } from '../utils/providerUtil';
+import { initApolloClient, State, StateOptions } from '../appState/util';
 
-const getGQLUrls = (network: Network): { ws: string; http: string }|undefined => {
-  if (!network.graphqlUrl) {
-    return undefined;
-  }
-  const ws = network.graphqlUrl.startsWith('http')
-    ? network.graphqlUrl.replace('http', 'ws')
-    : network.graphqlUrl;
-  const http = network.graphqlUrl.startsWith('ws')
-    ? network.graphqlUrl.replace('ws', 'http')
-    : network.graphqlUrl;
-  return { ws, http };
+const getNetworkFallback = (): Network => {
+  const storedNetwork = localStorage.getItem(ACTIVE_NETWORK_LS_KEY);
+  return storedNetwork != null ? JSON.parse(storedNetwork) : availableNetworks.mainnet;
 };
-// export type UseInitReefState = [ReefSigner[] | undefined, Provider | undefined, Network | undefined, boolean, any];
 
-interface State {
-  loading: boolean;
-  signers?: ReefSigner[];
-  provider?: Provider;
-  network?: Network;
-  error?: any; // TODO!
-}
-
-interface StateOptions {
-  network: Network;
-  signers?: ReefSigner[];
-  client?: ApolloClient<any>;
-}
 export const useInitReefState = (
   applicationDisplayName: string,
-  {
-    network = availableNetworks.mainnet,
-    client,
-    signers,
-  }: StateOptions,
+  options: StateOptions = {},
 ): State => {
+  const { network, client, signers } = options;
   const selectedNetwork: Network|undefined = useObservableState(currentNetwork$);
   const [provider, isProviderLoading] = useProvider((selectedNetwork as Network)?.rpcUrl);
   const [loadedSigners, isSignersLoading, error] = useLoadSigners(applicationDisplayName, signers ? undefined : provider);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (network && network !== selectedNetwork) {
-      setCurrentNetwork(network);
+    const newNetwork = network ?? getNetworkFallback();
+    if (newNetwork !== selectedNetwork) {
+      setCurrentNetwork(newNetwork);
     }
   }, [network]);
 
   useEffect(() => {
-    if (selectedNetwork) {
-      if (!client) {
-        const gqlUrls = getGQLUrls(selectedNetwork);
-        if (gqlUrls) {
-          setApolloUrls(gqlUrls);
-        }
-      } else {
-        apolloClientSubj.next(client);
-      }
-    }
+    initApolloClient(selectedNetwork, client);
   }, [selectedNetwork, client]);
 
   useEffect(() => {
@@ -76,7 +44,12 @@ export const useInitReefState = (
       setCurrentProvider(provider);
     }
     return () => {
-      provider?.api.disconnect();
+      if(provider){
+        const disc = async(prov) => {
+          await disconnectProvider(prov);
+        };
+        disc(provider);
+      }
     };
   }, [provider]);
 
