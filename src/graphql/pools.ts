@@ -4,7 +4,6 @@ import { gql } from '@apollo/client';
 export type BasePoolTransactionTypes = 'Swap' | 'Mint' | 'Burn';
 export type TransactionTypes = BasePoolTransactionTypes | 'All';
 
-
 // Pool information interfaces
 interface Supply {
   total_supply: number;
@@ -174,7 +173,6 @@ export type UserPoolsQuery = {
   }[];
 }
 
-
 export type PoolFeeQuery = {
   pool_hour_fee_aggregate: {
     aggregate: {
@@ -221,8 +219,6 @@ export type PoolsTotalSupply = {
   pool_event: AllPool[];
 };
 
-
-
 // Query variable interfaces
 interface FromVar {
   fromTime: string;
@@ -252,16 +248,15 @@ interface WhichTokenVar {
   whichToken: number;
 }
 
-
 export type PoolVar = AddressVar
 export type PoolSupplyVar = AddressVar
 export type PoolVolume24HVar = FromVar;
 export type PoolReservesVar = AddressVar
 export type PoolCountVar = OptionalSearchVar
-export interface UserPoolsVar extends AddressVar {}
+export type UserPoolsVar = AddressVar
 export interface PoolFeeVar extends AddressVar, FromVar { }
 export interface PoolTvlVar extends AddressVar, FromVar { }
-export interface PoolUserLpVar extends AddressVar, SignerAddressVar { };
+export interface PoolUserLpVar extends AddressVar, SignerAddressVar { }
 export interface PoolHourFeeVar extends AddressVar, FromVar { }
 export interface PoolHourVolumeVar extends AddressVar, FromVar { }
 export interface PoolVolumeAggregateVar extends PoolFeeVar, ToVar { }
@@ -320,7 +315,6 @@ query volume($fromTime: timestamptz!) {
 }
 `;
 
-
 export const POOL_USER_LP = gql`
 query user_lp($address: String!, $signerAddress: String!) {
   pool_event_aggregate(
@@ -345,7 +339,7 @@ query user_lp($address: String!, $signerAddress: String!) {
     }
   }
 }
-`
+`;
 
 export const POOL_TOTAL_SUPPLY = gql`
 query pool_lp($address: String!) {
@@ -366,7 +360,7 @@ query pool_lp($address: String!) {
     total_supply
   }
 }
-`
+`;
 export const POOLS_TOTAL_SUPPLY = gql`
 query pool_lp {
   pool_event(
@@ -411,8 +405,7 @@ query user_pools($address: String!) {
     }
   }
 }
-`
-
+`;
 
 export const POOL_SUPPLY_GQL = gql`
   query pool_supply($address: String!) {

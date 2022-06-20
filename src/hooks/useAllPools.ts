@@ -10,7 +10,7 @@ export const useAllPools = (): LastPoolReserves[] => {
       token_2,
       reserved_1,
       reserved_2,
-      address
+      address,
     }))
     : [];
 };
