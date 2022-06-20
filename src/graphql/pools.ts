@@ -27,6 +27,7 @@ interface Reserves {
 }
 interface AllPool extends Reserves {
   pool: {
+    address: string;
     token_1: string;
     token_2: string;
   }
@@ -517,6 +518,7 @@ subscription pool_event {
     reserved_1
     reserved_2
     pool {
+      address
       token_1
       token_2
     }
