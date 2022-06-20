@@ -4,16 +4,18 @@ import { gql } from '@apollo/client';
 export type BasePoolTransactionTypes = 'Swap' | 'Mint' | 'Burn';
 export type TransactionTypes = BasePoolTransactionTypes | 'All';
 
+
 // Pool information interfaces
 interface Supply {
   total_supply: number;
   supply: number;
 }
-interface Volume {
+export interface Amounts {
   amount_1: number;
   amount_2: number;
 }
-interface TimeframedVolume extends Volume {
+
+interface TimeframedVolume extends Amounts {
   timeframe: string;
 }
 interface Fee {
@@ -45,7 +47,7 @@ interface Pool {
   symbol_2: string;
   decimal_1: number;
   decimal_2: number;
-  volume_aggregate: { aggregate: { sum: Volume } };
+  volume_aggregate: { aggregate: { sum: Amounts } };
 }
 
 interface PoolData {
@@ -139,8 +141,16 @@ export type PoolHourVolumeQuery = { pool_hour_volume: TimeframedVolume[] };
 export type PoolTransactionQuery = { verified_pool_event: PoolTransaction[] };
 export type PoolHourCandlestickQuery = { pool_hour_candlestick: CandlestickData[]; }
 export type PoolVolumeAggregateQuery = {
-  pool_hour_volume_aggregate: { aggregate: { sum: Volume } };
+  pool_hour_volume_aggregate: { aggregate: { sum: Amounts } };
 };
+export interface PoolLPQuery {
+  pool_event_aggregate: {
+    aggregate: {
+      sum: Amounts;
+    };
+  };
+};
+
 export type PoolFeeQuery = {
   pool_hour_fee_aggregate: {
     aggregate: {
@@ -163,12 +173,29 @@ export type PoolCountQuery = {
   };
 }
 
+export type PoolHourVolumeAggregate = {
+  pool_hour_volume_aggregate: {
+    aggregate: {
+      sum: Amounts
+    }
+  }
+}
+
+export type PoolsTotalSupply = {
+  pool_event: AllPool[];
+};
+
+
+
 // Query variable interfaces
 interface FromVar {
   fromTime: string;
 }
 interface AddressVar {
   address: string;
+}
+interface UserAddressVar {
+  userAddress: string;
 }
 interface ToVar {
   toTime: string;
@@ -189,12 +216,14 @@ interface WhichTokenVar {
   whichToken: number;
 }
 
+
 export type PoolVar = AddressVar
 export type PoolSupplyVar = AddressVar
 export type PoolReservesVar = AddressVar
 export interface PoolFeeVar extends AddressVar, FromVar { }
 export interface PoolTvlVar extends AddressVar, FromVar { }
 export type PoolCountVar = OptionalSearchVar
+export interface PoolUserLpVar extends AddressVar, UserAddressVar { };
 export interface PoolHourFeeVar extends AddressVar, FromVar { }
 export interface PoolHourVolumeVar extends AddressVar, FromVar { }
 export interface PoolVolumeAggregateVar extends PoolFeeVar, ToVar { }
@@ -203,7 +232,108 @@ export interface PoolHourCandlestickVar extends AddressVar, FromVar, WhichTokenV
 export interface PoolBasicTransactionVar extends OptionalSearchVar, TransactionTypeVar { }
 export interface PoolTransactionCountVar extends OptionalSearchVar, TransactionTypeVar { }
 export interface PoolTransactionVar extends PoolBasicTransactionVar, OffsetVar, LimitVar { }
+
+
 // Graphql statements
+// Total supply of all pools
+export const POOLS_TOTAL_SUPPLY = gql`
+query total_supply {
+  pool_event(
+    distinct_on: pool_id
+    where: {
+      type: { _eq: "Sync" }
+    }
+    order_by: {
+      pool_id: asc
+      timestamp: desc
+    }
+  ) {
+    pool {
+      token_1
+      token_2
+    }
+    reserved_1
+    reserved_2
+  }
+}
+`;
+
+// Aggregating pool hour volume
+export const POOL_24H_VOLUME = gql`
+query volume($address: String!, $fromTime: $timestampz!) {
+  pool_hour_volume_aggregate(
+    where: {
+      pool: {
+        address: { _eq: $address }
+      }
+      timeframe: { _gt: $fromTime }
+    }
+  ) {
+    aggregate {
+      sum {
+        amount_1
+        amount_2
+      }
+    }
+  }
+}
+`;
+
+
+export const POOL_USER_LP = gql`
+query lp_tokens($userAddress: String!, $poolAddress: String!) {
+  pool_event_aggregate(
+    where: {
+      pool: {
+        address: { _eq: $poolAddress }
+      }
+      evm_event: {
+        event: {
+          extrinsic: {
+            signer: { _eq: $userAddress }
+          }
+        }
+      }
+      _or: [
+        { type: { _eq: "Burn" } }
+        { type: { _eq: "Mint" } }
+      ]
+    }
+  ) {
+    aggregate {
+      sum {
+        amount_1
+        amount_2
+      }
+    }
+  }
+}
+`
+
+export const POOL_LP = gql`
+query pool_lp($poolAdress: String!) {
+  pool_event_aggregate(
+    where: {
+      pool: {
+        address: { _eq: $poolAddress }
+      }
+      _or: [
+        { type: {_eq: "Burn" } }
+        { type: {_eq: "Mint" } }
+      ]
+    }
+
+  ) {
+    aggregate {
+      sum {
+        amount_1
+        amount_2
+      }
+    }
+  }
+}
+`
+
 export const POOL_SUPPLY_GQL = gql`
   query pool_supply($address: String!) {
     pool_minute_supply(

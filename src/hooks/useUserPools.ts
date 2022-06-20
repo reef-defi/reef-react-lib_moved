@@ -1,111 +1,31 @@
-import { ApolloClient, gql } from "@apollo/client";
+import { ApolloClient } from "@apollo/client";
 import { BigNumber } from "ethers";
 import { useState } from "react";
-import { LastPoolReserves, TokenPrices } from "../state";
+import { Amounts, PoolLPQuery, PoolUserLpVar, PoolVar, POOL_LP, POOL_USER_LP } from "../graphql/pools";
+import { getTokenPrice, LastPoolReserves, TokenPrices } from "../state";
 import { useAsyncEffect } from "./useAsyncEffect";
 
-interface Amounts {
-  amount_1: number,
-  amount_2: number,
-}
 
-type PoolsLPTokens = {[poolAddress: string]: BigNumber};
+export type PoolsLPTokens = {[poolAddress: string]: BigNumber};
 
-interface LPTokens {
-  pool_event_aggregate: {
-    aggregate: {
-      sum: Amounts;
-    };
-  };
-};
-
-interface LpPoolTokenVar {
-  poolAddress: string;
-}
-interface LpUserTokenVar extends LpPoolTokenVar {
-  userAddress: string;
-}
-
-const LP_USER_TOKENS = gql`
-query lp_tokens($userAddress: String!, $poolAddress: String!) {
-  pool_event_aggregate(
-    where: {
-      pool: {
-        address: { _eq: $poolAddress }
-      }
-      evm_event: {
-        event: {
-          extrinsic: {
-            signer: { _eq: $userAddress }
-          }
-        }
-      }
-      _or: [
-        { type: { _eq: "Burn" } }
-        { type: { _eq: "Mint" } }
-      ]
-    }
-  ) {
-    aggregate {
-      sum {
-        amount_1
-        amount_2
-      }
-    }
-  }
-}
-`
-
-const POOL_LP = gql`
-query pool_lp($poolAdress: String!) {
-  pool_event_aggregate(
-    where: {
-      pool: {
-        address: { _eq: $poolAddress }
-      }
-      _or: [
-        { type: {_eq: "Burn" } }
-        { type: {_eq: "Mint" } }
-      ]
-    }
-
-  ) {
-    aggregate {
-      sum {
-        amount_1
-        amount_2
-      }
-    }
-  }
-}
-
-`
-
-
-const getTokenPrice = (address: string, prices: TokenPrices): BigNumber => BigNumber.from(!!prices[address]
-  ? prices[address]
-  : 0
-);
-
-
-const queryUserPool = async (userAddress: string, poolAddress: string, client: ApolloClient<any>): Promise<Amounts> => client
-  .query<LPTokens, LpUserTokenVar>({
-    query: LP_USER_TOKENS,
+const queryUserPool = async (userAddress: string, address: string, client: ApolloClient<any>): Promise<Amounts> => client
+  .query<PoolLPQuery, PoolUserLpVar>({
+    query: POOL_USER_LP,
     variables: {
+      address,
       userAddress,
-      poolAddress,
     }
   })
   .then((res) => res.data.pool_event_aggregate.aggregate.sum);
 
-const queryPoolLp = async (poolAddress: string, client: ApolloClient<any>): Promise<Amounts> => client
-  .query<LPTokens, LpPoolTokenVar>({
+const queryPoolLp = async (address: string, client: ApolloClient<any>): Promise<Amounts> => client
+  .query<PoolLPQuery, PoolVar>({
     query: POOL_LP,
-    variables: { poolAddress }
+    variables: { address }
   })
   .then((res) => res.data.pool_event_aggregate.aggregate.sum);
 
-export const useUserPools = (userNativeAddress: string, pools: LastPoolReserves[], tokenPrices: TokenPrices, client: ApolloClient<any>) => {
+export const useUserPools = (userNativeAddress: string, pools: LastPoolReserves[], tokenPrices: TokenPrices, client: ApolloClient<any>): LastPoolReserves[] => {
   const [userReserves, setUserReserves] = useState<LastPoolReserves[]>([]);
 
   useAsyncEffect(async () => {

@@ -1,6 +1,7 @@
 import { BigNumber } from 'ethers';
 import { ensure } from '../utils/utils';
 import { calculateAmount } from '../utils/math';
+import { TokenPrices } from './pool';
 
 export enum ContractType {
   ERC20 = 'ERC20',
@@ -114,4 +115,9 @@ export const reefTokenWithAmount = (): TokenWithAmount => toTokenAmount(
     index: -1,
     price: 0,
   },
+);
+
+export const getTokenPrice = (address: string, prices: TokenPrices): BigNumber => BigNumber.from(!!prices[address]
+  ? prices[address]
+  : 0
 );

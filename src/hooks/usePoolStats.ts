@@ -1,15 +1,10 @@
-import { ApolloClient, gql } from "@apollo/client";
-import { useState } from "react";
-import { Pool, TokenPrices } from "../state";
-import { useAsyncEffect } from "./useAsyncEffect";
+import { ApolloClient } from "@apollo/client";
 import { BigNumber } from "ethers";
+import { useState } from "react";
+import { Amounts, PoolHourVolumeAggregate, PoolHourVolumeVar, PoolsTotalSupply, POOLS_TOTAL_SUPPLY, POOL_24H_VOLUME } from "../graphql/pools";
+import { getTokenPrice, LastPoolReserves, Pool, TokenPrices } from "../state";
+import { useAsyncEffect } from "./useAsyncEffect";
 
-
-
-const getTokenPrice = (address: string, prices: TokenPrices): BigNumber => BigNumber.from(!!prices[address]
-  ? prices[address]
-  : 0
-);
 
 // TODO: This query is not the best cause volume captures volumes per day and not by hour!
 // Will address this problem in the next update of explorer
@@ -30,93 +25,46 @@ const getTokenPrice = (address: string, prices: TokenPrices): BigNumber => BigNu
 // }
 // `;
 
-interface Amounts {
-  amount_1: string,
-  amount_2: string,
-}
-
-interface PoolHourVolumeAggregate {
-  pool_hour_volume_aggregate: {
-    aggregate: {
-      sum: Amounts
-    }
-  }
-}
-
-interface PoolHourVolumeVar {
-  poolAddress: string;
-  timeframe: string;
-}
-
-// Aggregating pool hour volume
-const POOL_24H_VOLUME = gql`
-query volume($poolAddress: String!, $timeframe: $timestampz!) {
-  pool_hour_volume_aggregate(
-    where: {
-      pool: {
-        address: { _eq: $poolAddress }
-      }
-      timeframe: { _gt: $timeframe }
-    }
-  ) {
-    aggregate {
-      sum {
-        amount_1
-        amount_2
-      }
-    }
-  }
-}
-`;
-
-const queryPoolVolume = async (address: string, from: string, client: ApolloClient<any>): Promise<Amounts> =>
+const queryPoolVolume = async (address: string, fromTime: string, client: ApolloClient<any>): Promise<Amounts> =>
   client.query<PoolHourVolumeAggregate, PoolHourVolumeVar>({
     query: POOL_24H_VOLUME,
     variables: {
-      timeframe: from,
-      poolAddress: address,
+      address,
+      fromTime,
     }
   })
   .then((res) => res.data.pool_hour_volume_aggregate.aggregate.sum);
 
 
-interface PoolTotalSupply {
-  pool: {
-    token_1: string;
-    token_2: string;
-  };
-  reserved_1: string;
-  reserved_2: string;
-}
-interface PoolsTotalSupply {
-  pool_event: PoolTotalSupply[];
-};
 
-const POOLS_TOTAL_SUPPLY = gql`
-query total_supply {
-  pool_event(
-    distinct_on: pool_id
-    where: {
-      type: { _eq: "Sync" }
-    }
-    order_by: {
-      pool_id: asc
-      timestamp: desc
-    }
-  ) {
-    pool {
-      token_1
-      token_2
-    }
-    reserved_1
-    reserved_2
-  }
-}
-`
-
-const usePoolStats = (pools: Pool[], tokenPrices: TokenPrices, apolloClient: ApolloClient<any>) => {
-  const [volume, setVolume] = useState("0");
+export const useTotalSupply = (pools: LastPoolReserves[], tokenPrices: TokenPrices, client: ApolloClient<any>): string => {
   const [totalSupply, setTotalSupply] = useState("0");
+
+  // Updating token supply
+  useAsyncEffect(async () => {
+    const supplies = await client.query<PoolsTotalSupply>({
+        query: POOLS_TOTAL_SUPPLY,
+      })
+      .then((res) => res.data.pool_event);
+
+    const supply = supplies
+      .reduce((acc, {pool: {token_1, token_2}, reserved_1, reserved_2}) => {
+        const tokenPrice1 = getTokenPrice(token_1, tokenPrices)
+        const tokenPrice2 = getTokenPrice(token_2, tokenPrices)
+
+      return acc
+        .add(tokenPrice1.mul(reserved_1))
+        .add(tokenPrice2.mul(reserved_2));
+    }, BigNumber.from(0));
+
+    setTotalSupply(supply.toString());
+  }, [pools, tokenPrices])
+
+  return totalSupply
+}
+
+export const usePoolVolume = (pools: Pool[], tokenPrices: TokenPrices, apolloClient: ApolloClient<any>): string => {
+  const [volume, setVolume] = useState("0");
 
   const yesterdayAtMidnight = new Date(Date.now() - 24*60*60*1000).toUTCString();
 
@@ -142,27 +90,6 @@ const usePoolStats = (pools: Pool[], tokenPrices: TokenPrices, apolloClient: Apo
     setVolume(summedVolumes.toString());
   }, [pools, tokenPrices]);
 
-  // Updating token supply
-  useAsyncEffect(async () => {
-    const supplies = await apolloClient.query<PoolsTotalSupply>({
-        query: POOLS_TOTAL_SUPPLY,
-      })
-      .then((res) => res.data.pool_event);
-
-    const supply = supplies
-    .reduce((acc, {pool: {token_1, token_2}, reserved_1, reserved_2}) => {
-      const tokenPrice1 = getTokenPrice(token_1, tokenPrices)
-      const tokenPrice2 = getTokenPrice(token_2, tokenPrices)
-
-      return acc
-        .add(tokenPrice1.mul(reserved_1))
-        .add(tokenPrice2.mul(reserved_2));
-    }, BigNumber.from(0));
-
-    setTotalSupply(supply.toString());
-  }, [pools, tokenPrices])
-
-  return [totalSupply, volume];
+  return volume;
 };
 
-export default usePoolStats;
