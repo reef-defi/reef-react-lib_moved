@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 
-const REEF_TOKEN_ID = 'reef-finance';
+const REEF_TOKEN_ID = 'reef';
 
 interface PriceRes {
   [currenty: string]: {
