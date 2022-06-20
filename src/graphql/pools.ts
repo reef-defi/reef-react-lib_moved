@@ -180,6 +180,18 @@ export type PoolHourVolumeAggregate = {
     }
   }
 }
+export type Pool24HVolume = {
+  pool_hour_volume: {
+    pool: {
+      address: string;
+      token_1: string;
+      token_2: string;
+    };
+    timeframe: string;
+    amount_1: number;
+    amount_2: number;
+  }[];
+}
 
 export type PoolsTotalSupply = {
   pool_event: AllPool[];
@@ -219,10 +231,11 @@ interface WhichTokenVar {
 
 export type PoolVar = AddressVar
 export type PoolSupplyVar = AddressVar
+export type PoolVolume24HVar = FromVar;
 export type PoolReservesVar = AddressVar
+export type PoolCountVar = OptionalSearchVar
 export interface PoolFeeVar extends AddressVar, FromVar { }
 export interface PoolTvlVar extends AddressVar, FromVar { }
-export type PoolCountVar = OptionalSearchVar
 export interface PoolUserLpVar extends AddressVar, UserAddressVar { };
 export interface PoolHourFeeVar extends AddressVar, FromVar { }
 export interface PoolHourVolumeVar extends AddressVar, FromVar { }
@@ -260,21 +273,22 @@ query total_supply {
 
 // Aggregating pool hour volume
 export const POOL_24H_VOLUME = gql`
-query volume($address: String!, $fromTime: $timestampz!) {
-  pool_hour_volume_aggregate(
+query volume($fromTime: timestamptz!) {
+	pool_hour_volume(
+    distinct_on: [pool_id, timeframe]
+    order_by: {
+      pool_id: asc
+      timeframe: desc
+    }
     where: {
-      pool: {
-        address: { _eq: $address }
-      }
-      timeframe: { _gt: $fromTime }
+      timeframe: { _gte: $fromTime }
     }
   ) {
-    aggregate {
-      sum {
-        amount_1
-        amount_2
-      }
+    pool {
+      address
     }
+    amount_1
+    amount_2
   }
 }
 `;
