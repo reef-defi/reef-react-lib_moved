@@ -1,11 +1,10 @@
 import { ApolloClient, gql } from "@apollo/client";
 import { useState } from "react";
-import { Pool } from "../state";
+import { Pool, TokenPrices } from "../state";
 import { useAsyncEffect } from "./useAsyncEffect";
 import { BigNumber } from "ethers";
 
 
-type TokenPrices = {[tokenAddress: string]: number};
 
 const getTokenPrice = (address: string, prices: TokenPrices): BigNumber => BigNumber.from(!!prices[address]
   ? prices[address]
@@ -49,6 +48,7 @@ interface PoolHourVolumeVar {
   timeframe: string;
 }
 
+// Aggregating pool hour volume
 const POOL_24H_VOLUME = gql`
 query volume($poolAddress: String!, $timeframe: $timestampz!) {
   pool_hour_volume_aggregate(
@@ -120,6 +120,8 @@ const usePoolStats = (pools: Pool[], tokenPrices: TokenPrices, apolloClient: Apo
 
   const yesterdayAtMidnight = new Date(Date.now() - 24*60*60*1000).toUTCString();
 
+  // TODO: When you will have time group both functions into generic one
+  // Updating volume
   useAsyncEffect(async () => {
     const volumes = await Promise.all(
       pools.map(async ({poolAddress, token1, token2}) => ({
@@ -131,6 +133,7 @@ const usePoolStats = (pools: Pool[], tokenPrices: TokenPrices, apolloClient: Apo
     const summedVolumes = volumes.reduce((acc, {token1, token2, amounts}) => {
       const tokenPrice1 = getTokenPrice(token1.address, tokenPrices);
       const tokenPrice2 = getTokenPrice(token2.address, tokenPrices);
+
       return acc
         .add(tokenPrice1.mul(amounts.amount_1))
         .add(tokenPrice2.mul(amounts.amount_2));
@@ -139,6 +142,7 @@ const usePoolStats = (pools: Pool[], tokenPrices: TokenPrices, apolloClient: Apo
     setVolume(summedVolumes.toString());
   }, [pools, tokenPrices]);
 
+  // Updating token supply
   useAsyncEffect(async () => {
     const supplies = await apolloClient.query<PoolsTotalSupply>({
         query: POOLS_TOTAL_SUPPLY,
@@ -149,6 +153,7 @@ const usePoolStats = (pools: Pool[], tokenPrices: TokenPrices, apolloClient: Apo
     .reduce((acc, {pool: {token_1, token_2}, reserved_1, reserved_2}) => {
       const tokenPrice1 = getTokenPrice(token_1, tokenPrices)
       const tokenPrice2 = getTokenPrice(token_2, tokenPrices)
+
       return acc
         .add(tokenPrice1.mul(reserved_1))
         .add(tokenPrice2.mul(reserved_2));
