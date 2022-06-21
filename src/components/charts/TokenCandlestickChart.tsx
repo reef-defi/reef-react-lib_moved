@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 
-import { utcHour } from 'd3-time';
+import { utcDay } from 'd3-time';
 // @ts-ignore
 import { timeFormat } from 'd3-time-format';
 // @ts-ignore
@@ -11,19 +11,19 @@ import { Chart } from 'react-stockcharts';
 // @ts-ignore
 import { CandlestickSeries } from 'react-stockcharts/lib/series';
 // @ts-ignore
-import { MouseCoordinateX, CrossHairCursor, CurrentCoordinate } from 'react-stockcharts/lib/coordinates';
+import { CrossHairCursor, CurrentCoordinate, MouseCoordinateX } from 'react-stockcharts/lib/coordinates';
 // @ts-ignore
 import { XAxis, YAxis } from 'react-stockcharts/lib/axes';
 // @ts-ignore
 import { SingleValueTooltip } from 'react-stockcharts/lib/tooltip';
 // @ts-ignore
 import { timeIntervalBarWidth } from 'react-stockcharts/lib/utils';
-import DefaultChart from './DefaultChart';
-import { useHourCandlestick } from '../../hooks';
-import { dropDuplicatesMultiKey } from '../../utils/utils';
-import { std } from '../../utils/math';
 import { CandlestickData } from '../../graphql/pools';
+import { useDayCandlestick, useLastDayCandlestick } from '../../hooks';
+import { std } from '../../utils/math';
+import { dropDuplicatesMultiKey } from '../../utils/utils';
 import { Loading } from '../common/Loading';
+import DefaultChart from './DefaultChart';
 
 interface OHLC {
   date: Date;
@@ -59,20 +59,47 @@ interface TokenCandlestickChart {
 
 const TokenCandlestickChart = ({ whichToken, address } : TokenCandlestickChart): JSX.Element => {
   const toDate = useMemo(() => Date.now(), []);
-  const fromDate = toDate - 50 * 60 * 60 * 1000; // last 50 hour
+  const fromDate = toDate - 31 * 24 * 60 * 60 * 1000; // last 50 hour
 
-  const { loading, data } = useHourCandlestick(address, fromDate, whichToken);
+  const { loading, data } = useDayCandlestick(address, fromDate, whichToken);
+  const { loading: lastLoading, data: lastCandlestick }  = useLastDayCandlestick(address, fromDate, whichToken);
 
   const candlestick = data
-    ? data.pool_hour_candlestick
+    ? data.pool_day_candlestick
       .map((token) => (whichToken === 1 ? token1Values(token) : token2Values(token)))
-      .filter(({ date }) => date.getTime() > fromDate)
     : [];
 
-  const results = dropDuplicatesMultiKey(candlestick, ['date'])
-    .sort((a, b) => a.date.getTime() - b.date.getTime());
+  // Injecting last seen OHCL before the date
+  if (lastCandlestick && lastCandlestick.pool_day_candlestick.length > 0) {
+    const item = whichToken === 1
+      ? token1Values(lastCandlestick.pool_day_candlestick[0])
+      : token2Values(lastCandlestick.pool_day_candlestick[0]);
 
-  if (loading) {
+    candlestick.splice(0, 0, item);
+  }
+
+  // Dropping date duplicates sorting data and repairing missing dates
+  const results = dropDuplicatesMultiKey(candlestick, ['date'])
+    .sort((a, b) => a.date.getTime() - b.date.getTime())
+    .reduce((acc, item) => {
+      if (acc.length === 0) {
+        return [item];
+      }
+      const last = acc[acc.length-1];
+      const lastDate = new Date(last.date);
+      lastDate.setDate(lastDate.getDate() + 1);
+
+      while (lastDate < item.date) {
+        acc.push({date: new Date(lastDate), close: last.close, high: last.close, low: last.close, open: last.close});
+        lastDate.setDate(lastDate.getDate() + 1);
+      }
+      acc.push(item);
+      return acc;
+    }, [] as OHLC[])
+    .filter(({ date }) => date.getTime() > fromDate)
+
+
+  if (loading || lastLoading) {
     return (<Loading />);
   }
   if (results.length <= 1) {
@@ -98,7 +125,7 @@ const TokenCandlestickChart = ({ whichToken, address } : TokenCandlestickChart):
           displayFormat={timeFormat('%Y-%m-%d %H:%M:%S')}
         />
 
-        <CandlestickSeries width={timeIntervalBarWidth(utcHour)} />
+        <CandlestickSeries width={timeIntervalBarWidth(utcDay)} />
 
         <CurrentCoordinate yAccessor={(d: OHLC) => d.close} fill={(d: OHLC) => d.close} />
 

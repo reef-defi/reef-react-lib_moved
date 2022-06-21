@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { DocumentNode, gql } from '@apollo/client';
 
 // Data interfaces
 export type BasePoolTransactionTypes = 'Swap' | 'Mint' | 'Burn';
@@ -138,7 +138,7 @@ export type AllPoolSubscription = { pool_event: AllPool[] }
 export type PoolSupplyQuery = { pool_minute_supply: Supply[] };
 export type PoolHourVolumeQuery = { pool_hour_volume: TimeframedVolume[] };
 export type PoolTransactionQuery = { verified_pool_event: PoolTransaction[] };
-export type PoolHourCandlestickQuery = { pool_hour_candlestick: CandlestickData[]; }
+export type PoolDayCandlestickQuery = { pool_day_candlestick: CandlestickData[]; }
 export type PoolVolumeAggregateQuery = {
   pool_hour_volume_aggregate: { aggregate: { sum: Amounts } };
 };
@@ -256,12 +256,13 @@ export type PoolCountVar = OptionalSearchVar
 export type UserPoolsVar = AddressVar
 export interface PoolFeeVar extends AddressVar, FromVar { }
 export interface PoolTvlVar extends AddressVar, FromVar { }
-export interface PoolUserLpVar extends AddressVar, SignerAddressVar { }
 export interface PoolHourFeeVar extends AddressVar, FromVar { }
 export interface PoolHourVolumeVar extends AddressVar, FromVar { }
 export interface PoolVolumeAggregateVar extends PoolFeeVar, ToVar { }
+export interface PoolUserLpVar extends AddressVar, SignerAddressVar { }
 export interface PoolsVar extends FromVar, OffsetVar, OptionalSearchVar { }
-export interface PoolHourCandlestickVar extends AddressVar, FromVar, WhichTokenVar { }
+export interface PoolLastCandlestickVar extends AddressVar, WhichTokenVar { }
+export interface PoolDayCandlestickVar extends AddressVar, FromVar, WhichTokenVar { }
 export interface PoolBasicTransactionVar extends OptionalSearchVar, TransactionTypeVar { }
 export interface PoolTransactionCountVar extends OptionalSearchVar, TransactionTypeVar { }
 export interface PoolTransactionVar extends PoolBasicTransactionVar, OffsetVar, LimitVar { }
@@ -635,9 +636,11 @@ export const POOL_COUNT_GQL = gql`
 `;
 
 // Charts queryes & subscriptions
-export const POOL_TVL_GQL = gql`
+type Time = "day" | "hour" | "minute";
+
+const tvlQuery = (time: Time): DocumentNode => gql`
 query pool_supply($address: String!, $fromTime: timestamptz!) {
-  pool_hour_supply(
+  pool_${time}_supply(
     where: {
       pool: { address: { _ilike: $address } }
       timeframe: { _gte: $fromTime }
@@ -648,10 +651,13 @@ query pool_supply($address: String!, $fromTime: timestamptz!) {
     timeframe
   }
 }`;
+export const POOL_DAY_TVL_GQL = tvlQuery('day');
+export const POOL_HOUR_TVL_GQL = tvlQuery('hour');
+export const POOL_MINUTE_TVL_GQL = tvlQuery('minute');
 
-export const POOL_HOUR_CANDLESTICK_GQL = gql`
+const candlestickQuery = (time: Time): DocumentNode =>gql`
 query candlestick($address: String!, $whichToken: Int!, $fromTime: timestamptz!) {
-  pool_hour_candlestick(
+  pool_${time}_candlestick(
     order_by: { timeframe: asc }
     where: {
       pool: { address: { _ilike: $address } }
@@ -677,6 +683,40 @@ query candlestick($address: String!, $whichToken: Int!, $fromTime: timestamptz!)
   }
 }
 `;
+
+export const POOL_DAY_CANDLESTICK_GQL = candlestickQuery("day")
+export const POOL_HOUR_CANDLESTICK_GQL = candlestickQuery("hour")
+export const POOL_MINUTE_CANDLESTICK_GQL = candlestickQuery("minute")
+
+export const POOL_LAST_CANDLESTICH_GQL = gql`
+query candlestick($address: String!, $whichToken: Int!, $fromTime: timestamptz!) {
+  pool_day_candlestick(
+    order_by: { timeframe: desc }
+    where: {
+      pool: { address: { _eq: $address } }
+      which_token: { _eq: $whichToken }
+      timeframe: { _lte: $fromTime }
+    }
+    limit: 1
+  ) {
+    pool_id
+    timeframe
+    close_1
+    close_2
+    high_1
+    high_2
+    low_1
+    low_2
+    open_1
+    open_2
+    which_token
+    pool {
+      token_1
+      token_2
+    }
+  }
+}
+`
 
 export const POOL_HOUR_FEE_SUBSCRIPTION_GQL = gql`
 subscription fee($address: String!, $fromTime: timestamptz!) {
