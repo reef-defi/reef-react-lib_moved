@@ -4,13 +4,12 @@ import {
 } from '@apollo/client';
 import {
   PoolBasicTransactionVar, PoolCountQuery, PoolCountVar, PoolDayCandlestickQuery,
-  PoolDayCandlestickVar, PoolFeeQuery,
+  PoolDayCandlestickVar, PoolDayVolumeQuery, PoolFeeQuery,
   PoolFeeVar, PoolHourFeeQuery,
-  PoolHourFeeVar, PoolHourVolumeQuery,
-  PoolHourVolumeVar, PoolQuery, PoolReservesQuery, PoolReservesVar, PoolsQuery, PoolSupplyQuery, PoolSupplyVar, PoolsVar, POOLS_GQL, PoolTransactionCountQuery, PoolTransactionQuery,
+  PoolHourFeeVar, PoolQuery, PoolReservesQuery, PoolReservesVar, PoolsQuery, PoolSupplyQuery, PoolSupplyVar, PoolsVar, POOLS_GQL, PoolTransactionCountQuery, PoolTransactionQuery,
   PoolTransactionVar, PoolTvlQuery,
   PoolTvlVar, PoolVar, PoolVolumeAggregateQuery,
-  PoolVolumeAggregateVar, POOL_COUNT_GQL, POOL_CURRENT_RESERVES_GQL, POOL_DAY_CANDLESTICK_GQL, POOL_DAY_TVL_GQL, POOL_FEES_GQL, POOL_GQL, POOL_HOUR_FEE_SUBSCRIPTION_GQL, POOL_HOUR_VOLUME_GQL, POOL_LAST_CANDLESTICH_GQL, POOL_SUPPLY_GQL, POOL_TRANSACTIONS_GQL, POOL_TRANSACTION_COUNT_GQL, POOL_VOLUME_AGGREGATE_GQL,
+  PoolVolumeAggregateVar, PoolVolumeVar, POOL_COUNT_GQL, POOL_CURRENT_RESERVES_GQL, POOL_DAY_CANDLESTICK_GQL, POOL_DAY_TVL_GQL, POOL_DAY_VOLUME_GQL, POOL_FEES_GQL, POOL_GQL, POOL_HOUR_FEE_SUBSCRIPTION_GQL, POOL_LAST_CANDLESTICH_GQL, POOL_SUPPLY_GQL, POOL_TRANSACTIONS_GQL, POOL_TRANSACTION_COUNT_GQL, POOL_VOLUME_AGGREGATE_GQL,
   TransactionTypes
 } from '../graphql/pools';
 
@@ -106,10 +105,10 @@ export const useDayTvl = (
     fromTime: new Date(fromTime).toISOString(),
   },
 });
-export const useHourVolume = (
+export const useDayPoolVolume = (
   address: string,
   fromTime: number,
-): QueryResult<PoolHourVolumeQuery> => useQuery<PoolHourVolumeQuery, PoolHourVolumeVar>(POOL_HOUR_VOLUME_GQL, {
+): QueryResult<PoolDayVolumeQuery> => useQuery<PoolDayVolumeQuery, PoolVolumeVar>(POOL_DAY_VOLUME_GQL, {
   variables: {
     address,
     fromTime: new Date(fromTime).toISOString(),

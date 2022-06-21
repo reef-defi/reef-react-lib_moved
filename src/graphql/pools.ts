@@ -136,7 +136,7 @@ export type PoolTvlQuery = { pool_day_supply: TVLData[] };
 export type PoolReservesQuery = { pool_event: Reserves[] };
 export type AllPoolSubscription = { pool_event: AllPool[] }
 export type PoolSupplyQuery = { pool_minute_supply: Supply[] };
-export type PoolHourVolumeQuery = { pool_hour_volume: TimeframedVolume[] };
+export type PoolDayVolumeQuery = { pool_day_volume: TimeframedVolume[] };
 export type PoolTransactionQuery = { verified_pool_event: PoolTransaction[] };
 export type PoolDayCandlestickQuery = { pool_day_candlestick: CandlestickData[]; }
 export type PoolVolumeAggregateQuery = {
@@ -256,8 +256,8 @@ export type PoolCountVar = OptionalSearchVar
 export type UserPoolsVar = AddressVar
 export interface PoolFeeVar extends AddressVar, FromVar { }
 export interface PoolTvlVar extends AddressVar, FromVar { }
+export interface PoolVolumeVar extends AddressVar, FromVar { }
 export interface PoolHourFeeVar extends AddressVar, FromVar { }
-export interface PoolHourVolumeVar extends AddressVar, FromVar { }
 export interface PoolVolumeAggregateVar extends PoolFeeVar, ToVar { }
 export interface PoolUserLpVar extends AddressVar, SignerAddressVar { }
 export interface PoolsVar extends FromVar, OffsetVar, OptionalSearchVar { }
@@ -446,9 +446,10 @@ export const POOL_VOLUME_AGGREGATE_GQL = gql`
     }
   }
 `;
-export const POOL_HOUR_VOLUME_GQL = gql`
+
+const volumeQuery = (time: Time): DocumentNode => gql`
 query volume($address: String!, $fromTime: timestamptz!) {
-  pool_hour_volume(
+  pool_${time}_volume(
     where: {
       timeframe: { _gte: $fromTime }
       pool: { address: { _ilike: $address } }
@@ -459,8 +460,11 @@ query volume($address: String!, $fromTime: timestamptz!) {
     amount_2
     timeframe
   }
-}
-`;
+}`
+export const POOL_DAY_VOLUME_GQL = volumeQuery('day');
+export const POOL_HOUR_VOLUME_GQL = volumeQuery('hour');
+export const POOL_MINUTE_VOLUME_GQL = volumeQuery('minute');
+
 export const POOL_FEES_GQL = gql`
   query pool_fee($address: String!, $fromTime: timestamptz!) {
     pool_hour_fee_aggregate(
