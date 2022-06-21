@@ -25,9 +25,8 @@ export const useInitReefState = (
   const { network, client, signers } = options;
   const selectedNetwork: Network|undefined = useObservableState(currentNetwork$);
   const [provider, isProviderLoading] = useProvider((selectedNetwork as Network)?.rpcUrl);
-  const [loadedSigners, isSignersLoading, error] = useLoadSigners(applicationDisplayName, signers ? undefined : provider);
+  const [loadedSigners, isSignersLoading, error] = useLoadSigners(applicationDisplayName, signers ? undefined : provider, signers);
   const [loading, setLoading] = useState(false);
-
   useEffect(() => {
     const newNetwork = network ?? getNetworkFallback();
     if (newNetwork !== selectedNetwork) {
