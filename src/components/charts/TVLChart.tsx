@@ -8,7 +8,6 @@ import { CrossHairCursor, CurrentCoordinate, MouseCoordinateX } from 'react-stoc
 // @ts-ignore
 import { XAxis, YAxis } from 'react-stockcharts/lib/axes';
 // @ts-ignore
-import { SingleValueTooltip } from 'react-stockcharts/lib/tooltip';
 import './Chart.css';
 // @ts-ignore
 import { LineSeries, ScatterSeries, SquareMarker } from 'react-stockcharts/lib/series';
@@ -59,7 +58,7 @@ const TVLChart = ({ address } : TVLChart): JSX.Element => {
 
   const values: number[] = tvl.map(({ amount }) => amount);
   const adjust = std(values);
-
+  console.log(filteredData)
   return (
     <DefaultChart
       data={filteredData}
@@ -93,18 +92,19 @@ const TVLChart = ({ address } : TVLChart): JSX.Element => {
         />
         <CurrentCoordinate yAccessor={(d: Data) => d.amount} fill={(d: Data) => d.amount} />
 
-        <SingleValueTooltip
-          yAccessor={(d: Data) => d.amount}
+        {/* TODO find wtf is wrong with this */}
+        {/* <SingleValueTooltip
+          yAccessor={(d: Data) => d.amount || 0}
           yDisplayFormat={(d: number) => formatAmount(d, 18)}
           fontSize={21}
           origin={[20, 10]}
-        />
-        <SingleValueTooltip
+        /> */}
+        {/* <SingleValueTooltip
           yAccessor={(d: Data) => d.date}
           fontSize={14}
           yDisplayFormat={timeFormat('%Y-%m-%d %H:%M:%S')}
           origin={[20, 30]}
-        />
+        /> */}
       </Chart>
 
       <CrossHairCursor />
