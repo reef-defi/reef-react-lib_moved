@@ -49,7 +49,7 @@ const signersLocallyUpdatedData$: Observable<ReefSigner[]> = reloadSignersSubj.p
         signersInjected,
         state.allUpdated,
       );
-      return of(updateCtx.updateActions)
+      return of(updateCtx.updateActions || [])
         .pipe(
           switchMap((updateActions) => updateSignersEvmBindings(
             updateActions,
@@ -298,16 +298,16 @@ export const selectedSigner$: Observable<ReefSigner | undefined | null> = combin
   signers$,
 ])
   .pipe(
-    map(([selectedAddress, signers]: [(string | undefined), (ReefSigner[] | null)]) => {
-      if (!selectedAddress) {
+    map(([selectedAddress, signers]: [string | undefined, ReefSigner[]|null]) => {
+      if (!selectedAddress || !signers || !signers.length) {
         return undefined;
       }
-      console.log('lib/SEL SIGNER addr=', selectedAddress, signers?.length);
-      let foundSigner = signers?.find(
+
+      let foundSigner = signers.find(
         (signer: ReefSigner) => signer?.address === selectedAddress,
       );
       if (!foundSigner) {
-        foundSigner = signers ? signers[0] : undefined;
+        foundSigner = signers ? signers[0] as ReefSigner : undefined;
       }
       try {
         if (foundSigner) {
@@ -320,7 +320,7 @@ export const selectedSigner$: Observable<ReefSigner | undefined | null> = combin
         // getting error in Flutter: 'The operation is insecure'
         // console.log('Flutter error=',e.message);
       }
-      return foundSigner ? { ...foundSigner } : undefined;
+      return foundSigner ? { ...foundSigner } as ReefSigner : undefined;
     }),
     catchError((err) => {
       console.log('selectedSigner$ ERROR=', err.message);

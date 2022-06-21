@@ -34,15 +34,23 @@ function getInstallExtensionMessage(): { message: string; url?: string } {
 
 export const useLoadSigners = (
   appDisplayName: string,
+  // if provider is not passed we need to pass signers and vice versa
   provider?: Provider,
+  signers?: ReefSigner[],
 ): [
   ReefSigner[],
   boolean,
   { code?: number; message: string; url?: string } | undefined
 ] => {
-  const [signers, setSigners] = useState<ReefSigner[]>([]);
+  const [signersVal, setSignersVal] = useState<ReefSigner[]>(signers||[]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<{ message: string; code?: number; url?: string }>();
+
+  useEffect(() => {
+    if (signers && signers.length) {
+      setSignersVal(signers);
+    }
+  }, [signers]);
 
   useAsyncEffect(async () => {
     if (!provider) {
@@ -75,7 +83,7 @@ export const useLoadSigners = (
 
       const sgnrs = await getExtensionSigners(extensions, provider);
       // TODO signers objects are large cause of provider object inside. Find a way to overcome this problem.
-      setSigners(sgnrs);
+      setSignersVal(sgnrs);
     } catch (e) {
       console.log('Error when loading signers!', e);
       setError(e as { message: string });
@@ -85,16 +93,17 @@ export const useLoadSigners = (
   }, [provider]);
 
   useEffect(() => {
-    if (!signers.length) {
+    if (!signersVal.length) {
       return;
     }
+
     let storedAddr = localStorage.getItem('selected_address_reef');
-    if(storedAddr && signers.some((s)=>storedAddr===s.address)){
+    if(storedAddr && signersVal.some((s)=>storedAddr===s.address)){
       setCurrentAddress(storedAddr);
       return;
     }
-    setCurrentAddress(signers[0].address);
-  }, [signers]);
+    setCurrentAddress(signersVal[0].address);
+  }, [signersVal]);
 
-  return [signers, isLoading, error];
+  return [signersVal, isLoading, error];
 };
