@@ -132,7 +132,7 @@ interface Fee {
 export type PoolQuery = { pool: PoolData[] };
 export type PoolsQuery = { verified_pool: Pool[] };
 export type PoolHourFeeQuery = { pool_hour_fee: Fee[] };
-export type PoolTvlQuery = { pool_hour_supply: TVLData[] };
+export type PoolTvlQuery = { pool_day_supply: TVLData[] };
 export type PoolReservesQuery = { pool_event: Reserves[] };
 export type AllPoolSubscription = { pool_event: AllPool[] }
 export type PoolSupplyQuery = { pool_minute_supply: Supply[] };
