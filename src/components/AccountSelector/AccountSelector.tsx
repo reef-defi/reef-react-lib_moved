@@ -2,29 +2,16 @@ import React from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Network, ReefSigner } from '../../state';
 import { toReefBalanceDisplay, trim } from '../../utils';
-import {
-  Border,
-  FlexRow,
-  Margin,
-  MT,
-  MX,
-} from '../common/Display';
-import {
-  WalletIcon,
-  CopyIcon,
-  ExploreIcon,
-  ReefAddressIcon,
-} from '../common/Icons';
-import {
-  Modal, ModalBody, ModalClose, ModalHeader,
-} from '../common/Modal';
-import {
-  LeadText, MiniText, MutedText, Title,
-} from '../common/Text';
-import { AccountListModal } from './AccountListModal';
+import { Border, FlexRow, Margin, MT, MX, } from '../common/Display';
+import { CopyIcon, ExploreIcon, ReefAddressIcon, WalletIcon, } from '../common/Icons';
+import { Modal, ModalBody, ModalClose, ModalHeader, } from '../common/Modal';
+import { LeadText, MiniText, MutedText, Title, } from '../common/Text';
 import { currentNetwork$ } from '../../appState/providerState';
 import { useObservableState } from '../../hooks';
 import './AccountSelector.css';
+import { ListItem } from '../common/List';
+import { getSignerIdent } from '../../rpc';
+import AccountInlineInfo from './AccountInlineInfo';
 
 interface AccountSelector {
   reefscanUrl: string;
@@ -59,6 +46,18 @@ export const AccountSelector = ({
     }
   };
 
+  const accountsView = accounts.map((acc, index) => (
+    <ListItem key={getSignerIdent(acc)}>
+      <AccountInlineInfo
+        name={acc.name}
+        address={acc.address}
+        evmAddress={acc.evmAddress}
+        source={acc.source}
+        onClick={() => selectAccount(index, acc)}
+      />
+    </ListItem>
+  ));
+
   return (
     <div className="nav-account border-rad">
       <div
@@ -90,14 +89,14 @@ export const AccountSelector = ({
                   <ReefAddressIcon address={address} />
                   <LeadText>{trim(evmAddress, 11)}</LeadText>
                 </div>
-                <button
+                {/*<button
                   type="button"
                   className="btn btn-sm btn-reef border-rad"
                   data-bs-target="#select-account-modal"
                   data-bs-toggle="modal"
                 >
                   <span>Switch account</span>
-                </button>
+                </button>*/}
               </FlexRow>
             </Margin>
             <Margin size="2">
@@ -163,14 +162,20 @@ export const AccountSelector = ({
             </MX>
           </Border>
           <MT size="2" />
+          <div className="account-selector__accounts-list border border-rad">
+            <ul className="list-group overflow-scroll" style={{ height: '300px' }}>
+              {accountsView}
+            </ul>
+          </div>
         </ModalBody>
       </Modal>
-      <AccountListModal
+      {/*<AccountListModal
         id="select-account-modal"
         accounts={accounts}
         selectAccount={selectAccount}
         backButtonModalId="#account-modal"
-      />
+      />*/}
+
     </div>
   );
 };

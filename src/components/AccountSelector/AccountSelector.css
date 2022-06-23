@@ -9,5 +9,19 @@
 
 .account-selector__account-address{
   align-items: baseline;
-  justify-content: space-between;
+  justify-content: center;
+}
+
+.account-selector__accounts-list{
+  margin: 1em 0;
+  padding: 3px;
+}
+
+.account-selector__accounts-list .list-group-item:last-child{
+  border-bottom: 0;
+}
+.account-selector__accounts-list .list-group-item{
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
 }
