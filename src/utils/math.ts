@@ -327,15 +327,21 @@ export const toHumanAmount = (amount: string): string => {
   return amount.slice(0, head.length + 4);
 };
 
-export const formatAmount = (amount: number, decimals: number): string => toHumanAmount(
-  utils.formatUnits(
-    BigNumber.from(
-      amount.toLocaleString('fullwide', { useGrouping: false }),
-    ).toString(),
-    decimals,
-  ),
-);
-
+export const formatAmount = (amount: number, decimals: number): string => {
+  let amo = amount.toLocaleString('fullwide', { useGrouping: false });
+  if (amo.indexOf(".") !== -1) {
+    amo = amo.substring(0, amo.indexOf("."))
+  }
+  if (amo.indexOf(",") !== -1) {
+    amo = amo.substring(0, amo.indexOf(","))
+  }
+  return toHumanAmount(
+    utils.formatUnits(
+      amo,
+      decimals,
+    ),
+  );
+}
 export const mean = (arr: number[]): number => arr.reduce((acc, v) => acc + v) / arr.length;
 export const variance = (arr: number[]): number => {
   const avg = mean(arr);
