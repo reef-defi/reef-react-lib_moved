@@ -21,6 +21,7 @@ import { BasicPoolInfo } from '../../state/pool';
 import { useHourFeeSubscription } from '../../hooks';
 import { Loading } from '../common/Loading';
 import { formatAmount, std } from '../../utils/math';
+import { dropDuplicatesMultiKey } from '../../utils';
 
 interface Data {
   fee_1: number;
@@ -40,8 +41,9 @@ const FeeChart = ({
     return <Loading />;
   }
 
-  const feeData = data.pool_hour_fee
-    .map((d) => ({ ...d, date: new Date(d.timeframe) }));
+  const feeData = dropDuplicatesMultiKey(data.pool_hour_fee, ["timeframe"])
+    .map((d) => ({ ...d, date: new Date(d.timeframe) }))
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
 
   if (feeData.length <= 1) {
     return <span>Not enough data</span>;
