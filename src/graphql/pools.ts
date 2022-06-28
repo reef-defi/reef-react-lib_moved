@@ -542,7 +542,10 @@ export const POOLS_GQL = gql`
         total_supply
         supply
       }
-      volume_aggregate(where: { timeframe: { _gte: $fromTime } }) {
+      volume_aggregate(
+        distinct_on: timeframe
+        where: { timeframe: { _gte: $fromTime } }
+      ) {
         aggregate {
           sum {
             amount_1
