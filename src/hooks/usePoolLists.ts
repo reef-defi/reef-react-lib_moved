@@ -93,10 +93,10 @@ const calculate24hVolumeUSD = (
     }: PoolListItemReq,
     tokenPrices: TokenPrices,
     current: boolean
-  ): string => {
+  ): BigNumber => {
     const v1 = current ? day_volume_1 : prev_day_volume_1;
     const v2 = current ? day_volume_2 : prev_day_volume_2;
-    if (v1 === null && v2 === null) return "$ 0";
+    if (v1 === null && v2 === null) return new BigNumber(0);
     const dv1 = new BigNumber(v1 === null ? 0 : v1)
       .div(new BigNumber(10).pow(decimal1))
       .multipliedBy(tokenPrices[token_1]);
@@ -104,16 +104,17 @@ const calculate24hVolumeUSD = (
       .div(new BigNumber(10).pow(decimal2))
       .multipliedBy(tokenPrices[token_2]);
 
-    return `$ ${dv1.plus(dv2).toFormat(2)}` // TODO Hudlajf add formatting.
+    return dv1.plus(dv2)
 }
 
 const calculateVolumeChange = (pool: PoolListItemReq, tokenPrices: TokenPrices): number => {
-  const current = new BigNumber(calculate24hVolumeUSD(pool, tokenPrices, true));
-  const previous = new BigNumber(calculate24hVolumeUSD(pool, tokenPrices, false));
+  const current = calculate24hVolumeUSD(pool, tokenPrices, true);
+  const previous = calculate24hVolumeUSD(pool, tokenPrices, false);
   if (previous.eq(0) && current.eq(0)) return 0;
   if (previous.eq(0)) return 100;
   if (current.eq(0)) return -100;
-  return current.minus(previous).div(previous).multipliedBy(100).toNumber();
+  const res = current.minus(previous).div(previous).multipliedBy(100)
+  return res.toNumber();
 }
 
 
@@ -129,7 +130,7 @@ tokenPrices: TokenPrices
 ): string => {
   const r1 = new BigNumber(reserved_1).div(new BigNumber(10).pow(decimal1)).multipliedBy(tokenPrices[token_1]);
   const r2 = new BigNumber(reserved_2).div(new BigNumber(10).pow(decimal2)).multipliedBy(tokenPrices[token_2]);
-  return `$ ${r1.plus(r2).toFormat(2)}` // TODO Hudlajf add formating. You can use toFormat function
+  return r1.plus(r2).toFormat(2) // TODO Hudlajf add formating. You can use toFormat function
 };
 
 const calculateUserLiquidity = (
@@ -144,7 +145,7 @@ const calculateUserLiquidity = (
     .multipliedBy(tokenPrices[token_2])
   const res = v1.plus(v2)
 
-  return res.gt(0) ? `$ ${res.toFormat(2)}` : undefined;
+  return res.gt(0) ? res.toFormat(2) : undefined;
 }
 
 export const usePoolsList = ({limit, offset, reefscanApi, search, signer, tokenPrices, queryType}: UsePoolsList): [PoolItem[], boolean] => {
@@ -180,7 +181,7 @@ export const usePoolsList = ({limit, offset, reefscanApi, search, signer, tokenP
           name: pool.contract_data_2.symbol
         },
         tvl: calculateUSDTVL(pool, tokenPrices),
-        volume24h: calculate24hVolumeUSD(pool, tokenPrices, true),
+        volume24h: calculate24hVolumeUSD(pool, tokenPrices, true).toFormat(2),
         volumeChange24h: calculateVolumeChange(pool, tokenPrices),
         myLiquidity: calculateUserLiquidity(pool, tokenPrices)
       }))
