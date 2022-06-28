@@ -85,10 +85,21 @@ export const toCurrencyFormat = (value: number, options = {}): string => Intl.Nu
   ...options,
 }).format(value);
 
+const ICONS = [
+  'https://app.reef.io/img/token-icons/token-icon-1.png',
+  'https://app.reef.io/img/token-icons/token-icon-2.png',
+  'https://app.reef.io/img/token-icons/token-icon-3.png',
+  'https://app.reef.io/img/token-icons/token-icon-4.png',
+  'https://app.reef.io/img/token-icons/token-icon-5.png',
+  'https://app.reef.io/img/token-icons/token-icon-6.png',
+  'https://app.reef.io/img/token-icons/token-icon-7.png',
+  'https://app.reef.io/img/token-icons/token-icon-8.png',
+  'https://app.reef.io/img/token-icons/token-icon-9.png',
+]
 // TODO implement with svg
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const getIconUrl = (address: string): string => address === REEF_ADDRESS
   ? 'https://s2.coinmarketcap.com/static/img/coins/64x64/6951.png'
-  : 'https://app.reef.io/img/token-icons/token-icon-7.png';
+  : ICONS[Math.floor(Math.random() * ICONS.length)];
