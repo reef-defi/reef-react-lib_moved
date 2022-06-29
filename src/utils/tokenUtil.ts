@@ -1,4 +1,5 @@
 import { BigNumber, utils } from 'ethers';
+import { BigNumber as BN } from 'bignumber.js';
 import { DataProgress, DataWithProgress, isDataSet } from './dataWithProgress';
 import {
   Pool, reefTokenWithAmount, Token, TokenWithAmount,
@@ -103,3 +104,6 @@ const ICONS = [
 export const getIconUrl = (address: string): string => address === REEF_ADDRESS
   ? 'https://s2.coinmarketcap.com/static/img/coins/64x64/6951.png'
   : ICONS[Math.floor(Math.random() * ICONS.length)];
+
+export const normalize = (amount: string|number, decimals: number): BN => new BN(amount)
+  .div(new BN(10).pow(decimals))

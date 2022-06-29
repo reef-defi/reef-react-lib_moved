@@ -49,6 +49,12 @@ interface Pool {
   volume_aggregate: { aggregate: { sum: Amounts } };
 }
 
+interface VerifiedContract {
+  verified_contract: null | {
+    contract_data: ContractData;
+  }
+}
+
 interface PoolData {
   id: number;
   address: string;
@@ -64,6 +70,23 @@ interface PoolData {
       contract_data: ContractData;
     };
   };
+}
+
+type AggregateSum <T> = {
+  aggregate: {
+    sum: T;
+  }
+};
+
+interface PoolInfo {
+  token_1: string;
+  token_2: string;
+  pool_event: Reserves[];
+  token_contract_1: VerifiedContract;
+  token_contract_2: VerifiedContract;
+  pool_event_aggregate: AggregateSum<Amounts>;
+  fee_aggregate: AggregateSum<Fee>;
+  volume_aggregate: AggregateSum<Amounts>;
 }
 
 interface PoolTransaction {
@@ -130,6 +153,7 @@ interface Fee {
 
 // Query result interfaces
 export type PoolQuery = { pool: PoolData[] };
+export type PoolInfoQuery = { pool: PoolInfo[] }
 export type PoolsQuery = { verified_pool: Pool[] };
 export type PoolDayFeeQuery = { pool_day_fee: Fee[] };
 export type PoolTvlQuery = { pool_day_supply: TVLData[] };
@@ -262,6 +286,7 @@ export interface PoolVolumeAggregateVar extends PoolFeeVar, ToVar { }
 export interface PoolUserLpVar extends AddressVar, SignerAddressVar { }
 export interface PoolsVar extends FromVar, OffsetVar, OptionalSearchVar { }
 export interface PoolLastCandlestickVar extends AddressVar, WhichTokenVar { }
+export interface PoolInfoVar extends AddressVar, FromVar, SignerAddressVar { }
 export interface PoolDayCandlestickVar extends AddressVar, FromVar, WhichTokenVar { }
 export interface PoolBasicTransactionVar extends OptionalSearchVar, TransactionTypeVar { }
 export interface PoolTransactionCountVar extends OptionalSearchVar, TransactionTypeVar { }
@@ -761,6 +786,90 @@ export const POOL_RESERVES_SUBSCRITION = gql`
     }
   }
 `;
+
+
+export const POOL_INFO_GQL = gql`query pool($address: String!, $signerAddress: String!, $fromTime: timestamptz!) {
+  pool(
+    where: {
+      address: { _eq: $address }
+    }
+  ) {
+    token_1
+    token_2
+    token_contract_1 {
+      verified_contract {
+        contract_data
+      }
+    }
+    token_contract_2 {
+      verified_contract {
+        contract_data
+      }
+    }
+    fee_aggregate(
+      distinct_on: timeframe
+      where: {
+        timeframe: { _gt: $fromTime }
+      }
+    ) {
+      aggregate {
+        sum {
+          fee_1
+          fee_2
+        }
+      }
+    }
+    volume_aggregate(
+      distinct_on: timeframe
+      where: {
+        timeframe: { _gt: $fromTime }
+      }
+    ) {
+      aggregate {
+        sum {
+          amount_1
+          amount_2
+        }
+      }
+    }
+    pool_event(
+      where: { type: { _eq: "Sync" } }
+      order_by: { timestamp: desc }
+      limit: 1
+    ) {
+        reserved_1
+        reserved_2
+    }
+    pool_event_aggregate (
+      where: {
+        _and: [
+          { evm_event: {
+            event: {
+              extrinsic: {
+                signer: { _eq: $signerAddress }
+              }
+            }
+          } }
+          { _or: [
+            { type: { _eq: "Mint" } }
+            { type: { _eq: "Burn" } }
+          ]
+          }
+        ]
+      }
+    ) {
+      aggregate {
+        sum {
+          amount_1
+          amount_2
+        }
+      }
+    }
+  }
+}
+`
+
+
 // Subscriptions
 export const ALL_POOL_SUBSCRITION = gql`
 subscription pool_event {
