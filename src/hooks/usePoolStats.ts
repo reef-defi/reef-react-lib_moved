@@ -6,6 +6,7 @@ import {
 } from '../graphql/pools';
 import { getTokenPrice, TokenPrices } from '../state';
 import { getIconUrl, normalize } from '../utils';
+import { usePoolCount } from './poolHooks';
 
 export const useTotalSupply = (tokenPrices: TokenPrices): string => {
   const { data } = useQuery<PoolsTotalSupply>(POOLS_TOTAL_VALUE_LOCKED);
@@ -74,6 +75,7 @@ export interface PoolStats {
   volumeChange24h: number;
 }
 
+
 export const usePoolInfo = (address: string, signerAddress: string, tokenPrices: TokenPrices): [PoolStats|undefined, boolean] => {
   const fromTime = useMemo(() => {
     let date = new Date()
@@ -91,6 +93,8 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
       }
     }
   )
+
+  usePoolCount
 
   const info = useMemo<PoolStats|undefined>(() => {
     if (!data || data.pool.length === 0) {
@@ -117,7 +121,7 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
     const tvlUSD = amountLocked1
       .multipliedBy(tokenPrices[pool.token_1])
       .plus(amountLocked2.multipliedBy(tokenPrices[pool.token_2]))
-      .toFormat(0);
+      .toFormat(2);
     const volume24hUSD = volume1
       .multipliedBy(tokenPrices[pool.token_1])
       .plus(volume2.multipliedBy(tokenPrices[pool.token_2]))

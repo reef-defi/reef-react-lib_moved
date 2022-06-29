@@ -156,6 +156,7 @@ export const usePoolsList = ({limit, offset, reefscanApi, search, signer, tokenP
   const [poolsReq, setPoolsReq] = useState<PoolListItemReq[]>([]);
 
   useAsyncEffect(async () => {
+    if (reefscanApi === '') { return; }
     Promise.resolve()
     .then(() => setIsLoading(true))
     .then(() => queryType === 'User'

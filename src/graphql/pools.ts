@@ -869,6 +869,15 @@ export const POOL_INFO_GQL = gql`query pool($address: String!, $signerAddress: S
 }
 `
 
+export const N_VERIFIED_POOLS = gql`
+query nPools {
+  verified_pool_aggregate {
+    aggregate {
+      count
+    }
+  }
+}
+`;
 
 // Subscriptions
 export const ALL_POOL_SUBSCRITION = gql`
