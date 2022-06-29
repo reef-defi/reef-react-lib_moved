@@ -44,6 +44,7 @@ interface QueryPoolList {
 }
 
 interface PoolItem {
+  address: string;
   tvl: string;
   volume24h: string;
   volumeChange24h: number;
@@ -172,6 +173,7 @@ export const usePoolsList = ({limit, offset, reefscanApi, search, signer, tokenP
   useEffect(() => {
     setPools(
       poolsReq.map((pool) => ({
+        address: pool.address,
         token1: {
           image: getIconUrl(pool.token_1),
           name: pool.contract_data_1.symbol
