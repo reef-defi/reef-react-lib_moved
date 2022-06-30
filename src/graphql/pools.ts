@@ -278,6 +278,7 @@ export type PoolVolume24HVar = FromVar;
 export type PoolReservesVar = AddressVar
 export type PoolCountVar = OptionalSearchVar
 export type UserPoolsVar = AddressVar
+export interface PoolsTotalValueLockedVar extends ToVar { }
 export interface PoolFeeVar extends AddressVar, FromVar { }
 export interface PoolTvlVar extends AddressVar, FromVar { }
 export interface PoolVolumeVar extends AddressVar, FromVar { }
@@ -295,11 +296,12 @@ export interface PoolTransactionVar extends PoolBasicTransactionVar, OffsetVar, 
 // Graphql statements
 // Total supply of all pools
 export const POOLS_TOTAL_VALUE_LOCKED = gql`
-query total_supply {
+query total_supply($toTime: timestamptz!) {
   pool_event(
     distinct_on: pool_id
     where: {
       type: { _eq: "Sync" }
+      timestamp: { _lt: $toTime }
     }
     order_by: {
       pool_id: asc

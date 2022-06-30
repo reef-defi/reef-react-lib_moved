@@ -2,15 +2,26 @@ import { useQuery } from '@apollo/client';
 import { BigNumber } from 'bignumber.js';
 import { useMemo } from 'react';
 import {
-  Pool24HVolume, PoolInfoQuery, PoolInfoVar, PoolsTotalSupply, POOLS_TOTAL_VALUE_LOCKED, PoolVolume24HVar, POOL_24H_VOLUME, POOL_INFO_GQL,
+  Pool24HVolume, PoolInfoQuery, PoolInfoVar, PoolsTotalSupply, PoolsTotalValueLockedVar, POOLS_TOTAL_VALUE_LOCKED, PoolVolume24HVar, POOL_24H_VOLUME, POOL_INFO_GQL,
 } from '../graphql/pools';
 import { getTokenPrice, TokenPrices } from '../state';
 import { getIconUrl, normalize } from '../utils';
 import { usePoolCount } from './poolHooks';
 
-export const useTotalSupply = (tokenPrices: TokenPrices): string => {
-  const { data } = useQuery<PoolsTotalSupply>(POOLS_TOTAL_VALUE_LOCKED);
-
+export const useTotalSupply = (tokenPrices: TokenPrices, previous=false): string => {
+  const toTime = useMemo(() => {
+    const tm = new Date();
+    if (previous) {
+      tm.setDate(tm.getDate() - 1);
+    }
+    return tm;
+  }, [])
+  const { data, error } = useQuery<PoolsTotalSupply, PoolsTotalValueLockedVar>(
+    POOLS_TOTAL_VALUE_LOCKED,
+    { variables: {
+      toTime: toTime.toISOString()
+    }}
+  );
   if (!data || data.pool_event.length === 0) {
     return '0';
   }
