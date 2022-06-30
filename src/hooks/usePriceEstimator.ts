@@ -66,11 +66,11 @@ export const estimatePrice = (
     const position1 = tokenPosition[token_1];
     const position2 = tokenPosition[token_2];
 
-    ratioMatrix[position1][position2] = new BigNumber(reserved_1)
-      .div(reserved_2)
-      .toNumber();
-    ratioMatrix[position2][position1] = new BigNumber(reserved_2)
+    ratioMatrix[position1][position2] = new BigNumber(reserved_2)
       .div(reserved_1)
+      .toNumber();
+    ratioMatrix[position2][position1] = new BigNumber(reserved_1)
+      .div(reserved_2)
       .toNumber();
   });
 
