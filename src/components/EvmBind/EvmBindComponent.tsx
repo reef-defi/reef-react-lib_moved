@@ -103,9 +103,10 @@ export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindCom
           </CardHeader>
           <SubCard>
             <p>
-              Creating Ethereum VM address for&nbsp;
-              {bindFor.name}
+              Creating Ethereum VM address for account&nbsp;
+              <b>{bindFor.name}</b>
               <MiniText>
+                &nbsp;
                 (
                 {toAddressShortDisplay(bindFor.address)}
                 )
@@ -173,32 +174,27 @@ export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindCom
                 {!txStatus && !!transferBalanceFrom && (
                 <div>
                   <p>
-                    First send
-                    {toReefBalanceDisplay(MIN_BALANCE)}
-                    {' '}
-                    for
-                    transaction
+                    <b>{toReefBalanceDisplay(MIN_BALANCE)}</b>
+                    &nbsp;tokens will be used to register a new EVM account to which your REEF account will be bound.
                     <br />
-                    {' '}
-                    from
-                    {transferBalanceFrom.name}
+                    <br />
+
+                    Tokens will be used from account:&nbsp;
+                    <b>{transferBalanceFrom.name}</b>
                     <OpenModalButton
-                      className="btn-empty link-text text-xs text-primary pl-1rem"
+                      className="btn-empty link-text text-xs text-primary pl-1"
                       id="selectMyAddress"
                     >
                       (change)
                     </OpenModalButton>
-                    <AccountListModal
-                      accounts={availableTxAccounts}
-                      id="selectMyAddress"
-                      selectAccount={onAccountSelect}
-                      title={(
-                        <div>
-                          Select account
-                        </div>
-                    )}
-                    />
                   </p>
+
+                  <AccountListModal
+                    accounts={availableTxAccounts}
+                    id="selectMyAddress"
+                    selectAccount={onAccountSelect}
+                    title="Select account"
+                  />
                   <button
                     type="button"
                     className="btn btn-reef btn-lg border-rad"
