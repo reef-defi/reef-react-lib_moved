@@ -30,6 +30,7 @@ interface AccountSelector {
   selectAccount: (index: number, signer: ReefSigner) => void;
   availableNetworks?: Network[];
   selectNetwork?: (network: Network) => void;
+  bindAccountCb?: () => void;
 }
 
 export const AccountSelector = ({
@@ -39,6 +40,7 @@ export const AccountSelector = ({
   selectAccount,
   selectNetwork,
   availableNetworks,
+  bindAccountCb,
 }: AccountSelector): JSX.Element => {
   const name = selectedSigner ? selectedSigner.name : '';
   const address = selectedSigner ? selectedSigner.address : '';
@@ -129,15 +131,30 @@ export const AccountSelector = ({
             </Margin>
             <MT size="2" />
             <MX size="2">
-              <CopyToClipboard text={`${evmAddress}${REEF_ADDRESS_SPECIFIC_STRING}`} onCopy={showEvmCopyAddressAlert}>
+              {selectedSigner?.isEvmClaimed && (
+                <CopyToClipboard text={`${evmAddress}${REEF_ADDRESS_SPECIFIC_STRING}`} onCopy={showEvmCopyAddressAlert}>
+                  <span
+                    className="form-text text-muted ms-2 "
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <CopyIcon small />
+                    <MiniText>Copy Reef EVM Address</MiniText>
+                  </span>
+                </CopyToClipboard>
+              )}
+
+              {!selectedSigner?.isEvmClaimed && bindAccountCb && (
                 <span
+                  role="button"
+                  tabIndex={0}
                   className="form-text text-muted ms-2 "
                   style={{ cursor: 'pointer' }}
+                  onClick={bindAccountCb}
                 >
-                  <CopyIcon small />
-                  <MiniText>Copy Reef EVM Address</MiniText>
+                  <MiniText>Bind EVM Address</MiniText>
                 </span>
-              </CopyToClipboard>
+              )}
+
               <CopyToClipboard text={address}>
                 <span
                   className="form-text text-muted ms-2"
