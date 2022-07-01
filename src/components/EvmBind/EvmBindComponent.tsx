@@ -1,19 +1,26 @@
 import { Provider } from '@reef-defi/evm-provider';
 import { BigNumber, ethers } from 'ethers';
 import React, { useEffect, useState } from 'react';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { ReefSigner } from '../../state';
 import {
-  bindEvmAddress, sendToNativeAddress, toAddressShortDisplay, toReefBalanceDisplay, TxStatusHandler, TxStatusUpdate,
+  bindEvmAddress, showEvmCopyAddressAlert, REEF_ADDRESS_SPECIFIC_STRING,
+  sendToNativeAddress,
+  toAddressShortDisplay,
+  toReefBalanceDisplay,
+  TxStatusHandler,
+  TxStatusUpdate,
 } from '../../utils';
 import { useObservableState } from '../../hooks';
 import { currentProvider$ } from '../../appState/providerState';
-import { ComponentCenter, FlexRow } from '../common/Display';
+import { ComponentCenter } from '../common/Display';
 import {
   Card, CardHeader, CardHeaderBlank, CardTitle, SubCard,
 } from '../common/Card';
 import { MiniText } from '../common/Text';
 import { OpenModalButton } from '../common/Modal';
 import { AccountListModal } from '../AccountSelector/AccountListModal';
+import { CopyIcon } from '../common/Icons';
 
 export enum EvmBindComponentTxType {
   TRANSFER = 'TRANSFER',
@@ -77,7 +84,7 @@ export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindCom
       return;
     }
 
-    const txIdent = await sendToNativeAddress(provider, from, amount, to.address, (val: TxStatusUpdate) => {
+    const txIdent = sendToNativeAddress(provider, from, amount, to.address, (val: TxStatusUpdate) => {
       if (val.error || val.isInBlock) {
         onTxUpd({ ...val, componentTxType: EvmBindComponentTxType.TRANSFER, addresses: [from.address, to.address] });
       }
@@ -102,8 +109,10 @@ export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindCom
             <CardHeaderBlank />
           </CardHeader>
           <SubCard>
+            {!bindFor.isEvmClaimed
+            && (
             <p>
-              Creating Ethereum VM address for account&nbsp;
+              Creating Ethereum VM address for account:&nbsp;
               <b>{bindFor.name}</b>
               <MiniText>
                 &nbsp;
@@ -112,25 +121,44 @@ export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindCom
                 )
               </MiniText>
             </p>
+            )}
             {bindFor.isEvmClaimed
             && (
-            <FlexRow>
+            <div>
               <p>
-                Account
-                {bindFor.name}
+                Account&nbsp;
+                <b>{bindFor.name}</b>
                 <MiniText>
+                  &nbsp;
                   (
                   {toAddressShortDisplay(bindFor.address)}
                   )
                 </MiniText>
                 {' '}
-                has Ethereum VM address
+                was successfully bound to Ethereum VM address&nbsp;
+                <MiniText>
+                  (
+                  {toAddressShortDisplay(bindFor.evmAddress)}
+                  )
+                </MiniText>
+                .
                 <br />
-                {toAddressShortDisplay(bindFor.evmAddress)}
-                <br />
-                Use this address ONLY on Reef chain.
               </p>
-            </FlexRow>
+              <CopyToClipboard
+                text={`${bindFor.evmAddress}${REEF_ADDRESS_SPECIFIC_STRING}`}
+                onCopy={showEvmCopyAddressAlert}
+              >
+                <span
+                  className="text-muted "
+                  style={{ cursor: 'pointer' }}
+                >
+                  <CopyIcon small />
+                  <span style={{ marginLeft: '4px' }}>
+                    <MiniText>Copy Reef EVM Address</MiniText>
+                  </span>
+                </span>
+              </CopyToClipboard>
+            </div>
             )}
             {!bindFor.isEvmClaimed
             && (
