@@ -83,9 +83,3 @@ export const toCurrencyFormat = (value: number, options = {}): string => Intl.Nu
   currencyDisplay: 'symbol',
   ...options,
 }).format(value);
-
-// TODO implement with svg
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const getIconUrl = (address: string): string => '';

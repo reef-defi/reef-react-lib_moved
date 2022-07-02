@@ -29,10 +29,10 @@ const findPoolTokens = (pools: LastPoolReserves[], tokens: Token[]): Token[] => 
   ({ token_1, token_2 }) => token.address === token_1 || token.address === token_2,
 ));
 
-const normalizeMatrixByNodeDegree = (matrix: number[][]): number[][] => {
-  const matrixRowSum = matrix.map((row) => row.reduce((acc, col) => acc + (col === 0 ? 0 : 1), 0));
-  return matrix.map((row, index) => row.map((col) => col / matrixRowSum[index]));
-};
+// const normalizeMatrixByNodeDegree = (matrix: number[][]): number[][] => {
+//   const matrixRowSum = matrix.map((row) => row.reduce((acc, col) => acc + (col === 0 ? 0 : 1), 0));
+//   return matrix.map((row, index) => row.map((col) => col / matrixRowSum[index]));
+// };
 
 const extractTokenPrices = (tokens: Token[], priceVector: number[], tokenPosition: AddressToNumber<number>): AddressToNumber<number> => tokens.reduce(
   (prev, curr) => ({
@@ -60,22 +60,17 @@ export const estimatePrice = (
   const tokenPosition = createTokenPositions(poolTokens);
   const reefTokenPointer = tokenPosition[REEF_ADDRESS];
 
-  // Setting initial reef token price
-  // Eventually we will change this to link stabil coins, where price is 1
-  priceVector[reefTokenPointer] = reefPrice;
-
   // Setting reserved matrix
-  verifiedPools.forEach(({
-    reserved_1, reserved_2, token_1, token_2,
+  verifiedPools.forEach(({    reserved_1, reserved_2, token_1, token_2,
   }) => {
     const position1 = tokenPosition[token_1];
     const position2 = tokenPosition[token_2];
 
-    ratioMatrix[position1][position2] = new BigNumber(reserved_1)
-      .div(reserved_2)
-      .toNumber();
-    ratioMatrix[position2][position1] = new BigNumber(reserved_2)
+    ratioMatrix[position1][position2] = new BigNumber(reserved_2)
       .div(reserved_1)
+      .toNumber();
+    ratioMatrix[position2][position1] = new BigNumber(reserved_1)
+      .div(reserved_2)
       .toNumber();
   });
 
@@ -87,13 +82,20 @@ export const estimatePrice = (
   // Pool1 (t1-t2): (1e+32, 1e+32)
   // Pool2 (t1-t3): (1e+22, 1e+22)
   // Here the distribution of pool2 is almost non-existing
-  ratioMatrix = normalizeMatrixByNodeDegree(ratioMatrix);
+  // TODO When using multiple tokens to estimate price normalize ratios with belows call
+  // ratioMatrix = normalizeMatrixByNodeDegree(ratioMatrix);
 
-  for (let iter = 0; iter < 50; iter += 1) {
-    // Setting locked price of reef token
-    priceVector = dot(ratioMatrix, priceVector);
-    priceVector[reefTokenPointer] = reefPrice;
-  }
+  // Setting initial reef token price
+  // Eventually we will change this to link stabil coins, where price is 1
+  priceVector[reefTokenPointer] = reefPrice;
+
+  priceVector = dot(ratioMatrix, priceVector);
+  // Setting locked price of reef token
+  priceVector[reefTokenPointer] = reefPrice;
+
+  // Iterate for other calculations
+  // for (let iter = 0; iter < 50; iter += 1) {
+  // }
 
   return extractTokenPrices(poolTokens, priceVector, tokenPosition);
 };

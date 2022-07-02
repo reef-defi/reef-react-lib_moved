@@ -1,8 +1,11 @@
 import { BigNumber, ethers } from 'ethers';
+import { reefTokenWithAmount } from '../state';
+import { getHashSumLastNr } from './math';
+import { DEFAULT_TOKEN_ICONS } from '../components/common/Icons';
 
 export const REEF_ADDRESS = '0x0000000000000000000000000000000001000000';
 export const EMPTY_ADDRESS = '0x';
-export const REEF_ADDRESS_SPECIFIC_STRING = "(ONLY for Reef chain!)";
+export const REEF_ADDRESS_SPECIFIC_STRING = '(ONLY for Reef chain!)';
 
 export interface ButtonStatus {
   text: string;
@@ -93,5 +96,26 @@ export const dropDuplicatesMultiKey = <Obj, Key extends keyof Obj>(
   return filtered;
 };
 
-export const removeReefSpecificStringFromAddress = (address: string): string => address.replace(REEF_ADDRESS_SPECIFIC_STRING, "").trim();
+export const removeReefSpecificStringFromAddress = (address: string): string => address.replace(REEF_ADDRESS_SPECIFIC_STRING, '').trim();
 export const addReefSpecificStringFromAddress = (address: string): string => `${address}${REEF_ADDRESS_SPECIFIC_STRING}`;
+
+/**
+ *  Returns icnUrl if exists, otherwise return sample icon based on calculated
+ *  checksum from provided address. Returned sample icon is svg encoded to base64
+ *  and prefixed with data string, so it can be used directly with <img /> tag.
+ */
+export const getIconUrl = (tokenAddress: string): string => {
+  const reefToken = reefTokenWithAmount();
+
+  if (tokenAddress === reefToken.address) {
+    return reefToken.iconUrl;
+  }
+
+  const checkSum = getHashSumLastNr(tokenAddress);
+  const nr = checkSum > -1 && checkSum < 10 ? checkSum : checkSum % 10;
+  return `data:image/svg+xml;base64,${btoa(DEFAULT_TOKEN_ICONS[nr])}`;
+};
+
+export const showEvmCopyAddressAlert = (): void => {
+  window.alert('ONLY use this address on Reef chain! DO NOT use this Reef EVM address on any other chain!');
+};
