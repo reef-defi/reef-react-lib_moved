@@ -115,3 +115,7 @@ export const getIconUrl = (tokenAddress: string): string => {
   const nr = checkSum > -1 && checkSum < 10 ? checkSum : checkSum % 10;
   return `data:image/svg+xml;base64,${btoa(DEFAULT_TOKEN_ICONS[nr])}`;
 };
+
+export const showEvmCopyAddressAlert = (): void => {
+  window.alert('ONLY use this address on Reef chain! DO NOT use this Reef EVM address on any other chain!');
+};

@@ -1,11 +1,21 @@
 import React from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Network, ReefSigner } from '../../state';
-import { toReefBalanceDisplay, trim } from '../../utils';
-import { Border, FlexRow, Margin, MT, MX, } from '../common/Display';
-import { CopyIcon, ExploreIcon, ReefAddressIcon, WalletIcon, } from '../common/Icons';
-import { Modal, ModalBody, ModalClose, ModalHeader, } from '../common/Modal';
-import { LeadText, MiniText, MutedText, Title, } from '../common/Text';
+import {
+  showEvmCopyAddressAlert, REEF_ADDRESS_SPECIFIC_STRING, toReefBalanceDisplay, trim
+} from '../../utils';
+import {
+  Border, FlexRow, Margin, MT, MX,
+} from '../common/Display';
+import {
+  CopyIcon, ExploreIcon, ReefAddressIcon, WalletIcon,
+} from '../common/Icons';
+import {
+  Modal, ModalBody, ModalClose, ModalHeader,
+} from '../common/Modal';
+import {
+  LeadText, MiniText, MutedText, Title,
+} from '../common/Text';
 import { currentNetwork$ } from '../../appState/providerState';
 import { useObservableState } from '../../hooks';
 import './AccountSelector.css';
@@ -20,6 +30,7 @@ interface AccountSelector {
   selectAccount: (index: number, signer: ReefSigner) => void;
   availableNetworks?: Network[];
   selectNetwork?: (network: Network) => void;
+  bindAccountCb?: () => void;
 }
 
 export const AccountSelector = ({
@@ -29,16 +40,13 @@ export const AccountSelector = ({
   selectAccount,
   selectNetwork,
   availableNetworks,
+  bindAccountCb,
 }: AccountSelector): JSX.Element => {
   const name = selectedSigner ? selectedSigner.name : '';
   const address = selectedSigner ? selectedSigner.address : '';
   const balance = toReefBalanceDisplay(selectedSigner?.balance);
   const evmAddress = selectedSigner ? selectedSigner.evmAddress : '';
   const currentNetwork = useObservableState(currentNetwork$);
-
-  const confirmEvmCopy = (): void => {
-    window.alert('ONLY use this address on Reef chain! DO NOT use this Reef EVM address on any other chain!');
-  };
 
   const selectCurrNetwork = (network: Network):void => {
     if (selectNetwork) {
@@ -89,14 +97,6 @@ export const AccountSelector = ({
                   <ReefAddressIcon address={address} />
                   <LeadText>{trim(evmAddress, 11)}</LeadText>
                 </div>
-                {/*<button
-                  type="button"
-                  className="btn btn-sm btn-reef border-rad"
-                  data-bs-target="#select-account-modal"
-                  data-bs-toggle="modal"
-                >
-                  <span>Switch account</span>
-                </button>*/}
               </FlexRow>
             </Margin>
             <Margin size="2">
@@ -131,15 +131,30 @@ export const AccountSelector = ({
             </Margin>
             <MT size="2" />
             <MX size="2">
-              <CopyToClipboard text={`${evmAddress}(ONLY for Reef chain!)`} onCopy={confirmEvmCopy}>
+              {selectedSigner?.isEvmClaimed && (
+                <CopyToClipboard text={`${evmAddress}${REEF_ADDRESS_SPECIFIC_STRING}`} onCopy={showEvmCopyAddressAlert}>
+                  <span
+                    className="form-text text-muted ms-2 "
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <CopyIcon small />
+                    <MiniText>Copy Reef EVM Address</MiniText>
+                  </span>
+                </CopyToClipboard>
+              )}
+
+              {!selectedSigner?.isEvmClaimed && bindAccountCb && (
                 <span
+                  role="button"
+                  tabIndex={0}
                   className="form-text text-muted ms-2 "
                   style={{ cursor: 'pointer' }}
+                  onClick={bindAccountCb}
                 >
-                  <CopyIcon small />
-                  <MiniText>Copy Reef EVM Address</MiniText>
+                  <MiniText>Bind EVM Address</MiniText>
                 </span>
-              </CopyToClipboard>
+              )}
+
               <CopyToClipboard text={address}>
                 <span
                   className="form-text text-muted ms-2"
@@ -169,13 +184,6 @@ export const AccountSelector = ({
           </div>
         </ModalBody>
       </Modal>
-      {/*<AccountListModal
-        id="select-account-modal"
-        accounts={accounts}
-        selectAccount={selectAccount}
-        backButtonModalId="#account-modal"
-      />*/}
-
     </div>
   );
 };

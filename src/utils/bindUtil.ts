@@ -16,6 +16,8 @@ export const bindEvmAddress = (
     return txIdent;
   }
 
+  const isAlertPopup = generateDefault===undefined;
+
   const existentialDeposit = 1;
   if (utils.parseEther(signer.balance.toString()).lte(existentialDeposit)) {
     const index = displayedPopup.indexOf(signer.address);
@@ -26,21 +28,23 @@ export const bindEvmAddress = (
 
   if (
     signer
-    && displayedPopup.indexOf(signer.address) < 0
+    && (!isAlertPopup
+    || displayedPopup.indexOf(signer.address) < 0)
     && !signer?.isEvmClaimed
   ) {
     // eslint-disable-next-line no-restricted-globals,no-alert
-    const isDefault = generateDefault
+    const createDefaultEVM = generateDefault
       // eslint-disable-next-line no-restricted-globals
       || confirm('Enable Reef chain with Ethereum VM capabilities.');
-    if (displayedPopup.indexOf(signer.address) < 0) {
+    if (isAlertPopup && displayedPopup.indexOf(signer.address) < 0) {
       displayedPopup.push(signer.address);
     }
-    if (isDefault) {
+    if (createDefaultEVM) {
       txIdent = Math.random().toString(10);
       signer.signer
         .claimDefaultAccount()
         .then(() => {
+
           if (!onTxChange) {
             alert(`Success, Ethereum VM address is ${signer.evmAddress}. Use this address ONLY on Reef chain.`);
           } else {
@@ -58,6 +62,7 @@ export const bindEvmAddress = (
         });
     } else {
       // TODO return claimEvmAccount(currentSigner, provider);
+      console.log("TODO custom EVM binding");
     }
   }
   return txIdent;
