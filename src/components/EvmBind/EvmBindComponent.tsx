@@ -203,11 +203,11 @@ export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindCom
                 <div>
                   <p>
                     <b>{toReefBalanceDisplay(MIN_BALANCE)}</b>
-                    &nbsp;tokens will be used to register a new EVM account to which your REEF account will be bound.
+                    &nbsp;coins will be used to register a new EVM account to which your REEF account will be bound.
                     <br />
                     <br />
 
-                    Tokens will be used from account:&nbsp;
+                    Coins will be used from account:&nbsp;
                     <b>{transferBalanceFrom.name}</b>
                     <OpenModalButton
                       className="btn-empty link-text text-xs text-primary pl-1"
@@ -226,7 +226,7 @@ export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindCom
                   <button
                     type="button"
                     className="btn btn-reef btn-lg border-rad"
-                    onClick={() => transfer(transferBalanceFrom, bindSigner, MIN_BALANCE, getUpdateTxCallback([onTxUpdate as TxStatusHandler, setTxStatus]))}
+                    onClick={() => transfer(transferBalanceFrom!, bindSigner, MIN_BALANCE, getUpdateTxCallback([onTxUpdate as TxStatusHandler, setTxStatus]))}
                   >
                     <span>Continue</span>
                   </button>
