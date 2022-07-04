@@ -15,8 +15,8 @@ export const useTotalSupply = (tokenPrices: TokenPrices, previous=false): string
       tm.setDate(tm.getDate() - 1);
     }
     return tm;
-  }, [])
-  const { data, error } = useQuery<PoolsTotalSupply, PoolsTotalValueLockedVar>(
+  }, []);
+  const { data } = useQuery<PoolsTotalSupply, PoolsTotalValueLockedVar>(
     POOLS_TOTAL_VALUE_LOCKED,
     { variables: {
       toTime: toTime.toISOString()

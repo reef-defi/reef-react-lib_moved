@@ -7,6 +7,8 @@ import { useAsyncEffect } from "./useAsyncEffect";
 
 const ALL_POOLS_LIST_ENDPOINT = '/api/pools/list'
 const USER_POOLS_LIST_ENDPOINT = '/api/pools/users-list'
+const ALL_POOLS_LIST_COUNT_ENDPOINT = '/api/pools/list-count'
+const USER_POOLS_LIST_COUNT_ENDPOINT = '/api/pools/users-list-count'
 
 interface ContractData {
   name: string;
@@ -60,7 +62,16 @@ interface PoolItem {
 }
 
 
-const defaultPoolQuery = async (endpoint: string, {limit, offset, reefscanApi, search, signer}: QueryPoolList): Promise<PoolListItemReq[]> => axios.post<PoolsListReqVar, AxiosResponse<PoolListItemReq[]>>(
+const defaultPoolQuery = async <Res>(
+  endpoint: string,
+  {
+    limit,
+    offset,
+    reefscanApi,
+    search,
+    signer
+  }: QueryPoolList
+): Promise<Res> => axios.post<PoolsListReqVar, AxiosResponse<Res>>(
   `${reefscanApi}${endpoint}`,
   {
     limit,
@@ -75,6 +86,12 @@ const queryPoolList = async (args: QueryPoolList): Promise<PoolListItemReq[]> =>
 
 const queryUserPoolList = async (args: QueryPoolList): Promise<PoolListItemReq[]> =>
   defaultPoolQuery(USER_POOLS_LIST_ENDPOINT, args);
+
+const queryPoolListCount = async (args: QueryPoolList): Promise<number> =>
+  defaultPoolQuery(ALL_POOLS_LIST_COUNT_ENDPOINT, args);
+
+const queryUserPoolListCount = async (args: QueryPoolList): Promise<number> =>
+  defaultPoolQuery(USER_POOLS_LIST_COUNT_ENDPOINT, args);
 
 interface UsePoolsList extends QueryPoolList {
   tokenPrices: TokenPrices;
@@ -147,28 +164,38 @@ const calculateUserLiquidity = (
   const res = v1.plus(v2)
 
   return res.gt(0) ? res.toFormat(2) : undefined;
-}
+};
 
-export const usePoolsList = ({limit, offset, reefscanApi, search, signer, tokenPrices, queryType}: UsePoolsList): [PoolItem[], boolean] => {
+
+export const usePoolsList = ({limit, offset, reefscanApi, search, signer, tokenPrices, queryType}: UsePoolsList): [PoolItem[], boolean, number] => {
   const [isLoading, setIsLoading] = useState(false);
-
+  const [count, setCount] = useState(0);
   const [pools, setPools] = useState<PoolItem[]>([]);
   const [poolsReq, setPoolsReq] = useState<PoolListItemReq[]>([]);
 
   useAsyncEffect(async () => {
     if (reefscanApi === '') { return; }
+    const queryArgs = {limit, offset, reefscanApi, search, signer};
+
     Promise.resolve()
-    .then(() => setIsLoading(true))
-    .then(() => queryType === 'User'
-      ? queryUserPoolList({limit, offset, reefscanApi, search, signer})
-      : queryPoolList({limit, offset, reefscanApi, search, signer})
-    )
-    .then((res) => setPoolsReq(res))
-    .catch((err) => {
-      console.error('Something went wrong when loading pools')
-      console.error(err)
-    })
-    .finally(() => setIsLoading(false))
+      .then(() => setIsLoading(true))
+      .then(() => queryType === 'User'
+        ? queryUserPoolList(queryArgs)
+        : queryPoolList(queryArgs)
+      )
+      .then((res) => setPoolsReq(res))
+      .catch((err) => {
+        console.error('Something went wrong when loading pools')
+        console.error(err)
+      })
+      .finally(() => setIsLoading(false));
+
+    Promise.resolve()
+      .then(() => queryType === 'User'
+        ? queryUserPoolListCount(queryArgs)
+        : queryPoolListCount(queryArgs)
+      )
+      .then((ctn) => setCount(ctn));
   }, [limit, offset, search, signer, reefscanApi])
 
   useEffect(() => {
@@ -191,6 +218,6 @@ export const usePoolsList = ({limit, offset, reefscanApi, search, signer, tokenP
     );
   }, [poolsReq, tokenPrices]);
 
-  return [pools, isLoading]
+  return [pools, isLoading, count]
 }
 
