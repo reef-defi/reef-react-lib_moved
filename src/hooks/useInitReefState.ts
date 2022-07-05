@@ -14,7 +14,12 @@ import { disconnectProvider } from '../utils/providerUtil';
 import { initApolloClient, State, StateOptions } from '../appState/util';
 
 const getNetworkFallback = (): Network => {
-  const storedNetwork = localStorage.getItem(ACTIVE_NETWORK_LS_KEY);
+  let storedNetwork;
+  try{
+    storedNetwork = localStorage.getItem(ACTIVE_NETWORK_LS_KEY);
+  }catch (e) {
+    // when cookies disabled localStorage can throw
+  }
   return storedNetwork != null ? JSON.parse(storedNetwork) : availableNetworks.mainnet;
 };
 
