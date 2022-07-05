@@ -12,7 +12,11 @@ export const setCurrentProvider = (provider: Provider): void => providerSubj.nex
 export const currentNetwork$ = selectedNetworkSubj.asObservable();
 export const setCurrentNetwork = (network: Network): void => {
   if (network != null) {
-    localStorage.setItem(ACTIVE_NETWORK_LS_KEY, JSON.stringify(network));
+    try {
+      localStorage.setItem(ACTIVE_NETWORK_LS_KEY, JSON.stringify(network));
+    }catch (e) {
+      // when cookies disabled localStorage can throw
+    }
   }
   selectedNetworkSubj.next(network);
 };

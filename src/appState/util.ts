@@ -101,7 +101,7 @@ export function initApolloClient(selectedNetwork?: Network, client?: ApolloClien
 }
 
 type destroyConnection = ()=>void;
-export const initReefState = (//applicationDisplayName: string,
+export const initReefState = (
   {
     network,
     client,
