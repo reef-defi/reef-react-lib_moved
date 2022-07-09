@@ -15,6 +15,7 @@ import { BigNumber } from 'ethers';
 import { web3FromSource } from '@reef-defi/extension-dapp';
 import { ensure, removeUndefinedItem } from '../utils/utils';
 import { ReefSigner } from '../state/types';
+import { AccountJson } from '@reef-defi/extension-base/background/types';
 // import { selectedSigner$ } from '../appState/accountState';
 
 const accountSourceSigners = new Map<string, InjectedSigner>();
@@ -47,7 +48,7 @@ export const getReefCoinBalance = async (
   provider: Provider,
 ): Promise<BigNumber> => {
   const balance = await provider.api.derive.balances
-    .all(address)
+    .all(address as any)
     .then((res: DeriveBalancesAccountData) => BigNumber.from(res.freeBalance.toString(10)));
   return balance;
 };
@@ -120,7 +121,7 @@ export const metaAccountsToSigners = async (
       .map((account) => metaAccountToSigner(account, provider, sign)),
   );
 
-  return signers.filter(removeUndefinedItem);
+  return signers.filter(removeUndefinedItem) as ReefSigner[];
 };
 
 export const accountToSigner = async (
@@ -142,6 +143,19 @@ export const accountToSigner = async (
   );
 };
 
+
+export function accountJsonToMeta (acc: AccountJson, source=''): InjectedAccountWithMeta {
+  return  {
+    address: acc.address,
+    meta: {
+      genesisHash: acc.genesisHash,
+      name: acc.name,
+      source: source
+    },
+    type: acc.type
+  };
+}
+
 export const getExtensionSigners = async (
   extensions: InjectedExtension[] | InjectedExtensionReef[],
   provider: Provider,
@@ -157,7 +171,7 @@ export const getExtensionSigners = async (
     ({ accounts, name, sig }) => accounts.map((account) => accountToSigner(account, provider, sig, name)),
   );
   const accounts = await Promise.all(accountPromisses);
-  return accounts;
+  return accounts as ReefSigner[];
 };
 
 export const bindSigner = async (signer: Signer): Promise<void> => {
