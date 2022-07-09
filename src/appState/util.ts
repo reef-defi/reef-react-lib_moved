@@ -1,6 +1,6 @@
 import { ContractInterface } from 'ethers';
 import { ContractType, Token, TokenWithAmount } from '../state/token';
-import { accountsSubj, reloadSignersSubj } from './accountState';
+import {accountsJsonSigningKeySubj, accountsJsonSubj, accountsSubj, reloadSignersSubj} from './accountState';
 import { UpdateAction } from './updateStateModel';
 import { availableNetworks, Network, Pool, ReefSigner } from '../state';
 import { calculateTokenPrice, disconnectProvider, TxStatusUpdate } from '../utils';
@@ -13,6 +13,12 @@ import { initProvider } from '../utils/providerUtil';
 import { currentNetwork$, setCurrentNetwork, setCurrentProvider } from './providerState';
 import { defer, finalize, Observable, scan, switchMap, tap } from 'rxjs';
 import { apolloClientSubj, setApolloUrls } from '../graphql';
+import type { Signer as InjectedSigningKey } from '@polkadot/api/types';
+import { AccountJson } from '@reef-defi/extension-base/background/types';
+import type {InjectedAccountWithMeta as InjectedAccountWithMetaReef} from "@reef-defi/extension-inject/types";
+import type {
+  InjectedAccountWithMeta,
+} from '@polkadot/extension-inject/types';
 
 export const combineTokensDistinct = ([tokens1, tokens2]: [
   Token[],
@@ -85,6 +91,7 @@ export interface StateOptions {
   network?: Network;
   signers?: ReefSigner[];
   client?: ApolloClient<any>;
+  jsonAccounts?:{accounts: AccountJson[] | InjectedAccountWithMeta[] | InjectedAccountWithMetaReef[], injectedSigner: InjectedSigningKey}
 }
 
 export function initApolloClient(selectedNetwork?: Network, client?: ApolloClient<any> ) {
@@ -101,11 +108,13 @@ export function initApolloClient(selectedNetwork?: Network, client?: ApolloClien
 }
 
 type destroyConnection = ()=>void;
+
 export const initReefState = (
   {
     network,
     client,
     signers,
+    jsonAccounts,
   }: StateOptions,): destroyConnection => {
   const subscription = currentNetwork$.pipe(
     switchMap((network) => initProvider(network.rpcUrl)
@@ -132,7 +141,13 @@ export const initReefState = (
       }
     });
   setCurrentNetwork(network||availableNetworks.mainnet);
-  accountsSubj.next(signers || null);
+  if(signers){
+    accountsSubj.next(signers || null);
+  }
+  if (jsonAccounts) {
+    accountsJsonSigningKeySubj.next(jsonAccounts.injectedSigner);
+    accountsJsonSubj.next(jsonAccounts.accounts);
+  }
   return () => subscription.unsubscribe();
 }
 

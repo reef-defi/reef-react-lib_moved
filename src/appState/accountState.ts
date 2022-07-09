@@ -3,6 +3,7 @@ import {
   combineLatest,
   distinctUntilChanged,
   map,
+  merge,
   mergeScan,
   Observable,
   of,
@@ -15,21 +16,40 @@ import {
   take,
   withLatestFrom,
 } from 'rxjs';
-import { Provider } from '@reef-defi/evm-provider';
-import { BigNumber } from 'ethers';
-import { filter } from 'rxjs/operators';
-import { gql } from '@apollo/client';
-import { UpdateDataCtx } from './updateStateModel';
-import { replaceUpdatedSigners, updateSignersEvmBindings, } from './accountStateUtil';
-import { currentProvider$ } from './providerState';
-import { ReefSigner } from '../state';
-import { apolloClientInstance$, zenToRx } from '../graphql/apollo';
+import {Provider} from '@reef-defi/evm-provider';
+import {BigNumber} from 'ethers';
+import {filter} from 'rxjs/operators';
+import {gql} from '@apollo/client';
+import {UpdateDataCtx} from './updateStateModel';
+import {replaceUpdatedSigners, updateSignersEvmBindings,} from './accountStateUtil';
+import {currentProvider$} from './providerState';
+import {ReefSigner} from '../state';
+import {apolloClientInstance$, zenToRx} from '../graphql/apollo';
+import {AccountJson} from '@reef-defi/extension-base/background/types';
+import type {InjectedAccountWithMeta} from "@reef-defi/extension-inject/types";
+import {accountJsonToMeta, metaAccountToSigner} from "../rpc/accounts";
+import type {Signer as InjectedSigningKey} from '@polkadot/api/types';
 
 export const accountsSubj = new ReplaySubject<ReefSigner[] | null>(1);
+export const accountsJsonSubj = new ReplaySubject<AccountJson[]| InjectedAccountWithMeta[] | null>(1);
+export const accountsJsonSigningKeySubj = new ReplaySubject<InjectedSigningKey>(1);
 export const reloadSignersSubj = new Subject<UpdateDataCtx<ReefSigner[]>>();
 
-export const signersInjected$ = accountsSubj.pipe(
-  map((signrs) => (signrs?.length ? signrs : [])),
+const signersFromJson$: Observable<ReefSigner[]> = combineLatest([accountsJsonSubj, currentProvider$, accountsJsonSigningKeySubj]).pipe(
+  switchMap(([jsonAccounts, provider, signingKey]: [(AccountJson[] | InjectedAccountWithMeta[] | null), Provider, InjectedSigningKey]) => {
+    let accounts = jsonAccounts || [];
+    if (accounts?.length && !accounts[0].meta) {
+      accounts = accounts.map((acc) => accountJsonToMeta(acc));
+    }
+    return Promise.all(
+      accounts.map((account) => metaAccountToSigner(account, provider as Provider, signingKey as InjectedSigningKey)),
+    ).then((signers:ReefSigner[])=>signers.filter(s=>!!s)) as Promise<ReefSigner[]>;
+  }),
+  shareReplay(1)
+);
+
+export const signersInjected$ = merge(accountsSubj, signersFromJson$).pipe(
+  map((signrs) => (signrs && signrs.length ? signrs : [])),
   shareReplay(1),
 );
 
