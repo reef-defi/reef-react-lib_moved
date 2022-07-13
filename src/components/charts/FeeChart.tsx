@@ -16,7 +16,7 @@ import { set } from 'd3-collection';
 import { XAxis, YAxis } from 'react-stockcharts/lib/axes';
 // @ts-ignore
 import { SingleValueTooltip } from 'react-stockcharts/lib/tooltip';
-import { useHourFeeSubscription } from '../../hooks';
+import { useDayPoolFee } from '../../hooks';
 import { BasicPoolInfo } from '../../state/pool';
 import { formatAmount, std } from '../../utils/math';
 import { Loading } from '../common/Loading';
@@ -34,7 +34,7 @@ const FeeChart = ({
   const toDate = Date.now();
   const fromDate = useMemo(() => toDate - 31 * 24 * 60 * 60 * 1000, []); // last 31 days
 
-  const { data, loading } = useHourFeeSubscription(address, fromDate);
+  const { data, loading } = useDayPoolFee(address, fromDate);
 
   if (loading || !data) {
     return <Loading />;

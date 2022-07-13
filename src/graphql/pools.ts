@@ -675,6 +675,7 @@ type Time = "day" | "hour" | "minute";
 const tvlQuery = (time: Time): DocumentNode => gql`
 query pool_supply($address: String!, $fromTime: timestamptz!) {
   pool_${time}_supply(
+    distinct_on: timestamp
     where: {
       pool: { address: { _ilike: $address } }
       timeframe: { _gte: $fromTime }
@@ -693,6 +694,7 @@ const candlestickQuery = (time: Time): DocumentNode =>gql`
 query candlestick($address: String!, $whichToken: Int!, $fromTime: timestamptz!) {
   pool_${time}_candlestick(
     order_by: { timeframe: asc }
+    distinct_on: timeframe
     where: {
       pool: { address: { _ilike: $address } }
       which_token: { _eq: $whichToken }
@@ -726,6 +728,7 @@ export const POOL_LAST_CANDLESTICH_GQL = gql`
 query candlestick($address: String!, $whichToken: Int!, $fromTime: timestamptz!) {
   pool_day_candlestick(
     order_by: { timeframe: desc }
+    distinct_on: timeframe
     where: {
       pool: { address: { _eq: $address } }
       which_token: { _eq: $whichToken }
@@ -752,9 +755,10 @@ query candlestick($address: String!, $whichToken: Int!, $fromTime: timestamptz!)
 }
 `
 
-const feeSubscription = (time: Time): DocumentNode => gql`
-subscription fee($address: String!, $fromTime: timestamptz!) {
+const feeQuery = (time: Time): DocumentNode => gql`
+query fee($address: String!, $fromTime: timestamptz!) {
   pool_${time}_fee(
+    distinct_on: timeframe
     where: {
       timeframe: { _gte: $fromTime }
       pool: { address: { _ilike: $address } }
@@ -768,9 +772,9 @@ subscription fee($address: String!, $fromTime: timestamptz!) {
 }
 `;
 
-export const POOL_DAY_FEE_SUBSCRIPTION_GQL = feeSubscription("day");
-export const POOL_HOUR_FEE_SUBSCRIPTION_GQL = feeSubscription("hour");
-export const POOL_MINUTE_FEE_SUBSCRIPTION_GQL = feeSubscription("minute");
+export const POOL_DAY_FEE_QUERY_GQL = feeQuery("day");
+export const POOL_HOUR_FEE_QUERY_GQL = feeQuery("hour");
+export const POOL_MINUTE_FEE_QUERY_GQL = feeQuery("minute");
 
 export const POOL_RESERVES_SUBSCRITION = gql`
   subscription pool_event {
