@@ -104,7 +104,7 @@ export const addReefSpecificStringFromAddress = (address: string): string => `${
  *  checksum from provided address. Returned sample icon is svg encoded to base64
  *  and prefixed with data string, so it can be used directly with <img /> tag.
  */
-export const getIconUrl = (tokenAddress: string): string => {
+export const getIconUrl = (tokenAddress = ''): string => {
   const reefToken = reefTokenWithAmount();
 
   if (tokenAddress === reefToken.address) {

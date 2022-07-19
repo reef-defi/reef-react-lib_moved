@@ -95,8 +95,8 @@ export const PoolPage = ({
     <div className="w-100 row justify-content-center">
       <div className="col-xl-10 col-lg-10 col-md-12">
         <div className="d-flex ms-1 mb-1">
-          <TokenIcon src={tokenIcon1} />
-          <TokenIcon src={tokenIcon2} />
+          <TokenIcon src={tokenIcon1} address={tokenAddress1} />
+          <TokenIcon src={tokenIcon2} address={tokenAddress2} />
           <BoldText size={1.6}>
             {' '}
             {tokenSymbol1}
@@ -113,7 +113,7 @@ export const PoolPage = ({
               <div className="card border-rad">
                 <div className="card-body py-1">
                   <div className="d-flex">
-                    <TokenIcon src={tokenIcon1} />
+                    <TokenIcon src={tokenIcon1} address={tokenAddress1} />
                     <ME size="1" />
                     <LeadText>
                       1
@@ -133,7 +133,7 @@ export const PoolPage = ({
               <div className="card border-rad">
                 <div className="card-body py-1">
                   <div className="d-flex">
-                    <TokenIcon src={tokenIcon2} />
+                    <TokenIcon src={tokenIcon2} address={tokenAddress2} />
                     <ME size="1" />
                     <LeadText>
                       1
