@@ -13,6 +13,7 @@ export interface Pool {
   minimumLiquidity: string;
 }
 
+// TODO naming is a bit off
 export interface BasicPoolInfo {
   address: string; // Pool address
   address1: string; // Token1 address
@@ -28,4 +29,7 @@ export interface LastPoolReserves {
   reserved_2: number;
   token_1: string;
   token_2: string;
+  address: string;
 }
+
+export type TokenPrices = {[tokenAddress: string]: number};

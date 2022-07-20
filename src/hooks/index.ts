@@ -16,3 +16,6 @@ export * from './useAddLiquidity';
 export * from './useRemoveLiquidity';
 export * from './useAllPools';
 export * from './usePriceEstimator';
+export * from './usePoolStats';
+export * from './usePoolSupply';
+export * from './usePoolLists';

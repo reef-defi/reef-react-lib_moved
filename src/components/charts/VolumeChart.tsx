@@ -4,7 +4,7 @@ import { timeFormat } from 'd3-time-format';
 // @ts-ignore
 import { Chart } from 'react-stockcharts';
 // @ts-ignore
-import { MouseCoordinateX, CrossHairCursor, CurrentCoordinate } from 'react-stockcharts/lib/coordinates';
+import { CrossHairCursor, CurrentCoordinate, MouseCoordinateX } from 'react-stockcharts/lib/coordinates';
 // @ts-ignore
 import { GroupedBarSeries } from 'react-stockcharts/lib/series';
 // @ts-ignore
@@ -15,12 +15,12 @@ import { set } from 'd3-collection';
 import { XAxis, YAxis } from 'react-stockcharts/lib/axes';
 // @ts-ignore
 import { SingleValueTooltip } from 'react-stockcharts/lib/tooltip';
-import DefaultChart from './DefaultChart';
-import { useHourVolume } from '../../hooks/poolHooks';
+import { useDayPoolVolume } from '../../hooks/poolHooks';
 import { BasicPoolInfo } from '../../state/pool';
+import { formatAmount, std } from '../../utils/math';
 import { dropDuplicatesMultiKey } from '../../utils/utils';
 import { Loading } from '../common/Loading';
-import { formatAmount, std } from '../../utils/math';
+import DefaultChart from './DefaultChart';
 
 interface Data {
   date: string;
@@ -32,15 +32,15 @@ const VolumeChart = ({
   address, symbol1, symbol2, decimal1, decimal2,
 } : BasicPoolInfo): JSX.Element => {
   const toDate = useMemo(() => Date.now(), []);
-  const fromDate = toDate - 50 * 60 * 60 * 1000; // last 50 hour
+  const fromDate = toDate - 31 * 24 * 60 * 60 * 1000; // last 50 hour
 
-  const { data, loading } = useHourVolume(address, fromDate);
+  const { data, loading } = useDayPoolVolume(address, fromDate);
 
   if (loading || !data) {
     return <Loading />;
   }
 
-  const volumeData = dropDuplicatesMultiKey(data.pool_hour_volume, ['timeframe'])
+  const volumeData = dropDuplicatesMultiKey(data.pool_day_volume, ['timeframe'])
     .map((d) => ({ ...d, date: new Date(d.timeframe) }))
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 
