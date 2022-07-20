@@ -8,3 +8,4 @@ export * from './transactionUtil';
 export * from './bindUtil';
 export * from './providerUtil';
 export * from './modalUtil';
+export * from './modalUtil';

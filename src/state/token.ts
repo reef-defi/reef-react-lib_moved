@@ -1,6 +1,8 @@
-import { BigNumber } from 'ethers';
-import { ensure } from '../utils/utils';
-import { calculateAmount } from '../utils/math';
+import {BigNumber} from 'ethers';
+import {BigNumber as BN} from 'bignumber.js';
+import {EMPTY_ADDRESS, ensure, MIN_EVM_TOKEN_BALANCE, MIN_REEF_TOKEN_BALANCE, REEF_ADDRESS} from '../utils/utils';
+import {calculateAmount} from '../utils/math';
+import {TokenPrices} from './pool';
 
 export enum ContractType {
   ERC20 = 'ERC20',
@@ -72,7 +74,7 @@ export const defaultTokenState = (index = 0): TokenState => ({
 
 export const createEmptyToken = (): Token => ({
   name: 'Select token',
-  address: '0x',
+  address: EMPTY_ADDRESS,
   balance: BigNumber.from('0'),
   decimals: -1,
   iconUrl: '',
@@ -95,15 +97,31 @@ export const toTokenAmount = (
   isEmpty: false,
 });
 
+export const checkMinExistentialTokenAmount = (token: TokenWithAmount): {valid: boolean, message?: string} => {
+  const FIXED_TX_FEE = 2;
+  const isReefToken = token.address === REEF_ADDRESS;
+  const amount = calculateAmount(token);
+  const existentialMinAmount = (isReefToken ? MIN_REEF_TOKEN_BALANCE : MIN_EVM_TOKEN_BALANCE);
+  const min = calculateAmount({ decimals: token.decimals, amount: (existentialMinAmount + FIXED_TX_FEE).toString() });
+  const sum = BigNumber.from(min).add(BigNumber.from(amount));
+  const valid = BigNumber.from(token.balance).gte(sum);
+  const message = valid ? '' : `At least ${existentialMinAmount} ${token.name} tokens should be left in the wallet after transaction.`;
+  return { valid, message };
+};
+
 export const ensureTokenAmount = (token: TokenWithAmount): void => ensure(
   BigNumber.from(calculateAmount(token)).lte(token.balance),
   `Insufficient ${token.name} balance`,
 );
 
+export const ensureExistentialTokenAmount = (token: TokenWithAmount): void => {
+  ensure(checkMinExistentialTokenAmount(token).valid, `Insufficient ${token.name} balance.`);
+};
+
 export const reefTokenWithAmount = (): TokenWithAmount => toTokenAmount(
   {
     name: 'REEF',
-    address: '0x0000000000000000000000000000000001000000',
+    address: REEF_ADDRESS,
     iconUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/6951.png',
     balance: BigNumber.from(0),
     decimals: 18,
@@ -115,3 +133,7 @@ export const reefTokenWithAmount = (): TokenWithAmount => toTokenAmount(
     price: 0,
   },
 );
+
+export const getTokenPrice = (address: string, prices: TokenPrices): BN => new BN(prices[address]
+  ? prices[address]
+  : 0);

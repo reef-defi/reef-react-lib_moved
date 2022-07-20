@@ -62,16 +62,18 @@ export const SelectToken = ({
 }: SelectToken): JSX.Element => {
   const [isLoading, setIsLoading] = useState(false);
   const [address, setAddress] = useState('');
+  const [selectedToken, setSelectedToken] = useState<Token | null>(null);
   const [foundSearchTokens, setFoundSearchTokens] = useState<
     DataWithProgress<Token[]>
   >([...tokens]);
 
   const isEmpty = selectedTokenName === 'Select token';
 
-  const handleSelectToken = (token) => {
+  const handleSelectToken = (token): void => {
     closeModal(id);
     onTokenSelect(token);
-  }
+    setSelectedToken(token);
+  };
 
   useEffect(() => {
     if (!signer) {
@@ -108,9 +110,12 @@ export const SelectToken = ({
     >
       <FullRow>
         <CenterRow>
-          <TokenIcon src={token.iconUrl} />
+          <TokenIcon
+            src={token.iconUrl}
+            address={token.address}
+          />
         </CenterRow>
-        <div className={"flex-grow-1 ms-3"}>
+        <div className="flex-grow-1 ms-3">
           <FlexColumn>
             <LeadText>{token.symbol}</LeadText>
             <MutedText>
@@ -139,7 +144,10 @@ export const SelectToken = ({
     .filter((token) => COMMON_BASES.includes(token.address))
     .map((token) => (
       <IconButton onClick={() => onTokenSelect(token)} key={token.address}>
-        <TokenIcon src={token.iconUrl} />
+        <TokenIcon
+          src={token.iconUrl}
+          address={token.address}
+        />
         <MS size="2">
           <Text>{token.symbol}</Text>
         </MS>
@@ -150,9 +158,9 @@ export const SelectToken = ({
     await Promise.resolve()
       .then(() => setIsLoading(true))
       .then(() => {
-        if(onAddressChange) {
+        if (onAddressChange) {
           onAddressChange(address);
-        };
+        }
       })
       .finally(() => setIsLoading(false));
   }, [address]);
@@ -166,7 +174,7 @@ export const SelectToken = ({
         }`}
         onClick={() => openModal(id)}
       >
-        {!isEmpty && <TokenIcon src={iconUrl} />}
+        {!isEmpty && <TokenIcon src={iconUrl} address={selectedToken?.address} />}
         <div className={`my-auto ${!isEmpty ? 'mx-2' : 'me-2'}`}>
           {selectedTokenName}
         </div>
