@@ -1,11 +1,7 @@
-import { BigNumber, utils } from 'ethers';
-import { BigNumber as BN } from 'bignumber.js';
-import { DataProgress, DataWithProgress, isDataSet } from './dataWithProgress';
-import {
-  Pool, reefTokenWithAmount, Token, TokenWithAmount,
-} from '../state';
-import { toDecimalPlaces } from './math';
-import { REEF_ADDRESS } from './utils';
+  import {BigNumber, utils} from 'ethers';
+import {DataProgress, DataWithProgress, isDataSet} from './dataWithProgress';
+import {Pool, reefTokenWithAmount, Token, TokenWithAmount,} from '../state';
+import {toDecimalPlaces} from './math';
 
 const { parseUnits, formatEther } = utils;
 
