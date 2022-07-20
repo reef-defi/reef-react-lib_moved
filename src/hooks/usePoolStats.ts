@@ -1,12 +1,20 @@
-import { useQuery } from '@apollo/client';
-import { BigNumber } from 'bignumber.js';
-import { useMemo } from 'react';
+import {useQuery} from '@apollo/client';
+import {BigNumber} from 'bignumber.js';
+import {useMemo} from 'react';
 import {
-  Pool24HVolume, PoolInfoQuery, PoolInfoVar, PoolsTotalSupply, PoolsTotalValueLockedVar, POOLS_TOTAL_VALUE_LOCKED, PoolVolume24HVar, POOL_24H_VOLUME, POOL_INFO_GQL,
+  Pool24HVolume,
+  POOL_24H_VOLUME,
+  POOL_INFO_GQL,
+  PoolInfoQuery,
+  PoolInfoVar,
+  POOLS_TOTAL_VALUE_LOCKED,
+  PoolsTotalSupply,
+  PoolsTotalValueLockedVar,
+  PoolVolume24HVar,
 } from '../graphql/pools';
-import { getTokenPrice, TokenPrices } from '../state';
-import { getIconUrl, normalize, convert2Normal } from '../utils';
-import { usePoolCount } from './poolHooks';
+import {getTokenPrice, TokenPrices} from '../state';
+import {getIconUrl, normalize} from '../utils';
+import {usePoolCount} from './poolHooks';
 
 export const useTotalSupply = (tokenPrices: TokenPrices, previous=false): string => {
   const toTime = useMemo(() => {
@@ -116,7 +124,7 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
     const {decimals: decimal1, name: name1, symbol: symbol1} = pool.token_contract_1.verified_contract!.contract_data;
     const {decimals: decimal2, name: name2, symbol: symbol2} = pool.token_contract_2.verified_contract!.contract_data;
 
-    const amountLocked1 = convert2Normal(pool.pool_event[0].reserved_1, decimal1);
+    const amountLocked1 = normalize(pool.pool_event[0].reserved_1, decimal1);
     const amountLocked2 = normalize(pool.pool_event[0].reserved_2, decimal2);
     const fee1 =  normalize(pool.fee_aggregate.aggregate.sum.fee_1, decimal1);
     const fee2 =  normalize(pool.fee_aggregate.aggregate.sum.fee_2, decimal2);
