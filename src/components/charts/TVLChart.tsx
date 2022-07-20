@@ -4,22 +4,21 @@ import { timeFormat } from 'd3-time-format';
 // @ts-ignore
 import { Chart } from 'react-stockcharts';
 // @ts-ignore
-import { MouseCoordinateX, CrossHairCursor, CurrentCoordinate } from 'react-stockcharts/lib/coordinates';
+import { CrossHairCursor, CurrentCoordinate, MouseCoordinateX } from 'react-stockcharts/lib/coordinates';
 // @ts-ignore
 import { XAxis, YAxis } from 'react-stockcharts/lib/axes';
 // @ts-ignore
-import { SingleValueTooltip } from 'react-stockcharts/lib/tooltip';
 import './Chart.css';
 // @ts-ignore
-import { ScatterSeries, SquareMarker, LineSeries } from 'react-stockcharts/lib/series';
+import { LineSeries, ScatterSeries, SquareMarker } from 'react-stockcharts/lib/series';
 // import {
 //   dropDuplicatesMultiKey, formatAmount, std, toTimestamp,
 // } from '../../../utils/utils';
-import DefaultChart from './DefaultChart';
+import { useDayTvl } from '../../hooks';
 import { formatAmount, std } from '../../utils/math';
-import { useHourTvl } from '../../hooks';
-import { Loading } from '../common/Loading';
 import { dropDuplicatesMultiKey } from '../../utils/utils';
+import { Loading } from '../common/Loading';
+import DefaultChart from './DefaultChart';
 
 interface TVLChart {
   address: string;
@@ -32,12 +31,12 @@ interface Data {
 
 const TVLChart = ({ address } : TVLChart): JSX.Element => {
   const toDate = useMemo(() => Date.now(), []);
-  const fromDate = toDate - 50 * 60 * 60 * 1000; // last 50 hour
+  const fromDate = toDate - 31 * 24 * 60 * 60 * 1000; // last 50 hour
 
-  const { loading, data } = useHourTvl(address, fromDate);
+  const { loading, data } = useDayTvl(address, fromDate);
 
   const tvl = data
-    ? data.pool_hour_supply
+    ? data.pool_day_supply
       .map(({ timeframe, total_supply }) => ({
         date: new Date(timeframe),
         amount: total_supply,
@@ -59,7 +58,7 @@ const TVLChart = ({ address } : TVLChart): JSX.Element => {
 
   const values: number[] = tvl.map(({ amount }) => amount);
   const adjust = std(values);
-
+  console.log(filteredData)
   return (
     <DefaultChart
       data={filteredData}
@@ -93,18 +92,19 @@ const TVLChart = ({ address } : TVLChart): JSX.Element => {
         />
         <CurrentCoordinate yAccessor={(d: Data) => d.amount} fill={(d: Data) => d.amount} />
 
-        <SingleValueTooltip
-          yAccessor={(d: Data) => d.amount}
+        {/* TODO find wtf is wrong with this */}
+        {/* <SingleValueTooltip
+          yAccessor={(d: Data) => d.amount || 0}
           yDisplayFormat={(d: number) => formatAmount(d, 18)}
           fontSize={21}
           origin={[20, 10]}
-        />
-        <SingleValueTooltip
+        /> */}
+        {/* <SingleValueTooltip
           yAccessor={(d: Data) => d.date}
           fontSize={14}
           yDisplayFormat={timeFormat('%Y-%m-%d %H:%M:%S')}
           origin={[20, 30]}
-        />
+        /> */}
       </Chart>
 
       <CrossHairCursor />

@@ -2,7 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { Contract } from 'ethers';
 import { Provider } from '@reef-defi/evm-provider';
 import {
-  createEmptyTokenWithAmount, ensureTokenAmount, NotifyFun, ReefSigner, reefTokenWithAmount, Token, TokenWithAmount,
+  checkMinExistentialTokenAmount,
+  createEmptyTokenWithAmount,
+  ensureExistentialTokenAmount,
+  ensureTokenAmount,
+  NotifyFun,
+  ReefSigner,
+  reefTokenWithAmount,
+  Token,
+  TokenWithAmount,
 } from '../../state';
 import { Input } from '../common/Input';
 import {
@@ -54,6 +62,7 @@ const sendStatus = (to: string, token: TokenWithAmount, signer: ReefSigner): But
     }
     ensure(token.amount !== '', 'Insert amount');
     ensureTokenAmount(token);
+    ensureExistentialTokenAmount(token);
 
     return { isValid: true, text: 'Confirm Send' };
   } catch (e) {
@@ -67,7 +76,7 @@ export const Send = ({
   const [to, setTo] = useState('');
   const [status, setStatus] = useState('');
   const [isLoading, setLoading] = useState(false);
-
+  const [isAmountPristine, setAmountPristine] = useState(true);
   const [token, setToken] = useState(reefTokenWithAmount());
 
   useEffect(() => {
@@ -80,15 +89,20 @@ export const Send = ({
 
   const tokenContract = new Contract(token.address, ERC20, signer.signer);
   const { text, isValid } = sendStatus(to, token, signer);
+  const existentialValidity = checkMinExistentialTokenAmount(token);
 
   const onTokenSelect = (newToken: Token): void => setToken({ ...createEmptyTokenWithAmount(false), ...newToken });
 
-  const onAmountChange = (amount: string): void => setToken({ ...token, amount });
+  const onAmountChange = (amount: string): void => {
+    setToken({ ...token, amount });
+    setAmountPristine(false);
+  };
 
   const onSend = async (): Promise<void> => {
     try {
       setLoading(true);
       ensureTokenAmount(token);
+      ensureExistentialTokenAmount(token);
       const amount = calculateAmount(token);
 
       if (token.address === REEF_ADDRESS && to.length === 48) {
@@ -162,6 +176,13 @@ export const Send = ({
                 ? (<LoadingButtonIconWithText text={status} />)
                 : (text)}
             </OpenModalButton>
+
+            {!isAmountPristine && !existentialValidity.valid
+              && (
+                <div className="existential-error">
+                  {existentialValidity.message}
+                </div>
+              )}
           </CenterColumn>
         </MT>
 

@@ -4,24 +4,23 @@ import { timeFormat } from 'd3-time-format';
 // @ts-ignore
 import { Chart } from 'react-stockcharts';
 // @ts-ignore
-import { MouseCoordinateX, CrossHairCursor, CurrentCoordinate } from 'react-stockcharts/lib/coordinates';
+import { CrossHairCursor, CurrentCoordinate, MouseCoordinateX } from 'react-stockcharts/lib/coordinates';
 // @ts-ignore
 import { GroupedBarSeries } from 'react-stockcharts/lib/series';
 
 // @ts-ignore
-import { scaleOrdinal, schemeCategory10, scalePoint } from 'd3-scale';
+import { scaleOrdinal, schemeCategory10 } from 'd3-scale';
 // @ts-ignore
 import { set } from 'd3-collection';
 // @ts-ignore
 import { XAxis, YAxis } from 'react-stockcharts/lib/axes';
 // @ts-ignore
 import { SingleValueTooltip } from 'react-stockcharts/lib/tooltip';
-import DefaultChart from './DefaultChart';
+import { useDayPoolFee } from '../../hooks';
 import { BasicPoolInfo } from '../../state/pool';
-import { useHourFeeSubscription } from '../../hooks';
-import { Loading } from '../common/Loading';
 import { formatAmount, std } from '../../utils/math';
-import { dropDuplicatesMultiKey } from '../../utils';
+import { Loading } from '../common/Loading';
+import DefaultChart from './DefaultChart';
 
 interface Data {
   fee_1: number;
@@ -33,17 +32,16 @@ const FeeChart = ({
   address, symbol1, symbol2, decimal1, decimal2,
 } : BasicPoolInfo): JSX.Element => {
   const toDate = Date.now();
-  const fromDate = useMemo(() => toDate - 50 * 60 * 60 * 1000, []); // last 50 hour
+  const fromDate = useMemo(() => toDate - 31 * 24 * 60 * 60 * 1000, []); // last 31 days
 
-  const { data, loading } = useHourFeeSubscription(address, fromDate);
+  const { data, loading } = useDayPoolFee(address, fromDate);
 
   if (loading || !data) {
     return <Loading />;
   }
 
-  const feeData = dropDuplicatesMultiKey(data.pool_hour_fee, ["timeframe"])
-    .map((d) => ({ ...d, date: new Date(d.timeframe) }))
-    .sort((a, b) => a.date.getTime() - b.date.getTime());
+  const feeData = data.pool_day_fee
+    .map((d) => ({ ...d, date: new Date(d.timeframe) }));
 
   if (feeData.length <= 1) {
     return <span>Not enough data</span>;

@@ -3,9 +3,13 @@ import { reefTokenWithAmount } from '../state';
 import { getHashSumLastNr } from './math';
 import { DEFAULT_TOKEN_ICONS } from '../components/common/Icons';
 
+export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
+
 export const REEF_ADDRESS = '0x0000000000000000000000000000000001000000';
 export const EMPTY_ADDRESS = '0x';
 export const REEF_ADDRESS_SPECIFIC_STRING = '(ONLY for Reef chain!)';
+export const MIN_REEF_TOKEN_BALANCE = 1;
+export const MIN_EVM_TOKEN_BALANCE = 60;
 
 export interface ButtonStatus {
   text: string;
@@ -104,7 +108,7 @@ export const addReefSpecificStringFromAddress = (address: string): string => `${
  *  checksum from provided address. Returned sample icon is svg encoded to base64
  *  and prefixed with data string, so it can be used directly with <img /> tag.
  */
-export const getIconUrl = (tokenAddress: string): string => {
+export const getIconUrl = (tokenAddress = ''): string => {
   const reefToken = reefTokenWithAmount();
 
   if (tokenAddress === reefToken.address) {
