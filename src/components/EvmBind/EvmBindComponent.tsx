@@ -72,7 +72,7 @@ export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindCom
       if (val.error || val.isInBlock) {
         onTxUpdate({ ...val, componentTxType: EvmBindComponentTxType.BIND, addresses: [bindFor.address] });
       }
-    }, true);
+    });
 
     if (txIdent) {
       onTxUpdate({ txIdent, componentTxType: EvmBindComponentTxType.BIND, addresses: [bindFor.address] });
