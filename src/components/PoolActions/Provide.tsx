@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import Uik from '@reef-defi/ui-kit';
 import BigNumber from 'bignumber.js';
 import { faCoins } from '@fortawesome/free-solid-svg-icons';
@@ -126,11 +126,11 @@ const Provide = ({
   } = state;
 
   const { percentage } = resolveSettings(settings);
-  // const [perc, setPerc] = useState(0);
+  const [perc, setPerc] = useState(0);
 
-  // const handleSlide = (value: number): void => {
-  //   setPerc(value);
-  // };
+  const handleSlide = (value: number): void => {
+    setPerc(value);
+  };
 
   const getTotalValue = useMemo((): number => {
     const firstTokenValue = new BigNumber(token1.price).times(token1.amount).toNumber();
@@ -168,7 +168,7 @@ const Provide = ({
         </div>
       </div>
 
-      {/* <div className="uik-pool-actions__slider">
+      <div className="uik-pool-actions__slider">
         <Uik.Slider
           value={perc}
           onChange={handleSlide}
@@ -181,7 +181,7 @@ const Provide = ({
             { position: 100, text: '100%' },
           ]}
         />
-      </div> */}
+      </div>
 
       <button
         className="uik-pool-actions__cta-wrapper"
