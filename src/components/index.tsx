@@ -1,5 +1,6 @@
 export * from './common';
 export * from './Pools/index';
+export * from './PoolActions/index';
 export * from './SelectToken';
 export * from './TokenFields';
 export * from './AddLiquidity';
