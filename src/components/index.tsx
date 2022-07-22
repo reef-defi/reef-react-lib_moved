@@ -3,6 +3,7 @@ export * from './Pools/index';
 export * from './SelectToken';
 export * from './TokenFields';
 export * from './AddLiquidity';
+export * from './PoolActions';
 export * from './SwapComponent';
 export * from './AccountSelector/AccountSelector';
 export * from './AccountSelector/AccountListModal';

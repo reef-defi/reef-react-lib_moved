@@ -5,6 +5,8 @@ import { DEFAULT_TOKEN_ICONS } from '../components/common/Icons';
 
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
 
+export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
+
 export const REEF_ADDRESS = '0x0000000000000000000000000000000001000000';
 export const EMPTY_ADDRESS = '0x';
 export const REEF_ADDRESS_SPECIFIC_STRING = '(ONLY for Reef chain!)';
