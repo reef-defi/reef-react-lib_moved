@@ -1,15 +1,24 @@
 import Uik from '@reef-defi/ui-kit';
 import React from "react";
-import { SwapComponentActions, SwapState } from "../../store";
+import { SwapState } from "../../store";
 import TokenField from "./TokenField";
 
 import { faRepeat } from '@fortawesome/free-solid-svg-icons';
 import BigNumber from 'bignumber.js';
 import { Pool, resolveSettings } from '../../state';
 
+
+export interface TradeActions {
+  onSwitch: () => void;
+  onSwap: () => Promise<void>;
+  setToken1Amount: (amount: string) => void;
+  setToken2Amount: (amount: string) => void;
+  setPercentage: (amount: number) => void;
+}
+
 interface Trade {
   state: SwapState,
-  actions: SwapComponentActions
+  actions: TradeActions
 }
 
 interface SummaryItem {
@@ -54,7 +63,7 @@ const Trade = ({state: {
   isValid,
   pool,
   settings,
-  status
+  // status
 }, actions: {
   onSwap,
   onSwitch,

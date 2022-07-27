@@ -11,9 +11,10 @@ import TokenField from './TokenField';
 // import ConfirmationModal from '../common/Modal';
 
 export interface ProvideActions {
-  onAddLiquidity: () => Promise<void>,
-  setToken1Amount: (amount: string) => void,
-  setToken2Amount: (amount: string) => void
+  onAddLiquidity: () => Promise<void>;
+  setToken1Amount: (amount: string) => void;
+  setToken2Amount: (amount: string) => void;
+  setPercentage: (amount: number) => void;
 }
 
 export interface Props {

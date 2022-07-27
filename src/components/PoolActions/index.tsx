@@ -1,31 +1,41 @@
-import React, { useState } from 'react';
 import Uik from '@reef-defi/ui-kit';
+import React, { useState } from 'react';
+import { SwapState } from '../../store';
 import Provide, { Props as ProvideProps } from './Provide';
+import Trade, { TradeActions } from './Trade';
 import Withdraw, { Props as WithdrawProps } from './Withdraw';
 
+// TODO Samo remove any
 export type CustomFunction = (...args: any[]) => any
 
 export interface Events {
   onTabChange?: CustomFunction
 }
 
+type Tab = 'Provide' | 'Withdraw' | 'Trade';
+
 export interface Props extends Events {
-  tab?: 'Provide' | 'Withdraw' | 'Trade',
+  tab?: Tab,
   provide: ProvideProps,
   withdraw: WithdrawProps,
+  trade: {
+    state: SwapState;
+    actions: TradeActions;
+  };
   className?: string
 }
 
 export const PoolActions = ({
-  tab = 'Provide',
+  tab = 'Trade',
   provide,
   withdraw,
+  trade,
   className,
   onTabChange,
 }: Props): JSX.Element => {
   const [currentTab, setTab] = useState(tab);
 
-  const selectTab = (value: 'Provide' | 'Withdraw' | 'Trade'): void => {
+  const selectTab = (value: Tab): void => {
     if (onTabChange) {
       const from = currentTab;
       const to = value;
@@ -47,10 +57,19 @@ export const PoolActions = ({
         <Uik.Tabs
           value={currentTab}
           onChange={(value) => selectTab(value)}
-          options={['Provide', 'Withdraw', 'Trade']}
+          options={['Trade', 'Provide', 'Withdraw']}
         />
       </div>
 
+      {
+        currentTab === 'Trade'
+        && (
+          <Trade
+            state={trade.state}
+            actions={trade.actions}
+          />
+        )
+      }
       {
         currentTab === 'Provide'
         && (
