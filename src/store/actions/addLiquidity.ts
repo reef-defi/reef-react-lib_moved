@@ -34,6 +34,7 @@ export interface AddLiquidityComponentActions {
   onAddLiquidity: () => Promise<void>;
   selectToken1: (token: Token) => void;
   selectToken2: (token: Token) => void;
+  setPercentage: (amount: number) => void;
   setSettings: (settings: Settings) => void;
   setToken1Amount: (amount: string) => void;
   setToken2Amount: (amount: string) => void;

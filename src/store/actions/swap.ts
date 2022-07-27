@@ -40,6 +40,7 @@ export interface SwapComponentActions {
   selectToken1: (token: Token) => void;
   selectToken2: (token: Token) => void;
   setSettings: (settings: Settings) => void;
+  setPercentage: (amount: number) => void;
   setToken1Amount: (amount: string) => void;
   setToken2Amount: (amount: string) => void;
   onAddressChange: (address: string) => Promise<void>;
