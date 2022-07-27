@@ -2,9 +2,9 @@ import React, { useMemo } from 'react';
 import Uik from '@reef-defi/ui-kit';
 import { faArrowUpFromBracket } from '@fortawesome/free-solid-svg-icons';
 import BigNumber from 'bignumber.js';
-import { resolveSettings } from '../../state';
+// import { resolveSettings } from '../../state';
 import { RemoveLiquidityState } from '../../store';
-import RemoveConfirmationModal from '../RemoveLiquidity/RemoveConfirmationModal';
+// import RemoveConfirmationModal from '../RemoveLiquidity/RemoveConfirmationModal';
 import TokenField from './TokenField';
 
 export interface WithdrawActions {
@@ -19,8 +19,8 @@ export interface Props {
 
 const Withdraw = ({
   state: {
-    settings,
-    pool,
+    // settings,
+    // pool,
     isLoading,
     isValid,
     percentage: percentageAmount,
@@ -33,8 +33,6 @@ const Withdraw = ({
     setPercentage,
   },
 }: Props): JSX.Element => {
-  const { percentage } = resolveSettings(settings);
-
   const getTotalValue = useMemo((): number => {
     const firstTokenValue = new BigNumber(token1.price).times(token1.amount).toNumber();
     const secondTokenValue = new BigNumber(token2.price).times(token2.amount).toNumber();
@@ -74,7 +72,9 @@ const Withdraw = ({
       <div className="uik-pool-actions__slider">
         <Uik.Slider
           value={percentageAmount}
-          onChange={setPercentage}
+          onChange={(e) => {
+            setPercentage(e)
+          }}
           tooltip={`${Uik.utils.maxDecimals(percentageAmount, 2)}%`}
           helpers={[
             { position: 0, text: '0%' },
@@ -89,8 +89,9 @@ const Withdraw = ({
       <button
         className="uik-pool-actions__cta-wrapper"
         type="button"
-        data-bs-toggle="modal"
-        data-bs-target="remove-modal-toggle"
+        onClick={onRemoveLiquidity}
+        // data-bs-toggle="modal"
+        // data-bs-target="remove-modal-toggle"
         disabled={!isValid || isLoading}
       >
         <Uik.Button
@@ -104,13 +105,13 @@ const Withdraw = ({
         />
       </button>
 
-      <RemoveConfirmationModal
+      {/* <RemoveConfirmationModal
         pool={pool!}
         slipperage={percentage}
         id="remove-modal-toggle"
         percentageAmount={percentageAmount}
         onRemove={onRemoveLiquidity}
-      />
+      /> */}
     </div>
   );
 };
