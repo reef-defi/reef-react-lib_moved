@@ -9,6 +9,7 @@ import {
   CLEAR_TOKEN_AMOUNTS,
   SET_COMPLETE_STATUS,
   SET_LOADING,
+  SET_PERCENTAGE,
   SET_POOL,
   SET_SETTINGS,
   SET_STATUS,
@@ -64,6 +65,16 @@ export type SetValidity = {
 export type ClearTokenAmounts = {
   type: typeof CLEAR_TOKEN_AMOUNTS;
 };
+
+export type SetPercentage = {
+  type: typeof SET_PERCENTAGE;
+  percentage: number;
+}
+
+export const setPercentageAction = (percentage: number): SetPercentage => ({
+  percentage,
+  type: SET_PERCENTAGE,
+});
 
 export const setPoolAction = (pool?: Pool): SetPool => ({
   pool,

@@ -1,18 +1,8 @@
 import { Settings } from '../../state';
-import { SET_PERCENTAGE } from '../actionTypes';
 import {
-  SetCompleteStatus, SetLoading, SetPool, SetSettings, SetStatus, SetToken1, SetToken2, SetValidity,
+  SetCompleteStatus, SetLoading, SetPercentage, SetPool, SetSettings, SetStatus, SetToken1, SetToken2, SetValidity
 } from './defaultActions';
 
-type SetPercentage = {
-  type: typeof SET_PERCENTAGE;
-  percentage: number;
-}
-
-export const setPercentageAction = (percentage: number): SetPercentage => ({
-  percentage,
-  type: SET_PERCENTAGE,
-});
 
 export type RemoveLiquidityActions =
   | SetLoading
