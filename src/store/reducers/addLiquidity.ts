@@ -56,9 +56,9 @@ const calculateOtherAmount = (amount: string, currentAmount: string, first: bool
   return new BigNumber(r1).div(r2).multipliedBy(amount).toFixed(4);
 };
 
-const applyPercentage = (state: AddLiquidityState, percentage: number): AddLiquidityState => {
+const findPriority = (state: AddLiquidityState): boolean => {
   if (!state.pool) {
-    return state
+    return true
   }
 
   const r1 = state.token1.address === state.pool.token1.address
@@ -76,7 +76,18 @@ const applyPercentage = (state: AddLiquidityState, percentage: number): AddLiqui
     .multipliedBy(r1)
     .div(r2)
 
-  if (balance1.lte(balance2)) {
+  return balance1.lte(balance2)
+}
+
+const calculateNewPercentage = (amount: string, second: string, state: AddLiquidityState): number => findPriority(state)
+  ? new BigNumber(amount).multipliedBy(new BigNumber(10).pow(state.token1.decimals)).div(state.token1.balance.toString()).multipliedBy(100).toNumber()
+  : new BigNumber(second).multipliedBy(new BigNumber(10).pow(state.token2.decimals)).div(state.token2.balance.toString()).multipliedBy(100).toNumber();
+
+const applyPercentage = (state: AddLiquidityState, percentage: number): AddLiquidityState => {
+  if (!state.pool) {
+    return state
+  }
+  if (findPriority(state)) {
     const amount = new BigNumber(state.token1.balance.toString()).div(new BigNumber(10).pow(state.token1.decimals)).multipliedBy(percentage).dividedBy(100).toFixed(2) // TODO format amount
     return {...state, percentage,
       token1: {...state.token1, amount},
@@ -108,16 +119,20 @@ export const addLiquidityReducer = (
         token2: { ...createEmptyTokenWithAmount(false), ...action.token },
       };
     case SET_TOKEN1_AMOUNT:
+      const amount2 = calculateOtherAmount(action.amount, token2.amount, false, pool);
       return {
         ...state,
         token1: { ...token1, amount: action.amount },
-        token2: { ...token2, amount: calculateOtherAmount(action.amount, token2.amount, false, pool) },
+        token2: { ...token2, amount: amount2 },
+        percentage: calculateNewPercentage(action.amount, amount2, state),
       };
     case SET_TOKEN2_AMOUNT:
+      const amount1 = calculateOtherAmount(action.amount, token1.amount, true, pool) ;
       return {
         ...state,
         token2: { ...token2, amount: action.amount },
-        token1: { ...token1, amount: calculateOtherAmount(action.amount, token1.amount, true, pool) },
+        token1: { ...token1, amount: amount1 },
+        percentage: calculateNewPercentage(amount1, action.amount, state)
       };
     case SET_STATUS:
       return { ...state, status: action.status };
