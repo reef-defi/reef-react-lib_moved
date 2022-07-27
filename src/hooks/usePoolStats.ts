@@ -14,7 +14,7 @@ import {
 } from '../graphql/pools';
 import {getTokenPrice, TokenPrices} from '../state';
 import {getIconUrl, normalize} from '../utils';
-import {usePoolCount} from './poolHooks';
+import {useDayVolume, usePoolCount} from './poolHooks';
 
 export const useTotalSupply = (tokenPrices: TokenPrices, previous=false): string => {
   const toTime = useMemo(() => {
@@ -101,6 +101,11 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
     date.setDate(date.getDate() - 1);
     return date.toISOString();
   }, [address, signerAddress])
+  const twoDaysAgo = useMemo(() => {
+    let date = new Date()
+    date.setDate(date.getDate() - 2);
+    return date.toISOString();
+  }, [address, signerAddress])
 
   const {data, loading} = useQuery<PoolInfoQuery, PoolInfoVar>(
     POOL_INFO_GQL,
@@ -113,13 +118,14 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
     }
   )
 
+  const {data: prevDayVolume} = useDayVolume(address, twoDaysAgo, fromTime);
+
   usePoolCount
 
   const info = useMemo<PoolStats|undefined>(() => {
-    if (!data || data.pool.length === 0) {
+    if (!data || !prevDayVolume || data.pool.length === 0) {
       return undefined;
     }
-    console.log(data)
     const pool = data.pool[0]
     const {decimals: decimal1, name: name1, symbol: symbol1} = pool.token_contract_1.verified_contract!.contract_data;
     const {decimals: decimal2, name: name2, symbol: symbol2} = pool.token_contract_2.verified_contract!.contract_data;
@@ -130,8 +136,11 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
     const fee2 =  normalize(pool.fee_aggregate.aggregate.sum.fee_2, decimal2);
     const volume1 = normalize(pool.volume_aggregate.aggregate.sum.amount_1, decimal1);
     const volume2 = normalize(pool.volume_aggregate.aggregate.sum.amount_2, decimal2);
+    const prevVolume1 = normalize(prevDayVolume.pool_hour_volume_aggregate.aggregate.sum.amount_1, decimal1);
+    const prevVolume2 = normalize(prevDayVolume.pool_hour_volume_aggregate.aggregate.sum.amount_2, decimal2);
     const mySupply1 = normalize(pool.pool_event_aggregate.aggregate.sum.amount_1, decimal1);
     const mySupply2 = normalize(pool.pool_event_aggregate.aggregate.sum.amount_2, decimal2);
+
 
     const mySupplyUSD = mySupply1
       .multipliedBy(tokenPrices[pool.token_1])
@@ -143,8 +152,24 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
       .toFormat(2);
     const volume24hUSD = volume1
       .multipliedBy(tokenPrices[pool.token_1])
-      .plus(volume2.multipliedBy(tokenPrices[pool.token_2]))
-      .toFormat(2);
+      .plus(volume2.multipliedBy(tokenPrices[pool.token_2]));
+    const prevVolume24USD = prevVolume1
+      .multipliedBy(tokenPrices[pool.token_1])
+      .plus(prevVolume2.multipliedBy(tokenPrices[pool.token_2]));
+
+    let volDiff = 0;
+    if (prevVolume24USD.eq(0) && volume24hUSD.eq(0)) {}
+    else if (prevVolume24USD.isNaN() && volume24hUSD.isNaN()) {}
+    else if (prevVolume24USD.eq(0) || prevVolume24USD.isNaN()) {
+      volDiff = 100
+    }
+    else if (volume24hUSD.eq(0) || volume24hUSD.isNaN()) {
+      volDiff = -100
+    }
+    else {
+      volDiff = prevVolume24USD.minus(volume24hUSD).dividedBy(prevVolume24USD).multipliedBy(100).toNumber()
+    }
+
 
     const all = amountLocked1.plus(amountLocked2)
 
@@ -181,10 +206,10 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
       },
       mySupplyUSD,
       tvlUSD,
-      volume24hUSD,
-      volumeChange24h: 10,
+      volume24hUSD: volume24hUSD.toFormat(2),
+      volumeChange24h: volDiff,
     };
-  }, [data, tokenPrices])
+  }, [data, prevDayVolume, tokenPrices])
 
   return [info, loading]
 }
