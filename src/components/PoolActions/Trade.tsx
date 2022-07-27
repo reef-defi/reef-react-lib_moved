@@ -63,7 +63,7 @@ const Trade = ({state: {
   isValid,
   pool,
   settings,
-  // status
+  status
 }, actions: {
   onSwap,
   onSwitch,
@@ -140,9 +140,10 @@ const Trade = ({state: {
         className="uik-pool-actions__cta"
         fill
         icon={faRepeat}
-        text="Trade"
+        text={isLoading ? status : 'Trade'}
         size="large"
         disabled={!isValid || isLoading}
+        loading={isLoading}
         onClick={onSwap}
       />
     </div>
