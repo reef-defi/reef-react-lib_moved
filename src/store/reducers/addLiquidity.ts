@@ -76,7 +76,7 @@ const applyPercentage = (state: AddLiquidityState, percentage: number): AddLiqui
     .multipliedBy(r1)
     .div(r2)
 
-  if (balance1.gte(balance2)) {
+  if (balance1.lte(balance2)) {
     const amount = new BigNumber(state.token1.balance.toString()).div(new BigNumber(10).pow(state.token1.decimals)).multipliedBy(percentage).dividedBy(100).toFixed(2) // TODO format amount
     return {...state, percentage,
       token1: {...state.token1, amount},
