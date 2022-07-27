@@ -1,7 +1,7 @@
 import { faCoins } from '@fortawesome/free-solid-svg-icons';
 import Uik from '@reef-defi/ui-kit';
 import BigNumber from 'bignumber.js';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 // import { Pool, TokenWithAmount } from '../../state';
 import { AddLiquidityState } from '../../store';
 // import { calculatePoolShare } from '../../utils/math';
@@ -110,6 +110,7 @@ const Provide = ({
   state,
   actions: {
     onAddLiquidity,
+    setPercentage,
     setToken1Amount,
     setToken2Amount,
   },
@@ -122,16 +123,9 @@ const Provide = ({
     isValid,
     // newPoolSupply,
     // pool,
+    percentage,
     status,
   } = state;
-
-  // const { percentage } = resolveSettings(settings);
-  const [perc, setPerc] = useState(0);
-
-  const handleSlide = (value: number): void => {
-    setPerc(value);
-  };
-
   const getTotalValue = useMemo((): number => {
     const firstTokenValue = new BigNumber(token1.price).times(token1.amount).toNumber();
     const secondTokenValue = new BigNumber(token2.price).times(token2.amount).toNumber();
@@ -170,9 +164,9 @@ const Provide = ({
 
       <div className="uik-pool-actions__slider">
         <Uik.Slider
-          value={perc}
-          onChange={handleSlide}
-          tooltip={`${Uik.utils.maxDecimals(perc, 2)}%`}
+          value={percentage}
+          onChange={setPercentage}
+          tooltip={`${Uik.utils.maxDecimals(percentage, 2)}%`}
           helpers={[
             { position: 0, text: '0%' },
             { position: 25 },

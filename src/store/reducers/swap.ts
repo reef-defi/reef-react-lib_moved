@@ -1,10 +1,11 @@
+import BigNumber from 'bignumber.js';
 import {
   createEmptyTokenWithAmount, defaultSettings, Pool, Settings, TokenWithAmount,
 } from '../../state';
 import { getInputAmount, getOutputAmount } from '../../utils';
 import { SwapAction, SwapFocus } from '../actions/swap';
 import {
-  CLEAR_TOKEN_AMOUNTS, SET_COMPLETE_STATUS, SET_LOADING, SET_POOL, SET_SETTINGS, SET_STATUS, SET_TOKEN1, SET_TOKEN1_AMOUNT, SET_TOKEN2, SET_TOKEN2_AMOUNT, SET_VALIDITY, SWITCH_TOKENS,
+  CLEAR_TOKEN_AMOUNTS, SET_COMPLETE_STATUS, SET_LOADING, SET_PERCENTAGE, SET_POOL, SET_SETTINGS, SET_STATUS, SET_TOKEN1, SET_TOKEN1_AMOUNT, SET_TOKEN2, SET_TOKEN2_AMOUNT, SET_VALIDITY, SWITCH_TOKENS,
 } from '../actionTypes';
 
 export interface SwapState {
@@ -30,6 +31,18 @@ export const initialSwapState: SwapState = {
   token1: createEmptyTokenWithAmount(), // token1 token
   token2: createEmptyTokenWithAmount(), // token2 token
 };
+
+const applyPercentage = (state: SwapState, percentage: number): SwapState => {
+  const amount = new BigNumber(state.token1.balance.toString())
+    .multipliedBy(percentage)
+    .div(100)
+    .div(new BigNumber(10).pow(state.token1.decimals));
+
+  return {...state, percentage,
+    token1: {...state.token1, amount: amount.toFixed(2)}, // TODO s
+    token2: {...state.token2, amount: !!state.pool ? getOutputAmount({...state.token1, amount: amount.toString()}, state.pool).toFixed(2) : '' }
+  };
+}
 
 export const swapReducer = (state = initialSwapState, action: SwapAction): SwapState => {
   const {
@@ -77,6 +90,7 @@ export const swapReducer = (state = initialSwapState, action: SwapAction): SwapS
     case SET_LOADING: return { ...state, isLoading: action.loading };
     case SET_VALIDITY: return { ...state, isValid: action.isValid };
     case SET_SETTINGS: return { ...state, settings: { ...action.settings } };
+    case SET_PERCENTAGE: return applyPercentage(state, action.percentage);
     case SET_COMPLETE_STATUS: return {
       ...state,
       isLoading: action.isLoading,

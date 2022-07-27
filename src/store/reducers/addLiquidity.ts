@@ -1,4 +1,4 @@
-import { BigNumber } from 'ethers';
+import BigNumber from 'bignumber.js';
 import {
   createEmptyTokenWithAmount,
   defaultSettings,
@@ -11,6 +11,7 @@ import {
   SET_COMPLETE_STATUS,
   SET_LOADING,
   SET_NEW_POOL_SUPPLY,
+  SET_PERCENTAGE,
   SET_POOL,
   SET_SETTINGS,
   SET_STATUS,
@@ -52,9 +53,43 @@ const calculateOtherAmount = (amount: string, currentAmount: string, first: bool
     ? [pool.reserve1, pool.reserve2]
     : [pool.reserve2, pool.reserve1];
 
-  const ratio = BigNumber.from(r1).mul(10000000).div(r2).toNumber() / 10000000;
-  return (ratio * parseFloat(amount)).toFixed(4);
+  return new BigNumber(r1).div(r2).multipliedBy(amount).toFixed(4);
 };
+
+const applyPercentage = (state: AddLiquidityState, percentage: number): AddLiquidityState => {
+  if (!state.pool) {
+    return state
+  }
+
+  const r1 = state.token1.address === state.pool.token1.address
+    ? new BigNumber(state.pool.reserve1)
+    : new BigNumber(state.pool.reserve2)
+  const r2 = state.token1.address !== state.pool.token1.address
+    ? new BigNumber(state.pool.reserve1)
+    : new BigNumber(state.pool.reserve2)
+
+
+  const balance1 = new BigNumber(state.token1.balance.toString())
+    .multipliedBy(r2)
+    .div(r1)
+  const balance2 = new BigNumber(state.token2.balance.toString())
+    .multipliedBy(r1)
+    .div(r2)
+
+  if (balance1.gte(balance2)) {
+    const amount = new BigNumber(state.token1.balance.toString()).div(new BigNumber(10).pow(state.token1.decimals)).multipliedBy(percentage).dividedBy(100).toFixed(2) // TODO format amount
+    return {...state, percentage,
+      token1: {...state.token1, amount},
+      token2: {...state.token2, amount: calculateOtherAmount(amount, state.token2.amount, false, state.pool)},
+    }
+  } else {
+    const amount = new BigNumber(state.token2.balance.toString()).div(new BigNumber(10).pow(state.token2.decimals)).multipliedBy(percentage).dividedBy(100).toFixed(2) // TODO format amount
+    return {...state, percentage,
+      token2: {...state.token2, amount},
+      token1: {...state.token1, amount: calculateOtherAmount(amount, state.token1.amount, true, state.pool)},
+    }
+  }
+}
 
 export const addLiquidityReducer = (
   state = initialAddLiquidityState,
@@ -96,6 +131,8 @@ export const addLiquidityReducer = (
       return { ...state, newPoolSupply: action.supply };
     case SET_SETTINGS:
       return { ...state, settings: { ...action.settings } };
+    case SET_PERCENTAGE:
+      return applyPercentage(state, action.percentage);
     case CLEAR_TOKEN_AMOUNTS:
       return {
         ...state,
