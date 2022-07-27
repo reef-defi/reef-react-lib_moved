@@ -39,10 +39,10 @@ export const removeLiquidityReducer = (state = initialRemoveLiquidityState, acti
     case SET_SETTINGS: return { ...state, settings: { ...action.settings } };
     case SET_PERCENTAGE: return { ...state,
       token1: {...state.token1,
-        amount: state.token1.balance.div(BigNumber.from(10).pow(state.token1.decimals)).div(100).mul(action.percentage).toString()
+        amount: state.pool!.token1.balance.div(BigNumber.from(10).pow(state.token1.decimals)).div(100).mul(action.percentage).toString()
       },
       token2: {...state.token2,
-        amount: state.token2.balance.div(BigNumber.from(10).pow(state.token2.decimals)).div(100).mul(action.percentage).toString()
+        amount: state.pool!.token2.balance.div(BigNumber.from(10).pow(state.token2.decimals)).div(100).mul(action.percentage).toString()
       },
       percentage: action.percentage
     };
