@@ -10,6 +10,7 @@ import {
 export interface SwapState {
   status: string;
   focus: SwapFocus;
+  percentage: number;
   isValid: boolean;
   settings: Settings;
   isLoading: boolean;
@@ -21,6 +22,7 @@ export interface SwapState {
 export const initialSwapState: SwapState = {
   status: '',
   focus: 'sell',
+  percentage: 0,
   pool: undefined,
   isValid: false,
   isLoading: false,

@@ -23,6 +23,7 @@ import {
 
 export interface AddLiquidityState {
   status: string;
+  percentage: number;
   isValid: boolean;
   settings: Settings;
   isLoading: boolean;
@@ -35,6 +36,7 @@ export interface AddLiquidityState {
 export const initialAddLiquidityState: AddLiquidityState = {
   status: '',
   isValid: false,
+  percentage: 0,
   isLoading: false,
   pool: undefined,
   newPoolSupply: '',
