@@ -5,7 +5,6 @@ import BigNumber from 'bignumber.js';
 // import { resolveSettings } from '../../state';
 import { RemoveLiquidityState } from '../../store';
 // import RemoveConfirmationModal from '../RemoveLiquidity/RemoveConfirmationModal';
-import TokenField from './TokenField';
 
 export interface WithdrawActions {
   onRemoveLiquidity: () => Promise<void>;
@@ -42,30 +41,20 @@ const Withdraw = ({
 
   return (
     <div>
-      <div className="uik-pool-actions__tokens">
-        <TokenField
-          token={token1}
-          onAmountChange={() => {}}
-        />
+      <div
+        className={`
+          uik-pool-actions__withdraw-preview
+          ${!getTotalValue ? 'uik-pool-actions__withdraw-preview--empty' : ''}
+        `}
+      >
+        <div className="uik-pool-actions__withdraw-percentage">
+          <span className="uik-pool-actions__withdraw-percentage-value">{ percentageAmount }</span>
+          <span className="uik-pool-actions__withdraw-percentage-sign">%</span>
+        </div>
 
-        <TokenField
-          token={token2}
-          onAmountChange={() => {}}
-        />
-      </div>
-
-      <div className="uik-pool-actions__summary">
-        <div
-          className={`
-            uik-pool-actions__summary-item
-            ${!getTotalValue ? 'uik-pool-actions__summary-item--empty' : ''}
-          `}
-        >
-          <div className="uik-pool-actions__summary-item-label">Total</div>
-          <div className="uik-pool-actions__summary-item-value">
-            $
-            { getTotalValue ? Uik.utils.formatAmount(getTotalValue) : '0.0' }
-          </div>
+        <div className="uik-pool-actions__withdraw-value">
+          $
+          { getTotalValue ? Uik.utils.formatAmount(getTotalValue) : '0.0' }
         </div>
       </div>
 
@@ -73,9 +62,10 @@ const Withdraw = ({
         <Uik.Slider
           value={percentageAmount}
           onChange={(e) => {
-            setPercentage(e)
+            setPercentage(e);
           }}
           tooltip={`${Uik.utils.maxDecimals(percentageAmount, 2)}%`}
+          stickyHelpers={false}
           helpers={[
             { position: 0, text: '0%' },
             { position: 25 },
