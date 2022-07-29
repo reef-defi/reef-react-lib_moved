@@ -2,7 +2,7 @@ import { gql, ApolloClient, useSubscription } from '@apollo/client';
 import { useMemo } from 'react';
 import { BigNumber } from 'ethers';
 import { ERC20ContractData, Token } from '../state';
-import { REEF_ADDRESS } from '../utils';
+import { getIconUrl, REEF_ADDRESS } from '../utils';
 
 const verifiedTokenQuery = gql`
 subscription tokens {
@@ -63,13 +63,13 @@ const sortTokens = (t1: Token, t2: Token): number => {
 interface Balances {
   [signer: string]: string;
 }
-
-export const useAllTokens = (signer?: string, client?: ApolloClient<any>): Token[] => {
-  const { data: tokenData } = useSubscription<VerifiedTokenQuery>(
+type UseAllTokens = [Token[], boolean]
+export const useAllTokens = (signer?: string, client?: ApolloClient<any>): UseAllTokens => {
+  const { data: tokenData, loading: tokenLoading } = useSubscription<VerifiedTokenQuery>(
     verifiedTokenQuery,
     { client },
   );
-  const { data: balanceData } = useSubscription<BalanceQuery, SignerVariable>(
+  const { data: balanceData, loading: balanceLoading } = useSubscription<BalanceQuery, SignerVariable>(
     tokenBalances,
     { client, variables: { signer: signer || '' } },
   );
@@ -84,7 +84,6 @@ export const useAllTokens = (signer?: string, client?: ApolloClient<any>): Token
     )
     : {}),
   [balanceData]);
-
   const tokens = useMemo((): Token[] => (tokenData
     ? tokenData.verified_contract.map(
       ({ address, contract_data: { decimals, name, symbol } }) => ({
@@ -92,7 +91,7 @@ export const useAllTokens = (signer?: string, client?: ApolloClient<any>): Token
         decimals,
         name,
         symbol,
-        iconUrl: address === REEF_ADDRESS ? 'https://s2.coinmarketcap.com/static/img/coins/64x64/6951.png' : '',
+        iconUrl: getIconUrl(address),
         balance: BigNumber.from(address in balances ? balances[address] : 0),
       }),
     )
@@ -100,5 +99,5 @@ export const useAllTokens = (signer?: string, client?: ApolloClient<any>): Token
     : []),
   [balances, tokenData]);
 
-  return tokens;
+  return [tokens, tokenLoading || balanceLoading];
 };
