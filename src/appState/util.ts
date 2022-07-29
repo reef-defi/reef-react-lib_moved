@@ -137,7 +137,7 @@ export const initReefState = (
   )
     .subscribe({
       error: (e) => {
-        console.log('initReefState ERR=', e.message);
+        console.log('initReefState ERR=', e);
       }
     });
   setCurrentNetwork(network||availableNetworks.mainnet);

@@ -74,7 +74,6 @@
     "@reef-defi/evm-provider": "^1.0.7",
     "@reef-defi/extension-dapp": "^0.41.2",
     "@reef-defi/extension-inject": "^0.41.2",
-    "@reef-defi/extension-base": "^1.0.5",
     "@reef-defi/ui-kit": "^1.0.2",
     "@types/react-router-dom": "^5.3.0",
     "axios": "^0.21.4",

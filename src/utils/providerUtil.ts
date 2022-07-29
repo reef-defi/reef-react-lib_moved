@@ -5,7 +5,12 @@ export async function initProvider(providerUrl: string) {
   const newProvider = new Provider({
     provider: new WsProvider(providerUrl),
   });
-  await newProvider.api.isReadyOrError;
+  try {
+    await newProvider.api.isReadyOrError;
+  }catch (e){
+    console.log("Provider isReadyOrError ERROR=",e);
+    throw e;
+  }
   return newProvider;
 }
 
