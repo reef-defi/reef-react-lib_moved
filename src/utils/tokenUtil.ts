@@ -83,5 +83,5 @@ export const toCurrencyFormat = (value: number, options = {}): string => Intl.Nu
   ...options,
 }).format(value);
 
-  export const normalize = (amount: string|number, decimals: number): BN => new BN(amount)
+  export const normalize = (amount: string|number, decimals: number): BN => new BN(Number.isNaN(amount) ? 0 : amount)
     .div(new BN(10).pow(decimals))
