@@ -1,10 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import Uik from '@reef-defi/ui-kit';
 import { faArrowUpFromBracket } from '@fortawesome/free-solid-svg-icons';
 import BigNumber from 'bignumber.js';
-// import { resolveSettings } from '../../state';
 import { RemoveLiquidityState } from '../../store';
-// import RemoveConfirmationModal from '../RemoveLiquidity/RemoveConfirmationModal';
+import WithdrawPopup from './ConfirmPopups/Withdraw';
+import { removeUserPoolSupply, calculatePoolShare } from '../../utils';
 
 export interface WithdrawActions {
   onRemoveLiquidity: () => Promise<void>;
@@ -18,8 +18,7 @@ export interface Props {
 
 const Withdraw = ({
   state: {
-    // settings,
-    // pool,
+    pool,
     isLoading,
     isValid,
     percentage: percentageAmount,
@@ -38,6 +37,8 @@ const Withdraw = ({
     const sum = firstTokenValue + secondTokenValue;
     return Uik.utils.maxDecimals(sum, 2);
   }, [token1, token2]);
+
+  const [isPopupOpen, setPopupOpen] = useState(false);
 
   return (
     <div>
@@ -76,32 +77,27 @@ const Withdraw = ({
         />
       </div>
 
-      <button
-        className="uik-pool-actions__cta-wrapper"
-        type="button"
-        onClick={onRemoveLiquidity}
-        // data-bs-toggle="modal"
-        // data-bs-target="remove-modal-toggle"
+      <Uik.Button
+        className="uik-pool-actions__cta"
+        fill
+        icon={faArrowUpFromBracket}
+        text={isLoading ? status : 'Withdraw'}
+        size="large"
         disabled={!isValid || isLoading}
-      >
-        <Uik.Button
-          className="uik-pool-actions__cta"
-          fill
-          icon={faArrowUpFromBracket}
-          text={isLoading ? status : 'Withdraw'}
-          size="large"
-          disabled={!isValid || isLoading}
-          loading={isLoading}
-        />
-      </button>
+        loading={isLoading}
+        onClick={() => setPopupOpen(true)}
+      />
 
-      {/* <RemoveConfirmationModal
-        pool={pool!}
-        slipperage={percentage}
-        id="remove-modal-toggle"
+      <WithdrawPopup
+        isOpen={isPopupOpen}
+        onClose={() => setPopupOpen(false)}
+        onConfirm={onRemoveLiquidity}
+        token1={token1}
+        token2={token2}
         percentageAmount={percentageAmount}
-        onRemove={onRemoveLiquidity}
-      /> */}
+        LPTokens={removeUserPoolSupply(percentageAmount, pool).toFixed(8)}
+        poolShare={`${calculatePoolShare(pool).toFixed(8)} %`}
+      />
     </div>
   );
 };
