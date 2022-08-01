@@ -1,11 +1,12 @@
 import Uik from '@reef-defi/ui-kit';
-import React from 'react';
+import React, { useState } from 'react';
 import { faRepeat } from '@fortawesome/free-solid-svg-icons';
 import BigNumber from 'bignumber.js';
 import { SwapState } from '../../store';
 import TokenField from './TokenField';
 
 import { Pool, resolveSettings } from '../../state';
+import TradePopup from './ConfirmPopups/Trade';
 
 export interface TradeActions {
   onSwitch: () => void;
@@ -87,8 +88,8 @@ const Trade = ({
   },
 } : Trade): JSX.Element => {
   const { gasLimit, percentage: slippage } = resolveSettings(settings);
-
   const rate = pool ? calculateRate(token1.address, pool) : undefined;
+  const [isPopupOpen, setPopupOpen] = useState(false);
 
   return (
     <div>
@@ -157,9 +158,19 @@ const Trade = ({
         icon={faRepeat}
         text={isLoading ? status : 'Trade'}
         size="large"
-        disabled={!isValid || isLoading}
         loading={isLoading}
-        onClick={onSwap}
+        disabled={!isValid || isLoading}
+        onClick={() => setPopupOpen(true)}
+      />
+
+      <TradePopup
+        isOpen={isPopupOpen}
+        onClose={() => setPopupOpen(false)}
+        onConfirm={onSwap}
+        token1={token1}
+        token2={token2}
+        slippage={slippage}
+        exchangeRate={rate}
       />
     </div>
   );

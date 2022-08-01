@@ -4,7 +4,7 @@
 }
 
 .confirm-popup .uik-modal__container .uik-modal__popup .uik-modal__head {
-  padding-bottom: 20px;
+  padding-bottom: 20px !important;
 }
 
 .confirm-popup .uik-modal__footer .uik-button {
