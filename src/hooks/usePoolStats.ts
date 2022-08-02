@@ -28,6 +28,7 @@ export const useTotalSupply = (tokenPrices: TokenPrices, previous=false): string
     return '0';
   }
 
+
   return data.pool_event.reduce((acc, { reserved_1, reserved_2, pool: { token_1, token_2 } }) => {
     const tokenPrice1 = getTokenPrice(token_1, tokenPrices);
     const tokenPrice2 = getTokenPrice(token_2, tokenPrices);
