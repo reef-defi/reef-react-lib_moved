@@ -56,6 +56,11 @@ const Provide = ({
     return percentage;
   }, [percentage]);
 
+  const onConfirm = (): void => {
+    if (onAddLiquidity) onAddLiquidity();
+    Uik.dropConfetti();
+  };
+
   return (
     <div>
       <div className="uik-pool-actions__tokens">
@@ -114,7 +119,7 @@ const Provide = ({
       <ProvidePopup
         isOpen={isPopupOpen}
         onClose={() => setPopupOpen(false)}
-        onConfirm={onAddLiquidity}
+        onConfirm={onConfirm}
         poolShare={`${calculatePoolShare(pool).toFixed(8)} %`}
         token1={token1}
         token2={token2}
