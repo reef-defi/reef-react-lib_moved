@@ -20,7 +20,13 @@ const TokenField = ({
   const onInputFocus = (): void => setFocused(true);
   const onInputBlur = (): void => setFocused(false);
 
-  const getPrice = useMemo((): number => Uik.utils.maxDecimals(new BigNumber(amo || 0).times(price || 0).toNumber(), 2), [amo, price]);
+  const getPrice = useMemo((): string => {
+    const num = new BigNumber(amo || 0).times(price || 0).toNumber();
+    const formatNum = Uik.utils.maxDecimals(num, 2);
+    if (formatNum) return `$${Uik.utils.formatAmount(formatNum)}`;
+    if (num) return '$0.0';
+    return '';
+  }, [amo, price]);
 
   const mathDecimals = !amount ? '' : amount.replaceAll(',', '.');
   const [inputValue, setInputValue] = useState(mathDecimals);
@@ -52,7 +58,7 @@ const TokenField = ({
           <div className="uik-pool-actions-token__symbol">{ token.symbol }</div>
           <div className="uik-pool-actions-token__amount">
             Available
-            {" "}
+            {' '}
             { showBalance(token) }
           </div>
         </div>
@@ -68,8 +74,7 @@ const TokenField = ({
               ${!getPrice ? 'uik-pool-actions-token__price--empty' : ''}
             `}
           >
-            $
-            { getPrice ? Uik.utils.formatAmount(getPrice) : '0.0' }
+            { getPrice }
           </div>
           )
         }
