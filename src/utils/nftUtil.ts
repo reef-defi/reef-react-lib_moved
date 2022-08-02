@@ -13,15 +13,15 @@ const extractIpfsHash = (ipfsUri: string): string|null => {
   return null;
 };
 
-const toIpfsProviderUrl = (ipfsUriStr: string): string | null => {
+const toIpfsProviderUrl = (ipfsUriStr: string, ipfsUrlResolver?: ipfsUrlResolverFn): string | null => {
   const ipfsHash = extractIpfsHash(ipfsUriStr);
   if (ipfsHash) {
-    return `https://cloudflare-ipfs.com/ipfs/${ipfsHash}`;
+    return !ipfsUrlResolver ? `https://cloudflare-ipfs.com/ipfs/${ipfsHash}` : ipfsUrlResolver(ipfsHash);
   }
   return null;
 };
 
-const resolveUriToUrl = (uri: string, nft: TokenNFT): string => {
+const resolveUriToUrl = (uri: string, nft: TokenNFT, ipfsUrlResolver?: ipfsUrlResolverFn): string => {
   const ipfsUrl = toIpfsProviderUrl(uri);
   if (ipfsUrl) {
     return ipfsUrl;
@@ -45,7 +45,7 @@ const resolveImageData = (metadata: NFTMetadata, nft: TokenNFT): NFTMetadata => 
   return { iconUrl: resolveUriToUrl(imageUriVal, nft), name: metadata.name, mimetype: metadata.mimetype };
 };
 
-export const getResolveNftPromise = (nft: TokenNFT|null, signer: Signer): Promise<TokenNFT|null> => {
+export const getResolveNftPromise = (nft: TokenNFT|null, signer: Signer, ipfsUrlResolver?: ipfsUrlResolverFn): Promise<TokenNFT|null> => {
   if (!nft) {
     return Promise.resolve(null);
   }
@@ -60,4 +60,6 @@ export const getResolveNftPromise = (nft: TokenNFT|null, signer: Signer): Promis
     .then((nftUri) => ({ ...nft, ...nftUri }));
 };
 
-export const resolveNftImageLinks = (nfts: (TokenNFT|null)[], signer: Signer) :Observable<(TokenNFT|null)[]> => (nfts?.length ? forkJoin(nfts.map((nft) => getResolveNftPromise(nft, signer))) : of([]));
+export const resolveNftImageLinks = (nfts: (TokenNFT|null)[], signer: Signer, ipfsUrlResolver?: ipfsUrlResolverFn) :Observable<(TokenNFT|null)[]> => (nfts?.length ? forkJoin(nfts.map((nft) => getResolveNftPromise(nft, signer, ipfsUrlResolver))) : of([]));
+
+export type ipfsUrlResolverFn = (ipfsHash)=> string;

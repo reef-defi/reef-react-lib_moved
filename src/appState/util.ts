@@ -19,15 +19,22 @@ import type {InjectedAccountWithMeta as InjectedAccountWithMetaReef} from "@reef
 import type {
   InjectedAccountWithMeta,
 } from '@polkadot/extension-inject/types';
+import {ipfsUrlResolverFn} from "../utils/nftUtil";
+
+type destroyConnection = ()=>void;
+
+export let _NFT_IPFS_RESOLVER_FN: ipfsUrlResolverFn;
 
 export const combineTokensDistinct = ([tokens1, tokens2]: [
   Token[],
   Token[]
 ]): Token[] => {
   const combinedT = [...tokens1];
+  console.log("COMBINED=",combinedT);
   tokens2.forEach((vT: Token) => (!combinedT.some((cT) => cT.address === vT.address)
     ? combinedT.push(vT)
     : null));
+  console.log("1111COMBINED=",combinedT);
   return combinedT;
 };
 
@@ -92,6 +99,7 @@ export interface StateOptions {
   signers?: ReefSigner[];
   client?: ApolloClient<any>;
   jsonAccounts?:{accounts: AccountJson[] | InjectedAccountWithMeta[] | InjectedAccountWithMetaReef[], injectedSigner: InjectedSigningKey}
+  ipfsHashReolverFn?: ipfsUrlResolverFn;
 }
 
 export function initApolloClient(selectedNetwork?: Network, client?: ApolloClient<any> ) {
@@ -107,14 +115,13 @@ export function initApolloClient(selectedNetwork?: Network, client?: ApolloClien
   }
 }
 
-type destroyConnection = ()=>void;
-
 export const initReefState = (
   {
     network,
     client,
     signers,
     jsonAccounts,
+    ipfsHashReolverFn
   }: StateOptions,): destroyConnection => {
   const subscription = currentNetwork$.pipe(
     switchMap((network) => initProvider(network.rpcUrl)
@@ -141,6 +148,9 @@ export const initReefState = (
       }
     });
   setCurrentNetwork(network||availableNetworks.mainnet);
+  if(ipfsHashReolverFn) {
+    _NFT_IPFS_RESOLVER_FN = ipfsHashReolverFn;
+  }
   if(signers){
     accountsSubj.next(signers || null);
   }
