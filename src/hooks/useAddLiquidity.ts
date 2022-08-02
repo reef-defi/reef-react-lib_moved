@@ -1,5 +1,6 @@
 import { BigNumber } from 'ethers';
 import { Dispatch, useEffect } from 'react';
+import Uik from '@reef-defi/ui-kit';
 import { approveTokenAmount, getReefswapRouter } from '../rpc';
 import {
   AddressToNumber,
@@ -173,7 +174,6 @@ export const onAddLiquidity = ({
   state,
   network,
   signer,
-  notify,
   dispatch,
   updateTokenState,
 }: OnAddLiquidity) => async (): Promise<void> => {
@@ -213,22 +213,31 @@ export const onAddLiquidity = ({
       signer.evmAddress,
       calculateDeadline(deadline),
     );
-    notify('Balances will reload after blocks are finalized.', 'info');
-    notify('Liquidity added successfully!');
+    Uik.notify.info({
+      message: 'Balances will reload after blocks are finalized',
+      keepAlive: true,
+    });
+
+    Uik.notify.success({
+      message: 'Successfully provided liquidity',
+      keepAlive: true,
+    });
   } catch (error) {
     const message = errorHandler(error.message)
       .replace('first', token1.name)
       .replace('second', token2.name);
 
-    notify(message, 'error');
-    // toast.error(errorHandler(message));
+    Uik.notify.danger({
+      message: `An error occurred while trying to provide liquidity: ${message}`,
+      keepAlive: true,
+    });
   } finally {
     /* TODO const newTokens = await loadTokens(tokens, sgnr);
     dispatch(setAllTokensAction(newTokens)); */
-    await updateTokenState().catch(() => notify(
-      'Failed to reload token balances, please reload the page to see correct balances.',
-      'warning',
-    ));
+    await updateTokenState().catch(() => Uik.notify.danger({
+      message: 'Please reaload the page to update token balances',
+      keepAlive: true,
+    }));
     dispatch(setLoadingAction(false));
     dispatch(clearTokenAmountsAction());
   }

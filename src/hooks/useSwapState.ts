@@ -1,5 +1,6 @@
 import { BigNumber } from 'ethers';
 import { Dispatch, useEffect } from 'react';
+import Uik from '@reef-defi/ui-kit';
 import { approveTokenAmount, getReefswapRouter } from '../rpc';
 import {
   AddressToNumber,
@@ -154,7 +155,7 @@ interface OnSwap {
 }
 
 export const onSwap = ({
-  state, network, account, dispatch, notify, updateTokenState,
+  state, network, account, dispatch, updateTokenState,
 }: OnSwap) => async (): Promise<void> => {
   const {
     token1, settings, token2, isValid, isLoading,
@@ -183,15 +184,27 @@ export const onSwap = ({
       evmAddress,
       calculateDeadline(deadline),
     );
-    notify('Balances will reload after blocks are finalized.', 'info');
-    notify('Swap complete!');
+
+    Uik.notify.info({
+      message: 'Balances will reload after blocks are finalized',
+      keepAlive: true,
+    });
+
+    Uik.notify.success({
+      message: 'Trade complete',
+      keepAlive: true,
+    });
   } catch (error) {
-    notify(`There was an error when swapping: ${error.message}`, 'error');
+    Uik.notify.danger({
+      message: `An error occurred while trying to complete your trade: ${error.message}`,
+      keepAlive: true,
+    });
   } finally {
-    await updateTokenState().catch(() => notify(
-      'Token balances were not updated, to do so reload page.',
-      'warning',
-    ));
+    await updateTokenState().catch(() => Uik.notify.danger({
+      message: 'Please reaload the page to update token balances',
+      keepAlive: true,
+    }));
+
     dispatch(setLoadingAction(false));
     dispatch(clearTokenAmountsAction());
   }
