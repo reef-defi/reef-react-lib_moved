@@ -36,7 +36,7 @@ const TradePopup = ({
     token2: {
       iconUrl: token2.iconUrl,
       symbol: token2.symbol,
-      price: Uik.utils.maxDecimals(token1.price, 4),
+      price: Uik.utils.maxDecimals(token2.price, 4),
       amount: token2.amount,
       value: Uik.utils.maxDecimals(calculateUsdAmount(token2), 2),
     },
