@@ -1,4 +1,5 @@
 import { Dispatch, useEffect } from 'react';
+import Uik from '@reef-defi/ui-kit';
 import { approveAmount, getReefswapRouter } from '../rpc';
 import {
   AddressToNumber,
@@ -95,7 +96,6 @@ export const onRemoveLiquidity = ({
   dispatch,
   network,
   signer,
-  notify,
 }: OnRemoveLiquidity) => async (): Promise<void> => {
   const { pool, percentage: percentageAmount, settings } = state;
   if (!pool || !signer || !network || percentageAmount === 0) { return; }
@@ -144,10 +144,20 @@ export const onRemoveLiquidity = ({
       signer.evmAddress,
       calculateDeadline(deadline),
     );
-    notify('Balances will reload after blocks are finalized.', 'info');
-    notify('Liquidity removed successfully!');
+    Uik.notify.info({
+      message: 'Balances will reload after blocks are finalized',
+      keepAlive: true,
+    });
+
+    Uik.notify.success({
+      message: 'Tokens were successfully withdrawn',
+      keepAlive: true,
+    });
   } catch (e) {
-    notify(`There was something wrong when removing liquidity: ${e.message}`, 'error');
+    Uik.notify.danger({
+      message: `An error occurred while trying to withdraw tokens: ${e.message}`,
+      keepAlive: true,
+    });
   } finally {
     dispatch(setLoadingAction(false));
     dispatch(setPercentageAction(0));
