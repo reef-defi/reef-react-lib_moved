@@ -98,6 +98,11 @@ const Trade = ({
     return percentage;
   }, [percentage]);
 
+  const onConfirm = (): void => {
+    if (onSwap) onSwap();
+    Uik.dropConfetti();
+  };
+
   return (
     <div>
       <div className="uik-pool-actions__tokens">
@@ -173,7 +178,7 @@ const Trade = ({
       <TradePopup
         isOpen={isPopupOpen}
         onClose={() => setPopupOpen(false)}
-        onConfirm={onSwap}
+        onConfirm={onConfirm}
         token1={token1}
         token2={token2}
         slippage={slippage}
