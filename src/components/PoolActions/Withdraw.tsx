@@ -40,6 +40,13 @@ const Withdraw = ({
 
   const [isPopupOpen, setPopupOpen] = useState(false);
 
+  const getPercentage = useMemo(() => {
+    if (isNaN(percentageAmount)) return 0;
+    if (percentageAmount > 100) return 100;
+    if (percentageAmount < 0) return 0;
+    return percentageAmount;
+  }, [percentageAmount]);
+
   return (
     <div>
       <div
@@ -49,7 +56,7 @@ const Withdraw = ({
         `}
       >
         <div className="uik-pool-actions__withdraw-percentage">
-          <span className="uik-pool-actions__withdraw-percentage-value">{ percentageAmount }</span>
+          <span className="uik-pool-actions__withdraw-percentage-value">{ getPercentage }</span>
           <span className="uik-pool-actions__withdraw-percentage-sign">%</span>
         </div>
 
@@ -61,11 +68,11 @@ const Withdraw = ({
 
       <div className="uik-pool-actions__slider">
         <Uik.Slider
-          value={percentageAmount}
+          value={getPercentage}
           onChange={(e) => {
             setPercentage(e);
           }}
-          tooltip={`${Uik.utils.maxDecimals(percentageAmount, 2)}%`}
+          tooltip={`${Uik.utils.maxDecimals(getPercentage, 2)}%`}
           stickyHelpers={false}
           helpers={[
             { position: 0, text: '0%' },
@@ -94,7 +101,7 @@ const Withdraw = ({
         onConfirm={onRemoveLiquidity}
         token1={token1}
         token2={token2}
-        percentageAmount={percentageAmount}
+        percentageAmount={getPercentage}
         LPTokens={removeUserPoolSupply(percentageAmount, pool).toFixed(8)}
         poolShare={`${calculatePoolShare(pool).toFixed(8)} %`}
       />

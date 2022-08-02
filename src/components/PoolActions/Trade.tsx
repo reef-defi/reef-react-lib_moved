@@ -1,5 +1,5 @@
 import Uik from '@reef-defi/ui-kit';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { faRepeat } from '@fortawesome/free-solid-svg-icons';
 import BigNumber from 'bignumber.js';
 import { SwapState } from '../../store';
@@ -91,6 +91,13 @@ const Trade = ({
   const rate = pool ? calculateRate(token1.address, pool) : undefined;
   const [isPopupOpen, setPopupOpen] = useState(false);
 
+  const getPercentage = useMemo(() => {
+    if (isNaN(percentage)) return 0;
+    if (percentage > 100) return 100;
+    if (percentage < 0) return 0;
+    return percentage;
+  }, [percentage]);
+
   return (
     <div>
       <div className="uik-pool-actions__tokens">
@@ -139,9 +146,9 @@ const Trade = ({
 
       <div className="uik-pool-actions__slider">
         <Uik.Slider
-          value={percentage}
+          value={getPercentage}
           onChange={setPercentage}
-          tooltip={`${Uik.utils.maxDecimals(percentage, 2)}%`}
+          tooltip={`${Uik.utils.maxDecimals(getPercentage, 2)}%`}
           helpers={[
             { position: 0, text: '0%' },
             { position: 25 },
