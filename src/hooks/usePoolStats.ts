@@ -1,20 +1,15 @@
-import {useQuery} from '@apollo/client';
-import {BigNumber} from 'bignumber.js';
-import {useMemo} from 'react';
+import { useQuery } from '@apollo/client';
+import { BigNumber } from 'bignumber.js';
+import { useMemo } from 'react';
 import {
-  Pool24HVolume,
-  POOL_24H_VOLUME,
-  POOL_INFO_GQL,
-  PoolInfoQuery,
-  PoolInfoVar,
-  POOLS_TOTAL_VALUE_LOCKED,
-  PoolsTotalSupply,
-  PoolsTotalValueLockedVar,
-  PoolVolume24HVar,
+  Pool24HVolume, PoolInfoQuery,
+  PoolInfoVar, PoolsTotalSupply,
+  PoolsTotalValueLockedVar, POOLS_TOTAL_VALUE_LOCKED, PoolVolume24HVar, POOL_24H_VOLUME,
+  POOL_INFO_GQL
 } from '../graphql/pools';
-import {getTokenPrice, TokenPrices} from '../state';
-import {getIconUrl, normalize} from '../utils';
-import {useDayVolume, usePoolCount} from './poolHooks';
+import { getTokenPrice, TokenPrices } from '../state';
+import { getIconUrl, normalize } from '../utils';
+import { useDayVolume } from './poolHooks';
 
 export const useTotalSupply = (tokenPrices: TokenPrices, previous=false): string => {
   const toTime = useMemo(() => {
@@ -33,6 +28,7 @@ export const useTotalSupply = (tokenPrices: TokenPrices, previous=false): string
   if (!data || data.pool_event.length === 0) {
     return '0';
   }
+
 
   return data.pool_event.reduce((acc, { reserved_1, reserved_2, pool: { token_1, token_2 } }) => {
     const tokenPrice1 = getTokenPrice(token_1, tokenPrices);
@@ -117,10 +113,7 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
       }
     }
   )
-
   const {data: prevDayVolume} = useDayVolume(address, twoDaysAgo, fromTime);
-
-  usePoolCount
 
   const info = useMemo<PoolStats|undefined>(() => {
     if (!data || !prevDayVolume || data.pool.length === 0) {
