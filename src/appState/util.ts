@@ -99,7 +99,7 @@ export interface StateOptions {
   signers?: ReefSigner[];
   client?: ApolloClient<any>;
   jsonAccounts?:{accounts: AccountJson[] | InjectedAccountWithMeta[] | InjectedAccountWithMetaReef[], injectedSigner: InjectedSigningKey}
-  ipfsHashReolverFn?: ipfsUrlResolverFn;
+  ipfsHashResolverFn?: ipfsUrlResolverFn;
 }
 
 export function initApolloClient(selectedNetwork?: Network, client?: ApolloClient<any> ) {
@@ -121,7 +121,7 @@ export const initReefState = (
     client,
     signers,
     jsonAccounts,
-    ipfsHashReolverFn
+    ipfsHashResolverFn
   }: StateOptions,): destroyConnection => {
   const subscription = currentNetwork$.pipe(
     switchMap((network) => initProvider(network.rpcUrl)

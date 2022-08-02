@@ -22,7 +22,7 @@ const toIpfsProviderUrl = (ipfsUriStr: string, ipfsUrlResolver?: ipfsUrlResolver
 };
 
 const resolveUriToUrl = (uri: string, nft: TokenNFT, ipfsUrlResolver?: ipfsUrlResolverFn): string => {
-  const ipfsUrl = toIpfsProviderUrl(uri);
+  const ipfsUrl = toIpfsProviderUrl(uri, ipfsUrlResolver);
   if (ipfsUrl) {
     return ipfsUrl;
   }
@@ -40,9 +40,9 @@ const resolveUriToUrl = (uri: string, nft: TokenNFT, ipfsUrlResolver?: ipfsUrlRe
   return uri;
 };
 
-const resolveImageData = (metadata: NFTMetadata, nft: TokenNFT): NFTMetadata => {
+const resolveImageData = (metadata: NFTMetadata, nft: TokenNFT, ipfsUrlResolver?: ipfsUrlResolverFn): NFTMetadata => {
   const imageUriVal: string = metadata?.image ? metadata?.image : metadata.toString();
-  return { iconUrl: resolveUriToUrl(imageUriVal, nft), name: metadata.name, mimetype: metadata.mimetype };
+  return { iconUrl: resolveUriToUrl(imageUriVal, nft, ipfsUrlResolver), name: metadata.name, mimetype: metadata.mimetype };
 };
 
 export const getResolveNftPromise = (nft: TokenNFT|null, signer: Signer, ipfsUrlResolver?: ipfsUrlResolverFn): Promise<TokenNFT|null> => {
@@ -54,9 +54,9 @@ export const getResolveNftPromise = (nft: TokenNFT|null, signer: Signer, ipfsUrl
   const uriPromise = (contractTypeAbi as any).some((fn) => fn.name === 'uri') ? contract.uri(nft.nftId)
     : contract.tokenURI(nft.nftId);
   return uriPromise
-    .then((metadataUri) => resolveUriToUrl(metadataUri, nft))
+    .then((metadataUri) => resolveUriToUrl(metadataUri, nft, ipfsUrlResolver))
     .then(axios.get)
-    .then((jsonStr) => resolveImageData(jsonStr.data, nft))
+    .then((jsonStr) => resolveImageData(jsonStr.data, nft, ipfsUrlResolver))
     .then((nftUri) => ({ ...nft, ...nftUri }));
 };
 
