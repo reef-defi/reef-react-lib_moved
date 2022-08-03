@@ -59,7 +59,7 @@ export const swapReducer = (state = initialSwapState, action: SwapAction): SwapS
           ? getOutputAmount({ ...token1, amount: action.amount }, pool).toFixed(4)
           : '',
       },
-      percentage: action.amount === '' ? 0 : new BigNumber(action.amount).multipliedBy(new BigNumber(10).pow(state.token1.decimals)).div(token1.balance.toString()).multipliedBy(100).toNumber()
+      percentage: action.amount === '' ? 0 : Math.min(new BigNumber(action.amount).multipliedBy(new BigNumber(10).pow(state.token1.decimals)).div(token1.balance.toString()).multipliedBy(100).toNumber(), 100)
     };
     case SET_TOKEN2_AMOUNT:
       const otherAmount = pool && action.amount
@@ -73,7 +73,7 @@ export const swapReducer = (state = initialSwapState, action: SwapAction): SwapS
         ...token1,
         amount: otherAmount,
       },
-      percentage: otherAmount === '' ? 0 : new BigNumber(otherAmount).multipliedBy(new BigNumber(10).pow(state.token1.decimals)).div(token1.balance.toString()).multipliedBy(100).toNumber()
+      percentage: otherAmount === '' ? 0 : Math.min(new BigNumber(otherAmount).multipliedBy(new BigNumber(10).pow(state.token1.decimals)).div(token1.balance.toString()).multipliedBy(100).toNumber(), 100)
     };
     case SWITCH_TOKENS: return {
       ...state,
