@@ -185,15 +185,12 @@ export const onSwap = ({
       calculateDeadline(deadline),
     );
 
-    Uik.notify.info({
-      message: 'Balances will reload after blocks are finalized',
+    Uik.notify.success({
+      message: 'Trade complete.\nBalances will reload after blocks are finalized',
       keepAlive: true,
     });
 
-    Uik.notify.success({
-      message: 'Trade complete',
-      keepAlive: true,
-    });
+    Uik.dropConfetti();
   } catch (error) {
     Uik.notify.danger({
       message: `An error occurred while trying to complete your trade: ${error.message}`,

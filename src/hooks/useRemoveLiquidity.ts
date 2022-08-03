@@ -144,15 +144,13 @@ export const onRemoveLiquidity = ({
       signer.evmAddress,
       calculateDeadline(deadline),
     );
-    Uik.notify.info({
-      message: 'Balances will reload after blocks are finalized',
+
+    Uik.notify.success({
+      message: 'Tokens were successfully withdrawn.\nBalances will reload after blocks are finalized.',
       keepAlive: true,
     });
 
-    Uik.notify.success({
-      message: 'Tokens were successfully withdrawn',
-      keepAlive: true,
-    });
+    Uik.dropConfetti();
   } catch (e) {
     Uik.notify.danger({
       message: `An error occurred while trying to withdraw tokens: ${e.message}`,
