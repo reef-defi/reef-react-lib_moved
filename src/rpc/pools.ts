@@ -36,7 +36,6 @@ export const loadPool = async (
   const decimals = await contract.decimals();
   const reserves = await contract.getReserves();
   const totalSupply = await contract.totalSupply();
-  const minimumLiquidity = await contract.MINIMUM_LIQUIDITY();
   const liquidity = await contract.balanceOf(await signer.getAddress());
 
   const address1 = await contract.token1();
@@ -55,7 +54,6 @@ export const loadPool = async (
     reserve2: finalReserve2.toString(),
     totalSupply: totalSupply.toString(),
     userPoolBalance: liquidity.toString(),
-    minimumLiquidity: minimumLiquidity.toString(),
     token1: { ...token1, balance: tokenBalance1 },
     token2: { ...token2, balance: tokenBalance2 },
   };

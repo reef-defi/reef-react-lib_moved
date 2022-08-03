@@ -10,7 +10,6 @@ export interface Pool {
   totalSupply: string;
   poolAddress: string;
   userPoolBalance: string;
-  minimumLiquidity: string;
 }
 
 // TODO naming is a bit off
