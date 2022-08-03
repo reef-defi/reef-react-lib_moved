@@ -29,9 +29,9 @@ const WithdrawPopup = ({
   onConfirm,
 }: Props): JSX.Element => {
   const tokens = useMemo(() => {
-    let amount1 = showRemovePoolTokenShare(percentageAmount, token1);
+    let amount1 = new BigNumber(showRemovePoolTokenShare(percentageAmount, token1)).toNumber();
     if (isNaN(amount1)) amount1 = 0;
-    let amount2 = showRemovePoolTokenShare(percentageAmount, token2);
+    let amount2 = new BigNumber(showRemovePoolTokenShare(percentageAmount, token2)).toNumber();
     if (isNaN(amount2)) amount2 = 0;
 
     let value1 = Uik.utils.maxDecimals(new BigNumber(token1.price).times(amount1).toNumber(), 2);
