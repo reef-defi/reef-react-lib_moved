@@ -14,7 +14,7 @@ import {
 import { BigNumber, FixedNumber, utils } from 'ethers';
 import { gql } from '@apollo/client';
 import { filter } from 'rxjs/operators';
-import { combineTokensDistinct, toTokensWithPrice } from './util';
+import {combineTokensDistinct, _NFT_IPFS_RESOLVER_FN, toTokensWithPrice} from './util';
 import { selectedSigner$ } from './accountState';
 import { currentProvider$, currentNetwork$ } from './providerState';
 import { apolloClientInstance$, zenToRx } from '../graphql/apollo';
@@ -262,7 +262,7 @@ export const selectedSignerNFTs$: Observable<TokenNFT[]> = combineLatest([
             ? res.data.token_holder
             : undefined)),
           map(parseTokenHolderArray),
-          switchMap((nfts: TokenNFT[]) => (resolveNftImageLinks(nfts, signer.signer) as Observable<TokenNFT[]>)),
+          switchMap((nfts: TokenNFT[]) => (resolveNftImageLinks(nfts, signer.signer, _NFT_IPFS_RESOLVER_FN) as Observable<TokenNFT[]>)),
         ))),
   );
 
@@ -332,7 +332,7 @@ const resolveTransferHistoryNfts = (tokens: (Token | TokenNFT)[], signer: ReefSi
   }
   return of(nftOrNull)
     .pipe(
-      switchMap((nfts) => resolveNftImageLinks(nfts, signer.signer)),
+      switchMap((nfts) => resolveNftImageLinks(nfts, signer.signer, _NFT_IPFS_RESOLVER_FN)),
       map((nftOrNullResolved: (TokenNFT | null)[]) => {
         const resolvedNftTransfers: (Token | TokenNFT)[] = [];
         nftOrNullResolved.forEach((nftOrN, i) => {
