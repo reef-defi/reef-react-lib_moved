@@ -68,7 +68,7 @@ const status = (
       BigNumber.from(calculateAmount(token2)).lte(token2.balance),
       `Insufficient ${token2.name} balance`,
     );
-    return { isValid: true, text: 'Add liquidity' };
+    return { isValid: true, text: 'Provide' };
   } catch (e) {
     return { isValid: false, text: e.message };
   }

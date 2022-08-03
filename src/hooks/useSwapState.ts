@@ -40,13 +40,13 @@ const swapStatus = (
     ensure(!buy.isEmpty, 'Select buy token');
     ensure(buy.address !== sell.address, 'Tokens must be different');
     ensure(!!pool, 'Pool does not exist');
-    ensure(sell.amount.length !== 0, `Missing ${sell.name} amount`);
-    ensure(buy.amount.length !== 0, `Missing ${buy.name} amount`);
-    ensure(parseFloat(sell.amount) > 0, `Missing ${sell.name} amount`);
+    ensure(sell.amount.length !== 0, `Missing ${sell.symbol} amount`);
+    ensure(buy.amount.length !== 0, `Missing ${buy.symbol} amount`);
+    ensure(parseFloat(sell.amount) > 0, `Missing ${sell.symbol} amount`);
     ensure(
       parseFloat(sell.amount)
         <= convert2Normal(sell.decimals, sell.balance.toString()),
-      `Insufficient ${sell.name} balance`,
+      `Insufficient ${sell.symbol} balance`,
     );
 
     // Because of aboves ensure pool would not need explenation mark. Typescript broken...
@@ -69,7 +69,7 @@ const swapStatus = (
     // const balance = balanceAdjuster1.mul(balanceAdjuster2);
     // ensure(balance.gte(reserved), 'Deliquified pool');
     // ensure(amountOut1.eq(amountIn1) && amountOut2.eq(amountIn2), 'Deliquified pool')
-    return { isValid: true, text: 'Swap' };
+    return { isValid: true, text: 'Trade' };
   } catch (e) {
     return { isValid: false, text: e.message };
   }
