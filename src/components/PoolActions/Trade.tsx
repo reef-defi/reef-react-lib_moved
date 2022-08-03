@@ -23,7 +23,6 @@ interface Trade {
   actions: TradeActions
 }
 
-
 interface SummaryItem {
   label: string,
   value?: string,
@@ -98,13 +97,13 @@ const Trade = ({
 
   const fee = useMemo(() => {
     if (token1.amount === '') {
-      return "0 $";
+      return '0 $';
     }
-    return new BigNumber(token1.amount)
+    return `${new BigNumber(token1.amount)
       .multipliedBy(token1.price)
       .multipliedBy(0.0003)
-      .toFixed(4) + " $"
-  }, [token1.amount, token1.address, token1.price])
+      .toFixed(4)} $`;
+  }, [token1.amount, token1.address, token1.price]);
 
   return (
     <div>
@@ -173,7 +172,7 @@ const Trade = ({
         className="uik-pool-actions__cta"
         fill
         icon={faRepeat}
-        text={status}
+        text={isLoading ? status : 'Trade'}
         size="large"
         loading={isLoading}
         disabled={!isValid || isLoading}
