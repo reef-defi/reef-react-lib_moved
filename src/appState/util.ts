@@ -23,7 +23,11 @@ import {ipfsUrlResolverFn} from "../utils/nftUtil";
 
 type destroyConnection = ()=>void;
 
-export let _NFT_IPFS_RESOLVER_FN: ipfsUrlResolverFn;
+export let _NFT_IPFS_RESOLVER_FN: ipfsUrlResolverFn|undefined;
+
+export const setNftIpfsResolverFn = (val?: ipfsUrlResolverFn) => {
+  _NFT_IPFS_RESOLVER_FN = val;
+}
 
 export const combineTokensDistinct = ([tokens1, tokens2]: [
   Token[],
@@ -148,9 +152,7 @@ export const initReefState = (
       }
     });
   setCurrentNetwork(network||availableNetworks.mainnet);
-  if(ipfsHashReolverFn) {
-    _NFT_IPFS_RESOLVER_FN = ipfsHashReolverFn;
-  }
+  setNftIpfsResolverFn( ipfsHashResolverFn);
   if(signers){
     accountsSubj.next(signers || null);
   }
