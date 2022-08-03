@@ -124,7 +124,7 @@ export const addLiquidityReducer = (
         ...state,
         token1: { ...token1, amount: action.amount },
         token2: { ...token2, amount: amount2 },
-        percentage: action.amount === '' ? 0 : Math.min(calculateNewPercentage(action.amount, amount2, state), 0),
+        percentage: action.amount === '' ? 0 : Math.min(calculateNewPercentage(action.amount, amount2, state), 100),
       };
     case SET_TOKEN2_AMOUNT:
       const amount1 = action.amount === '' ? '' : calculateOtherAmount(action.amount, state.token1.amount, true, pool) ;
@@ -132,7 +132,7 @@ export const addLiquidityReducer = (
         ...state,
         token2: { ...token2, amount: action.amount },
         token1: { ...token1, amount: amount1 },
-        percentage: action.amount === '' ? 0 : Math.min(calculateNewPercentage(amount1, action.amount, state), 0)
+        percentage: action.amount === '' ? 0 : Math.min(calculateNewPercentage(amount1, action.amount, state), 100)
       };
     case SET_STATUS:
       return { ...state, status: action.status };
@@ -151,6 +151,7 @@ export const addLiquidityReducer = (
     case CLEAR_TOKEN_AMOUNTS:
       return {
         ...state,
+        percentage: 0,
         token1: { ...token1, amount: '' },
         token2: { ...token2, amount: '' },
       };

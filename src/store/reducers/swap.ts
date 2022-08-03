@@ -103,6 +103,7 @@ export const swapReducer = (state = initialSwapState, action: SwapAction): SwapS
     };
     case CLEAR_TOKEN_AMOUNTS: return {
       ...state,
+      percentage: 0,
       token1: { ...token1, amount: '' },
       token2: { ...token2, amount: '' },
     };
