@@ -143,7 +143,7 @@ export const onRemoveLiquidity = ({
       removedLiquidity,
       signer.signer,
     );
-    dispatch(setStatusAction('Removing supply'));
+    dispatch(setStatusAction('Withdrawing'));
     await reefswapRouter.removeLiquidity(
       pool.token1.address,
       pool.token2.address,
