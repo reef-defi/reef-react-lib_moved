@@ -1,4 +1,5 @@
 import { DocumentNode, gql } from '@apollo/client';
+import { PoolData, ReservedData } from '../state';
 
 // Data interfaces
 export type BasePoolTransactionTypes = 'Swap' | 'Mint' | 'Burn';
@@ -55,7 +56,7 @@ interface VerifiedContract {
   }
 }
 
-interface PoolData {
+interface BasicPoolData {
   id: number;
   address: string;
   token_contract_1: {
@@ -153,8 +154,13 @@ interface Fee {
   timeframe: string;
 }
 
+interface LastClose {
+  close: number;
+}
+
+
 // Query result interfaces
-export type PoolQuery = { pool: PoolData[] };
+export type PoolQuery = { pool: BasicPoolData[] };
 export type PoolInfoQuery = { pool: PoolInfo[] }
 export type PoolsQuery = { verified_pool: Pool[] };
 export type PoolDayFeeQuery = { pool_day_fee: Fee[] };
@@ -241,6 +247,12 @@ export type Pool24HVolume = {
   }[];
 }
 
+export interface PoolDataQuery extends PoolData {
+  previousReserved: ReservedData[];
+  previousCandlestick1: LastClose[];
+  previousCandlestick2: LastClose[];
+}
+
 export type PoolsTotalSupply = {
   pool_event: AllPool[];
 };
@@ -283,6 +295,7 @@ export type UserPoolsVar = AddressVar
 export interface PoolsTotalValueLockedVar extends ToVar { }
 export interface PoolFeeVar extends AddressVar, FromVar { }
 export interface PoolTvlVar extends AddressVar, FromVar { }
+export interface PoolDataVar extends AddressVar, FromVar { }
 export interface PoolVolumeVar extends AddressVar, FromVar { }
 export interface PoolHourFeeVar extends AddressVar, FromVar { }
 export interface PoolVolumeAggregateVar extends PoolFeeVar, ToVar { }
@@ -294,7 +307,6 @@ export interface PoolDayCandlestickVar extends AddressVar, FromVar, WhichTokenVa
 export interface PoolBasicTransactionVar extends OptionalSearchVar, TransactionTypeVar { }
 export interface PoolTransactionCountVar extends OptionalSearchVar, TransactionTypeVar { }
 export interface PoolTransactionVar extends PoolBasicTransactionVar, OffsetVar, LimitVar { }
-
 // Graphql statements
 // Total supply of all pools
 export const POOLS_TOTAL_VALUE_LOCKED = gql`
@@ -890,6 +902,104 @@ subscription pool($address: String!, $signerAddress: String!, $fromTime: timesta
         }
       }
     }
+  }
+}
+`
+
+export const POOL_DATA_GQL = gql`
+subscription poolData($address: String!, $fromTime: timestamptz!) {
+  candlestick1: pool_day_candlestick(
+    where: {
+      which_token: { _eq: 1 }
+      pool: { address: { _eq: $address } }
+      timeframe: { _gte: $fromTime }
+    }
+    distinct_on: timeframe
+  ) {
+    close: close_1
+    high: high_1
+    open: open_1
+    low: low_1
+    timeframe
+  }
+  candlestick2: pool_day_candlestick(
+    where: {
+      which_token: { _eq: 2 }
+      pool: { address: { _eq: $address } }
+      timeframe: { _gte: $fromTime }
+    }
+    distinct_on: timeframe
+  ) {
+    close: close_2
+    high: high_2
+    open: open_2
+    low: low_2
+    timeframe
+  }
+  fee: pool_day_fee(
+    where: {
+      pool: { address: { _eq: $address } }
+      timeframe: { _gte: $fromTime }
+    }
+    distinct_on: timeframe
+  ) {
+    fee1: fee_1
+    fee2: fee_2
+    timeframe
+  }
+  volume: pool_day_volume(
+    where: {
+      pool: { address: { _eq: $address } }
+      timeframe: { _gte: $fromTime }
+    }
+    distinct_on: timeframe
+    limit: 10
+  ) {
+    amount1: amount_1
+    amount2: amount_2
+    timeframe
+  }
+  reserves: pool_day_locked(
+    where: {
+      pool: { address: { _eq: $address } }
+      timeframe: { _gte: $fromTime }
+    }
+    distinct_on: timeframe
+  ) {
+    reserved1: reserved_1
+    reserved2: reserved_2
+    timeframe
+  }
+  previousReserves: pool_day_locked(
+    where: {
+      pool: { address: { _eq: $address } }
+      timeframe: { _lt: $fromTime }
+    }
+    limit: 1
+  ) {
+    timeframe
+    reserved1: reserved_1
+    reserved2: reserved_2
+  }
+  previousCandlestick1: pool_day_candlestick(
+    where: {
+      which_token: { _eq: 1 }
+      pool: { address: { _eq: $address } }
+      timeframe: { _lt: $fromTime }
+    }
+    limit: 1
+  ) {
+    close: close_1
+  }
+  previousCandlestick2: pool_day_candlestick(
+    where: {
+      which_token: { _eq: 2 }
+      pool: { address: { _eq: $address } }
+      timeframe: { _lt: $fromTime }
+    }
+    limit: 1
+  ) {
+    close: close_2
   }
 }
 `
