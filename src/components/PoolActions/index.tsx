@@ -5,6 +5,7 @@ import Provide, { Props as ProvideProps } from './Provide';
 import Trade, { TradeActions } from './Trade';
 import Withdraw, { Props as WithdrawProps } from './Withdraw';
 import Finalizing from './Finalizing';
+import './pool-actions.css';
 
 // TODO Samo remove any
 export type CustomFunction = (...args: any[]) => any
