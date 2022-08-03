@@ -169,7 +169,7 @@ const Trade = ({
         className="uik-pool-actions__cta"
         fill
         icon={faRepeat}
-        text={isLoading ? status : 'Trade'}
+        text={status}
         size="large"
         loading={isLoading}
         disabled={!isValid || isLoading}
