@@ -180,6 +180,7 @@ const Trade = ({
       />
 
       <TradePopup
+        fee={fee}
         isOpen={isPopupOpen}
         onClose={() => setPopupOpen(false)}
         onConfirm={onSwap}
