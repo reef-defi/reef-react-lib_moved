@@ -34,7 +34,6 @@ const Provide = ({
   },
 }: Props): JSX.Element => {
   const {
-    // settings,
     token1,
     token2,
     isLoading,
@@ -52,13 +51,6 @@ const Provide = ({
   }, [token1, token2]);
 
   const [isPopupOpen, setPopupOpen] = useState(false);
-
-  const getPercentage = useMemo(() => {
-    if (isNaN(percentage)) return 0;
-    if (percentage > 100) return 100;
-    if (percentage < 0) return 0;
-    return percentage;
-  }, [percentage]);
 
   return (
     <div>
@@ -93,9 +85,9 @@ const Provide = ({
 
       <div className="uik-pool-actions__slider">
         <Uik.Slider
-          value={getPercentage}
+          value={percentage}
           onChange={setPercentage}
-          tooltip={`${Uik.utils.maxDecimals(getPercentage, 2)}%`}
+          tooltip={`${Uik.utils.maxDecimals(percentage, 2)}%`}
           helpers={[
             { position: 0, text: '0%' },
             { position: 25 },
@@ -124,7 +116,7 @@ const Provide = ({
         poolShare={`${calculatePoolShare(pool).toFixed(8)} %`}
         token1={token1}
         token2={token2}
-        percentage={getPercentage}
+        percentage={percentage}
         LPTokens={newPoolSupply}
       />
     </div>
