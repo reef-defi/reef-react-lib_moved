@@ -1,7 +1,7 @@
 import { faRepeat } from '@fortawesome/free-solid-svg-icons';
 import Uik from '@reef-defi/ui-kit';
 import BigNumber from 'bignumber.js';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { SwapState } from '../../store';
 import TokenField, { SelectToken } from './TokenField';
 
@@ -92,9 +92,19 @@ const Trade = ({
     selectToken2,
   },
 } : Trade): JSX.Element => {
-  const { gasLimit, percentage: slippage } = resolveSettings(settings);
+  const { percentage: slippage } = resolveSettings(settings);
   const rate = pool ? calculateRate(token1.address, pool) : undefined;
   const [isPopupOpen, setPopupOpen] = useState(false);
+
+  const fee = useMemo(() => {
+    if (token1.amount === '') {
+      return "0 $";
+    }
+    return new BigNumber(token1.amount)
+      .multipliedBy(token1.price)
+      .multipliedBy(0.0003)
+      .toFixed(4) + " $"
+  }, [token1.amount, token1.address, token1.price])
 
   return (
     <div>
@@ -133,8 +143,8 @@ const Trade = ({
         />
         <SummaryItem
           label="Fee"
-          value={gasLimit}
-          empty={!gasLimit}
+          value={fee}
+          empty={!fee}
         />
         <SummaryItem
           label="Slippage"
