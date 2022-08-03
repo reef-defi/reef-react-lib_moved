@@ -176,7 +176,7 @@ export const onSwap = ({
     const reefswapRouter = getReefswapRouter(network.routerAddress, signer);
     await approveTokenAmount(token1, network.routerAddress, signer);
 
-    dispatch(setStatusAction('Executing swap'));
+    dispatch(setStatusAction('Executing trade'));
     await reefswapRouter.swapExactTokensForTokensSupportingFeeOnTransferTokens(
       sellAmount,
       minBuyAmount,
