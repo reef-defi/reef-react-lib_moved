@@ -81,7 +81,7 @@ const Withdraw = ({
         className="uik-pool-actions__cta"
         fill
         icon={faArrowUpFromBracket}
-        text={status}
+        text={isLoading ? status : 'Withdraw'}
         size="large"
         disabled={!isValid || isLoading}
         loading={isLoading}

@@ -1,0 +1,8 @@
+.uik-pool-action .uik-button--loading .uik-loading {
+  position: static;
+}
+
+.uik-pool-action .uik-button--loading .uik-button__text {
+  opacity: 1;
+  margin-left: 0.8rem;
+}
