@@ -1,8 +1,18 @@
-.uik-pool-action .uik-button--loading .uik-loading {
+.uik-pool-actions .uik-button--loading .uik-loading {
   position: static;
 }
 
-.uik-pool-action .uik-button--loading .uik-button__text {
+.uik-pool-actions .uik-button--loading .uik-button__text {
   opacity: 1;
   margin-left: 0.8rem;
+  color: hsla(
+    var(--text--h),
+    var(--text--s),
+    var(--text--l),
+    0.5
+  ) !important;
+}
+
+.uik-pool-actions .uik-button--loading .uik-loading__spinner-dot::before {
+  background: var(--text-light) !important;
 }
