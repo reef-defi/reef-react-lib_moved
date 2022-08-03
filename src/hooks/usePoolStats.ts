@@ -119,7 +119,6 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
       return undefined;
     }
     const pool = data.pool[0]
-    console.log(pool)
     const {decimals: decimal1, name: name1, symbol: symbol1} = pool.tokenContract1.verified_contract!.contract_data;
     const {decimals: decimal2, name: name2, symbol: symbol2} = pool.tokenContract2.verified_contract!.contract_data;
 

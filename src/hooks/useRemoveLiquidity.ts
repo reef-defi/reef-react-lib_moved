@@ -39,7 +39,7 @@ const removeStatus = (percentageAmount: number, pool?: Pool): ButtonStatus => {
     ensure(percentageAmount > 0, 'Enter an amount');
     return {
       isValid: true,
-      text: 'Confirm remove',
+      text: 'Withdraw',
     };
   } catch (e) {
     return {
@@ -58,7 +58,7 @@ export const useRemoveLiquidity = ({
   // Updating tokens
   useKeepTokenUpdated(address1, token1, tokens, tokenPrices, (token) => dispatch(setToken1Action(token)));
   useKeepTokenUpdated(address2, token2, tokens, tokenPrices, (token) => dispatch(setToken2Action(token)));
-  
+
   // Find pool
   const [loadedPool, isPoolLoading] = useLoadPool(
     token1,
