@@ -1,16 +1,17 @@
-import React, { useMemo } from 'react';
-import BigNumber from 'bignumber.js';
 import Uik from '@reef-defi/ui-kit';
+import BigNumber from 'bignumber.js';
+import React, { useMemo } from 'react';
+import { Pool } from '../../../state';
+import { showRemovePoolTokenShare } from '../../../utils';
+import './confirm-popup.css';
 import SummaryItem from './SummaryItem';
 import Token from './Token';
-import { TokenWithAmount } from '../../../state';
-import './confirm-popup.css';
-import { showRemovePoolTokenShare } from '../../../utils';
 
 export interface Props {
+  pool: Pool;
+  price1: number;
+  price2: number;
   percentageAmount: number
-  token1: TokenWithAmount
-  token2: TokenWithAmount
   isOpen: boolean
   LPTokens: string | number
   poolShare: string
@@ -19,43 +20,44 @@ export interface Props {
 }
 
 const WithdrawPopup = ({
-  percentageAmount,
-  token1,
-  token2,
+  price1,
+  price2,
+  pool,
   isOpen,
   LPTokens,
   poolShare,
+  percentageAmount,
   onClose,
   onConfirm,
 }: Props): JSX.Element => {
   const tokens = useMemo(() => {
-    let amount1 = new BigNumber(showRemovePoolTokenShare(percentageAmount, token1)).toNumber();
+    let amount1 = new BigNumber(showRemovePoolTokenShare(percentageAmount, pool.token1)).toNumber();
     if (isNaN(amount1)) amount1 = 0;
-    let amount2 = new BigNumber(showRemovePoolTokenShare(percentageAmount, token2)).toNumber();
+    let amount2 = new BigNumber(showRemovePoolTokenShare(percentageAmount, pool.token2)).toNumber();
     if (isNaN(amount2)) amount2 = 0;
 
-    let value1 = Uik.utils.maxDecimals(new BigNumber(token1.price).times(amount1).toNumber(), 2);
+    let value1 = Uik.utils.maxDecimals(new BigNumber(price1).times(amount1).toNumber(), 2);
     if (isNaN(value1)) value1 = 0;
-    let value2 = Uik.utils.maxDecimals(new BigNumber(token2.price).times(amount2).toNumber(), 2);
+    let value2 = Uik.utils.maxDecimals(new BigNumber(price2).times(amount2).toNumber(), 2);
     if (isNaN(value2)) value2 = 0;
 
     return {
       token1: {
-        iconUrl: token1.iconUrl,
-        symbol: token1.symbol,
-        price: Uik.utils.maxDecimals(token1.price, 4),
+        iconUrl: pool.token1.iconUrl,
+        symbol: pool.token1.symbol,
+        price: Uik.utils.maxDecimals(price1, 4),
         amount: amount1,
         value: value1,
       },
       token2: {
-        iconUrl: token2.iconUrl,
-        symbol: token2.symbol,
-        price: Uik.utils.maxDecimals(token2.price, 4),
+        iconUrl: pool.token2.iconUrl,
+        symbol: pool.token2.symbol,
+        price: Uik.utils.maxDecimals(price2, 4),
         amount: amount2,
         value: value2,
       },
     };
-  }, [percentageAmount, token1, token2]);
+  }, [percentageAmount, pool, price1, price2]);
 
   const getLPTokens = useMemo(() => {
     const value = Uik.utils.maxDecimals(LPTokens, 4);
