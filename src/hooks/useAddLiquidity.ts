@@ -62,11 +62,11 @@ const status = (
     ensure(token2.amount.length > 0, `Missing ${token2.symbol} amount`);
     ensure(
       BigNumber.from(calculateAmount(token1)).lte(token1.balance),
-      `Insufficient ${token1.name} balance`,
+      `Insufficient ${token1.symbol} balance`,
     );
     ensure(
       BigNumber.from(calculateAmount(token2)).lte(token2.balance),
-      `Insufficient ${token2.name} balance`,
+      `Insufficient ${token2.symbol} balance`,
     );
     return { isValid: true, text: 'Provide' };
   } catch (e) {
@@ -192,9 +192,9 @@ export const onAddLiquidity = ({
     const percentage1 = calculateAmountWithPercentage(token1, percentage);
     const percentage2 = calculateAmountWithPercentage(token2, percentage);
 
-    dispatch(setStatusAction(`Approving ${token1.name} token`));
+    dispatch(setStatusAction(`Approving ${token1.symbol} token`));
     await approveTokenAmount(token1, network.routerAddress, signer.signer);
-    dispatch(setStatusAction(`Approving ${token2.name} token`));
+    dispatch(setStatusAction(`Approving ${token2.symbol} token`));
     await approveTokenAmount(token2, network.routerAddress, signer.signer);
 
     dispatch(setStatusAction('Adding supply'));
