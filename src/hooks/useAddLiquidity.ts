@@ -213,15 +213,13 @@ export const onAddLiquidity = ({
       signer.evmAddress,
       calculateDeadline(deadline),
     );
-    Uik.notify.info({
-      message: 'Balances will reload after blocks are finalized',
+
+    Uik.notify.success({
+      message: 'Successfully provided liquidity.\nBalances will reload after blocks are finalized.',
       keepAlive: true,
     });
 
-    Uik.notify.success({
-      message: 'Successfully provided liquidity',
-      keepAlive: true,
-    });
+    Uik.dropConfetti();
   } catch (error) {
     const message = errorHandler(error.message)
       .replace('first', token1.name)

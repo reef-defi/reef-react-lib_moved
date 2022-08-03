@@ -47,11 +47,6 @@ const Withdraw = ({
     return percentageAmount;
   }, [percentageAmount]);
 
-  const onConfirm = (): void => {
-    if (onRemoveLiquidity) onRemoveLiquidity();
-    Uik.dropMoney();
-  };
-
   return (
     <div>
       <div
@@ -103,7 +98,7 @@ const Withdraw = ({
       <WithdrawPopup
         isOpen={isPopupOpen}
         onClose={() => setPopupOpen(false)}
-        onConfirm={onConfirm}
+        onConfirm={onRemoveLiquidity}
         token1={token1}
         token2={token2}
         percentageAmount={getPercentage}
