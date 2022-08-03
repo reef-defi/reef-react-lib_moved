@@ -170,7 +170,7 @@ export const onSwap = ({
     dispatch(setLoadingAction(true));
     ensureTokenAmount(token1);
 
-    dispatch(setStatusAction(`Approving ${token1.name} token`));
+    dispatch(setStatusAction(`Approving ${token1.symbol} token`));
     const sellAmount = calculateAmount(token1);
     const minBuyAmount = calculateAmountWithPercentage(token2, percentage);
     const reefswapRouter = getReefswapRouter(network.routerAddress, signer);
