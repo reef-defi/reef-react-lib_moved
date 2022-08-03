@@ -6,25 +6,27 @@ import { TokenWithAmount } from '../../../state';
 import './confirm-popup.css';
 import { calculateUsdAmount, minimumRecieveAmount } from '../../../utils/math';
 
-export interface Props {
+export interface TradePopup {
+  fee: string;
   isOpen: boolean
-  onClose: (...args: any[]) => any
-  onConfirm?: (...args: any[]) => any
-  token1: TokenWithAmount
-  token2: TokenWithAmount
   slippage: number,
   exchangeRate?: string
+  token1: TokenWithAmount
+  token2: TokenWithAmount
+  onClose: (...args: any[]) => any
+  onConfirm?: (...args: any[]) => any
 }
 
 const TradePopup = ({
+  fee,
   isOpen,
-  onClose,
-  onConfirm,
   token1,
   token2,
   slippage,
   exchangeRate,
-}: Props): JSX.Element => {
+  onClose,
+  onConfirm,
+}: TradePopup): JSX.Element => {
   const tokens = useMemo(() => ({
     token1: {
       iconUrl: token1.iconUrl,
@@ -86,7 +88,7 @@ const TradePopup = ({
         <div className="confirm-popup-summary">
           <SummaryItem
             label="Fee"
-            value="1.5 REEF"
+            value={fee}
           />
           <SummaryItem
             label="Route"
