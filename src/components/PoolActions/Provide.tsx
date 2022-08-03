@@ -4,7 +4,7 @@ import BigNumber from 'bignumber.js';
 import React, { useState, useMemo } from 'react';
 import { AddLiquidityState } from '../../store';
 import { calculatePoolShare } from '../../utils/math';
-import TokenField from './TokenField';
+import TokenField, { SelectToken } from './TokenField';
 
 import ProvidePopup from './ConfirmPopups/Provide';
 
@@ -13,6 +13,8 @@ export interface ProvideActions {
   setToken1Amount: (amount: string) => void;
   setToken2Amount: (amount: string) => void;
   setPercentage: (amount: number) => void;
+  selectToken1?: SelectToken;
+  selectToken2?: SelectToken;
 }
 
 export interface Props {
@@ -27,6 +29,8 @@ const Provide = ({
     setPercentage,
     setToken1Amount,
     setToken2Amount,
+    selectToken1,
+    selectToken2,
   },
 }: Props): JSX.Element => {
   const {
@@ -62,11 +66,13 @@ const Provide = ({
         <TokenField
           token={token1}
           onAmountChange={setToken1Amount}
+          selectToken={selectToken1}
         />
 
         <TokenField
           token={token2}
           onAmountChange={setToken2Amount}
+          selectToken={selectToken2}
         />
       </div>
 
