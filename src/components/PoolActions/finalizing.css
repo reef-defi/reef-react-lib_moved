@@ -1,0 +1,22 @@
+.pool-actions-finalizing {
+  width: 100%;
+  text-align: center;
+  padding-bottom: 20px;
+}
+
+.pool-actions-finalizing__animation {
+  position: relative;
+  width: calc(100% + 60px);
+  margin: 0 -30px;
+  height: 150px;
+}
+
+.pool-actions-finalizing__animation .fish-animation__fish {
+  animation-duration: 4s;
+  animation-fill-mode: backwards;
+}
+
+.pool-actions-finalizing__animation .fish-animation:last-child .fish-animation__fish {
+  animation-delay: 0.5s;
+  width: 40px;
+}
