@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { faRepeat } from '@fortawesome/free-solid-svg-icons';
 import BigNumber from 'bignumber.js';
 import { SwapState } from '../../store';
-import TokenField from './TokenField';
+import TokenField, { SelectToken } from './TokenField';
 
 import { Pool, resolveSettings } from '../../state';
 import TradePopup from './ConfirmPopups/Trade';
@@ -14,6 +14,8 @@ export interface TradeActions {
   setToken1Amount: (amount: string) => void;
   setToken2Amount: (amount: string) => void;
   setPercentage: (amount: number) => void;
+  selectToken1?: SelectToken;
+  selectToken2?: SelectToken;
 }
 
 interface Trade {
@@ -85,6 +87,8 @@ const Trade = ({
     setPercentage,
     setToken1Amount,
     setToken2Amount,
+    selectToken1,
+    selectToken2,
   },
 } : Trade): JSX.Element => {
   const { gasLimit, percentage: slippage } = resolveSettings(settings);
@@ -104,6 +108,7 @@ const Trade = ({
         <TokenField
           token={token1}
           onAmountChange={setToken1Amount}
+          selectToken={selectToken1}
         />
 
         <div className="uik-pool-actions__token-switch">
@@ -122,6 +127,7 @@ const Trade = ({
         <TokenField
           token={token2}
           onAmountChange={setToken2Amount}
+          selectToken={selectToken2}
         />
       </div>
 

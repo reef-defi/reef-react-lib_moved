@@ -3,15 +3,20 @@ import Uik from '@reef-defi/ui-kit';
 import BigNumber from 'bignumber.js';
 import { TokenWithAmount } from '../../state';
 import { showBalance } from '../../utils/math';
+import './token-field.css';
+
+export type SelectToken = () => void
 
 interface Props {
   token: TokenWithAmount,
-  onAmountChange: (amount: string) => void
+  onAmountChange: (amount: string) => void,
+  selectToken?: SelectToken
 }
 
 const TokenField = ({
   token,
   onAmountChange,
+  selectToken,
 }: Props): JSX.Element => {
   const { amount, price, isEmpty } = token;
   const amo = parseFloat(amount);
@@ -38,6 +43,23 @@ const TokenField = ({
     onAmountChange(newVal);
   };
 
+  const isSelected = useMemo(() => token.symbol !== 'Select token', [token.symbol]);
+
+  if (!isSelected) {
+    return (
+      <button
+        className={`
+        uik-pool-actions-token
+        uik-pool-actions-token--select
+      `}
+        type="button"
+        onClick={selectToken}
+      >
+        Select token
+      </button>
+    );
+  }
+
   return (
     <div
       className={`
@@ -46,7 +68,12 @@ const TokenField = ({
       `}
     >
 
-      <div className="uik-pool-actions-token__token">
+      <button
+        className="uik-pool-actions-token__token"
+        type="button"
+        disabled={!selectToken}
+        onClick={selectToken}
+      >
         <div
           className="uik-pool-actions-token__image"
           style={{
@@ -62,7 +89,7 @@ const TokenField = ({
             { showBalance(token) }
           </div>
         </div>
-      </div>
+      </button>
 
       <div className="uik-pool-actions-token__value">
         {
