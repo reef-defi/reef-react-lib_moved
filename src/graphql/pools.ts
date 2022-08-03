@@ -79,14 +79,16 @@ type AggregateSum <T> = {
 };
 
 interface PoolInfo {
-  token_1: string;
-  token_2: string;
-  pool_event: Reserves[];
-  token_contract_1: VerifiedContract;
-  token_contract_2: VerifiedContract;
-  pool_event_aggregate: AggregateSum<Amounts>;
-  fee_aggregate: AggregateSum<Fee>;
-  volume_aggregate: AggregateSum<Amounts>;
+  token1: string;
+  token2: string;
+  reserves: Reserves[];
+  tokenContract1: VerifiedContract;
+  tokenContract2: VerifiedContract;
+  fee: AggregateSum<Fee>;
+  currentDayVolume: AggregateSum<Amounts>;
+  previousDayVolume: AggregateSum<Amounts>;
+  totalSupply: {total_supply: string}[];
+  userSupply: AggregateSum<{supply: string}>;
 }
 
 interface PoolTransaction {
@@ -287,7 +289,7 @@ export interface PoolVolumeAggregateVar extends PoolFeeVar, ToVar { }
 export interface PoolUserLpVar extends AddressVar, SignerAddressVar { }
 export interface PoolsVar extends FromVar, OffsetVar, OptionalSearchVar { }
 export interface PoolLastCandlestickVar extends AddressVar, WhichTokenVar { }
-export interface PoolInfoVar extends AddressVar, FromVar, SignerAddressVar { }
+export interface PoolInfoVar extends AddressVar, FromVar, ToVar, SignerAddressVar { }
 export interface PoolDayCandlestickVar extends AddressVar, FromVar, WhichTokenVar { }
 export interface PoolBasicTransactionVar extends OptionalSearchVar, TransactionTypeVar { }
 export interface PoolTransactionCountVar extends OptionalSearchVar, TransactionTypeVar { }
@@ -794,28 +796,29 @@ export const POOL_RESERVES_SUBSCRITION = gql`
 `;
 
 
-export const POOL_INFO_GQL = gql`query pool($address: String!, $signerAddress: String!, $fromTime: timestamptz!) {
+export const POOL_INFO_GQL = gql`
+subscription pool($address: String!, $signerAddress: String!, $fromTime: timestamptz!, $toTime: timestamptz!) {
   pool(
     where: {
       address: { _eq: $address }
     }
   ) {
-    token_1
-    token_2
-    token_contract_1 {
+    token1: token_1
+    token2: token_2
+    tokenContract1: token_contract_1 {
       verified_contract {
         contract_data
       }
     }
-    token_contract_2 {
+    tokenContract2: token_contract_2 {
       verified_contract {
         contract_data
       }
     }
-    fee_aggregate(
+    fee: fee_aggregate(
       distinct_on: timeframe
       where: {
-        timeframe: { _gt: $fromTime }
+        timeframe: { _gt: $toTime }
       }
     ) {
       aggregate {
@@ -825,10 +828,10 @@ export const POOL_INFO_GQL = gql`query pool($address: String!, $signerAddress: S
         }
       }
     }
-    volume_aggregate(
+    currentDayVolume: volume_aggregate(
       distinct_on: timeframe
       where: {
-        timeframe: { _gt: $fromTime }
+        timeframe: { _gt: $toTime }
       }
     ) {
       aggregate {
@@ -838,29 +841,12 @@ export const POOL_INFO_GQL = gql`query pool($address: String!, $signerAddress: S
         }
       }
     }
-    pool_event(
-      where: { type: { _eq: "Sync" } }
-      order_by: { timestamp: desc }
-      limit: 1
-    ) {
-        reserved_1
-        reserved_2
-    }
-    pool_event_aggregate (
+    previousDayVolume: volume_aggregate(
+      distinct_on: timeframe
       where: {
         _and: [
-          { evm_event: {
-            event: {
-              extrinsic: {
-                signer: { _eq: $signerAddress }
-              }
-            }
-          } }
-          { _or: [
-            { type: { _eq: "Mint" } }
-            { type: { _eq: "Burn" } }
-          ]
-          }
+          { timeframe: { _gt: $fromTime } }
+          { timeframe: { _lte: $toTime } }
         ]
       }
     ) {
@@ -868,6 +854,39 @@ export const POOL_INFO_GQL = gql`query pool($address: String!, $signerAddress: S
         sum {
           amount_1
           amount_2
+        }
+      }
+    }
+    reserves: pool_event(
+      where: { type: { _eq: "Sync" } }
+      order_by: { timestamp: desc }
+      limit: 1
+    ) {
+        reserved_1
+        reserved_2
+    }
+    totalSupply: pool_event(
+      where: { type: { _eq: "Transfer" } }
+      order_by: { timestamp: desc }
+      limit: 1
+    ) {
+      total_supply
+    }
+    userSupply: pool_event_aggregate(
+      where: {
+        type: { _eq: "Transfer" }
+        evm_event: {
+          event: {
+            extrinsic: {
+              signer: { _eq: $signerAddress }
+            }
+          }
+        }
+      }
+    ) {
+      aggregate {
+        sum {
+          supply
         }
       }
     }
