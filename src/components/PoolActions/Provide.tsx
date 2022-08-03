@@ -110,7 +110,7 @@ const Provide = ({
         className="uik-pool-actions__cta"
         fill
         icon={faCoins}
-        text={isLoading ? status : 'Provide'}
+        text={status}
         size="large"
         disabled={!isValid || isLoading}
         loading={isLoading}
