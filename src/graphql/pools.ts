@@ -914,7 +914,6 @@ query poolData($address: String!, $fromTime: timestamptz!) {
       pool: { address: { _eq: $address } }
       timeframe: { _gte: $fromTime }
     }
-    order_by: { timeframe: asc }
     distinct_on: timeframe
   ) {
     close: close_1
@@ -954,7 +953,6 @@ query poolData($address: String!, $fromTime: timestamptz!) {
       timeframe: { _gte: $fromTime }
     }
     distinct_on: timeframe
-    limit: 10
   ) {
     amount1: amount_1
     amount2: amount_2
@@ -976,6 +974,7 @@ query poolData($address: String!, $fromTime: timestamptz!) {
       pool: { address: { _eq: $address } }
       timeframe: { _lt: $fromTime }
     }
+    order_by: { timeframe: desc }
     limit: 1
   ) {
     timeframe
@@ -988,6 +987,7 @@ query poolData($address: String!, $fromTime: timestamptz!) {
       pool: { address: { _eq: $address } }
       timeframe: { _lt: $fromTime }
     }
+    order_by: { timeframe: desc }
     limit: 1
   ) {
     close: close_1
@@ -998,6 +998,7 @@ query poolData($address: String!, $fromTime: timestamptz!) {
       pool: { address: { _eq: $address } }
       timeframe: { _lt: $fromTime }
     }
+    order_by: { timeframe: desc }
     limit: 1
   ) {
     close: close_2
