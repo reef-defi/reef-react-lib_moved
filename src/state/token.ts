@@ -118,15 +118,17 @@ export const ensureExistentialTokenAmount = (token: TokenWithAmount): void => {
   ensure(checkMinExistentialTokenAmount(token).valid, `Insufficient ${token.name} balance.`);
 };
 
+export const REEF_TOKEN: Token = {
+  name: 'REEF',
+  address: REEF_ADDRESS,
+  iconUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/6951.png',
+  balance: BigNumber.from(0),
+  decimals: 18,
+  symbol: 'REEF',
+
+}
 export const reefTokenWithAmount = (): TokenWithAmount => toTokenAmount(
-  {
-    name: 'REEF',
-    address: REEF_ADDRESS,
-    iconUrl: 'https://s2.coinmarketcap.com/static/img/coins/64x64/6951.png',
-    balance: BigNumber.from(0),
-    decimals: 18,
-    symbol: 'REEF',
-  },
+  REEF_TOKEN,
   {
     amount: '',
     index: -1,

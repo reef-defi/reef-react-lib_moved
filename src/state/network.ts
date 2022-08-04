@@ -1,4 +1,18 @@
+// import { REEF_TOKEN, Token } from "./token";
+
+import { REEF_TOKEN, Token } from "./token";
+
 export type AvailableNetworks = 'mainnet' | 'testnet' | 'localhost';
+
+export interface Bond {
+  name: string;
+  description: string;
+  contractAddress: string;
+  validatorAddress: string;
+  stake: Token;
+  farm: Token;
+  apy: string;
+};
 
 export interface Network {
   rpcUrl: string;
@@ -9,6 +23,7 @@ export interface Network {
   graphqlUrl: string;
   genesisHash: string;
   reefscanFrontendUrl: string;
+  bonds: Bond[]
 }
 
 export const SS58_REEF = 42;
@@ -25,6 +40,7 @@ export const availableNetworks: Networks = {
     graphqlUrl: 'wss://testnet.reefscan.com/graphql',
     genesisHash: '0x0f89efd7bf650f2d521afef7456ed98dff138f54b5b7915cc9bce437ab728660',
     reefscanFrontendUrl: 'https://testnet.reefscan.com',
+    bonds: [],
   },
   mainnet: {
     name: 'mainnet',
@@ -35,6 +51,17 @@ export const availableNetworks: Networks = {
     graphqlUrl: 'wss://reefscan.com/graphql',
     genesisHash: '0x7834781d38e4798d548e34ec947d19deea29df148a7bf32484b7b24dacf8d4b7',
     reefscanFrontendUrl: 'https://reefscan.com',
+    bonds: [
+      {
+          name: 'Reef community staking bond',
+          description: '',
+          contractAddress: '0x7D3596b724cEB02f2669b902E4F1EEDeEfad3be6',
+          validatorAddress: '5Hax9GZjpurht2RpDr5eNLKvEApECuNxUpmRbYs5iNh7LpHa',
+          stake: {...REEF_TOKEN},
+          farm: {...REEF_TOKEN},
+          apy: '32',
+      }
+    ]
   },
   localhost: {
     name: 'localhost',
@@ -45,5 +72,6 @@ export const availableNetworks: Networks = {
     graphqlUrl: 'ws://localhost:8080/v1/graphql',
     genesisHash: '', // TODO ?
     reefscanFrontendUrl: 'http://localhost:3000',
+    bonds: [],
   },
 };
