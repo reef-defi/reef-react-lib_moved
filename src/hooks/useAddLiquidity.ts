@@ -1,6 +1,6 @@
+import Uik from '@reef-defi/ui-kit';
 import { BigNumber } from 'ethers';
 import { Dispatch, useEffect } from 'react';
-import Uik from '@reef-defi/ui-kit';
 import { approveTokenAmount, getReefswapRouter } from '../rpc';
 import {
   AddressToNumber,
@@ -8,11 +8,11 @@ import {
   NotifyFun, ReefSigner,
   resolveSettings,
   Token,
-  TokenWithAmount,
+  TokenWithAmount
 } from '../state';
 import {
   AddLiquidityActions,
-  SetNewPoolSupplyAction,
+  SetNewPoolSupplyAction
 } from '../store/actions/addLiquidity';
 import {
   clearTokenAmountsAction,
@@ -21,7 +21,7 @@ import {
   setPoolAction,
   setStatusAction,
   setToken1Action,
-  setToken2Action,
+  setToken2Action
 } from '../store/actions/defaultActions';
 import { AddLiquidityState } from '../store/reducers/addLiquidity';
 import {
@@ -32,7 +32,7 @@ import {
   calculatePoolSupply,
   ensure,
   ensureAmount,
-  errorHandler,
+  errorHandler
 } from '../utils';
 import { useKeepTokenUpdated } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
@@ -187,6 +187,11 @@ export const onAddLiquidity = ({
     ensureAmount(token1);
     ensureAmount(token2);
 
+    const reefswapRouter = getReefswapRouter(
+      network.routerAddress,
+      signer.signer,
+    );
+
     const amount1 = calculateAmount(token1);
     const amount2 = calculateAmount(token2);
     const percentage1 = calculateAmountWithPercentage(token1, percentage);
@@ -197,12 +202,22 @@ export const onAddLiquidity = ({
     dispatch(setStatusAction(`Approving ${token2.symbol} token`));
     await approveTokenAmount(token2, network.routerAddress, signer.signer);
 
-    dispatch(setStatusAction('Adding supply'));
-    const reefswapRouter = getReefswapRouter(
-      network.routerAddress,
-      signer.signer,
-    );
 
+    console.log('Estimating provide limits')
+    let extrinsicTransaction = await reefswapRouter.populateTransaction.addLiquidity(
+      token1.address,
+      token2.address,
+      amount1,
+      amount2,
+      percentage1,
+      percentage2,
+      signer.evmAddress,
+      calculateDeadline(deadline),
+    )
+    let estimation = await signer.signer.provider.estimateResources(extrinsicTransaction);
+    console.log(`Provide call estimations: \n\tGas: ${estimation.gas.toString()}\n\tStorage: ${estimation.storage.toString()}\n\tWeight fee: ${estimation.weightFee.toString()}`)
+
+    dispatch(setStatusAction('Adding supply'));
     await reefswapRouter.addLiquidity(
       token1.address,
       token2.address,

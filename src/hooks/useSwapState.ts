@@ -1,6 +1,6 @@
+import Uik from '@reef-defi/ui-kit';
 import { BigNumber } from 'ethers';
 import { Dispatch, useEffect } from 'react';
-import Uik from '@reef-defi/ui-kit';
 import { approveTokenAmount, getReefswapRouter } from '../rpc';
 import {
   AddressToNumber,
@@ -10,11 +10,11 @@ import {
   Pool,
   ReefSigner,
   resolveSettings, Token,
-  TokenWithAmount,
+  TokenWithAmount
 } from '../state';
 import { SwapAction } from '../store';
 import {
-  clearTokenAmountsAction, setCompleteStatusAction, setLoadingAction, setPoolAction, setStatusAction, setToken1Action, setToken2Action,
+  clearTokenAmountsAction, setCompleteStatusAction, setLoadingAction, setPoolAction, setStatusAction, setToken1Action, setToken2Action
 } from '../store/actions/defaultActions';
 import { SwapState } from '../store/reducers/swap';
 import {
@@ -23,7 +23,7 @@ import {
   calculateAmountWithPercentage,
   calculateDeadline,
   convert2Normal,
-  ensure,
+  ensure
 } from '../utils';
 import { useKeepTokenUpdated } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
@@ -170,11 +170,24 @@ export const onSwap = ({
     dispatch(setLoadingAction(true));
     ensureTokenAmount(token1);
 
+
     dispatch(setStatusAction(`Approving ${token1.symbol} token`));
     const sellAmount = calculateAmount(token1);
     const minBuyAmount = calculateAmountWithPercentage(token2, percentage);
     const reefswapRouter = getReefswapRouter(network.routerAddress, signer);
     await approveTokenAmount(token1, network.routerAddress, signer);
+
+
+    console.log('Estimating trade limits')
+    let extrinsicTransaction = await reefswapRouter.populateTransaction.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+      sellAmount,
+      minBuyAmount,
+      [token1.address, token2.address],
+      evmAddress,
+      calculateDeadline(deadline),
+    );
+    let estimation = await signer.provider.estimateResources(extrinsicTransaction);
+    console.log(`Trade call estimations: \n\tGas: ${estimation.gas.toString()}\n\tStorage: ${estimation.storage.toString()}\n\tWeight fee: ${estimation.weightFee.toString()}`)
 
     dispatch(setStatusAction('Executing trade'));
     await reefswapRouter.swapExactTokensForTokensSupportingFeeOnTransferTokens(
