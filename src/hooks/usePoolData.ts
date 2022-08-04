@@ -1,4 +1,4 @@
-import { useSubscription } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import BigNumber from "bignumber.js";
 import { useMemo } from "react";
 import { PoolDataQuery, PoolDataVar, POOL_DATA_GQL } from "../graphql/pools";
@@ -31,7 +31,7 @@ const emptyHolder = (days=0): BaseDataHolder => ({
   value: 0,
 })
 
-const fillMissingDates = <T extends Time>(data: T[], start: T, end: T, resolvePrev: (prev: T) => T): T[] => [
+const fillMissingDates = <T extends Time>(data: T[], start: T, end: T, resolvePrev: (prev: T, last: Date) => T): T[] => [
     ...data,
     {...end}
   ]
@@ -41,7 +41,7 @@ const fillMissingDates = <T extends Time>(data: T[], start: T, end: T, resolvePr
       lastDate.setDate(lastDate.getDate() + 1);
 
       while (lastDate < item.time) {
-        acc.push(resolvePrev(last));
+        acc.push(resolvePrev(last, lastDate));
         lastDate.setDate(lastDate.getDate() + 1);
       }
       acc.push({...item});
@@ -70,16 +70,17 @@ const processCandlestick = (data: CandlestickData[], prevClose: number, days: nu
       time: new Date(),
       timeframe: new Date().toString(),
     },
-    ({close, time}) => ({
+    ({close}, lastDate) => ({
       close,
       high: close,
       low: close,
       open: close,
-      time: new Date(time),
+      time: new Date(lastDate),
       timeframe: new Date().toString()
     })
   );
-// interface M extends Timeframe, Record<
+
+
 const defaultProcess =
   (price1: number, price2: number, decimal1: number, decimal2: number) =>
   ({timeframe, amount1, amount2}: Amounts): BaseDataHolder => ({
@@ -107,7 +108,7 @@ interface UsePoolData {
 export const usePoolData = ({address, decimal1, decimal2, price1, price2, days=31}: UsePoolData): UsePoolDataOutput => {
   const fromTime = useFromTime(days);
 
-  const {data, loading} = useSubscription<PoolDataQuery, PoolDataVar>(
+  const {data, loading} = useQuery<PoolDataQuery, PoolDataVar>(
     POOL_DATA_GQL,
     {
       variables: {
@@ -135,6 +136,7 @@ export const usePoolData = ({address, decimal1, decimal2, price1, price2, days=3
       data.previousCandlestick1.length > 0 ? data.previousCandlestick1[0].close : 0,
       days
     );
+
     const secondToken = processCandlestick(
       data.candlestick2,
       data.previousCandlestick2.length > 0 ? data.previousCandlestick2[0].close : 0,
@@ -144,7 +146,7 @@ export const usePoolData = ({address, decimal1, decimal2, price1, price2, days=3
       data.volume.map(process),
       emptyHolder(days-1),
       emptyHolder(),
-      (last) => ({value: 0, time: new Date(last.time)})
+      ({}, lastDate) => ({value: 0, time: new Date(lastDate)})
     )
     const fees = fillMissingDates(
       data.fee
@@ -156,10 +158,10 @@ export const usePoolData = ({address, decimal1, decimal2, price1, price2, days=3
         .map(process),
       emptyHolder(days-1),
       emptyHolder(),
-      (last) => ({value: 0, time: new Date(last.time)})
+      ({}, lastDate) => ({value: 0, time: new Date(lastDate)})
     )
     const tvl = fillMissingDates(
-      data.reserved
+      data.reserves
         .map(({reserved1, reserved2, timeframe}): Amounts => ({
           timeframe,
           amount1: reserved1,
@@ -168,7 +170,7 @@ export const usePoolData = ({address, decimal1, decimal2, price1, price2, days=3
         .map(process),
       emptyHolder(days-1),
       emptyHolder(),
-      (last) => ({value: last.value, time: new Date(last.time)})
+      (last, lastDate) => ({value: last.value, time: new Date(lastDate)})
     )
 
     return {
@@ -178,7 +180,7 @@ export const usePoolData = ({address, decimal1, decimal2, price1, price2, days=3
       volume,
       tvl
     };
-  }, [data]);
+  }, [data, price1, price2, decimal1, decimal2]);
 
   return [processed, loading]
 }
