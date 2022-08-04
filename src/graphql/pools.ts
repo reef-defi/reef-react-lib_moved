@@ -1,4 +1,5 @@
 import { DocumentNode, gql } from '@apollo/client';
+import { PoolData, ReservedData } from '../state';
 
 // Data interfaces
 export type BasePoolTransactionTypes = 'Swap' | 'Mint' | 'Burn';
@@ -55,7 +56,7 @@ interface VerifiedContract {
   }
 }
 
-interface PoolData {
+interface BasicPoolData {
   id: number;
   address: string;
   token_contract_1: {
@@ -79,14 +80,16 @@ type AggregateSum <T> = {
 };
 
 interface PoolInfo {
-  token_1: string;
-  token_2: string;
-  pool_event: Reserves[];
-  token_contract_1: VerifiedContract;
-  token_contract_2: VerifiedContract;
-  pool_event_aggregate: AggregateSum<Amounts>;
-  fee_aggregate: AggregateSum<Fee>;
-  volume_aggregate: AggregateSum<Amounts>;
+  token1: string;
+  token2: string;
+  reserves: Reserves[];
+  tokenContract1: VerifiedContract;
+  tokenContract2: VerifiedContract;
+  fee: AggregateSum<Fee>;
+  currentDayVolume: AggregateSum<Amounts>;
+  previousDayVolume: AggregateSum<Amounts>;
+  totalSupply: {total_supply: string}[];
+  userSupply: AggregateSum<{supply: string}>;
 }
 
 interface PoolTransaction {
@@ -151,8 +154,13 @@ interface Fee {
   timeframe: string;
 }
 
+interface LastClose {
+  close: number;
+}
+
+
 // Query result interfaces
-export type PoolQuery = { pool: PoolData[] };
+export type PoolQuery = { pool: BasicPoolData[] };
 export type PoolInfoQuery = { pool: PoolInfo[] }
 export type PoolsQuery = { verified_pool: Pool[] };
 export type PoolDayFeeQuery = { pool_day_fee: Fee[] };
@@ -239,6 +247,12 @@ export type Pool24HVolume = {
   }[];
 }
 
+export interface PoolDataQuery extends PoolData {
+  previousReserved: ReservedData[];
+  previousCandlestick1: LastClose[];
+  previousCandlestick2: LastClose[];
+}
+
 export type PoolsTotalSupply = {
   pool_event: AllPool[];
 };
@@ -281,18 +295,18 @@ export type UserPoolsVar = AddressVar
 export interface PoolsTotalValueLockedVar extends ToVar { }
 export interface PoolFeeVar extends AddressVar, FromVar { }
 export interface PoolTvlVar extends AddressVar, FromVar { }
+export interface PoolDataVar extends AddressVar, FromVar { }
 export interface PoolVolumeVar extends AddressVar, FromVar { }
 export interface PoolHourFeeVar extends AddressVar, FromVar { }
 export interface PoolVolumeAggregateVar extends PoolFeeVar, ToVar { }
 export interface PoolUserLpVar extends AddressVar, SignerAddressVar { }
 export interface PoolsVar extends FromVar, OffsetVar, OptionalSearchVar { }
 export interface PoolLastCandlestickVar extends AddressVar, WhichTokenVar { }
-export interface PoolInfoVar extends AddressVar, FromVar, SignerAddressVar { }
+export interface PoolInfoVar extends AddressVar, FromVar, ToVar, SignerAddressVar { }
 export interface PoolDayCandlestickVar extends AddressVar, FromVar, WhichTokenVar { }
 export interface PoolBasicTransactionVar extends OptionalSearchVar, TransactionTypeVar { }
 export interface PoolTransactionCountVar extends OptionalSearchVar, TransactionTypeVar { }
 export interface PoolTransactionVar extends PoolBasicTransactionVar, OffsetVar, LimitVar { }
-
 // Graphql statements
 // Total supply of all pools
 export const POOLS_TOTAL_VALUE_LOCKED = gql`
@@ -794,28 +808,29 @@ export const POOL_RESERVES_SUBSCRITION = gql`
 `;
 
 
-export const POOL_INFO_GQL = gql`query pool($address: String!, $signerAddress: String!, $fromTime: timestamptz!) {
+export const POOL_INFO_GQL = gql`
+subscription pool($address: String!, $signerAddress: String!, $fromTime: timestamptz!, $toTime: timestamptz!) {
   pool(
     where: {
       address: { _eq: $address }
     }
   ) {
-    token_1
-    token_2
-    token_contract_1 {
+    token1: token_1
+    token2: token_2
+    tokenContract1: token_contract_1 {
       verified_contract {
         contract_data
       }
     }
-    token_contract_2 {
+    tokenContract2: token_contract_2 {
       verified_contract {
         contract_data
       }
     }
-    fee_aggregate(
+    fee: fee_aggregate(
       distinct_on: timeframe
       where: {
-        timeframe: { _gt: $fromTime }
+        timeframe: { _gt: $toTime }
       }
     ) {
       aggregate {
@@ -825,10 +840,10 @@ export const POOL_INFO_GQL = gql`query pool($address: String!, $signerAddress: S
         }
       }
     }
-    volume_aggregate(
+    currentDayVolume: volume_aggregate(
       distinct_on: timeframe
       where: {
-        timeframe: { _gt: $fromTime }
+        timeframe: { _gt: $toTime }
       }
     ) {
       aggregate {
@@ -838,29 +853,12 @@ export const POOL_INFO_GQL = gql`query pool($address: String!, $signerAddress: S
         }
       }
     }
-    pool_event(
-      where: { type: { _eq: "Sync" } }
-      order_by: { timestamp: desc }
-      limit: 1
-    ) {
-        reserved_1
-        reserved_2
-    }
-    pool_event_aggregate (
+    previousDayVolume: volume_aggregate(
+      distinct_on: timeframe
       where: {
         _and: [
-          { evm_event: {
-            event: {
-              extrinsic: {
-                signer: { _eq: $signerAddress }
-              }
-            }
-          } }
-          { _or: [
-            { type: { _eq: "Mint" } }
-            { type: { _eq: "Burn" } }
-          ]
-          }
+          { timeframe: { _gt: $fromTime } }
+          { timeframe: { _lte: $toTime } }
         ]
       }
     ) {
@@ -871,6 +869,139 @@ export const POOL_INFO_GQL = gql`query pool($address: String!, $signerAddress: S
         }
       }
     }
+    reserves: pool_event(
+      where: { type: { _eq: "Sync" } }
+      order_by: { timestamp: desc }
+      limit: 1
+    ) {
+        reserved_1
+        reserved_2
+    }
+    totalSupply: pool_event(
+      where: { type: { _eq: "Transfer" } }
+      order_by: { timestamp: desc }
+      limit: 1
+    ) {
+      total_supply
+    }
+    userSupply: pool_event_aggregate(
+      where: {
+        type: { _eq: "Transfer" }
+        evm_event: {
+          event: {
+            extrinsic: {
+              signer: { _eq: $signerAddress }
+            }
+          }
+        }
+      }
+    ) {
+      aggregate {
+        sum {
+          supply
+        }
+      }
+    }
+  }
+}
+`
+
+export const POOL_DATA_GQL = gql`
+query poolData($address: String!, $fromTime: timestamptz!) {
+  candlestick1: pool_day_candlestick(
+    where: {
+      which_token: { _eq: 1 }
+      pool: { address: { _eq: $address } }
+      timeframe: { _gte: $fromTime }
+    }
+    distinct_on: timeframe
+  ) {
+    close: close_1
+    high: high_1
+    open: open_1
+    low: low_1
+    timeframe
+  }
+  candlestick2: pool_day_candlestick(
+    where: {
+      which_token: { _eq: 2 }
+      pool: { address: { _eq: $address } }
+      timeframe: { _gte: $fromTime }
+    }
+    distinct_on: timeframe
+  ) {
+    close: close_2
+    high: high_2
+    open: open_2
+    low: low_2
+    timeframe
+  }
+  fee: pool_day_fee(
+    where: {
+      pool: { address: { _eq: $address } }
+      timeframe: { _gte: $fromTime }
+    }
+    distinct_on: timeframe
+  ) {
+    fee1: fee_1
+    fee2: fee_2
+    timeframe
+  }
+  volume: pool_day_volume(
+    where: {
+      pool: { address: { _eq: $address } }
+      timeframe: { _gte: $fromTime }
+    }
+    distinct_on: timeframe
+  ) {
+    amount1: amount_1
+    amount2: amount_2
+    timeframe
+  }
+  reserves: pool_day_locked(
+    where: {
+      pool: { address: { _eq: $address } }
+      timeframe: { _gte: $fromTime }
+    }
+    distinct_on: timeframe
+  ) {
+    reserved1: reserved_1
+    reserved2: reserved_2
+    timeframe
+  }
+  previousReserves: pool_day_locked(
+    where: {
+      pool: { address: { _eq: $address } }
+      timeframe: { _lt: $fromTime }
+    }
+    order_by: { timeframe: desc }
+    limit: 1
+  ) {
+    timeframe
+    reserved1: reserved_1
+    reserved2: reserved_2
+  }
+  previousCandlestick1: pool_day_candlestick(
+    where: {
+      which_token: { _eq: 1 }
+      pool: { address: { _eq: $address } }
+      timeframe: { _lt: $fromTime }
+    }
+    order_by: { timeframe: desc }
+    limit: 1
+  ) {
+    close: close_1
+  }
+  previousCandlestick2: pool_day_candlestick(
+    where: {
+      which_token: { _eq: 2 }
+      pool: { address: { _eq: $address } }
+      timeframe: { _lt: $fromTime }
+    }
+    order_by: { timeframe: desc }
+    limit: 1
+  ) {
+    close: close_2
   }
 }
 `

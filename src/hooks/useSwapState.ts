@@ -1,5 +1,6 @@
 import { BigNumber } from 'ethers';
 import { Dispatch, useEffect } from 'react';
+import Uik from '@reef-defi/ui-kit';
 import { approveTokenAmount, getReefswapRouter } from '../rpc';
 import {
   AddressToNumber,
@@ -39,13 +40,13 @@ const swapStatus = (
     ensure(!buy.isEmpty, 'Select buy token');
     ensure(buy.address !== sell.address, 'Tokens must be different');
     ensure(!!pool, 'Pool does not exist');
-    ensure(sell.amount.length !== 0, `Missing ${sell.name} amount`);
-    ensure(buy.amount.length !== 0, `Missing ${buy.name} amount`);
-    ensure(parseFloat(sell.amount) > 0, `Missing ${sell.name} amount`);
+    ensure(sell.amount.length !== 0, `Missing ${sell.symbol} amount`);
+    ensure(buy.amount.length !== 0, `Missing ${buy.symbol} amount`);
+    ensure(parseFloat(sell.amount) > 0, `Missing ${sell.symbol} amount`);
     ensure(
       parseFloat(sell.amount)
         <= convert2Normal(sell.decimals, sell.balance.toString()),
-      `Insufficient ${sell.name} balance`,
+      `Insufficient ${sell.symbol} balance`,
     );
 
     // Because of aboves ensure pool would not need explenation mark. Typescript broken...
@@ -68,7 +69,7 @@ const swapStatus = (
     // const balance = balanceAdjuster1.mul(balanceAdjuster2);
     // ensure(balance.gte(reserved), 'Deliquified pool');
     // ensure(amountOut1.eq(amountIn1) && amountOut2.eq(amountIn2), 'Deliquified pool')
-    return { isValid: true, text: 'Swap' };
+    return { isValid: true, text: 'Trade' };
   } catch (e) {
     return { isValid: false, text: e.message };
   }
@@ -154,7 +155,7 @@ interface OnSwap {
 }
 
 export const onSwap = ({
-  state, network, account, dispatch, notify, updateTokenState,
+  state, network, account, dispatch, updateTokenState,
 }: OnSwap) => async (): Promise<void> => {
   const {
     token1, settings, token2, isValid, isLoading,
@@ -169,13 +170,13 @@ export const onSwap = ({
     dispatch(setLoadingAction(true));
     ensureTokenAmount(token1);
 
-    dispatch(setStatusAction(`Approving ${token1.name} token`));
+    dispatch(setStatusAction(`Approving ${token1.symbol} token`));
     const sellAmount = calculateAmount(token1);
     const minBuyAmount = calculateAmountWithPercentage(token2, percentage);
     const reefswapRouter = getReefswapRouter(network.routerAddress, signer);
     await approveTokenAmount(token1, network.routerAddress, signer);
 
-    dispatch(setStatusAction('Executing swap'));
+    dispatch(setStatusAction('Executing trade'));
     await reefswapRouter.swapExactTokensForTokensSupportingFeeOnTransferTokens(
       sellAmount,
       minBuyAmount,
@@ -183,15 +184,24 @@ export const onSwap = ({
       evmAddress,
       calculateDeadline(deadline),
     );
-    notify('Balances will reload after blocks are finalized.', 'info');
-    notify('Swap complete!');
+
+    Uik.notify.success({
+      message: 'Trade complete.\nBalances will reload after blocks are finalized',
+      keepAlive: true,
+    });
+
+    Uik.dropConfetti();
   } catch (error) {
-    notify(`There was an error when swapping: ${error.message}`, 'error');
+    Uik.notify.danger({
+      message: `An error occurred while trying to complete your trade: ${error.message}`,
+      keepAlive: true,
+    });
   } finally {
-    await updateTokenState().catch(() => notify(
-      'Token balances were not updated, to do so reload page.',
-      'warning',
-    ));
+    await updateTokenState().catch(() => Uik.notify.danger({
+      message: 'Please reaload the page to update token balances',
+      keepAlive: true,
+    }));
+
     dispatch(setLoadingAction(false));
     dispatch(clearTokenAmountsAction());
   }

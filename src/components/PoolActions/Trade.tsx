@@ -1,12 +1,12 @@
-import Uik from '@reef-defi/ui-kit';
-import React from "react";
-import { SwapState } from "../../store";
-import TokenField from "./TokenField";
-
 import { faRepeat } from '@fortawesome/free-solid-svg-icons';
+import Uik from '@reef-defi/ui-kit';
 import BigNumber from 'bignumber.js';
-import { Pool, resolveSettings } from '../../state';
+import React, { useMemo, useState } from 'react';
+import { SwapState } from '../../store';
+import TokenField, { SelectToken } from './TokenField';
 
+import { Pool, resolveSettings } from '../../state';
+import TradePopup from './ConfirmPopups/Trade';
 
 export interface TradeActions {
   onSwitch: () => void;
@@ -14,6 +14,8 @@ export interface TradeActions {
   setToken1Amount: (amount: string) => void;
   setToken2Amount: (amount: string) => void;
   setPercentage: (amount: number) => void;
+  selectToken1?: SelectToken;
+  selectToken2?: SelectToken;
 }
 
 interface Trade {
@@ -32,48 +34,76 @@ const SummaryItem = ({
   label,
   value,
   empty,
-  className
+  className,
 }: SummaryItem): JSX.Element => (
   <div
     className={`
       uik-pool-actions__summary-item
-      ${empty ? 'uik-pool-actions__summary-item--empty': ''}
+      ${empty ? 'uik-pool-actions__summary-item--empty' : ''}
       ${className || ''}
     `}
   >
     <div className="uik-pool-actions__summary-item-label">{ label }</div>
     <div className="uik-pool-actions__summary-item-value">{ value }</div>
   </div>
-)
+);
 
-const calculateRate = (sellTokenAddress: string, {token1: {address, decimals: decimals1}, token2: {decimals: decimals2}, reserve1, reserve2}: Pool) => {
+const calculateRate = (
+  sellTokenAddress: string,
+  {
+    token1: {
+      address,
+      symbol: symbol1,
+      decimals: decimals1,
+    },
+    token2: {
+      symbol: symbol2,
+      decimals: decimals2,
+    },
+    reserve1,
+    reserve2,
+  }: Pool,
+): string => {
   const r1 = new BigNumber(reserve1).div(new BigNumber(10).pow(decimals1));
   const r2 = new BigNumber(reserve2).div(new BigNumber(10).pow(decimals2));
   const res = sellTokenAddress === address ? r1.div(r2) : r2.div(r1);
-  // TODO Samo add formating
-  return`1 = ${res.toFormat(4)}`;
-}
+  return `1 ${symbol2} = ${Uik.utils.maxDecimals(res.toNumber(), 4)} ${symbol1}`;
+};
 
-const Trade = ({state: {
-  token1,
-  percentage,
-  token2,
-  focus,
-  isLoading,
-  isValid,
-  pool,
-  settings,
-  status
-}, actions: {
-  onSwap,
-  onSwitch,
-  setPercentage,
-  setToken1Amount,
-  setToken2Amount
-}} : Trade): JSX.Element => {
-  const {gasLimit, percentage: slippage} = resolveSettings(settings);
-
+const Trade = ({
+  state: {
+    token1,
+    percentage,
+    token2,
+    focus,
+    isLoading,
+    isValid,
+    pool,
+    settings,
+    status,
+  }, actions: {
+    onSwap,
+    onSwitch,
+    setPercentage,
+    setToken1Amount,
+    setToken2Amount,
+    selectToken1,
+    selectToken2,
+  },
+} : Trade): JSX.Element => {
+  const { percentage: slippage } = resolveSettings(settings);
   const rate = pool ? calculateRate(token1.address, pool) : undefined;
+  const [isPopupOpen, setPopupOpen] = useState(false);
+
+  const fee = useMemo(() => {
+    if (token1.amount === '') {
+      return '0 $';
+    }
+    return `${new BigNumber(token1.amount)
+      .multipliedBy(token1.price)
+      .multipliedBy(0.0003)
+      .toFixed(4)} $`;
+  }, [token1.amount, token1.address, token1.price]);
 
   return (
     <div>
@@ -81,6 +111,7 @@ const Trade = ({state: {
         <TokenField
           token={token1}
           onAmountChange={setToken1Amount}
+          selectToken={selectToken1}
         />
 
         <div className="uik-pool-actions__token-switch">
@@ -92,13 +123,14 @@ const Trade = ({state: {
             `}
             onClick={onSwitch}
           >
-            <Uik.Icon icon={faRepeat}/>
+            <Uik.Icon icon={faRepeat} />
           </button>
         </div>
 
         <TokenField
           token={token2}
           onAmountChange={setToken2Amount}
+          selectToken={selectToken2}
         />
       </div>
 
@@ -110,8 +142,8 @@ const Trade = ({state: {
         />
         <SummaryItem
           label="Fee"
-          value={gasLimit}
-          empty={!gasLimit}
+          value={fee}
+          empty={!fee}
         />
         <SummaryItem
           label="Slippage"
@@ -127,11 +159,11 @@ const Trade = ({state: {
           onChange={setPercentage}
           tooltip={`${Uik.utils.maxDecimals(percentage, 2)}%`}
           helpers={[
-            { position: 0, text: "0%" },
+            { position: 0, text: '0%' },
             { position: 25 },
-            { position: 50, text: "50%" },
-            { position: 75, },
-            { position: 100, text: "100%" },
+            { position: 50, text: '50%' },
+            { position: 75 },
+            { position: 100, text: '100%' },
           ]}
         />
       </div>
@@ -142,12 +174,23 @@ const Trade = ({state: {
         icon={faRepeat}
         text={isLoading ? status : 'Trade'}
         size="large"
-        disabled={!isValid || isLoading}
         loading={isLoading}
-        onClick={onSwap}
+        disabled={!isValid || isLoading}
+        onClick={() => setPopupOpen(true)}
+      />
+
+      <TradePopup
+        fee={fee}
+        isOpen={isPopupOpen}
+        onClose={() => setPopupOpen(false)}
+        onConfirm={onSwap}
+        token1={token1}
+        token2={token2}
+        slippage={slippage}
+        exchangeRate={rate}
       />
     </div>
   );
-}
+};
 
 export default Trade;

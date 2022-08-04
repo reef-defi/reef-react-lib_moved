@@ -1,5 +1,6 @@
 import { BigNumber } from 'ethers';
 import { Dispatch, useEffect } from 'react';
+import Uik from '@reef-defi/ui-kit';
 import { approveTokenAmount, getReefswapRouter } from '../rpc';
 import {
   AddressToNumber,
@@ -61,13 +62,13 @@ const status = (
     ensure(token2.amount.length > 0, `Missing ${token2.symbol} amount`);
     ensure(
       BigNumber.from(calculateAmount(token1)).lte(token1.balance),
-      `Insufficient ${token1.name} balance`,
+      `Insufficient ${token1.symbol} balance`,
     );
     ensure(
       BigNumber.from(calculateAmount(token2)).lte(token2.balance),
-      `Insufficient ${token2.name} balance`,
+      `Insufficient ${token2.symbol} balance`,
     );
-    return { isValid: true, text: 'Add liquidity' };
+    return { isValid: true, text: 'Provide' };
   } catch (e) {
     return { isValid: false, text: e.message };
   }
@@ -173,7 +174,6 @@ export const onAddLiquidity = ({
   state,
   network,
   signer,
-  notify,
   dispatch,
   updateTokenState,
 }: OnAddLiquidity) => async (): Promise<void> => {
@@ -192,9 +192,9 @@ export const onAddLiquidity = ({
     const percentage1 = calculateAmountWithPercentage(token1, percentage);
     const percentage2 = calculateAmountWithPercentage(token2, percentage);
 
-    dispatch(setStatusAction(`Approving ${token1.name} token`));
+    dispatch(setStatusAction(`Approving ${token1.symbol} token`));
     await approveTokenAmount(token1, network.routerAddress, signer.signer);
-    dispatch(setStatusAction(`Approving ${token2.name} token`));
+    dispatch(setStatusAction(`Approving ${token2.symbol} token`));
     await approveTokenAmount(token2, network.routerAddress, signer.signer);
 
     dispatch(setStatusAction('Adding supply'));
@@ -213,22 +213,29 @@ export const onAddLiquidity = ({
       signer.evmAddress,
       calculateDeadline(deadline),
     );
-    notify('Balances will reload after blocks are finalized.', 'info');
-    notify('Liquidity added successfully!');
+
+    Uik.notify.success({
+      message: 'Successfully provided liquidity.\nBalances will reload after blocks are finalized.',
+      keepAlive: true,
+    });
+
+    Uik.dropConfetti();
   } catch (error) {
     const message = errorHandler(error.message)
       .replace('first', token1.name)
       .replace('second', token2.name);
 
-    notify(message, 'error');
-    // toast.error(errorHandler(message));
+    Uik.notify.danger({
+      message: `An error occurred while trying to provide liquidity: ${message}`,
+      keepAlive: true,
+    });
   } finally {
     /* TODO const newTokens = await loadTokens(tokens, sgnr);
     dispatch(setAllTokensAction(newTokens)); */
-    await updateTokenState().catch(() => notify(
-      'Failed to reload token balances, please reload the page to see correct balances.',
-      'warning',
-    ));
+    await updateTokenState().catch(() => Uik.notify.danger({
+      message: 'Please reaload the page to update token balances',
+      keepAlive: true,
+    }));
     dispatch(setLoadingAction(false));
     dispatch(clearTokenAmountsAction());
   }

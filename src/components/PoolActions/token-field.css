@@ -1,0 +1,35 @@
+.uik-pool-actions-token__token {
+  border: none;
+  background-color: transparent;
+}
+
+.uik-pool-actions-token__token:not([disabled]):hover {
+  cursor: pointer;
+}
+
+.uik-pool-actions-token__token:not([disabled]):hover .uik-pool-actions-token__info .uik-pool-actions-token__symbol {
+  color: var(--primary) !important;
+}
+
+.uik-pool-actions .uik-pool-actions-token.uik-pool-actions-token--select {
+  height: 74px;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border: none;
+  font-size: 15px;
+  font-weight: 500;
+  color: hsla(
+    var(--text--h),
+    var(--text--s),
+    var(--text--l),
+    0.75
+  );
+}
+
+.uik-pool-actions .uik-pool-actions-token.uik-pool-actions-token--select:hover {
+  cursor: pointer;
+  color: var(--primary);
+}

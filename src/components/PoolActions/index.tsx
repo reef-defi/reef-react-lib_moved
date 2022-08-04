@@ -4,6 +4,8 @@ import { SwapState } from '../../store';
 import Provide, { Props as ProvideProps } from './Provide';
 import Trade, { TradeActions } from './Trade';
 import Withdraw, { Props as WithdrawProps } from './Withdraw';
+import Finalizing from './Finalizing';
+import './pool-actions.css';
 
 // TODO Samo remove any
 export type CustomFunction = (...args: any[]) => any
@@ -22,7 +24,8 @@ export interface Props extends Events {
     state: SwapState;
     actions: TradeActions;
   };
-  className?: string
+  className?: string,
+  finalizing?: boolean
 }
 
 export const PoolActions = ({
@@ -32,6 +35,7 @@ export const PoolActions = ({
   trade,
   className,
   onTabChange,
+  finalizing,
 }: Props): JSX.Element => {
   const [currentTab, setTab] = useState(tab);
 
@@ -62,7 +66,12 @@ export const PoolActions = ({
       </div>
 
       {
-        currentTab === 'Trade'
+        finalizing
+        && <Finalizing />
+      }
+
+      {
+        currentTab === 'Trade' && !finalizing
         && (
           <Trade
             state={trade.state}
@@ -70,8 +79,9 @@ export const PoolActions = ({
           />
         )
       }
+
       {
-        currentTab === 'Provide'
+        currentTab === 'Provide' && !finalizing
         && (
           <Provide
             state={provide.state}
@@ -81,7 +91,7 @@ export const PoolActions = ({
       }
 
       {
-        currentTab === 'Withdraw'
+        currentTab === 'Withdraw' && !finalizing
         && (
           <Withdraw
             state={withdraw.state}

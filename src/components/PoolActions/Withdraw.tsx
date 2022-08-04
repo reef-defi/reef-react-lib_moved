@@ -1,11 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import Uik from '@reef-defi/ui-kit';
 import { faArrowUpFromBracket } from '@fortawesome/free-solid-svg-icons';
 import BigNumber from 'bignumber.js';
-// import { resolveSettings } from '../../state';
 import { RemoveLiquidityState } from '../../store';
-// import RemoveConfirmationModal from '../RemoveLiquidity/RemoveConfirmationModal';
-import TokenField from './TokenField';
+import WithdrawPopup from './ConfirmPopups/Withdraw';
+import { removeUserPoolSupply, calculatePoolShare } from '../../utils';
 
 export interface WithdrawActions {
   onRemoveLiquidity: () => Promise<void>;
@@ -19,11 +18,10 @@ export interface Props {
 
 const Withdraw = ({
   state: {
-    // settings,
-    // pool,
+    pool,
     isLoading,
     isValid,
-    percentage: percentageAmount,
+    percentage,
     status,
     token1,
     token2,
@@ -40,42 +38,35 @@ const Withdraw = ({
     return Uik.utils.maxDecimals(sum, 2);
   }, [token1, token2]);
 
+  const [isPopupOpen, setPopupOpen] = useState(false);
+
   return (
     <div>
-      <div className="uik-pool-actions__tokens">
-        <TokenField
-          token={token1}
-          onAmountChange={() => {}}
-        />
+      <div
+        className={`
+          uik-pool-actions__withdraw-preview
+          ${!getTotalValue ? 'uik-pool-actions__withdraw-preview--empty' : ''}
+        `}
+      >
+        <div className="uik-pool-actions__withdraw-percentage">
+          <span className="uik-pool-actions__withdraw-percentage-value">{ percentage }</span>
+          <span className="uik-pool-actions__withdraw-percentage-sign">%</span>
+        </div>
 
-        <TokenField
-          token={token2}
-          onAmountChange={() => {}}
-        />
-      </div>
-
-      <div className="uik-pool-actions__summary">
-        <div
-          className={`
-            uik-pool-actions__summary-item
-            ${!getTotalValue ? 'uik-pool-actions__summary-item--empty' : ''}
-          `}
-        >
-          <div className="uik-pool-actions__summary-item-label">Total</div>
-          <div className="uik-pool-actions__summary-item-value">
-            $
-            { getTotalValue ? Uik.utils.formatAmount(getTotalValue) : '0.0' }
-          </div>
+        <div className="uik-pool-actions__withdraw-value">
+          $
+          { getTotalValue ? Uik.utils.formatAmount(getTotalValue) : '0.0' }
         </div>
       </div>
 
       <div className="uik-pool-actions__slider">
         <Uik.Slider
-          value={percentageAmount}
+          value={percentage}
           onChange={(e) => {
-            setPercentage(e)
+            setPercentage(e);
           }}
-          tooltip={`${Uik.utils.maxDecimals(percentageAmount, 2)}%`}
+          tooltip={`${Uik.utils.maxDecimals(percentage, 2)}%`}
+          stickyHelpers={false}
           helpers={[
             { position: 0, text: '0%' },
             { position: 25 },
@@ -86,32 +77,28 @@ const Withdraw = ({
         />
       </div>
 
-      <button
-        className="uik-pool-actions__cta-wrapper"
-        type="button"
-        onClick={onRemoveLiquidity}
-        // data-bs-toggle="modal"
-        // data-bs-target="remove-modal-toggle"
+      <Uik.Button
+        className="uik-pool-actions__cta"
+        fill
+        icon={faArrowUpFromBracket}
+        text={isLoading ? status : 'Withdraw'}
+        size="large"
         disabled={!isValid || isLoading}
-      >
-        <Uik.Button
-          className="uik-pool-actions__cta"
-          fill
-          icon={faArrowUpFromBracket}
-          text={isLoading ? status : 'Withdraw'}
-          size="large"
-          disabled={!isValid || isLoading}
-          loading={isLoading}
-        />
-      </button>
+        loading={isLoading}
+        onClick={() => setPopupOpen(true)}
+      />
 
-      {/* <RemoveConfirmationModal
+      <WithdrawPopup
+        isOpen={isPopupOpen}
+        onClose={() => setPopupOpen(false)}
+        onConfirm={onRemoveLiquidity}
         pool={pool!}
-        slipperage={percentage}
-        id="remove-modal-toggle"
-        percentageAmount={percentageAmount}
-        onRemove={onRemoveLiquidity}
-      /> */}
+        price1={token1.price}
+        price2={token2.price}
+        percentageAmount={percentage}
+        LPTokens={removeUserPoolSupply(percentage, pool).toFixed(8)}
+        poolShare={`${calculatePoolShare(pool).toFixed(8)} %`}
+      />
     </div>
   );
 };

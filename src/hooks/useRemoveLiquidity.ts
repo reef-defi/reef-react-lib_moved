@@ -1,14 +1,16 @@
+import Uik from '@reef-defi/ui-kit';
+import BigNumber from 'bignumber.js';
 import { Dispatch, useEffect } from 'react';
 import { approveAmount, getReefswapRouter } from '../rpc';
 import {
   AddressToNumber,
-  Network, NotifyFun, Pool, ReefSigner, REMOVE_DEFAULT_SLIPPAGE_TOLERANCE, resolveSettings, Token,
+  Network, NotifyFun, Pool, ReefSigner, REMOVE_DEFAULT_SLIPPAGE_TOLERANCE, resolveSettings, Token
 } from '../state';
 import {
-  RemoveLiquidityActions, RemoveLiquidityState, setCompleteStatusAction, setLoadingAction, setPercentageAction, setPoolAction, setStatusAction, setToken1Action, setToken2Action,
+  RemoveLiquidityActions, RemoveLiquidityState, setCompleteStatusAction, setLoadingAction, setPercentageAction, setPoolAction, setStatusAction, setToken1Action, setToken2Action
 } from '../store';
 import {
-  ButtonStatus, calculateDeadline, ensure, removePoolTokenShare, removeSupply, transformAmount,
+  ButtonStatus, calculateDeadline, ensure
 } from '../utils';
 import { useKeepTokenUpdated } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
@@ -37,7 +39,7 @@ const removeStatus = (percentageAmount: number, pool?: Pool): ButtonStatus => {
     ensure(percentageAmount > 0, 'Enter an amount');
     return {
       isValid: true,
-      text: 'Confirm remove',
+      text: 'Withdraw',
     };
   } catch (e) {
     return {
@@ -56,6 +58,7 @@ export const useRemoveLiquidity = ({
   // Updating tokens
   useKeepTokenUpdated(address1, token1, tokens, tokenPrices, (token) => dispatch(setToken1Action(token)));
   useKeepTokenUpdated(address2, token2, tokens, tokenPrices, (token) => dispatch(setToken2Action(token)));
+
   // Find pool
   const [loadedPool, isPoolLoading] = useLoadPool(
     token1,
@@ -95,7 +98,6 @@ export const onRemoveLiquidity = ({
   dispatch,
   network,
   signer,
-  notify,
 }: OnRemoveLiquidity) => async (): Promise<void> => {
   const { pool, percentage: percentageAmount, settings } = state;
   if (!pool || !signer || !network || percentageAmount === 0) { return; }
@@ -109,21 +111,28 @@ export const onRemoveLiquidity = ({
     network.routerAddress,
     signer.signer,
   );
-  const normalRemovedSupply = removeSupply(
-    percentageAmount,
-    pool.userPoolBalance,
-    18,
-  );
-  const removedLiquidity = transformAmount(18, `${normalRemovedSupply}`);
+  const userPoolBalance = new BigNumber(pool.userPoolBalance);
+  const poolPercentage = userPoolBalance.div(pool.totalSupply);
+  const removedLiquidity = userPoolBalance
+    .multipliedBy(percentageAmount)
+    .div(100)
+    .toFixed(0);
 
-  const minimumTokenAmount1 = removePoolTokenShare(
-    Math.max(percentageAmount - percentage, 0),
-    pool.token1,
-  );
-  const minimumTokenAmount2 = removePoolTokenShare(
-    Math.max(percentageAmount - percentage, 0),
-    pool.token2,
-  );
+  const minimumTokenAmount1 = new BigNumber(pool.reserve1)
+    .multipliedBy(poolPercentage)
+    .multipliedBy(percentageAmount)
+    .div(100)
+    .multipliedBy(100-percentage)
+    .div(100)
+    .toFixed(0);
+
+  const minimumTokenAmount2 = new BigNumber(pool.reserve2)
+    .multipliedBy(poolPercentage)
+    .multipliedBy(percentageAmount)
+    .div(100)
+    .multipliedBy(100-percentage)
+    .div(100)
+    .toFixed(0);
 
   try {
     dispatch(setLoadingAction(true));
@@ -134,7 +143,7 @@ export const onRemoveLiquidity = ({
       removedLiquidity,
       signer.signer,
     );
-    dispatch(setStatusAction('Removing supply'));
+    dispatch(setStatusAction('Withdrawing'));
     await reefswapRouter.removeLiquidity(
       pool.token1.address,
       pool.token2.address,
@@ -144,10 +153,18 @@ export const onRemoveLiquidity = ({
       signer.evmAddress,
       calculateDeadline(deadline),
     );
-    notify('Balances will reload after blocks are finalized.', 'info');
-    notify('Liquidity removed successfully!');
+
+    Uik.notify.success({
+      message: 'Tokens were successfully withdrawn.\nBalances will reload after blocks are finalized.',
+      keepAlive: true,
+    });
+
+    Uik.dropConfetti();
   } catch (e) {
-    notify(`There was something wrong when removing liquidity: ${e.message}`, 'error');
+    Uik.notify.danger({
+      message: `An error occurred while trying to withdraw tokens: ${e.message}`,
+      keepAlive: true,
+    });
   } finally {
     dispatch(setLoadingAction(false));
     dispatch(setPercentageAction(0));
