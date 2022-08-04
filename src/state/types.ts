@@ -83,7 +83,7 @@ export interface ReservedData extends BaseReservedData, Timeframe { }
 export interface PoolData {
   fee: FeeData[];
   volume: VolumeData[];
-  reserved: ReservedData[];
+  reserves: ReservedData[];
   candlestick1: CandlestickData[];
   candlestick2: CandlestickData[];
 }

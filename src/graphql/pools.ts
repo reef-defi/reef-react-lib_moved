@@ -907,13 +907,14 @@ subscription pool($address: String!, $signerAddress: String!, $fromTime: timesta
 `
 
 export const POOL_DATA_GQL = gql`
-subscription poolData($address: String!, $fromTime: timestamptz!) {
+query poolData($address: String!, $fromTime: timestamptz!) {
   candlestick1: pool_day_candlestick(
     where: {
       which_token: { _eq: 1 }
       pool: { address: { _eq: $address } }
       timeframe: { _gte: $fromTime }
     }
+    order_by: { timeframe: asc }
     distinct_on: timeframe
   ) {
     close: close_1
