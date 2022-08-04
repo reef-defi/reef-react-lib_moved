@@ -1,7 +1,7 @@
 import { BigNumber, ethers } from 'ethers';
+import { DEFAULT_TOKEN_ICONS } from '../components/common/Icons';
 import { reefTokenWithAmount } from '../state';
 import { getHashSumLastNr } from './math';
-import { DEFAULT_TOKEN_ICONS } from '../components/common/Icons';
 
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
 

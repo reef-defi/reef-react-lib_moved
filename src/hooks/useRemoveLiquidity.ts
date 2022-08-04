@@ -143,6 +143,20 @@ export const onRemoveLiquidity = ({
       removedLiquidity,
       signer.signer,
     );
+
+    console.log('Estimating withdraw limits')
+    let extrinsicTransaction = await reefswapRouter.populateTransaction.removeLiquidity(
+      pool.token1.address,
+      pool.token2.address,
+      removedLiquidity,
+      minimumTokenAmount1,
+      minimumTokenAmount2,
+      signer.evmAddress,
+      calculateDeadline(deadline),
+    );
+    let estimation = await signer.signer.provider.estimateResources(extrinsicTransaction);
+    console.log(`Withdraw call estimations: \n\tGas: ${estimation.gas.toString()}\n\tStorage: ${estimation.storage.toString()}\n\tWeight fee: ${estimation.weightFee.toString()}`)
+
     dispatch(setStatusAction('Withdrawing'));
     await reefswapRouter.removeLiquidity(
       pool.token1.address,
