@@ -92,6 +92,7 @@ export const useAddLiquidity = ({
     token2,
     network?.factoryAddress || '',
     signer?.signer,
+    isLoading
   );
   const newPoolSupply = calculatePoolSupply(token1, token2, pool);
 

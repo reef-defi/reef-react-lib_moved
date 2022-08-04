@@ -65,6 +65,7 @@ export const useRemoveLiquidity = ({
     token2,
     network?.factoryAddress || '',
     signer?.signer,
+    isLoading
   );
   // Updating pool
   useEffect(() => {

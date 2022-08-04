@@ -107,6 +107,7 @@ export const useSwapState = ({
     buy,
     network?.factoryAddress || '',
     account?.signer,
+    isLoading,
   );
   useEffect(() => {
     if (loadedPool) {
