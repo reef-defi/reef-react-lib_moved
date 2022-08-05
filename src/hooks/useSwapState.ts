@@ -23,7 +23,8 @@ import {
   calculateAmountWithPercentage,
   calculateDeadline,
   convert2Normal,
-  ensure
+  ensure,
+  errorHandler
 } from '../utils';
 import { useKeepTokenUpdated } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
@@ -212,8 +213,9 @@ export const onSwap = ({
 
     Uik.dropConfetti();
   } catch (error) {
+    const message = errorHandler(error.message)
     Uik.notify.danger({
-      message: `An error occurred while trying to complete your trade: ${error.message}`,
+      message: `An error occurred while trying to complete your trade: ${message}`,
       keepAlive: true,
     });
   } finally {

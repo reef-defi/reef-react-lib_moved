@@ -10,7 +10,7 @@ import {
   RemoveLiquidityActions, RemoveLiquidityState, setCompleteStatusAction, setLoadingAction, setPercentageAction, setPoolAction, setStatusAction, setToken1Action, setToken2Action
 } from '../store';
 import {
-  ButtonStatus, calculateDeadline, ensure
+  ButtonStatus, calculateDeadline, ensure, errorHandler
 } from '../utils';
 import { useKeepTokenUpdated } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
@@ -183,7 +183,7 @@ export const onRemoveLiquidity = ({
     Uik.dropConfetti();
   } catch (e) {
     Uik.notify.danger({
-      message: `An error occurred while trying to withdraw tokens: ${e.message}`,
+      message: `An error occurred while trying to withdraw tokens: ${errorHandler(e.message)}`,
       keepAlive: true,
     });
   } finally {
