@@ -10,7 +10,7 @@ import { SubCard } from '../common/Card';
 import { Margin, MT, MX } from '../common/Display';
 import { PlusIcon } from '../common/Icons';
 import { ConfirmLabel } from '../common/Label';
-import {ConfirmationModal} from '../common/Modal';
+import ConfirmationModal from '../common/Modal';
 import { MiniText, MutedText } from '../common/Text';
 
 interface RemoveConfirmationModal {

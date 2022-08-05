@@ -3,7 +3,7 @@ import { TokenWithAmount } from '../../state';
 import { calculateUsdAmount } from '../../utils';
 import { Margin } from '../common/Display';
 import { ConfirmLabel } from '../common/Label';
-import {ConfirmationModal} from '../common/Modal';
+import ConfirmationModal from '../common/Modal';
 import { TokenAmountView } from '../TokenFields/TokenAmountView';
 
 interface SendConfirmationModal {

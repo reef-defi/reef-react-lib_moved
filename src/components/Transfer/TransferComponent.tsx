@@ -35,9 +35,8 @@ import {
 import { TokenAmountFieldMax, TokenAmountView } from '../TokenFields';
 import { Input } from '../common/Input';
 import { MiniText } from '../common/Text';
-import {
+import ConfirmationModal, {
   ModalFooter,
-  ConfirmationModal,
   OpenModalButton,
 } from '../common/Modal';
 import { Loading, LoadingButtonIconWithText } from '../common/Loading';

@@ -14,7 +14,7 @@ import {
 import { ComponentCenter } from '../common/Display';
 import { ConfirmLabel } from '../common/Label';
 import { LoadingButtonIconWithText } from '../common/Loading';
-import {ConfirmationModal} from '../common/Modal';
+import ConfirmationModal from '../common/Modal';
 import { TokenAmountField } from '../TokenFields';
 import { TransactionSettings } from '../TransactionSettings';
 

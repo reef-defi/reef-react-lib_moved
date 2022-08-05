@@ -5,7 +5,7 @@ import { SwitchTokenButton } from '../common/Button';
 import { SubCard } from '../common/Card';
 import { Margin } from '../common/Display';
 import { ConfirmLabel } from '../common/Label';
-import {ConfirmationModal} from '../common/Modal';
+import ConfirmationModal from '../common/Modal';
 import { MutedText } from '../common/Text';
 import { TokenAmountView } from '../TokenFields';
 
