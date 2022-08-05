@@ -1,5 +1,5 @@
 import { DocumentNode, gql } from '@apollo/client';
-import { PoolData, ReservedData } from '../state';
+import { ERC20ContractData, PoolData, ReservedData } from '../state';
 
 // Data interfaces
 export type BasePoolTransactionTypes = 'Swap' | 'Mint' | 'Burn';
@@ -32,6 +32,17 @@ interface AllPool extends Reserves {
     address: string;
     token_1: string;
     token_2: string;
+
+    token_contract_1: {
+      verified_contract: {
+        contract_data: ERC20ContractData;
+      }
+    }
+    token_contract_2: {
+      verified_contract: {
+        contract_data: ERC20ContractData;
+      }
+    }
   }
 }
 interface ContractData {
@@ -1030,6 +1041,16 @@ subscription pool_event {
       address
       token_1
       token_2
+      token_contract_1 {
+        verified_contract {
+          contract_data
+        }
+      }
+      token_contract_2 {
+        verified_contract {
+          contract_data
+        }
+      }
     }
   }
 }
