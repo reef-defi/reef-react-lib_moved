@@ -85,7 +85,7 @@ interface ConfirmationModal {
   confirmBtnLabel?: string;
 }
 
-const ConfirmationModal: React.FC<ConfirmationModal> = ({
+export const ConfirmationModal: React.FC<ConfirmationModal> = ({
   id = 'exampleModal',
   title,
   confirmFun,
@@ -106,4 +106,3 @@ const ConfirmationModal: React.FC<ConfirmationModal> = ({
   </Modal>
 );
 
-export default ConfirmationModal;
