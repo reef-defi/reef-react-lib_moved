@@ -14,6 +14,7 @@ const chainErrors: { [key: string]: string } = {
   INSUFFICIENT_LIQUIDITY_BURNED: 'Insufficient liquidity burned.',
   InsufficientBalance: 'Account Reef token balance is too low.',
   LiquidityRestrictions: 'Insufficient pool liquidity.',
+  TRANSFER_FAILED: 'Token transfer failed.',
 };
 
 export const errorHandler = (message: string): string => {
