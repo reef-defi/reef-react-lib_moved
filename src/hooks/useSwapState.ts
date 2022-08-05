@@ -197,6 +197,12 @@ export const onSwap = ({
       [token1.address, token2.address],
       evmAddress,
       calculateDeadline(deadline),
+      {
+        gasLimit: estimation.gas,
+        customData: {
+          storageLimit: estimation.storage.lt(0) ? 0 : estimation.storage
+        }
+      }
     );
 
     Uik.notify.success({
