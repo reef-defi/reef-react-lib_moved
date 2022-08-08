@@ -1,6 +1,6 @@
 import {BigNumber} from 'ethers';
 import {BigNumber as BN} from 'bignumber.js';
-import {EMPTY_ADDRESS, ensure, MIN_EVM_TOKEN_BALANCE, MIN_REEF_TOKEN_BALANCE, REEF_ADDRESS} from '../utils/utils';
+import {EMPTY_ADDRESS, ensure, MIN_EVM_TX_BALANCE, MIN_NATIVE_TX_BALANCE, REEF_ADDRESS} from '../utils/utils';
 import {calculateAmount} from '../utils/math';
 import {TokenPrices} from './pool';
 
@@ -97,16 +97,21 @@ export const toTokenAmount = (
   isEmpty: false,
 });
 
-export const checkMinExistentialTokenAmount = (token: TokenWithAmount): {valid: boolean, message?: string} => {
-  const FIXED_TX_FEE = 2;
-  const isReefToken = token.address === REEF_ADDRESS;
+export function isNativeTransfer(token: Token) {
+  return token.address === REEF_ADDRESS;
+}
+
+export const checkMinExistentialReefAmount = (token: TokenWithAmount, reefBalance: BigNumber): {valid: boolean, message?: string, requiredBalanceMin: BigNumber} => {
   const amount = calculateAmount(token);
-  const existentialMinAmount = (isReefToken ? MIN_REEF_TOKEN_BALANCE : MIN_EVM_TOKEN_BALANCE);
-  const min = calculateAmount({ decimals: token.decimals, amount: (existentialMinAmount + FIXED_TX_FEE).toString() });
-  const sum = BigNumber.from(min).add(BigNumber.from(amount));
-  const valid = BigNumber.from(token.balance).gte(sum);
-  const message = valid ? '' : `At least ${existentialMinAmount} ${token.name} tokens should be left in the wallet after transaction.`;
-  return { valid, message };
+  const nativeTransfer = isNativeTransfer(token);
+  const FIXED_TX_FEE = nativeTransfer ? 2 : 3;
+  const minAmountBesidesTx = (nativeTransfer ? MIN_NATIVE_TX_BALANCE : MIN_EVM_TX_BALANCE);
+  console.log("Exist min amt=",minAmountBesidesTx);
+  const min = calculateAmount({ decimals: token.decimals, amount: (minAmountBesidesTx + FIXED_TX_FEE).toString() });
+  const requiredBalanceMin = nativeTransfer ? BigNumber.from(min).add(BigNumber.from(amount)) : BigNumber.from(min);
+  const valid = BigNumber.from(reefBalance).gte(requiredBalanceMin);
+  const message = valid ? '' : `At least ${minAmountBesidesTx} REEF coins should be left to allow for transaction.`;
+  return { valid, message, requiredBalanceMin };
 };
 
 export const ensureTokenAmount = (token: TokenWithAmount): void => ensure(
@@ -114,8 +119,8 @@ export const ensureTokenAmount = (token: TokenWithAmount): void => ensure(
   `Insufficient ${token.name} balance`,
 );
 
-export const ensureExistentialTokenAmount = (token: TokenWithAmount): void => {
-  ensure(checkMinExistentialTokenAmount(token).valid, `Insufficient ${token.name} balance.`);
+export const ensureExistentialReefAmount = (token: TokenWithAmount, reefBalance: BigNumber): void => {
+  ensure(checkMinExistentialReefAmount(token, reefBalance).valid, `Insufficient ${token.name} balance.`);
 };
 
 export const REEF_TOKEN: Token = {
@@ -139,3 +144,7 @@ export const reefTokenWithAmount = (): TokenWithAmount => toTokenAmount(
 export const getTokenPrice = (address: string, prices: TokenPrices): BN => new BN(prices[address]
   ? prices[address]
   : 0);
+
+export const isNativeAddress = (toAddress: string) => {
+  return toAddress.length === 48 && toAddress[0] === '5';
+}

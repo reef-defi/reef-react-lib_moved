@@ -1,34 +1,39 @@
-import React, { useEffect, useState } from 'react';
-import { Contract } from 'ethers';
-import { Provider } from '@reef-defi/evm-provider';
+import React, {useEffect, useState} from 'react';
+import {BigNumber, Contract} from 'ethers';
+import {Provider} from '@reef-defi/evm-provider';
 import {
-  checkMinExistentialTokenAmount,
+  checkMinExistentialReefAmount,
   createEmptyTokenWithAmount,
-  ensureExistentialTokenAmount,
+  ensureExistentialReefAmount,
   ensureTokenAmount,
+  isNativeTransfer,
   NotifyFun,
   ReefSigner,
   reefTokenWithAmount,
   Token,
   TokenWithAmount,
 } from '../../state';
-import { Input } from '../common/Input';
-import {
-  Card, CardHeaderBlank, SubCard, CardHeader, CardTitle,
-} from '../common/Card';
-import { CenterColumn, ComponentCenter, MT } from '../common/Display';
-import { OpenModalButton } from '../common/Modal';
+import {Input} from '../common/Input';
+import {Card, CardHeader, CardHeaderBlank, CardTitle, SubCard,} from '../common/Card';
+import {CenterColumn, ComponentCenter, MT} from '../common/Display';
+import {OpenModalButton} from '../common/Modal';
 import SendConfirmationModal from './SendConfirmationModal';
-import { TokenAmountFieldMax } from '../TokenFields';
-import { LoadingButtonIconWithText } from '../common/Loading';
-import { ERC20 } from '../../assets/abi/ERC20';
+import {TokenAmountFieldMax} from '../TokenFields';
+import {LoadingButtonIconWithText} from '../common/Loading';
+import {ERC20} from '../../assets/abi/ERC20';
 import {
-  ButtonStatus, calculateAmount, ensure, nativeTransfer, REEF_ADDRESS, removeReefSpecificStringFromAddress,
+  ButtonStatus,
+  calculateAmount,
+  ensure,
+  nativeTransfer,
+  removeReefSpecificStringFromAddress,
+  toReefBalanceDisplay,
 } from '../../utils';
-import { AccountListModal } from '../AccountSelector/AccountListModal';
-import { SwitchTokenButton } from '../common/Button';
-import { DownIcon } from '../common/Icons';
+import {AccountListModal} from '../AccountSelector/AccountListModal';
+import {SwitchTokenButton} from '../common/Button';
+import {DownIcon} from '../common/Icons';
 import './Send.css';
+import {parseEther} from "ethers/lib/utils";
 
 interface Send {
   tokens: Token[];
@@ -52,17 +57,34 @@ const getSignerEvmAddress = async (address: string, provider: Provider): Promise
   return addr;
 };
 
+const getSignerNativeAddress = async (evmAddress: string, provider: Provider): Promise<string> => {
+  if (isNativeAddress(evmAddress)) {
+    return evmAddress;
+  }
+  const address = await provider.api.query.evmAccounts.accounts(evmAddress);
+  const addr = (address as any).toString();
+
+  if (!addr) {
+    throw new Error('Native address does not exist');
+  }
+  return addr;
+};
+
+function isNativeAddress(toAddress: string) {
+  return toAddress.length === 48 && toAddress[0] === '5';
+}
+
 const sendStatus = (to: string, token: TokenWithAmount, signer: ReefSigner): ButtonStatus => {
   try {
     const toAddress = to.trim();
     ensure(toAddress.length !== 0, 'Missing destination address');
-    ensure(toAddress.length === 42 || (toAddress.length === 48 && toAddress[0] === '5'), 'Incorrect destination address');
+    ensure(toAddress.length === 42 || isNativeAddress(toAddress), 'Incorrect destination address');
     if (toAddress.startsWith('0x')) {
       ensure(signer.isEvmClaimed, 'Bind account');
     }
     ensure(token.amount !== '', 'Insert amount');
     ensureTokenAmount(token);
-    ensureExistentialTokenAmount(token);
+    ensureExistentialReefAmount(token, signer.balance);
 
     return { isValid: true, text: 'Confirm Send' };
   } catch (e) {
@@ -89,12 +111,19 @@ export const Send = ({
 
   const tokenContract = new Contract(token.address, ERC20, signer.signer);
   const { text, isValid } = sendStatus(to, token, signer);
-  const existentialValidity = checkMinExistentialTokenAmount(token);
+  const existentialValidity = checkMinExistentialReefAmount(token, signer.balance);
 
   const onTokenSelect = (newToken: Token): void => setToken({ ...createEmptyTokenWithAmount(false), ...newToken });
 
-  const onAmountChange = (amount: string): void => {
-    setToken({ ...token, amount });
+  const onAmountChange = (amount: string, token: TokenWithAmount, signer: ReefSigner): void => {
+    const {requiredBalanceMin} = checkMinExistentialReefAmount(token, signer.balance);
+    console.log("aaa=",amount, requiredBalanceMin);
+    let maxAmt = isNativeTransfer(token) ? parseEther(amount).sub(requiredBalanceMin) : parseEther(amount);
+    let zero = BigNumber.from('0');
+    if(maxAmt.lt(zero)){
+      maxAmt = zero;
+    }
+    setToken({ ...token, amount: toReefBalanceDisplay(maxAmt) });
     setAmountPristine(false);
   };
 
@@ -102,15 +131,16 @@ export const Send = ({
     try {
       setLoading(true);
       ensureTokenAmount(token);
-      ensureExistentialTokenAmount(token);
+      ensureExistentialReefAmount(token, signer.balance);
       const amount = calculateAmount(token);
 
-      if (token.address === REEF_ADDRESS && to.length === 48) {
+      if (isNativeTransfer(token)) {
         setStatus('Transfering native REEF');
-        await nativeTransfer(amount, to, provider, signer);
+        const nativeAddr = await getSignerNativeAddress(to, provider);
+        await nativeTransfer(amount, nativeAddr, provider, signer);
       } else {
         setStatus('Extracting evm address');
-        const toAddress = to.length === 48
+        const toAddress = isNativeAddress(to)
           ? await getSignerEvmAddress(to, provider)
           : to;
         setStatus(`Transfering ${token.symbol}`);
@@ -163,7 +193,7 @@ export const Send = ({
         <SwitchTokenButton disabled addIcon />
         <TokenAmountFieldMax
           onTokenSelect={onTokenSelect}
-          onAmountChange={onAmountChange}
+          onAmountChange={(amt)=>onAmountChange(amt, token, signer)}
           signer={signer}
           token={token}
           tokens={tokens}
