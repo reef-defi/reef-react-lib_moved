@@ -8,7 +8,7 @@ import TokenField, { SelectToken } from './TokenField';
 
 import ProvidePopup from './ConfirmPopups/Provide';
 
-export interface ProvideActions {
+interface ProvideActions {
   onAddLiquidity: () => Promise<void>;
   setToken1Amount: (amount: string) => void;
   setToken2Amount: (amount: string) => void;
@@ -17,12 +17,12 @@ export interface ProvideActions {
   selectToken2?: SelectToken;
 }
 
-export interface Props {
+interface Provider {
   state: AddLiquidityState,
   actions: ProvideActions
 }
 
-const Provide = ({
+export const Provide = ({
   state,
   actions: {
     onAddLiquidity,
@@ -32,7 +32,7 @@ const Provide = ({
     selectToken1,
     selectToken2,
   },
-}: Props): JSX.Element => {
+}: Provider): JSX.Element => {
   const {
     token1,
     token2,
@@ -123,4 +123,3 @@ const Provide = ({
   );
 };
 
-export default Provide;

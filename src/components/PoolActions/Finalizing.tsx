@@ -2,7 +2,7 @@ import React from 'react';
 import Uik from '@reef-defi/ui-kit';
 import './finalizing.css';
 
-const Finalizing = (): JSX.Element => (
+export const Finalizing = (): JSX.Element => (
   <div className="pool-actions-finalizing">
     <div className="pool-actions-finalizing__animation">
       <Uik.FishAnimation />
@@ -13,4 +13,3 @@ const Finalizing = (): JSX.Element => (
   </div>
 );
 
-export default Finalizing;

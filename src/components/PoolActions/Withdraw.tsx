@@ -6,17 +6,17 @@ import { RemoveLiquidityState } from '../../store';
 import WithdrawPopup from './ConfirmPopups/Withdraw';
 import { removeUserPoolSupply, calculatePoolShare } from '../../utils';
 
-export interface WithdrawActions {
+interface WithdrawActions {
   onRemoveLiquidity: () => Promise<void>;
   setPercentage: (percentage: number) => void;
 }
 
-export interface Props {
+interface Withdraw {
   state: RemoveLiquidityState;
   actions: WithdrawActions
 }
 
-const Withdraw = ({
+export const Withdraw = ({
   state: {
     pool,
     isLoading,
@@ -30,7 +30,7 @@ const Withdraw = ({
     onRemoveLiquidity,
     setPercentage,
   },
-}: Props): JSX.Element => {
+}: Withdraw): JSX.Element => {
   const getTotalValue = useMemo((): number => {
     const firstTokenValue = new BigNumber(token1.price).times(token1.amount).toNumber();
     const secondTokenValue = new BigNumber(token2.price).times(token2.amount).toNumber();
@@ -103,4 +103,3 @@ const Withdraw = ({
   );
 };
 
-export default Withdraw;

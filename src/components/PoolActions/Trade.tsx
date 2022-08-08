@@ -8,7 +8,7 @@ import TokenField, { SelectToken } from './TokenField';
 import { Pool, resolveSettings } from '../../state';
 import TradePopup from './ConfirmPopups/Trade';
 
-export interface TradeActions {
+interface TradeActions {
   onSwitch: () => void;
   onSwap: () => Promise<void>;
   setToken1Amount: (amount: string) => void;
@@ -70,7 +70,7 @@ const calculateRate = (
   return `1 ${symbol2} = ${Uik.utils.maxDecimals(res.toNumber(), 4)} ${symbol1}`;
 };
 
-const Trade = ({
+export const Trade = ({
   state: {
     token1,
     percentage,
@@ -192,5 +192,3 @@ const Trade = ({
     </div>
   );
 };
-
-export default Trade;
