@@ -12,12 +12,8 @@ export const useAllPools = (): LastPoolReserves[] => {
             token_1,
             token_2,
             address,
-            token_contract_1: {
-              verified_contract: { contract_data: token_data_1 },
-            },
-            token_contract_2: {
-              verified_contract: { contract_data: token_data_2 },
-            },
+            token_contract_1,
+            token_contract_2,
           },
           reserved_2,
         }) => ({
@@ -26,8 +22,8 @@ export const useAllPools = (): LastPoolReserves[] => {
           reserved_1,
           reserved_2,
           address,
-          token_data_1,
-          token_data_2,
+          token_data_1: token_contract_1.verified_contract?.contract_data,
+          token_data_2: token_contract_2.verified_contract?.contract_data,
         })
       )
     : [];

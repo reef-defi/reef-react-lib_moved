@@ -36,12 +36,12 @@ interface AllPool extends Reserves {
     token_contract_1: {
       verified_contract: {
         contract_data: ERC20ContractData;
-      }
+      } | null
     }
     token_contract_2: {
       verified_contract: {
         contract_data: ERC20ContractData;
-      }
+      } | null
     }
   }
 }
@@ -841,7 +841,7 @@ subscription pool($address: String!, $signerAddress: String!, $fromTime: timesta
     fee: fee_aggregate(
       distinct_on: timeframe
       where: {
-        timeframe: { _gt: $toTime }
+        timeframe: { _gte: $toTime }
       }
     ) {
       aggregate {
@@ -854,7 +854,7 @@ subscription pool($address: String!, $signerAddress: String!, $fromTime: timesta
     currentDayVolume: volume_aggregate(
       distinct_on: timeframe
       where: {
-        timeframe: { _gt: $toTime }
+        timeframe: { _gte: $toTime }
       }
     ) {
       aggregate {
@@ -868,8 +868,8 @@ subscription pool($address: String!, $signerAddress: String!, $fromTime: timesta
       distinct_on: timeframe
       where: {
         _and: [
-          { timeframe: { _gt: $fromTime } }
-          { timeframe: { _lte: $toTime } }
+          { timeframe: { _gte: $fromTime } }
+          { timeframe: { _lt: $toTime } }
         ]
       }
     ) {
