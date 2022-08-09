@@ -3,7 +3,7 @@ import BigNumber from 'bignumber.js';
 import { Contract } from 'ethers';
 import { Dispatch, useEffect } from 'react';
 import { ReefswapPair } from '../assets/abi/ReefswapPair';
-import { approveAmount, getReefswapRouter } from '../rpc';
+import { getReefswapRouter } from '../rpc';
 import {
   AddressToNumber,
   Network, NotifyFun, Pool, ReefSigner, REMOVE_DEFAULT_SLIPPAGE_TOLERANCE, resolveSettings, Token

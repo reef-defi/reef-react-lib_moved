@@ -2,7 +2,7 @@ import Uik from '@reef-defi/ui-kit';
 import { BigNumber, Contract } from 'ethers';
 import { Dispatch, useEffect } from 'react';
 import { ERC20 } from '../assets/abi/ERC20';
-import { approveTokenAmount, getReefswapRouter } from '../rpc';
+import { getReefswapRouter } from '../rpc';
 import {
   AddressToNumber,
   Network,
