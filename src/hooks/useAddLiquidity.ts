@@ -1,6 +1,7 @@
 import Uik from '@reef-defi/ui-kit';
-import { BigNumber } from 'ethers';
+import { BigNumber, Contract } from 'ethers';
 import { Dispatch, useEffect } from 'react';
+import { ERC20 } from '../assets/abi/ERC20';
 import { approveTokenAmount, getReefswapRouter } from '../rpc';
 import {
   AddressToNumber,
@@ -199,9 +200,14 @@ export const onAddLiquidity = ({
     const percentage2 = calculateAmountWithPercentage(token2, percentage);
 
     dispatch(setStatusAction(`Approving ${token1.symbol} token`));
-    await approveTokenAmount(token1, network.routerAddress, signer.signer);
+    const token1Contract = new Contract(token1.address, ERC20, signer.signer);
+    // const approvetTokenTransaction1 = token1Contract.populateTransaction.approve(network.routerAddress, amount1);
+    await token1Contract.approve(network.routerAddress, amount1);
+
     dispatch(setStatusAction(`Approving ${token2.symbol} token`));
-    await approveTokenAmount(token2, network.routerAddress, signer.signer);
+    const token2Contract = new Contract(token2.address, ERC20, signer.signer);
+    await token2Contract.approve(network.routerAddress, amount2);
+    // const approvetTokenTransaction2 = token2Contract.populateTransaction.approve(network.routerAddress, amount2);
 
 
     console.log('Estimating provide limits')

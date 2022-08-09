@@ -1,6 +1,8 @@
 import Uik from '@reef-defi/ui-kit';
 import BigNumber from 'bignumber.js';
+import { Contract } from 'ethers';
 import { Dispatch, useEffect } from 'react';
+import { ReefswapPair } from '../assets/abi/ReefswapPair';
 import { approveAmount, getReefswapRouter } from '../rpc';
 import {
   AddressToNumber,
@@ -138,12 +140,10 @@ export const onRemoveLiquidity = ({
   try {
     dispatch(setLoadingAction(true));
     dispatch(setStatusAction('Approving remove'));
-    await approveAmount(
-      pool.poolAddress,
-      network.routerAddress,
-      removedLiquidity,
-      signer.signer,
-    );
+    const poolContract = new Contract(pool.poolAddress, ReefswapPair, signer.signer);
+    await poolContract.aprove(network.routerAddress, removedLiquidity);
+
+    // const approveTransaction = await poolContract.populateTransaction.approve(network.routerAddress, removedLiquidity);
 
     console.log('Estimating withdraw limits')
     let extrinsicTransaction = await reefswapRouter.populateTransaction.removeLiquidity(

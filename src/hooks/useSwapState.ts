@@ -1,7 +1,8 @@
 import Uik from '@reef-defi/ui-kit';
-import { BigNumber } from 'ethers';
+import { BigNumber, Contract } from 'ethers';
 import { Dispatch, useEffect } from 'react';
-import { approveTokenAmount, getReefswapRouter } from '../rpc';
+import { ERC20 } from '../assets/abi/ERC20';
+import { getReefswapRouter } from '../rpc';
 import {
   AddressToNumber,
   ensureTokenAmount,
@@ -172,26 +173,45 @@ export const onSwap = ({
     dispatch(setLoadingAction(true));
     ensureTokenAmount(token1);
 
-
     dispatch(setStatusAction(`Approving ${token1.symbol} token`));
     const sellAmount = calculateAmount(token1);
     const minBuyAmount = calculateAmountWithPercentage(token2, percentage);
     const reefswapRouter = getReefswapRouter(network.routerAddress, signer);
-    await approveTokenAmount(token1, network.routerAddress, signer);
 
+    // await approveTokenAmount(token1, network.routerAddress, signer);
+    const sellTokenContract = new Contract(token1.address, ERC20, signer);
+    await sellTokenContract.approve(network.routerAddress, sellAmount);
 
-    console.log('Estimating trade limits')
-    let extrinsicTransaction = await reefswapRouter.populateTransaction.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+    dispatch(setStatusAction('Executing trade'));
+    // const approveTransaction = await sellTokenContract.populateTransaction.approve(
+    //   network.routerAddress,
+    //   sellAmount
+    // );
+
+    // console.log('Approve transaction: ', approveTransaction)
+    // // console.log('Estimating trade limits')
+    let tradeTransaction = await reefswapRouter.populateTransaction.swapExactTokensForTokensSupportingFeeOnTransferTokens(
       sellAmount,
       minBuyAmount,
       [token1.address, token2.address],
       evmAddress,
       calculateDeadline(deadline),
     );
-    let estimation = await signer.provider.estimateResources(extrinsicTransaction);
+
+    // console.log('Trade transaction: ', tradeTransaction)
+
+    // const batch = signer.provider.api.tx.utility.batchAll([approveTransaction, tradeTransaction]);
+
+    // const hash = await batch.signAndSend(signer);
+    // console.log(hash)
+    // signer.provider.api.tx.utility.batchAll([
+    //   approveTransaction,
+    //   tradeTransaction
+    // ]);
+
+    let estimation = await signer.provider.estimateResources(tradeTransaction);
     console.log(`Trade call estimations: \n\tGas: ${estimation.gas.toString()}\n\tStorage: ${estimation.storage.toString()}\n\tWeight fee: ${estimation.weightFee.toString()}`)
 
-    dispatch(setStatusAction('Executing trade'));
     await reefswapRouter.swapExactTokensForTokensSupportingFeeOnTransferTokens(
       sellAmount,
       minBuyAmount,
