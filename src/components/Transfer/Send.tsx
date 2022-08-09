@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Contract } from 'ethers';
 import { Provider } from '@reef-defi/evm-provider';
+import Uik from '@reef-defi/ui-kit';
+import { Contract } from 'ethers';
+import React, { useEffect, useState } from 'react';
+import { ERC20 } from '../../assets/abi/ERC20';
 import {
   checkMinExistentialTokenAmount,
   createEmptyTokenWithAmount,
@@ -10,25 +12,24 @@ import {
   ReefSigner,
   reefTokenWithAmount,
   Token,
-  TokenWithAmount,
+  TokenWithAmount
 } from '../../state';
-import { Input } from '../common/Input';
 import {
-  Card, CardHeaderBlank, SubCard, CardHeader, CardTitle,
-} from '../common/Card';
-import { CenterColumn, ComponentCenter, MT } from '../common/Display';
-import { OpenModalButton } from '../common/Modal';
-import SendConfirmationModal from './SendConfirmationModal';
-import { TokenAmountFieldMax } from '../TokenFields';
-import { LoadingButtonIconWithText } from '../common/Loading';
-import { ERC20 } from '../../assets/abi/ERC20';
-import {
-  ButtonStatus, calculateAmount, ensure, nativeTransfer, REEF_ADDRESS, removeReefSpecificStringFromAddress,
+  ButtonStatus, calculateAmount, ensure, errorHandler, nativeTransfer, REEF_ADDRESS, removeReefSpecificStringFromAddress
 } from '../../utils';
 import { AccountListModal } from '../AccountSelector/AccountListModal';
 import { SwitchTokenButton } from '../common/Button';
+import {
+  Card, CardHeader, CardHeaderBlank, CardTitle, SubCard
+} from '../common/Card';
+import { CenterColumn, ComponentCenter, MT } from '../common/Display';
 import { DownIcon } from '../common/Icons';
+import { Input } from '../common/Input';
+import { LoadingButtonIconWithText } from '../common/Loading';
+import { OpenModalButton } from '../common/Modal';
+import { TokenAmountFieldMax } from '../TokenFields';
 import './Send.css';
+import SendConfirmationModal from './SendConfirmationModal';
 
 interface Send {
   tokens: Token[];
@@ -71,7 +72,7 @@ const sendStatus = (to: string, token: TokenWithAmount, signer: ReefSigner): But
 };
 
 export const Send = ({
-  signer, tokens, accounts, provider, notify,
+  signer, tokens, accounts, provider,
 }: Send): JSX.Element => {
   const [to, setTo] = useState('');
   const [status, setStatus] = useState('');
@@ -117,11 +118,18 @@ export const Send = ({
         await tokenContract.transfer(toAddress, amount);
       }
 
-      notify('Balances will reload after blocks are finalized.', 'info');
-      notify('Tokens sent successfully!');
-    } catch (e) {
-      console.error(e);
-      notify(`There was an error while sending tokens: ${e.message}`, 'error');
+      Uik.notify.success({
+        message: 'Tokens transfered.\nBalances will reload after blocks are finalized',
+        keepAlive: true,
+      });
+
+      Uik.dropConfetti();
+    } catch (error) {
+      const message = errorHandler(error.message)
+      Uik.notify.danger({
+        message: `There was an error while sending tokens: ${message}`,
+        keepAlive: true,
+      });
     } finally {
       setLoading(false);
     }

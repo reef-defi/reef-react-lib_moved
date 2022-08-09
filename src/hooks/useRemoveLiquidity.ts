@@ -1,7 +1,9 @@
 import Uik from '@reef-defi/ui-kit';
 import BigNumber from 'bignumber.js';
+import { Contract } from 'ethers';
 import { Dispatch, useEffect } from 'react';
-import { approveAmount, getReefswapRouter } from '../rpc';
+import { ReefswapPair } from '../assets/abi/ReefswapPair';
+import { getReefswapRouter } from '../rpc';
 import {
   AddressToNumber,
   Network, NotifyFun, Pool, ReefSigner, REMOVE_DEFAULT_SLIPPAGE_TOLERANCE, resolveSettings, Token
@@ -10,7 +12,7 @@ import {
   RemoveLiquidityActions, RemoveLiquidityState, setCompleteStatusAction, setLoadingAction, setPercentageAction, setPoolAction, setStatusAction, setToken1Action, setToken2Action
 } from '../store';
 import {
-  ButtonStatus, calculateDeadline, ensure
+  ButtonStatus, calculateDeadline, ensure, errorHandler
 } from '../utils';
 import { useKeepTokenUpdated } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
@@ -65,6 +67,7 @@ export const useRemoveLiquidity = ({
     token2,
     network?.factoryAddress || '',
     signer?.signer,
+    isLoading
   );
   // Updating pool
   useEffect(() => {
@@ -137,12 +140,10 @@ export const onRemoveLiquidity = ({
   try {
     dispatch(setLoadingAction(true));
     dispatch(setStatusAction('Approving remove'));
-    await approveAmount(
-      pool.poolAddress,
-      network.routerAddress,
-      removedLiquidity,
-      signer.signer,
-    );
+    const poolContract = new Contract(pool.poolAddress, ReefswapPair, signer.signer);
+    await poolContract.aprove(network.routerAddress, removedLiquidity);
+
+    // const approveTransaction = await poolContract.populateTransaction.approve(network.routerAddress, removedLiquidity);
 
     console.log('Estimating withdraw limits')
     let extrinsicTransaction = await reefswapRouter.populateTransaction.removeLiquidity(
@@ -166,6 +167,12 @@ export const onRemoveLiquidity = ({
       minimumTokenAmount2,
       signer.evmAddress,
       calculateDeadline(deadline),
+      {
+        gasLimit: estimation.gas,
+        customData: {
+          storageLimit: estimation.storage.lt(0) ? 0 : estimation.storage
+        }
+      }
     );
 
     Uik.notify.success({
@@ -176,7 +183,7 @@ export const onRemoveLiquidity = ({
     Uik.dropConfetti();
   } catch (e) {
     Uik.notify.danger({
-      message: `An error occurred while trying to withdraw tokens: ${e.message}`,
+      message: `An error occurred while trying to withdraw tokens: ${errorHandler(e.message)}`,
       keepAlive: true,
     });
   } finally {

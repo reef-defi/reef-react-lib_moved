@@ -10,13 +10,14 @@ export const useLoadPool = (
   token2: Token,
   factoryAddress: string,
   signer?: Signer,
+  disable?: boolean,
 ): [LoadingPool, boolean] => {
   const [pool, setPool] = useState<Pool>();
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const load = async (): Promise<void> => {
-      if (!token1.address || !token2.address || !signer) {
+      if (!token1.address || !token2.address || !signer || disable) {
         return;
       }
       Promise.resolve()

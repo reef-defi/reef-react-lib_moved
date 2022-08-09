@@ -1,5 +1,5 @@
 import { DocumentNode, gql } from '@apollo/client';
-import { PoolData, ReservedData } from '../state';
+import { ERC20ContractData, PoolData, ReservedData } from '../state';
 
 // Data interfaces
 export type BasePoolTransactionTypes = 'Swap' | 'Mint' | 'Burn';
@@ -32,6 +32,17 @@ interface AllPool extends Reserves {
     address: string;
     token_1: string;
     token_2: string;
+
+    token_contract_1: {
+      verified_contract: {
+        contract_data: ERC20ContractData;
+      } | null
+    }
+    token_contract_2: {
+      verified_contract: {
+        contract_data: ERC20ContractData;
+      } | null
+    }
   }
 }
 interface ContractData {
@@ -830,7 +841,7 @@ subscription pool($address: String!, $signerAddress: String!, $fromTime: timesta
     fee: fee_aggregate(
       distinct_on: timeframe
       where: {
-        timeframe: { _gt: $toTime }
+        timeframe: { _gte: $toTime }
       }
     ) {
       aggregate {
@@ -843,7 +854,7 @@ subscription pool($address: String!, $signerAddress: String!, $fromTime: timesta
     currentDayVolume: volume_aggregate(
       distinct_on: timeframe
       where: {
-        timeframe: { _gt: $toTime }
+        timeframe: { _gte: $toTime }
       }
     ) {
       aggregate {
@@ -857,8 +868,8 @@ subscription pool($address: String!, $signerAddress: String!, $fromTime: timesta
       distinct_on: timeframe
       where: {
         _and: [
-          { timeframe: { _gt: $fromTime } }
-          { timeframe: { _lte: $toTime } }
+          { timeframe: { _gte: $fromTime } }
+          { timeframe: { _lt: $toTime } }
         ]
       }
     ) {
@@ -1030,6 +1041,16 @@ subscription pool_event {
       address
       token_1
       token_2
+      token_contract_1 {
+        verified_contract {
+          contract_data
+        }
+      }
+      token_contract_2 {
+        verified_contract {
+          contract_data
+        }
+      }
     }
   }
 }

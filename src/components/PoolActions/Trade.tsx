@@ -5,10 +5,10 @@ import React, { useMemo, useState } from 'react';
 import { SwapState } from '../../store';
 import TokenField, { SelectToken } from './TokenField';
 
-import { Pool, resolveSettings } from '../../state';
+import { Pool, resolveSettings, Token } from '../../state';
 import TradePopup from './ConfirmPopups/Trade';
 
-export interface TradeActions {
+interface TradeActions {
   onSwitch: () => void;
   onSwap: () => Promise<void>;
   setToken1Amount: (amount: string) => void;
@@ -19,6 +19,7 @@ export interface TradeActions {
 }
 
 interface Trade {
+  tokens: Token[];
   state: SwapState,
   actions: TradeActions
 }
@@ -70,7 +71,7 @@ const calculateRate = (
   return `1 ${symbol2} = ${Uik.utils.maxDecimals(res.toNumber(), 4)} ${symbol1}`;
 };
 
-const Trade = ({
+export const Trade = ({
   state: {
     token1,
     percentage,
@@ -90,6 +91,7 @@ const Trade = ({
     selectToken1,
     selectToken2,
   },
+  tokens,
 } : Trade): JSX.Element => {
   const { percentage: slippage } = resolveSettings(settings);
   const rate = pool ? calculateRate(token1.address, pool) : undefined;
@@ -110,6 +112,7 @@ const Trade = ({
       <div className="uik-pool-actions__tokens">
         <TokenField
           token={token1}
+          tokens={tokens}
           onAmountChange={setToken1Amount}
           selectToken={selectToken1}
         />
@@ -129,6 +132,7 @@ const Trade = ({
 
         <TokenField
           token={token2}
+          tokens={tokens}
           onAmountChange={setToken2Amount}
           selectToken={selectToken2}
         />
@@ -192,5 +196,3 @@ const Trade = ({
     </div>
   );
 };
-
-export default Trade;
