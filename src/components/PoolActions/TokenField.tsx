@@ -1,64 +1,45 @@
-import React, { useState, useMemo, useEffect } from 'react';
 import Uik from '@reef-defi/ui-kit';
 import BigNumber from 'bignumber.js';
-import { TokenWithAmount } from '../../state';
+import React, { useMemo, useState } from 'react';
+import { Token, TokenWithAmount } from '../../state';
 import { showBalance } from '../../utils/math';
 import './token-field.css';
 
-export type SelectToken = () => void
+export type SelectToken = (token: Token) => void
 
-interface Props {
-  token: TokenWithAmount,
-  onAmountChange: (amount: string) => void,
-  selectToken?: SelectToken
+BigNumber.config({EXPONENTIAL_AT: 1000})
+
+interface TokenField {
+  token: TokenWithAmount;
+  tokens?: Token[];
+  selectToken?: SelectToken;
+  onAmountChange: (amount: string) => void;
 }
 
 const TokenField = ({
   token,
+  // tokens=[],
   onAmountChange,
   selectToken,
-}: Props): JSX.Element => {
-  const { amount, price, isEmpty } = token;
-  const amo = parseFloat(amount);
-
+}: TokenField): JSX.Element => {
   const [isFocused, setFocused] = useState(false);
   const onInputFocus = (): void => setFocused(true);
   const onInputBlur = (): void => setFocused(false);
 
-  const getPrice = useMemo((): string => {
-    const num = new BigNumber(amo || 0).times(price || 0).toNumber();
+  const price = useMemo((): string => {
+    if (token.amount === '') {
+      return '';
+    }
+    const num = new BigNumber(token.amount)
+      .multipliedBy(token.price)
+      .toString();
     const formatNum = Uik.utils.maxDecimals(num, 2);
-    if (formatNum) return `$${Uik.utils.formatAmount(formatNum)}`;
-    if (num) return '$0.0';
-    return '';
-  }, [amo, price]);
-
-  const mathDecimals = !amount ? '' : amount.replaceAll(',', '.');
-  const [inputValue, setInputValue] = useState(mathDecimals);
-  useEffect(() => setInputValue(amount), [amount]);
-
-  const handleInputChange = (event: any): void => {
-    const newVal = event.target.value;
-    setInputValue(newVal);
-    onAmountChange(newVal);
-  };
-
-  const isSelected = useMemo(() => token.symbol !== 'Select token', [token.symbol]);
-
-  if (!isSelected) {
-    return (
-      <button
-        className={`
-        uik-pool-actions-token
-        uik-pool-actions-token--select
-      `}
-        type="button"
-        onClick={selectToken}
-      >
-        Select token
-      </button>
-    );
-  }
+    if (!formatNum) {
+      return '$0.0'
+    } else {
+      return `$${Uik.utils.formatAmount(formatNum)}`;
+    }
+  }, [token.amount, token.price]);
 
   return (
     <div
@@ -69,10 +50,13 @@ const TokenField = ({
     >
 
       <button
-        className="uik-pool-actions-token__token"
+        className={!token.isEmpty
+          ? "uik-pool-actions-token__token"
+          : "uik-pool-actions-token uik-pool-actions-token--select"
+        }
         type="button"
         disabled={!selectToken}
-        onClick={selectToken}
+        // onClick={selectToken}
       >
         <div
           className="uik-pool-actions-token__image"
@@ -83,41 +67,44 @@ const TokenField = ({
 
         <div className="uik-pool-actions-token__info">
           <div className="uik-pool-actions-token__symbol">{ token.symbol }</div>
-          <div className="uik-pool-actions-token__amount">
-            Available
-            {' '}
-            { showBalance(token) }
-          </div>
+          { !token.isEmpty &&
+            <div className="uik-pool-actions-token__amount">
+              Available
+              {' '}
+              { showBalance(token) }
+            </div>
+          }
         </div>
       </button>
+      { !token.isEmpty &&
+        <div className="uik-pool-actions-token__value">
+          {
+            !!price
+            && (
+            <div
+              className={`
+                uik-pool-actions-token__price
+                ${!price ? 'uik-pool-actions-token__price--empty' : ''}
+              `}
+            >
+              { price }
+            </div>
+            )
+          }
 
-      <div className="uik-pool-actions-token__value">
-        {
-          !!price
-          && (
-          <div
-            className={`
-              uik-pool-actions-token__price
-              ${!getPrice ? 'uik-pool-actions-token__price--empty' : ''}
-            `}
-          >
-            { getPrice }
-          </div>
-          )
-        }
-
-        <input
-          type="number"
-          min={0.0}
-          disabled={isEmpty}
-          value={inputValue}
-          onBlur={onInputBlur}
-          onFocus={onInputFocus}
-          size={1}
-          placeholder="0.0"
-          onChange={handleInputChange}
-        />
-      </div>
+          <input
+            type="number"
+            min={0.0}
+            disabled={token.isEmpty}
+            value={token.amount}
+            onBlur={onInputBlur}
+            onFocus={onInputFocus}
+            size={1}
+            placeholder="0.0"
+            onChange={(event) => onAmountChange(event.target.value)}
+          />
+        </div>
+      }
     </div>
   );
 };

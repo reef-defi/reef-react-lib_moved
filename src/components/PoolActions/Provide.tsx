@@ -7,6 +7,7 @@ import { calculatePoolShare } from '../../utils/math';
 import TokenField, { SelectToken } from './TokenField';
 
 import ProvidePopup from './ConfirmPopups/Provide';
+import { Token } from '../../state';
 
 interface ProvideActions {
   onAddLiquidity: () => Promise<void>;
@@ -18,12 +19,14 @@ interface ProvideActions {
 }
 
 interface Provider {
-  state: AddLiquidityState,
-  actions: ProvideActions
+  tokens: Token[];
+  state: AddLiquidityState;
+  actions: ProvideActions;
 }
 
 export const Provide = ({
   state,
+  tokens,
   actions: {
     onAddLiquidity,
     setPercentage,
@@ -57,12 +60,14 @@ export const Provide = ({
       <div className="uik-pool-actions__tokens">
         <TokenField
           token={token1}
+          tokens={tokens}
           onAmountChange={setToken1Amount}
           selectToken={selectToken1}
         />
 
         <TokenField
           token={token2}
+          tokens={tokens}
           onAmountChange={setToken2Amount}
           selectToken={selectToken2}
         />

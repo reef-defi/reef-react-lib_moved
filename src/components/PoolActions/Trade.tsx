@@ -5,7 +5,7 @@ import React, { useMemo, useState } from 'react';
 import { SwapState } from '../../store';
 import TokenField, { SelectToken } from './TokenField';
 
-import { Pool, resolveSettings } from '../../state';
+import { Pool, resolveSettings, Token } from '../../state';
 import TradePopup from './ConfirmPopups/Trade';
 
 interface TradeActions {
@@ -19,6 +19,7 @@ interface TradeActions {
 }
 
 interface Trade {
+  tokens: Token[];
   state: SwapState,
   actions: TradeActions
 }
@@ -90,6 +91,7 @@ export const Trade = ({
     selectToken1,
     selectToken2,
   },
+  tokens,
 } : Trade): JSX.Element => {
   const { percentage: slippage } = resolveSettings(settings);
   const rate = pool ? calculateRate(token1.address, pool) : undefined;
@@ -110,6 +112,7 @@ export const Trade = ({
       <div className="uik-pool-actions__tokens">
         <TokenField
           token={token1}
+          tokens={tokens}
           onAmountChange={setToken1Amount}
           selectToken={selectToken1}
         />
@@ -129,6 +132,7 @@ export const Trade = ({
 
         <TokenField
           token={token2}
+          tokens={tokens}
           onAmountChange={setToken2Amount}
           selectToken={selectToken2}
         />
