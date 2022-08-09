@@ -242,7 +242,8 @@ export const onSwap = ({
     await updateTokenState().catch(() => Uik.notify.danger({
       message: 'Please reaload the page to update token balances',
       keepAlive: true,
-    }));
+    }))
+    
 
     dispatch(setLoadingAction(false));
     dispatch(clearTokenAmountsAction());
