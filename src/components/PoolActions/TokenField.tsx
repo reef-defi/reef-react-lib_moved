@@ -2,8 +2,8 @@ import Uik from '@reef-defi/ui-kit';
 import BigNumber from 'bignumber.js';
 import React, { useMemo, useState } from 'react';
 import { Token, TokenWithAmount } from '../../state';
-import { showBalance } from '../../utils/math';
 import './token-field.css';
+import TokenDropdown from './TokenDropdown';
 
 export type SelectToken = (token: Token) => void
 
@@ -18,7 +18,7 @@ interface TokenField {
 
 const TokenField = ({
   token,
-  // tokens=[],
+  tokens=[],
   onAmountChange,
   selectToken,
 }: TokenField): JSX.Element => {
@@ -48,34 +48,11 @@ const TokenField = ({
         ${isFocused ? 'uik-pool-actions-token--focused' : isFocused}
       `}
     >
-
-      <button
-        className={!token.isEmpty
-          ? "uik-pool-actions-token__token"
-          : "uik-pool-actions-token uik-pool-actions-token--select"
-        }
-        type="button"
-        disabled={!selectToken}
-        // onClick={selectToken}
-      >
-        <div
-          className="uik-pool-actions-token__image"
-          style={{
-            backgroundImage: `url(${token.iconUrl})`,
-          }}
-        />
-
-        <div className="uik-pool-actions-token__info">
-          <div className="uik-pool-actions-token__symbol">{ token.symbol }</div>
-          { !token.isEmpty &&
-            <div className="uik-pool-actions-token__amount">
-              Available
-              {' '}
-              { showBalance(token) }
-            </div>
-          }
-        </div>
-      </button>
+      <TokenDropdown
+        token={token}
+        tokens={tokens}
+        selectToken={selectToken}
+      />
       { !token.isEmpty &&
         <div className="uik-pool-actions-token__value">
           {
