@@ -107,15 +107,7 @@ export const Send = ({
 
   const onTokenSelect = (newToken: Token): void => setToken({ ...createEmptyTokenWithAmount(false), ...newToken });
 
-  const onAmountChange = (amount: string, token: TokenWithAmount, signer: ReefSigner): void => {
-    // const {requiredBalanceMin} = checkMinExistentialReefAmount(token, signer.balance);
-    /*let maxAmt = isNativeTransfer(token) ? parseEther(amount).sub(requiredBalanceMin) : parseEther(amount);
-    let zero = BigNumber.from('0');
-    if(maxAmt.lt(zero)){
-      maxAmt = zero;
-    }
-    console.log("maxAmt=",maxAmt.toString()); */
-    signer;
+  const onAmountChange = (amount: string, token: TokenWithAmount): void => {
     setToken({ ...token, amount: amount });
     setAmountPristine(false);
   };
@@ -186,7 +178,7 @@ export const Send = ({
         <SwitchTokenButton disabled addIcon />
         <TokenAmountFieldMax
           onTokenSelect={onTokenSelect}
-          onAmountChange={(amt)=>onAmountChange(amt, token, signer)}
+          onAmountChange={(amt)=>onAmountChange(amt, token)}
           signer={signer}
           token={token}
           tokens={tokens}

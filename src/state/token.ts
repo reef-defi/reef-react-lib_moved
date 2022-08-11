@@ -109,7 +109,7 @@ export function isNativeTransfer(token: Token) {
   return token.address === REEF_ADDRESS;
 }
 
-export const checkMinExistentialReefAmount = (token: TokenWithAmount, reefBalance: BigNumber): {valid: boolean, message?: string, requiredBalanceMin: BigNumber} => {
+export const checkMinExistentialReefAmount = (token: TokenWithAmount, reefBalance: BigNumber): {valid: boolean, message?: string, maxTransfer: BigNumber} => {
 
   const nativeReefTransfer = isNativeTransfer(token);
   const FIXED_TX_FEE = nativeReefTransfer ? 2 : 3;
@@ -117,17 +117,18 @@ export const checkMinExistentialReefAmount = (token: TokenWithAmount, reefBalanc
   const reservedTxMin = calculateAmount({ decimals: REEF_TOKEN.decimals, amount: (minAmountBesidesTx + FIXED_TX_FEE).toString() });
   const transferAmt = BigNumber.from(parseEther(assertAmount(token.amount)));
   const requiredReefMin = nativeReefTransfer ? BigNumber.from(reservedTxMin).add(transferAmt) : BigNumber.from(reservedTxMin);
+  const maxTransfer = reefBalance.sub(BigNumber.from(reservedTxMin));
   const valid = reefBalance.gte(requiredReefMin);
   let message = '';
   if(!valid){
-    message = `Min ${toReefBalanceDisplay(BigNumber.from(reservedTxMin))} needed to secure transaction. Token transfer fee is ~2.5 REEF.`;
+    message = `${toReefBalanceDisplay(BigNumber.from(reservedTxMin))} balance needed to call EVM transaction. Token transfer fee ~2.5 REEF.`;
 
     if (nativeReefTransfer) {
       const maxTransfer = reefBalance.sub(BigNumber.from(reservedTxMin));
       message = `Maximum transfer amount is ${toReefBalanceDisplay( maxTransfer)} to allow for fees.`
     }
   }
-  return { valid, message, requiredBalanceMin: requiredReefMin };
+  return { valid, message, maxTransfer };
 };
 
 export const ensureTokenAmount = (token: TokenWithAmount): void => ensure(
