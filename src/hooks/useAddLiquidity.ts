@@ -200,14 +200,10 @@ export const onAddLiquidity = ({
     const percentage2 = calculateAmountWithPercentage(token2, percentage);
 
     dispatch(setStatusAction('Adding supply'));
-    // dispatch(setStatusAction(`Approving ${token1.symbol} token`));
     const token1Contract = new Contract(token1.address, ERC20, signer.signer);
-    // await token1Contract.approve(network.routerAddress, amount1);
-
-    // dispatch(setStatusAction(`Approving ${token2.symbol} token`));
     const token2Contract = new Contract(token2.address, ERC20, signer.signer);
-    // await token2Contract.approve(network.routerAddress, amount2);
 
+    // Populating transactions
     const approvetTransaction1 = await token1Contract.populateTransaction.approve(network.routerAddress, amount1);
     const approvetTransaction2 = await token2Contract.populateTransaction.approve(network.routerAddress, amount2);
     const provideTransaction = await reefswapRouter.populateTransaction.addLiquidity(
@@ -221,8 +217,10 @@ export const onAddLiquidity = ({
       calculateDeadline(deadline),
     );
 
+    // estimating resources for token approval
     const resources = await signer.signer.provider.estimateResources(approvetTransaction1);
 
+    // Creating transaction extrinsics
     const approveExtrinsic1 = await signer.signer.provider.api.tx.evm.call(
       approvetTransaction1.to,
       approvetTransaction1.data,
@@ -241,17 +239,19 @@ export const onAddLiquidity = ({
       provideTransaction.to,
       provideTransaction.data,
       BigNumber.from(provideTransaction.value || 0),
-      BigNumber.from(605379).mul(2),
+      BigNumber.from(605379).mul(2), // Value was used from estimateResources, which can only be ran if tokens are approved. multiple 2 is a safty net.
       BigNumber.from(0)
     );
 
+    // Batching extrinsics
     const batch = await signer.signer.provider.api.tx.utility.batchAll([
       approveExtrinsic1,
       approveExtrinsic2,
       provideExtrinsic
     ]);
 
-    const signAndSend = new Promise<void>(async (resolve) => {
+    // Signing and awaiting when data comes in block
+    await new Promise<void>(async (resolve) => {
       batch.signAndSend(
         signer.address,
         { signer: signer.signer.signingKey },
@@ -259,6 +259,9 @@ export const onAddLiquidity = ({
           if (status.status.isInBlock) {
             resolve();
           }
+          // TODO handle error - somehow
+          // First find it
+
           // If you want to await until block is finalized use below if
           // if (status.status.isFinalized) {
             // resolve();
@@ -266,7 +269,6 @@ export const onAddLiquidity = ({
         }
       );
     });
-    await signAndSend;
 
     Uik.notify.success({
       message: 'Successfully provided liquidity.\nBalances will reload after blocks are finalized.',
