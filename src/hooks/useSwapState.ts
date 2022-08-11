@@ -166,31 +166,25 @@ export const onSwap = ({
   if (!isValid || isLoading || !account || !network) {
     return;
   }
-  const { signer, evmAddress } = account;
+  const { signer, address, evmAddress } = account;
   const { percentage, deadline } = resolveSettings(settings);
 
   try {
     dispatch(setLoadingAction(true));
     ensureTokenAmount(token1);
 
-    dispatch(setStatusAction(`Approving ${token1.symbol} token`));
     const sellAmount = calculateAmount(token1);
     const minBuyAmount = calculateAmountWithPercentage(token2, percentage);
     const reefswapRouter = getReefswapRouter(network.routerAddress, signer);
 
-    // await approveTokenAmount(token1, network.routerAddress, signer);
     const sellTokenContract = new Contract(token1.address, ERC20, signer);
-    await sellTokenContract.approve(network.routerAddress, sellAmount);
 
     dispatch(setStatusAction('Executing trade'));
-    // const approveTransaction = await sellTokenContract.populateTransaction.approve(
-    //   network.routerAddress,
-    //   sellAmount
-    // );
-
-    // console.log('Approve transaction: ', approveTransaction)
-    // // console.log('Estimating trade limits')
-    let tradeTransaction = await reefswapRouter.populateTransaction.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+    const approveTransaction = await sellTokenContract.populateTransaction.approve(
+      network.routerAddress,
+      sellAmount
+    );
+    const tradeTransaction = await reefswapRouter.populateTransaction.swapExactTokensForTokensSupportingFeeOnTransferTokens(
       sellAmount,
       minBuyAmount,
       [token1.address, token2.address],
@@ -198,33 +192,44 @@ export const onSwap = ({
       calculateDeadline(deadline),
     );
 
-    // console.log('Trade transaction: ', tradeTransaction)
+    const approveResources = await signer.provider.estimateResources(approveTransaction);
 
-    // const batch = signer.provider.api.tx.utility.batchAll([approveTransaction, tradeTransaction]);
+    const approveExtrinsic = await signer.provider.api.tx.evm.call(
+      approveTransaction.to,
+      approveTransaction.data,
+      BigNumber.from(approveTransaction.value || 0),
+      approveResources.gas,
+      approveResources.storage.lt(0) ? BigNumber.from(0) : approveResources.storage
+    );
+    const tradeExtrinsic = await signer.provider.api.tx.evm.call(
+      tradeTransaction.to,
+      tradeTransaction.data,
+      BigNumber.from(tradeTransaction.value || 0),
+      BigNumber.from(542376).mul(2),
+      BigNumber.from(0),
+    );
 
-    // const hash = await batch.signAndSend(signer);
-    // console.log(hash)
-    // signer.provider.api.tx.utility.batchAll([
-    //   approveTransaction,
-    //   tradeTransaction
-    // ]);
+    const batch = signer.provider.api.tx.utility.batchAll([
+      approveExtrinsic,
+      tradeExtrinsic,
+    ]);
 
-    let estimation = await signer.provider.estimateResources(tradeTransaction);
-    console.log(`Trade call estimations: \n\tGas: ${estimation.gas.toString()}\n\tStorage: ${estimation.storage.toString()}\n\tWeight fee: ${estimation.weightFee.toString()}`)
-
-    await reefswapRouter.swapExactTokensForTokensSupportingFeeOnTransferTokens(
-      sellAmount,
-      minBuyAmount,
-      [token1.address, token2.address],
-      evmAddress,
-      calculateDeadline(deadline),
-      {
-        gasLimit: estimation.gas,
-        customData: {
-          storageLimit: estimation.storage.lt(0) ? 0 : estimation.storage
+    const signAndSend = new Promise<void>(async (resolve) => {
+      batch.signAndSend(
+        address,
+        { signer: signer.signingKey },
+        (status: any) => {
+          if (status.status.isInBlock) {
+            resolve();
+          }
+          // If you want to await until block is finalized use below if
+          // if (status.status.isFinalized) {
+            // resolve();
+          // }
         }
-      }
-    );
+      );
+    });
+    await signAndSend;
 
     Uik.notify.success({
       message: 'Trade complete.\nBalances will reload after blocks are finalized',
@@ -243,7 +248,7 @@ export const onSwap = ({
       message: 'Please reaload the page to update token balances',
       keepAlive: true,
     }))
-    
+
 
     dispatch(setLoadingAction(false));
     dispatch(clearTokenAmountsAction());
