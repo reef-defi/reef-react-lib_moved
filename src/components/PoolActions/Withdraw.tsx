@@ -87,18 +87,19 @@ export const Withdraw = ({
         loading={isLoading}
         onClick={() => setPopupOpen(true)}
       />
-
-      <WithdrawPopup
-        isOpen={isPopupOpen}
-        onClose={() => setPopupOpen(false)}
-        onConfirm={onRemoveLiquidity}
-        pool={pool!}
-        price1={token1.price}
-        price2={token2.price}
-        percentageAmount={percentage}
-        LPTokens={removeUserPoolSupply(percentage, pool).toFixed(8)}
-        poolShare={`${calculatePoolShare(pool).toFixed(8)} %`}
-      />
+      { !!pool &&
+        <WithdrawPopup
+          isOpen={isPopupOpen}
+          onClose={() => setPopupOpen(false)}
+          onConfirm={onRemoveLiquidity}
+          pool={pool}
+          price1={token1.price}
+          price2={token2.price}
+          percentageAmount={percentage}
+          LPTokens={removeUserPoolSupply(percentage, pool).toFixed(8)}
+          poolShare={`${calculatePoolShare(pool).toFixed(8)} %`}
+        />
+      }
     </div>
   );
 };
