@@ -1,6 +1,6 @@
 import Uik from '@reef-defi/ui-kit';
-import BigNumber from 'bignumber.js';
-import { Contract } from 'ethers';
+import BN from 'bignumber.js';
+import { BigNumber, Contract } from 'ethers';
 import { Dispatch, useEffect } from 'react';
 import { ReefswapPair } from '../assets/abi/ReefswapPair';
 import { getReefswapRouter } from '../rpc';
@@ -100,11 +100,11 @@ export const onRemoveLiquidity = ({
   state,
   dispatch,
   network,
-  signer,
+  signer: sig,
 }: OnRemoveLiquidity) => async (): Promise<void> => {
   const { pool, percentage: percentageAmount, settings } = state;
-  if (!pool || !signer || !network || percentageAmount === 0) { return; }
-
+  if (!pool || !sig || !network || percentageAmount === 0) { return; }
+  const {signer, evmAddress, address} = sig;
   const { percentage, deadline } = resolveSettings(
     settings,
     REMOVE_DEFAULT_SLIPPAGE_TOLERANCE,
@@ -112,16 +112,16 @@ export const onRemoveLiquidity = ({
 
   const reefswapRouter = getReefswapRouter(
     network.routerAddress,
-    signer.signer,
+    signer,
   );
-  const userPoolBalance = new BigNumber(pool.userPoolBalance);
+  const userPoolBalance = new BN(pool.userPoolBalance);
   const poolPercentage = userPoolBalance.div(pool.totalSupply);
   const removedLiquidity = userPoolBalance
     .multipliedBy(percentageAmount)
     .div(100)
     .toFixed(0);
 
-  const minimumTokenAmount1 = new BigNumber(pool.reserve1)
+  const minimumTokenAmount1 = new BN(pool.reserve1)
     .multipliedBy(poolPercentage)
     .multipliedBy(percentageAmount)
     .div(100)
@@ -129,7 +129,7 @@ export const onRemoveLiquidity = ({
     .div(100)
     .toFixed(0);
 
-  const minimumTokenAmount2 = new BigNumber(pool.reserve2)
+  const minimumTokenAmount2 = new BN(pool.reserve2)
     .multipliedBy(poolPercentage)
     .multipliedBy(percentageAmount)
     .div(100)
@@ -139,41 +139,58 @@ export const onRemoveLiquidity = ({
 
   try {
     dispatch(setLoadingAction(true));
-    dispatch(setStatusAction('Approving remove'));
-    const poolContract = new Contract(pool.poolAddress, ReefswapPair, signer.signer);
-    await poolContract.aprove(network.routerAddress, removedLiquidity);
-
-    // const approveTransaction = await poolContract.populateTransaction.approve(network.routerAddress, removedLiquidity);
-
-    console.log('Estimating withdraw limits')
-    let extrinsicTransaction = await reefswapRouter.populateTransaction.removeLiquidity(
-      pool.token1.address,
-      pool.token2.address,
-      removedLiquidity,
-      minimumTokenAmount1,
-      minimumTokenAmount2,
-      signer.evmAddress,
-      calculateDeadline(deadline),
-    );
-    let estimation = await signer.signer.provider.estimateResources(extrinsicTransaction);
-    console.log(`Withdraw call estimations: \n\tGas: ${estimation.gas.toString()}\n\tStorage: ${estimation.storage.toString()}\n\tWeight fee: ${estimation.weightFee.toString()}`)
-
     dispatch(setStatusAction('Withdrawing'));
-    await reefswapRouter.removeLiquidity(
+    const poolContract = new Contract(pool.poolAddress, ReefswapPair, signer);
+
+    const approveTransaction = await poolContract.populateTransaction.approve(network.routerAddress, removedLiquidity);
+    let withdrawTransaction = await reefswapRouter.populateTransaction.removeLiquidity(
       pool.token1.address,
       pool.token2.address,
       removedLiquidity,
       minimumTokenAmount1,
       minimumTokenAmount2,
-      signer.evmAddress,
+      evmAddress,
       calculateDeadline(deadline),
-      {
-        gasLimit: estimation.gas,
-        customData: {
-          storageLimit: estimation.storage.lt(0) ? 0 : estimation.storage
-        }
-      }
     );
+    const approveResources = await signer.provider.estimateResources(approveTransaction);
+
+    const approveExtrinsic = await signer.provider.api.tx.evm.call(
+      approveTransaction.to,
+      approveTransaction.data,
+      BigNumber.from(approveTransaction.value || 0),
+      approveResources.gas,
+      approveResources.storage.lt(0) ? BigNumber.from(0) : approveResources.storage
+    );
+    const withdrawExtrinsic = await signer.provider.api.tx.evm.call(
+      withdrawTransaction.to,
+      withdrawTransaction.data,
+      BigNumber.from(withdrawTransaction.value || 0),
+      BigNumber.from(626914).mul(2),
+      BigNumber.from(0),
+    );
+
+    const batch = signer.provider.api.tx.utility.batchAll([
+      approveExtrinsic,
+      withdrawExtrinsic,
+    ]);
+
+    const signAndSend = new Promise<void>(async (resolve) => {
+      batch.signAndSend(
+        address,
+        { signer: signer.signingKey },
+        (status: any) => {
+          if (status.status.isInBlock) {
+            resolve();
+          }
+          // If you want to await until block is finalized use below if
+          // if (status.status.isFinalized) {
+            // resolve();
+          // }
+        }
+      );
+    });
+    await signAndSend;
+
 
     Uik.notify.success({
       message: 'Tokens were successfully withdrawn.\nBalances will reload after blocks are finalized.',
