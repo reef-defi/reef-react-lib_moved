@@ -1,5 +1,6 @@
 import { Signer } from '@reef-defi/evm-provider';
 import { BigNumber } from 'ethers';
+import type { Signer as InjectedSigner } from '@polkadot/api/types';
 
 export interface ReefSigner {
   name: string;
@@ -10,6 +11,7 @@ export interface ReefSigner {
   isEvmClaimed: boolean;
   source: string;
   genesisHash?: string;
+  sign: InjectedSigner;
 }
 
 export type Color = 'success' | 'danger' | 'warning';
