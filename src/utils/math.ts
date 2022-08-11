@@ -47,7 +47,9 @@ interface CalculateAmount {
 export const calculateAmount = ({
   decimals,
   amount,
-}: CalculateAmount): string => BigNumber.from(transformAmount(decimals, assertAmount(amount))).toString();
+}: CalculateAmount): string => {
+  return BigNumber.from(transformAmount(decimals, assertAmount(amount))).toString()
+};
 
 export const calculateAmountWithPercentage = (
   { amount: oldAmount, decimals }: CalculateAmount,

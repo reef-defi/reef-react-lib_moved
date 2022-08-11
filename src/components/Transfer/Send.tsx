@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {BigNumber, Contract} from 'ethers';
+import {Contract} from 'ethers';
 import {Provider} from '@reef-defi/evm-provider';
 import {
   checkMinExistentialReefAmount,
@@ -21,19 +21,11 @@ import SendConfirmationModal from './SendConfirmationModal';
 import {TokenAmountFieldMax} from '../TokenFields';
 import {LoadingButtonIconWithText} from '../common/Loading';
 import {ERC20} from '../../assets/abi/ERC20';
-import {
-  ButtonStatus,
-  calculateAmount,
-  ensure,
-  nativeTransfer,
-  removeReefSpecificStringFromAddress,
-  toReefBalanceDisplay,
-} from '../../utils';
+import {ButtonStatus, calculateAmount, ensure, nativeTransfer, removeReefSpecificStringFromAddress,} from '../../utils';
 import {AccountListModal} from '../AccountSelector/AccountListModal';
 import {SwitchTokenButton} from '../common/Button';
 import {DownIcon} from '../common/Icons';
 import './Send.css';
-import {parseEther} from "ethers/lib/utils";
 
 interface Send {
   tokens: Token[];
@@ -116,14 +108,15 @@ export const Send = ({
   const onTokenSelect = (newToken: Token): void => setToken({ ...createEmptyTokenWithAmount(false), ...newToken });
 
   const onAmountChange = (amount: string, token: TokenWithAmount, signer: ReefSigner): void => {
-    const {requiredBalanceMin} = checkMinExistentialReefAmount(token, signer.balance);
-    console.log("aaa=",amount, requiredBalanceMin);
-    let maxAmt = isNativeTransfer(token) ? parseEther(amount).sub(requiredBalanceMin) : parseEther(amount);
+    // const {requiredBalanceMin} = checkMinExistentialReefAmount(token, signer.balance);
+    /*let maxAmt = isNativeTransfer(token) ? parseEther(amount).sub(requiredBalanceMin) : parseEther(amount);
     let zero = BigNumber.from('0');
     if(maxAmt.lt(zero)){
       maxAmt = zero;
     }
-    setToken({ ...token, amount: toReefBalanceDisplay(maxAmt) });
+    console.log("maxAmt=",maxAmt.toString()); */
+    signer;
+    setToken({ ...token, amount: amount });
     setAmountPristine(false);
   };
 
