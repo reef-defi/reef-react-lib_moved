@@ -1,21 +1,21 @@
-import { Provider, Signer } from '@reef-defi/evm-provider';
 import type {
-  InjectedExtension,
-  InjectedAccountWithMeta,
+  InjectedAccountWithMeta, InjectedExtension
 } from '@polkadot/extension-inject/types';
+import { Provider, Signer } from '@reef-defi/evm-provider';
+
+import { DeriveBalancesAccountData } from '@polkadot/api-derive/balances/types';
+import type { Signer as InjectedSigner } from '@polkadot/api/types';
 import type {
   InjectedAccount,
   InjectedAccountWithMeta as InjectedAccountWithMetaReef,
-  InjectedExtension as InjectedExtensionReef,
+  InjectedExtension as InjectedExtensionReef
 } from '@reef-defi/extension-inject/types';
-import type { Signer as InjectedSigner } from '@polkadot/api/types';
-import { DeriveBalancesAccountData } from '@polkadot/api-derive/balances/types';
 import { BigNumber } from 'ethers';
 // import { firstValueFrom } from 'rxjs';
-import { web3FromSource } from '@reef-defi/extension-dapp';
-import { ensure, removeUndefinedItem } from '../utils/utils';
-import { ReefSigner } from '../state/types';
 import { AccountJson } from '@reef-defi/extension-base/background/types';
+import { web3FromAddress, web3FromSource } from '@reef-defi/extension-dapp';
+import { ReefSigner } from '../state/types';
+import { ensure, removeUndefinedItem } from '../utils/utils';
 // import { selectedSigner$ } from '../appState/accountState';
 
 const accountSourceSigners = new Map<string, InjectedSigner>();
@@ -64,13 +64,13 @@ const signerToReefSigner = async (
   provider: Provider,
   {
     address, name, source, genesisHash,
-  }: SignerInfo,
+  }: SignerInfo
 ): Promise<ReefSigner> => {
   const evmAddress = await signer.getAddress();
   const isEvmClaimed = await signer.isClaimed();
-
+  const inj = await web3FromAddress(address)
   const balance = await getReefCoinBalance(address, provider);
-
+  inj.signer
   return {
     signer,
     balance,
@@ -80,6 +80,7 @@ const signerToReefSigner = async (
     address,
     source,
     genesisHash: genesisHash!,
+    sign: inj.signer,
   };
 };
 
@@ -106,7 +107,7 @@ export const metaAccountToSigner = async (
       address: account.address,
       name: account.meta.name || '',
       genesisHash: account.meta.genesisHash || '',
-    },
+    }
   );
 };
 
