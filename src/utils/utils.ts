@@ -8,8 +8,8 @@ export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
 export const REEF_ADDRESS = '0x0000000000000000000000000000000001000000';
 export const EMPTY_ADDRESS = '0x';
 export const REEF_ADDRESS_SPECIFIC_STRING = '(ONLY for Reef chain!)';
-export const MIN_REEF_TOKEN_BALANCE = 1;
-export const MIN_EVM_TOKEN_BALANCE = 60;
+export const MIN_NATIVE_TX_BALANCE = 1;
+export const MIN_EVM_TX_BALANCE = 65;
 
 export interface ButtonStatus {
   text: string;

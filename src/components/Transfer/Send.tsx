@@ -1,13 +1,14 @@
-import { Provider } from '@reef-defi/evm-provider';
+import {Provider} from '@reef-defi/evm-provider';
 import Uik from '@reef-defi/ui-kit';
-import { Contract } from 'ethers';
-import React, { useEffect, useState } from 'react';
-import { ERC20 } from '../../assets/abi/ERC20';
+import {Contract} from 'ethers';
+import React, {useEffect, useState} from 'react';
+import {ERC20} from '../../assets/abi/ERC20';
 import {
-  checkMinExistentialTokenAmount,
+  checkMinExistentialReefAmount,
   createEmptyTokenWithAmount,
-  ensureExistentialTokenAmount,
+  ensureExistentialReefAmount,
   ensureTokenAmount,
+  isNativeTransfer,
   NotifyFun,
   ReefSigner,
   reefTokenWithAmount,
@@ -15,21 +16,24 @@ import {
   TokenWithAmount
 } from '../../state';
 import {
-  ButtonStatus, calculateAmount, ensure, errorHandler, nativeTransfer, REEF_ADDRESS, removeReefSpecificStringFromAddress
+  ButtonStatus,
+  calculateAmount,
+  ensure,
+  errorHandler,
+  nativeTransfer,
+  removeReefSpecificStringFromAddress
 } from '../../utils';
-import { AccountListModal } from '../AccountSelector/AccountListModal';
-import { SwitchTokenButton } from '../common/Button';
-import {
-  Card, CardHeader, CardHeaderBlank, CardTitle, SubCard
-} from '../common/Card';
-import { CenterColumn, ComponentCenter, MT } from '../common/Display';
-import { DownIcon } from '../common/Icons';
-import { Input } from '../common/Input';
-import { LoadingButtonIconWithText } from '../common/Loading';
-import { OpenModalButton } from '../common/Modal';
-import { TokenAmountFieldMax } from '../TokenFields';
-import './Send.css';
+import {AccountListModal} from '../AccountSelector/AccountListModal';
+import {SwitchTokenButton} from '../common/Button';
+import {Card, CardHeader, CardHeaderBlank, CardTitle, SubCard} from '../common/Card';
+import {CenterColumn, ComponentCenter, MT} from '../common/Display';
+import {DownIcon} from '../common/Icons';
+import {Input} from '../common/Input';
+import {LoadingButtonIconWithText} from '../common/Loading';
+import {OpenModalButton} from '../common/Modal';
+import {TokenAmountFieldMax} from '../TokenFields';
 import SendConfirmationModal from './SendConfirmationModal';
+import './Send.css';
 
 interface Send {
   tokens: Token[];
@@ -53,17 +57,34 @@ const getSignerEvmAddress = async (address: string, provider: Provider): Promise
   return addr;
 };
 
+const getSignerNativeAddress = async (evmAddress: string, provider: Provider): Promise<string> => {
+  if (isNativeAddress(evmAddress)) {
+    return evmAddress;
+  }
+  const address = await provider.api.query.evmAccounts.accounts(evmAddress);
+  const addr = (address as any).toString();
+
+  if (!addr) {
+    throw new Error('Native address does not exist');
+  }
+  return addr;
+};
+
+function isNativeAddress(toAddress: string) {
+  return toAddress.length === 48 && toAddress[0] === '5';
+}
+
 const sendStatus = (to: string, token: TokenWithAmount, signer: ReefSigner): ButtonStatus => {
   try {
     const toAddress = to.trim();
     ensure(toAddress.length !== 0, 'Missing destination address');
-    ensure(toAddress.length === 42 || (toAddress.length === 48 && toAddress[0] === '5'), 'Incorrect destination address');
+    ensure(toAddress.length === 42 || isNativeAddress(toAddress), 'Incorrect destination address');
     if (toAddress.startsWith('0x')) {
       ensure(signer.isEvmClaimed, 'Bind account');
     }
     ensure(token.amount !== '', 'Insert amount');
     ensureTokenAmount(token);
-    ensureExistentialTokenAmount(token);
+    ensureExistentialReefAmount(token, signer.balance);
 
     return { isValid: true, text: 'Confirm Send' };
   } catch (e) {
@@ -90,12 +111,12 @@ export const Send = ({
 
   const tokenContract = new Contract(token.address, ERC20, signer.signer);
   const { text, isValid } = sendStatus(to, token, signer);
-  const existentialValidity = checkMinExistentialTokenAmount(token);
+  const existentialValidity = checkMinExistentialReefAmount(token, signer.balance);
 
   const onTokenSelect = (newToken: Token): void => setToken({ ...createEmptyTokenWithAmount(false), ...newToken });
 
-  const onAmountChange = (amount: string): void => {
-    setToken({ ...token, amount });
+  const onAmountChange = (amount: string, token: TokenWithAmount): void => {
+    setToken({ ...token, amount: amount });
     setAmountPristine(false);
   };
 
@@ -103,15 +124,16 @@ export const Send = ({
     try {
       setLoading(true);
       ensureTokenAmount(token);
-      ensureExistentialTokenAmount(token);
+      ensureExistentialReefAmount(token, signer.balance);
       const amount = calculateAmount(token);
 
-      if (token.address === REEF_ADDRESS && to.length === 48) {
+      if (isNativeTransfer(token)) {
         setStatus('Transfering native REEF');
-        await nativeTransfer(amount, to, provider, signer);
+        const nativeAddr = await getSignerNativeAddress(to, provider);
+        await nativeTransfer(amount, nativeAddr, provider, signer);
       } else {
         setStatus('Extracting evm address');
-        const toAddress = to.length === 48
+        const toAddress = isNativeAddress(to)
           ? await getSignerEvmAddress(to, provider)
           : to;
         setStatus(`Transfering ${token.symbol}`);
@@ -171,7 +193,7 @@ export const Send = ({
         <SwitchTokenButton disabled addIcon />
         <TokenAmountFieldMax
           onTokenSelect={onTokenSelect}
-          onAmountChange={onAmountChange}
+          onAmountChange={(amt)=>onAmountChange(amt, token)}
           signer={signer}
           token={token}
           tokens={tokens}
