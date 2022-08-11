@@ -1,6 +1,7 @@
 import React, { ReactElement } from 'react';
 import {
-  Color, ReefSigner, Token, TokenWithAmount,
+  checkMinExistentialReefAmount,
+  Color, isNativeTransfer, REEF_TOKEN, ReefSigner, Token, TokenWithAmount,
 } from '../../state';
 import { showBalance, toUnits } from '../../utils/math';
 import { SubCard } from '../common/Card';
@@ -11,6 +12,7 @@ import { InputAmount } from '../common/Input';
 import { ColorText, MiniText } from '../common/Text';
 import { SelectToken } from '../SelectToken';
 import { getData } from '../../utils';
+import {BigNumber} from "ethers";
 
 interface TokenAmountFieldProps {
   id?: string;
@@ -108,6 +110,15 @@ interface TokenAmountFieldMax extends TokenAmountFieldProps {
   afterBalanceEl?: ReactElement;
   hideSelectTokenCommonBaseView?: boolean;
 }
+
+function getMaxAmt(token: TokenWithAmount, signerBalance: BigNumber) {
+  if(!isNativeTransfer(token)){
+    return toUnits(token);
+  }
+  var {maxTransfer} = checkMinExistentialReefAmount(token, signerBalance)
+  return toUnits({balance:maxTransfer, decimals: REEF_TOKEN.decimals});
+}
+
 export const TokenAmountFieldMax = ({
   id,
   token,
@@ -144,7 +155,7 @@ export const TokenAmountFieldMax = ({
             <span
               className="text-primary text-decoration-none"
               role="button"
-              onClick={() => onAmountChange(`${toUnits(token)}`)}
+              onClick={() => onAmountChange(`${getMaxAmt(token, signer.balance)}`)}
             >
               (Max)
             </span>
