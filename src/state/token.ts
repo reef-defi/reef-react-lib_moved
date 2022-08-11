@@ -125,7 +125,7 @@ export const checkMinExistentialReefAmount = (token: TokenWithAmount, reefBalanc
 
     if (nativeReefTransfer) {
       const maxTransfer = reefBalance.sub(BigNumber.from(reservedTxMin));
-      message = `Maximum transfer amount is ${toReefBalanceDisplay( maxTransfer)} to allow for fees.`
+      message = `Maximum transfer amount is ~${toReefBalanceDisplay( maxTransfer)} to allow for fees.`
     }
   }
   return { valid, message, maxTransfer };

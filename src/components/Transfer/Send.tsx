@@ -1,11 +1,8 @@
-import { Provider } from '@reef-defi/evm-provider';
-import Uik from '@reef-defi/ui-kit';
-import { Contract } from 'ethers';
-import React, { useEffect, useState } from 'react';
-import { ERC20 } from '../../assets/abi/ERC20';
-import React, {useEffect, useState} from 'react';
-import {Contract} from 'ethers';
 import {Provider} from '@reef-defi/evm-provider';
+import Uik from '@reef-defi/ui-kit';
+import {Contract} from 'ethers';
+import React, {useEffect, useState} from 'react';
+import {ERC20} from '../../assets/abi/ERC20';
 import {
   checkMinExistentialReefAmount,
   createEmptyTokenWithAmount,
@@ -19,33 +16,24 @@ import {
   TokenWithAmount
 } from '../../state';
 import {
-  ButtonStatus, calculateAmount, ensure, errorHandler, nativeTransfer, REEF_ADDRESS, removeReefSpecificStringFromAddress
+  ButtonStatus,
+  calculateAmount,
+  ensure,
+  errorHandler,
+  nativeTransfer,
+  removeReefSpecificStringFromAddress
 } from '../../utils';
-import { AccountListModal } from '../AccountSelector/AccountListModal';
-import { SwitchTokenButton } from '../common/Button';
-import {
-  Card, CardHeader, CardHeaderBlank, CardTitle, SubCard
-} from '../common/Card';
-import { CenterColumn, ComponentCenter, MT } from '../common/Display';
-import { DownIcon } from '../common/Icons';
-import { Input } from '../common/Input';
-import { LoadingButtonIconWithText } from '../common/Loading';
-import { OpenModalButton } from '../common/Modal';
-import { TokenAmountFieldMax } from '../TokenFields';
-import {Input} from '../common/Input';
-import {Card, CardHeader, CardHeaderBlank, CardTitle, SubCard,} from '../common/Card';
-import {CenterColumn, ComponentCenter, MT} from '../common/Display';
-import {OpenModalButton} from '../common/Modal';
-import SendConfirmationModal from './SendConfirmationModal';
-import {TokenAmountFieldMax} from '../TokenFields';
-import {LoadingButtonIconWithText} from '../common/Loading';
-import {ERC20} from '../../assets/abi/ERC20';
-import {ButtonStatus, calculateAmount, ensure, nativeTransfer, removeReefSpecificStringFromAddress,} from '../../utils';
 import {AccountListModal} from '../AccountSelector/AccountListModal';
 import {SwitchTokenButton} from '../common/Button';
+import {Card, CardHeader, CardHeaderBlank, CardTitle, SubCard} from '../common/Card';
+import {CenterColumn, ComponentCenter, MT} from '../common/Display';
 import {DownIcon} from '../common/Icons';
-import './Send.css';
+import {Input} from '../common/Input';
+import {LoadingButtonIconWithText} from '../common/Loading';
+import {OpenModalButton} from '../common/Modal';
+import {TokenAmountFieldMax} from '../TokenFields';
 import SendConfirmationModal from './SendConfirmationModal';
+import './Send.css';
 
 interface Send {
   tokens: Token[];
