@@ -1,0 +1,128 @@
+.overlay-action__wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-height: 100vh;
+  max-height: 100vh;
+  z-index: 1000;
+  background-color: var(--bg);
+  overflow: auto;
+}
+
+.overlay-action__wrapper.enter {
+  transform: translateY(-100%);
+  background-color: hsl(
+    var(--bg--h),
+    var(--bg--s),
+    calc(var(--bg--l) + 10%)
+  );
+}
+
+.overlay-action__wrapper.overlay-action__content {
+  opacity: 0;
+}
+
+.overlay-action__wrapper.enter-active,
+.overlay-action__wrapper.enter-done,
+.overlay-action__wrapper.exit {
+  opacity: 1;
+  transform: none;
+  background-color: var(--bg);
+}
+
+.overlay-action__wrapper.enter-active .overlay-action__content,
+.overlay-action__wrapper.enter-done .overlay-action__content,
+.overlay-action__wrapper.exit .overlay-action__content {
+  opacity: 1;
+  transform: none;
+}
+
+.overlay-action__wrapper.exit-active {
+  transform: translateY(-100%);
+}
+
+.overlay-action__wrapper.exit-active .overlay-action__content {
+  opacity: 0;
+}
+
+.overlay-action__wrapper.enter-active,
+.overlay-action__wrapper.exit-active {
+  transition: all 0.5s;
+}
+
+.overlay-action__wrapper.enter-active .overlay-action__content {
+  transition-delay: 0.35s;
+}
+
+.overlay-action__content {
+  width: 100%;
+  padding: 50px;
+  max-width: 900px;
+  margin: 0 auto;
+  transition: all 0.35s;
+}
+
+.overlay-action__head {
+  margin-top: -10px;
+  width: 100%;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.overlay-action__title {
+  font-size: 1.625rem;
+  line-height: 1.2;
+  font-weight: 500;
+  color: hsla(
+    var(--text--h),
+    var(--text--s),
+    var(--text--l),
+    0.9
+  );
+}
+
+.overlay-action__close-btn {
+  position: absolute;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 54px;
+  height: 54px;
+  min-width: 54px;
+  border-radius: 50%;
+  background-color: transparent;
+  border: none;
+  transition: all 0.125s;
+  color: var(--text-light);
+  box-shadow: var(--neomorph-out);
+}
+
+.overlay-action .uik-modal__close-btn-icon {
+  width: 14px;
+  height: 22px;
+}
+
+.overlay-action__close-btn:hover {
+  color: var(--primary);
+  cursor: pointer;
+  box-shadow: var(--neomorph-out-light), var(--neomorph-in-light);
+}
+
+.overlay-action__close-btn:active {
+  color: var(--primary);
+  box-shadow: var(--neomorph-out-light), var(--neomorph-in);
+}
+
+.overlay-action__slot {
+  width: 100%;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 40px;
+} 
