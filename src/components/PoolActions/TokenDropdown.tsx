@@ -3,6 +3,7 @@ import React, { useState } from "react"
 import { Token, TokenWithAmount } from "../../state";
 import { showBalance } from "../../utils";
 import './token-field.css';
+import { faQuestion } from '@fortawesome/free-solid-svg-icons';
 
 interface TokenDropdown {
   token: TokenWithAmount;
@@ -73,34 +74,32 @@ const TokenDropdown = ({token, tokens, selectToken} : TokenDropdown): JSX.Elemen
           style={{
             backgroundImage: `url(${token.iconUrl})`,
           }}
-        />
-
-        <div className="uik-pool-actions-token__info">
-          <div className="uik-pool-actions-token__symbol">{ token.symbol }</div>
-          { !token.isEmpty &&
-            <div className="uik-pool-actions-token__amount">
-              Available
-              {' '}
-              { showBalance(token) }
-            </div>
-          }
+        >
+          {token.isEmpty && <Uik.Icon className="mx-3 px-2" icon={faQuestion} />}
         </div>
+        { !token.isEmpty &&
+          <div className="uik-pool-actions-token__info">
+            <div className="uik-pool-actions-token__symbol">{ token.symbol }</div>
+              <div className="uik-pool-actions-token__amount">
+                Available
+                {' '}
+                { showBalance(token) }
+              </div>
+          </div>
+        }
       </button>
-      
+
       <Uik.Dropdown
         isOpen={isOpen}
         position="bottomRight"
         onClose={() => setOpen(false)}
-        className="overflow-scroll"
       >
         <Uik.Input
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Search token"
         />
-        <div className="">
-          {shownTokens}
-        </div>
+        {shownTokens}
       </Uik.Dropdown>
     </div>
   );
