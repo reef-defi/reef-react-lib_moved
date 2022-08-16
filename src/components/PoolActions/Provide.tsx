@@ -57,6 +57,8 @@ export const Provide = ({
 
   return (
     <div>
+      <Uik.Text type="mini" className="uik-pool-actions__description">Earn trading fees on this liquidity pool by staking your tokens into it.</Uik.Text>
+
       <div className="uik-pool-actions__tokens">
         <TokenField
           token={token1}
