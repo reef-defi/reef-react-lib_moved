@@ -107,7 +107,7 @@ export const Provide = ({
         className="uik-pool-actions__cta"
         fill
         icon={faCoins}
-        text={isLoading ? status : 'Provide'}
+        text={isLoading ? status : 'Stake'}
         size="large"
         disabled={!isValid || isLoading}
         loading={isLoading}
@@ -127,4 +127,3 @@ export const Provide = ({
     </div>
   );
 };
-
