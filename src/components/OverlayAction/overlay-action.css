@@ -17,6 +17,18 @@
     var(--bg--s),
     calc(var(--bg--l) + 10%)
   );
+  animation: overlay-action-enter 0.5s;
+}
+
+@keyframes overlay-action-enter {
+  from {
+    transform: translateY(-100%);
+    background-color: hsl(
+      var(--bg--h),
+      var(--bg--s),
+      calc(var(--bg--l) + 10%)
+    );
+  }
 }
 
 .overlay-action__wrapper.overlay-action__content {
