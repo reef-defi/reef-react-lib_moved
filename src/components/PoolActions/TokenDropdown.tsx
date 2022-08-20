@@ -38,10 +38,10 @@ const TokenDropdown = ({token, tokens, selectToken} : TokenDropdown): JSX.Elemen
         return false;
       }
       if (
-        search === '' ||
-        token.symbol.startsWith(search) ||
-        token.name.startsWith(search) ||
-        token.address.startsWith(search)
+        search === ''
+        || token.symbol.toLowerCase().startsWith(search.toLowerCase())
+        || token.name.toLowerCase().startsWith(search.toLowerCase())
+        || token.address.toLowerCase().startsWith(search.toLowerCase())
       ) {
         return true;
       }
