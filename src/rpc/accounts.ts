@@ -59,6 +59,7 @@ interface SignerInfo {
   address: string;
   genesisHash: string;
 }
+
 const signerToReefSigner = async (
   signer: Signer,
   provider: Provider,
@@ -68,9 +69,14 @@ const signerToReefSigner = async (
 ): Promise<ReefSigner> => {
   const evmAddress = await signer.getAddress();
   const isEvmClaimed = await signer.isClaimed();
-  const inj = await web3FromAddress(address)
+  let inj;
+  try {
+    inj = await web3FromAddress(address);
+  }catch (e) {
+    // when web3Enable() is not called before
+  }
   const balance = await getReefCoinBalance(address, provider);
-  inj.signer
+  inj?.signer
   return {
     signer,
     balance,
@@ -80,7 +86,7 @@ const signerToReefSigner = async (
     address,
     source,
     genesisHash: genesisHash!,
-    sign: inj.signer,
+    sign: inj?.signer,
   };
 };
 
