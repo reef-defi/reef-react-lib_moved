@@ -26,6 +26,8 @@ const TokenDropdownItem = ({ token, selectToken }: TokenDropdownItem): JSX.Eleme
         <Uik.Text type="mini">{token.name}</Uik.Text>
         <Uik.Text type="mini">{token.symbol}</Uik.Text>
       </div>
+
+      <div className="uik-pool-actions-token__select-dropdown-token-balance">{ showBalance(token) }</div>
     </Uik.Container>
   </Uik.DropdownItem>
 );
