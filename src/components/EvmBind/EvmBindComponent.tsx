@@ -1,10 +1,11 @@
+import Identicon from '@polkadot/react-identicon';
 import { Provider } from '@reef-defi/evm-provider';
 import { BigNumber, ethers } from 'ethers';
 import React, { useEffect, useState } from 'react';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
+import Uik from '@reef-defi/ui-kit';
 import { ReefSigner } from '../../state';
 import {
-  bindEvmAddress, showEvmCopyAddressAlert, REEF_ADDRESS_SPECIFIC_STRING,
+  bindEvmAddress,
   sendToNativeAddress,
   toAddressShortDisplay,
   toReefBalanceDisplay,
@@ -13,14 +14,9 @@ import {
 } from '../../utils';
 import { useObservableState } from '../../hooks';
 import { currentProvider$ } from '../../appState/providerState';
-import { ComponentCenter } from '../common/Display';
-import {
-  Card, CardHeader, CardHeaderBlank, CardTitle, SubCard,
-} from '../common/Card';
-import { MiniText } from '../common/Text';
 import { OpenModalButton } from '../common/Modal';
 import { AccountListModal } from '../AccountSelector/AccountListModal';
-import { CopyIcon } from '../common/Icons';
+import './bind.css';
 
 export enum EvmBindComponentTxType {
   TRANSFER = 'TRANSFER',
@@ -43,6 +39,19 @@ const MIN_BALANCE = ethers.utils.parseEther('5');
 function getSignersWithEnoughBalance(signers: ReefSigner[], bindFor: ReefSigner): ReefSigner[] {
   return signers?.length ? signers.filter((sig) => sig.address !== bindFor.address && sig.balance.gt(MIN_BALANCE.mul(BigNumber.from('2')))) : [];
 }
+
+const Account = ({ account }: { account: ReefSigner }): JSX.Element => (
+  <div className="bind-evm-account">
+    <div className="bind-evm-account__identicon">
+      <Identicon value={account.address} size={44} theme="substrate" />
+    </div>
+
+    <div className="bind-evm-account__info">
+      <div className="bind-evm-account__name">{ account.name }</div>
+      <div className="bind-evm-account__address">{ toAddressShortDisplay(account.address) }</div>
+    </div>
+  </div>
+);
 
 export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindComponent): JSX.Element => {
   const provider: Provider|undefined = useObservableState(currentProvider$);
@@ -99,87 +108,70 @@ export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindCom
 
   const onAccountSelect = (_: any, selected: ReefSigner): void => setTransferBalanceFrom(selected);
 
+  const copyAddress = (address: string): void => {
+    navigator.clipboard.writeText(address).then(() => {
+      Uik.notify.info('Copied address to clipboard');
+    }, () => {
+      Uik.notify.danger('Cannot copy to clipboard');
+    });
+  };
+
   return (
     <div className="mx-auto bind-evm">
-      <ComponentCenter>
-        <Card>
-          <CardHeader>
-            <CardHeaderBlank />
-            <CardTitle title="Register Ethereum VM Address" />
-            <CardHeaderBlank />
-          </CardHeader>
-          <SubCard>
-            {!bindFor.isEvmClaimed
-            && (
-            <p>
-              Creating Ethereum VM address for account:&nbsp;
-              <b>{bindFor.name}</b>
-              <MiniText>
-                &nbsp;
-                (
-                {toAddressShortDisplay(bindFor.address)}
-                )
-              </MiniText>
-            </p>
-            )}
-            {bindFor.isEvmClaimed
+      {!bindFor.isEvmClaimed
             && (
             <div>
               <p>
-                Account&nbsp;
-                <b>{bindFor.name}</b>
-                <MiniText>
-                  &nbsp;
-                  (
-                  {toAddressShortDisplay(bindFor.address)}
-                  )
-                </MiniText>
+                Creating Ethereum VM address for account
+              </p>
+              <Account account={bindFor} />
+            </div>
+            )}
+      {bindFor.isEvmClaimed
+            && (
+            <div>
+              <Account account={bindFor} />
+              <p>
                 {' '}
-                was successfully bound to Ethereum VM address&nbsp;
-                <MiniText>
-                  (
-                  {toAddressShortDisplay(bindFor.evmAddress)}
-                  )
-                </MiniText>
+                Successfully bound to Ethereum VM address&nbsp;
+                <b>{toAddressShortDisplay(bindFor.evmAddress)}</b>
                 .
                 <br />
               </p>
-              <CopyToClipboard
-                text={`${bindFor.evmAddress}${REEF_ADDRESS_SPECIFIC_STRING}`}
-                onCopy={showEvmCopyAddressAlert}
-              >
-                <span
-                  className="text-muted "
-                  style={{ cursor: 'pointer' }}
-                >
-                  <CopyIcon small />
-                  <span style={{ marginLeft: '4px' }}>
-                    <MiniText>Copy Reef EVM Address</MiniText>
-                  </span>
-                </span>
-              </CopyToClipboard>
+
+              <Uik.Button
+                text="Copy EVM address"
+                fill
+                size="large"
+                onClick={() => copyAddress(bindFor.evmAddress)}
+              />
             </div>
             )}
-            {!bindFor.isEvmClaimed
+      {!bindFor.isEvmClaimed
             && (
             <div>
               {txStatus && (
               <div>
                 {!txStatus.error && !txStatus.isInBlock && !txStatus.isComplete
                 && (
-                <p>
-                  {txStatus.componentTxType === EvmBindComponentTxType.BIND ? 'Binding' : 'Transfer'}
-                  {' '}
-                  in progress
+                <p className="bind-evm__loading">
+                  <Uik.Loading size="small" />
+                  <span>
+                    {txStatus.componentTxType === EvmBindComponentTxType.BIND ? 'Binding' : 'Transfer'}
+                    {' '}
+                    in progress
+                  </span>
                 </p>
                 )}
                 {!txStatus.error && txStatus.isInBlock && txStatus.componentTxType === EvmBindComponentTxType.TRANSFER && (
                 <div>
                   <p>Transfer complete. Now execute bind transaction.</p>
-                  <button type="button" onClick={() => bindAccount(getUpdateTxCallback([onTxUpdate as TxStatusHandler, setTxStatus]))}>
-                    Continue
-                    and bind
-                  </button>
+                  <Uik.Button
+                    fill
+                    size="large"
+                    text="Continue and Bind"
+                    onClick={() => bindAccount(getUpdateTxCallback([onTxUpdate as TxStatusHandler, setTxStatus]))}
+                  />
                 </div>
                 )}
                 {!txStatus.error && txStatus.isInBlock && txStatus.componentTxType === EvmBindComponentTxType.BIND && (
@@ -207,13 +199,12 @@ export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindCom
                     <br />
                     <br />
 
-                    Coins will be used from account:&nbsp;
-                    <b>{transferBalanceFrom.name}</b>
+                    Coins will be used from account
                     <OpenModalButton
-                      className="btn-empty link-text text-xs text-primary pl-1"
+                      className="btn-empty bind-evm__select-account"
                       id="selectMyAddress"
                     >
-                      (change)
+                      <Account account={transferBalanceFrom} />
                     </OpenModalButton>
                   </p>
 
@@ -223,13 +214,12 @@ export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindCom
                     selectAccount={onAccountSelect}
                     title="Select account"
                   />
-                  <button
-                    type="button"
-                    className="btn btn-reef btn-lg border-rad"
+                  <Uik.Button
+                    text="Continue"
+                    fill
+                    size="large"
                     onClick={() => transfer(transferBalanceFrom!, bindSigner, MIN_BALANCE, getUpdateTxCallback([onTxUpdate as TxStatusHandler, setTxStatus]))}
-                  >
-                    <span>Continue</span>
-                  </button>
+                  />
                 </div>
                 )}
               </div>
@@ -238,22 +228,16 @@ export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindCom
               {(!txStatus) && hasBalanceForBinding(bindFor.balance)
               && (
               <div>
-                <button
-                  type="button"
-                  className="btn btn-reef btn-lg border-rad"
+                <Uik.Button
+                  fill
+                  size="large"
+                  text="Continue"
                   onClick={() => bindAccount(getUpdateTxCallback([onTxUpdate as TxStatusHandler, setTxStatus]))}
-                >
-                  <span>Continue</span>
-                </button>
+                />
               </div>
               )}
-
             </div>
             )}
-
-          </SubCard>
-        </Card>
-      </ComponentCenter>
     </div>
   );
 };
