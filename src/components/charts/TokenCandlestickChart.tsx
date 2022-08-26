@@ -62,7 +62,7 @@ const TokenCandlestickChart = ({ whichToken, address } : TokenCandlestickChart):
   const fromDate = toDate - 31 * 24 * 60 * 60 * 1000; // last 50 hour
 
   const { loading, data } = useDayCandlestick(address, fromDate, whichToken);
-  const { loading: lastLoading, data: lastCandlestick }  = useLastDayCandlestick(address, fromDate, whichToken);
+  const { loading: lastLoading, data: lastCandlestick } = useLastDayCandlestick(address, fromDate, whichToken);
 
   const candlestick = data
     ? data.pool_day_candlestick
@@ -85,19 +85,20 @@ const TokenCandlestickChart = ({ whichToken, address } : TokenCandlestickChart):
       if (acc.length === 0) {
         return [item];
       }
-      const last = acc[acc.length-1];
+      const last = acc[acc.length - 1];
       const lastDate = new Date(last.date);
       lastDate.setDate(lastDate.getDate() + 1);
 
       while (lastDate < item.date) {
-        acc.push({date: new Date(lastDate), close: last.close, high: last.close, low: last.close, open: last.close});
+        acc.push({
+          date: new Date(lastDate), close: last.close, high: last.close, low: last.close, open: last.close,
+        });
         lastDate.setDate(lastDate.getDate() + 1);
       }
       acc.push(item);
       return acc;
     }, [] as OHLC[])
-    .filter(({ date }) => date.getTime() > fromDate)
-
+    .filter(({ date }) => date.getTime() > fromDate);
 
   if (loading || lastLoading) {
     return (<Loading />);

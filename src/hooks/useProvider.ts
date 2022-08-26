@@ -19,12 +19,10 @@ export const useProvider = (providerUrl?: string | undefined): UseProvider => {
     Promise.resolve()
       .then(() => setError(''))
       .then(() => setIsLoading(true))
-      .then(async () => {
-        return await initProvider(providerUrl);
-      })
-      .then((prov)=>{
+      .then(async () => await initProvider(providerUrl))
+      .then((prov) => {
         if (provider && providerDestroyFn) {
-          console.log('PROV DDDDD=',provider, providerDestroyFn);
+          console.log('PROV DDDDD=', provider, providerDestroyFn);
           // providerDestroyFn();
         }
         setProvider(prov);

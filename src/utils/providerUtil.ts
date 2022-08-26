@@ -7,13 +7,13 @@ export async function initProvider(providerUrl: string) {
   });
   try {
     await newProvider.api.isReadyOrError;
-  }catch (e){
-    console.log("Provider isReadyOrError ERROR=",e);
+  } catch (e) {
+    console.log('Provider isReadyOrError ERROR=', e);
     throw e;
   }
   return newProvider;
 }
 
-export async function disconnectProvider(provider: Provider){
+export async function disconnectProvider(provider: Provider) {
   await provider.api.disconnect();
 }

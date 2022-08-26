@@ -18,7 +18,6 @@ const chainErrors: { [key: string]: string } = {
 };
 
 export const errorHandler = (message: string): string => {
-
   if (message.includes('ReefswapV2: K')) {
     return 'Pool K value can not be aligned with desired amounts. Try decreasing swap amount or increase slippage tolerance.';
   }

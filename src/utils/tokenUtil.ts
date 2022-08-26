@@ -1,8 +1,10 @@
-  import {BigNumber, utils} from 'ethers';
-import {DataProgress, DataWithProgress, isDataSet} from './dataWithProgress';
-import {Pool, reefTokenWithAmount, Token, TokenWithAmount,} from '../state';
-import {toDecimalPlaces} from './math';
-import {BigNumber as BN} from "bignumber.js";
+import { BigNumber, utils } from 'ethers';
+import { BigNumber as BN } from 'bignumber.js';
+import { DataProgress, DataWithProgress, isDataSet } from './dataWithProgress';
+import {
+  Pool, reefTokenWithAmount, Token, TokenWithAmount,
+} from '../state';
+import { toDecimalPlaces } from './math';
 
 const { parseUnits, formatEther } = utils;
 
@@ -83,5 +85,5 @@ export const toCurrencyFormat = (value: number, options = {}): string => Intl.Nu
   ...options,
 }).format(value);
 
-  export const normalize = (amount: string|number, decimals: number): BN => new BN(Number.isNaN(amount) ? 0 : amount)
-    .div(new BN(10).pow(decimals))
+export const normalize = (amount: string|number, decimals: number): BN => new BN(Number.isNaN(amount) ? 0 : amount)
+  .div(new BN(10).pow(decimals));

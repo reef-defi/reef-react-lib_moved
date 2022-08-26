@@ -58,7 +58,7 @@ const TVLChart = ({ address } : TVLChart): JSX.Element => {
 
   const values: number[] = tvl.map(({ amount }) => amount);
   const adjust = std(values);
-  console.log(filteredData)
+  console.log(filteredData);
   return (
     <DefaultChart
       data={filteredData}

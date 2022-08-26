@@ -1,6 +1,6 @@
-import {useEffect, useState} from 'react';
-import {DataProgress, DataWithProgress} from '../utils/dataWithProgress';
-import {reefPrice$} from "../appState/tokenState";
+import { useEffect, useState } from 'react';
+import { DataProgress, DataWithProgress } from '../utils/dataWithProgress';
+import { reefPrice$ } from '../appState/tokenState';
 
 export const useReefPriceInterval = (
 ): DataWithProgress<number> => {

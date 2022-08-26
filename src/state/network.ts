@@ -1,6 +1,6 @@
 // import { REEF_TOKEN, Token } from "./token";
 
-import { REEF_TOKEN, Token } from "./token";
+import { REEF_TOKEN, Token } from './token';
 
 export type AvailableNetworks = 'mainnet' | 'testnet' | 'localhost';
 
@@ -12,7 +12,7 @@ export interface Bond {
   stake: Token;
   farm: Token;
   apy: string;
-};
+}
 
 export interface Network {
   rpcUrl: string;
@@ -53,15 +53,15 @@ export const availableNetworks: Networks = {
     reefscanFrontendUrl: 'https://reefscan.com',
     bonds: [
       {
-          name: 'Reef community staking bond',
-          description: '',
-          contractAddress: '0x7D3596b724cEB02f2669b902E4F1EEDeEfad3be6',
-          validatorAddress: '5Hax9GZjpurht2RpDr5eNLKvEApECuNxUpmRbYs5iNh7LpHa',
-          stake: {...REEF_TOKEN},
-          farm: {...REEF_TOKEN},
-          apy: '32',
-      }
-    ]
+        name: 'Reef community staking bond',
+        description: '',
+        contractAddress: '0x7D3596b724cEB02f2669b902E4F1EEDeEfad3be6',
+        validatorAddress: '5Hax9GZjpurht2RpDr5eNLKvEApECuNxUpmRbYs5iNh7LpHa',
+        stake: { ...REEF_TOKEN },
+        farm: { ...REEF_TOKEN },
+        apy: '32',
+      },
+    ],
   },
   localhost: {
     name: 'localhost',

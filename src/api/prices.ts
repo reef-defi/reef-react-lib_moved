@@ -21,12 +21,12 @@ const explorerApi = axios.create({
 });
 
 export const getTokenPrice = async (tokenId: string): Promise<number> => {
-  if(tokenId === REEF_TOKEN_ID){
+  if (tokenId === REEF_TOKEN_ID) {
     return explorerApi.get<void, AxiosResponse<any>>(
-      `/price`,
-    ).then((res)=>res.data.usd);
+      '/price',
+    ).then((res) => res.data.usd);
   }
-    return coingeckoApi
+  return coingeckoApi
     .get<void, AxiosResponse<PriceRes>>(
       `/simple/price?ids=${tokenId}&vs_currencies=usd`,
     )

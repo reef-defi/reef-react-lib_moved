@@ -7,7 +7,7 @@ import TokenDropdown from './TokenDropdown';
 
 export type SelectToken = (token: Token) => void
 
-BigNumber.config({EXPONENTIAL_AT: 1000})
+BigNumber.config({ EXPONENTIAL_AT: 1000 });
 
 interface TokenField {
   token: TokenWithAmount;
@@ -18,7 +18,7 @@ interface TokenField {
 
 const TokenField = ({
   token,
-  tokens=[],
+  tokens = [],
   onAmountChange,
   selectToken,
 }: TokenField): JSX.Element => {
@@ -35,10 +35,9 @@ const TokenField = ({
       .toString();
     const formatNum = Uik.utils.maxDecimals(num, 2);
     if (!formatNum) {
-      return '$0.0'
-    } else {
-      return `$${Uik.utils.formatAmount(formatNum)}`;
+      return '$0.0';
     }
+    return `$${Uik.utils.formatAmount(formatNum)}`;
   }, [token.amount, token.price]);
 
   return (
@@ -53,7 +52,8 @@ const TokenField = ({
         tokens={tokens}
         selectToken={selectToken}
       />
-      { !token.isEmpty &&
+      { !token.isEmpty
+        && (
         <div className="uik-pool-actions-token__value">
           {
             !!price
@@ -81,7 +81,7 @@ const TokenField = ({
             onChange={(event) => onAmountChange(event.target.value)}
           />
         </div>
-      }
+        )}
     </div>
   );
 };

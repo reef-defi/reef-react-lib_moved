@@ -169,7 +169,6 @@ interface LastClose {
   close: number;
 }
 
-
 // Query result interfaces
 export type PoolQuery = { pool: BasicPoolData[] };
 export type PoolInfoQuery = { pool: PoolInfo[] }
@@ -303,7 +302,7 @@ export type PoolVolume24HVar = FromVar;
 export type PoolReservesVar = AddressVar
 export type PoolCountVar = OptionalSearchVar
 export type UserPoolsVar = AddressVar
-export interface PoolsTotalValueLockedVar extends ToVar { }
+export type PoolsTotalValueLockedVar = ToVar
 export interface PoolFeeVar extends AddressVar, FromVar { }
 export interface PoolTvlVar extends AddressVar, FromVar { }
 export interface PoolDataVar extends AddressVar, FromVar { }
@@ -512,7 +511,7 @@ query volume($address: String!, $fromTime: timestamptz!) {
     amount_2
     timeframe
   }
-}`
+}`;
 export const POOL_DAY_VOLUME_GQL = volumeQuery('day');
 export const POOL_HOUR_VOLUME_GQL = volumeQuery('hour');
 export const POOL_MINUTE_VOLUME_GQL = volumeQuery('minute');
@@ -695,7 +694,7 @@ export const POOL_COUNT_GQL = gql`
 `;
 
 // Charts queryes & subscriptions
-type Time = "day" | "hour" | "minute";
+type Time = 'day' | 'hour' | 'minute';
 
 const tvlQuery = (time: Time): DocumentNode => gql`
 query pool_supply($address: String!, $fromTime: timestamptz!) {
@@ -715,7 +714,7 @@ export const POOL_DAY_TVL_GQL = tvlQuery('day');
 export const POOL_HOUR_TVL_GQL = tvlQuery('hour');
 export const POOL_MINUTE_TVL_GQL = tvlQuery('minute');
 
-const candlestickQuery = (time: Time): DocumentNode =>gql`
+const candlestickQuery = (time: Time): DocumentNode => gql`
 query candlestick($address: String!, $whichToken: Int!, $fromTime: timestamptz!) {
   pool_${time}_candlestick(
     order_by: { timeframe: asc }
@@ -745,9 +744,9 @@ query candlestick($address: String!, $whichToken: Int!, $fromTime: timestamptz!)
 }
 `;
 
-export const POOL_DAY_CANDLESTICK_GQL = candlestickQuery("day")
-export const POOL_HOUR_CANDLESTICK_GQL = candlestickQuery("hour")
-export const POOL_MINUTE_CANDLESTICK_GQL = candlestickQuery("minute")
+export const POOL_DAY_CANDLESTICK_GQL = candlestickQuery('day');
+export const POOL_HOUR_CANDLESTICK_GQL = candlestickQuery('hour');
+export const POOL_MINUTE_CANDLESTICK_GQL = candlestickQuery('minute');
 
 export const POOL_LAST_CANDLESTICH_GQL = gql`
 query candlestick($address: String!, $whichToken: Int!, $fromTime: timestamptz!) {
@@ -778,7 +777,7 @@ query candlestick($address: String!, $whichToken: Int!, $fromTime: timestamptz!)
     }
   }
 }
-`
+`;
 
 const feeQuery = (time: Time): DocumentNode => gql`
 query fee($address: String!, $fromTime: timestamptz!) {
@@ -797,9 +796,9 @@ query fee($address: String!, $fromTime: timestamptz!) {
 }
 `;
 
-export const POOL_DAY_FEE_QUERY_GQL = feeQuery("day");
-export const POOL_HOUR_FEE_QUERY_GQL = feeQuery("hour");
-export const POOL_MINUTE_FEE_QUERY_GQL = feeQuery("minute");
+export const POOL_DAY_FEE_QUERY_GQL = feeQuery('day');
+export const POOL_HOUR_FEE_QUERY_GQL = feeQuery('hour');
+export const POOL_MINUTE_FEE_QUERY_GQL = feeQuery('minute');
 
 export const POOL_RESERVES_SUBSCRITION = gql`
   subscription pool_event {
@@ -817,7 +816,6 @@ export const POOL_RESERVES_SUBSCRITION = gql`
     }
   }
 `;
-
 
 export const POOL_INFO_GQL = gql`
 subscription pool($address: String!, $signerAddress: String!, $fromTime: timestamptz!, $toTime: timestamptz!) {
@@ -915,7 +913,7 @@ subscription pool($address: String!, $signerAddress: String!, $fromTime: timesta
     }
   }
 }
-`
+`;
 
 export const POOL_DATA_GQL = gql`
 query poolData($address: String!, $fromTime: timestamptz!) {
@@ -1015,7 +1013,7 @@ query poolData($address: String!, $fromTime: timestamptz!) {
     close: close_2
   }
 }
-`
+`;
 
 export const N_VERIFIED_POOLS = gql`
 query nPools {
