@@ -50,7 +50,7 @@
   transition: all 0.125s;
   height: 70px;
   padding: 0 17px 1px 71px;
-  font-family: var(--font-family);
+  font-family: var(--font);
   font-size: 15px;
   color: var(--text);
   font-weight: 500;

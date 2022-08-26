@@ -3,6 +3,7 @@ import { Provider } from '@reef-defi/evm-provider';
 import Uik from '@reef-defi/ui-kit';
 import { Contract } from 'ethers';
 import React, { useEffect, useState, useMemo } from 'react';
+import BigNumber from 'bignumber.js';
 import { ERC20 } from '../../assets/abi/ERC20';
 import {
   checkMinExistentialReefAmount,
@@ -23,6 +24,7 @@ import {
   nativeTransfer,
   removeReefSpecificStringFromAddress,
   shortAddress,
+  showBalance,
 } from '../../utils';
 import SendConfirmationModal from './SendConfirmationModal';
 import './Send.css';
@@ -117,6 +119,7 @@ const Accounts = ({
         {
           getAccounts.map((account, index) => (
             <Uik.DropdownItem
+              key={`account-${index}`}
               className="send-accounts__account"
               onClick={() => selectAccount(index, account)}
             >
@@ -207,6 +210,26 @@ export const Send = ({
     document.addEventListener('mouseup', close);
   };
 
+  const maxAmount = useMemo((): number => Math.floor(
+    new BigNumber(
+      showBalance(token)
+        .replace(` ${token.symbol}`, '')
+        .replace(` ${token.name}`, ''),
+    ).toNumber(),
+  ), [token]);
+
+  const percentage = useMemo((): number => {
+    let percentage = new BigNumber(token.amount || 0).times(100).dividedBy(maxAmount).toNumber();
+    if (percentage < 0) percentage = 0;
+    if (percentage > 100) percentage = 100;
+    return percentage;
+  }, [token.amount, maxAmount]);
+
+  const setPercentage = (perc): void => {
+    const amount = new BigNumber(perc).times(maxAmount).dividedBy(100).toNumber();
+    onAmountChange(String(amount), token);
+  };
+
   return (
     <div className="send">
       <div className="send__address">
@@ -252,9 +275,9 @@ export const Send = ({
       <div className="uik-pool-actions__slider">
         <Uik.Slider
           className="send__slider"
-          value={50}
-          onChange={() => {}}
-          tooltip={`${Uik.utils.maxDecimals(50, 2)}%`}
+          value={percentage}
+          onChange={setPercentage}
+          tooltip={`${Uik.utils.maxDecimals(percentage, 2)}%`}
           helpers={[
             { position: 0, text: '0%' },
             { position: 25 },
