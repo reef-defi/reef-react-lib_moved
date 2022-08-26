@@ -22,6 +22,7 @@ import {
   errorHandler,
   nativeTransfer,
   removeReefSpecificStringFromAddress,
+  shortAddress,
 } from '../../utils';
 import SendConfirmationModal from './SendConfirmationModal';
 import './Send.css';
@@ -122,7 +123,7 @@ const Accounts = ({
               <Identicon className="send-accounts__account-identicon" value={account.address} size={44} theme="substrate" />
               <div className="send-accounts__account-info">
                 <div className="send-accounts__account-name">{ account.name }</div>
-                <div className="send-accounts__account-address">{ account.address }</div>
+                <div className="send-accounts__account-address">{ shortAddress(account.address) }</div>
               </div>
             </Uik.DropdownItem>
           ))
