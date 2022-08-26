@@ -78,6 +78,12 @@ const TokenDropdown = ({ token, tokens, selectToken } : TokenDropdown): JSX.Elem
             backgroundImage: `url(${token.iconUrl})`,
           }}
         />
+
+        {
+          token.isEmpty
+          && <span>Select token</span>
+        }
+
         { !token.isEmpty
           && (
           <div className="uik-pool-actions-token__info">

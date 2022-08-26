@@ -24,6 +24,10 @@
   margin-left: 15px;
 }
 
+.uik-pool-actions-token--select .uik-pool-actions-token__image + span {
+  margin-left: 13px;
+}
+
 .uik-pool-actions .uik-pool-actions-token.uik-pool-actions-token--select {
   height: 74px;
   display: flex;
