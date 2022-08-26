@@ -105,6 +105,10 @@
   align-items: center;
 }
 
+.send-accounts__account--selected {
+  background-color: var(--border-color);
+}
+
 .send-accounts__account .send-accounts__account-identicon {
   margin-left: -5px;
 }

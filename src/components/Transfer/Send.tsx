@@ -104,7 +104,12 @@ const Accounts = ({
     if (!query) return accounts;
 
     const perfectMatch = accounts.find((acc) => acc.address === query);
-    if (perfectMatch) return accounts;
+    if (perfectMatch) {
+      return [
+        perfectMatch,
+        ...accounts.filter((acc) => acc.address !== query),
+      ];
+    }
 
     return accounts.filter((acc) => acc.address.toLowerCase().startsWith(query.toLowerCase())
         || acc.name.replaceAll(' ', '').toLowerCase().startsWith(query.toLowerCase()));
@@ -120,7 +125,10 @@ const Accounts = ({
           getAccounts.map((account, index) => (
             <Uik.DropdownItem
               key={`account-${index}`}
-              className="send-accounts__account"
+              className={`
+                send-accounts__account
+                ${account.address === query ? 'send-accounts__account--selected' : ''}
+              `}
               onClick={() => selectAccount(index, account)}
             >
               <Identicon className="send-accounts__account-identicon" value={account.address} size={44} theme="substrate" />
