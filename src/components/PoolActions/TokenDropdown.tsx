@@ -33,7 +33,7 @@ const TokenDropdownItem = ({ token, selectToken }: TokenDropdownItem): JSX.Eleme
 );
 
 const TokenDropdown = ({ token, tokens, selectToken } : TokenDropdown): JSX.Element => {
-  const [isOpen, setOpen] = useState(token.isEmpty);
+  const [isOpen, setOpen] = useState(token.isEmpty && !!selectToken);
   const [search, setSearch] = useState('');
 
   const shownTokens = tokens
