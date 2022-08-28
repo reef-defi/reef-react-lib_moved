@@ -55,7 +55,6 @@ export const defaultOptions: DefaultOptions = {
   updateTokenState: async () => {},
 };
 
-
 interface Timeframe {
   timeframe: string;
 }

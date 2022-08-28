@@ -1,11 +1,12 @@
-import {Provider} from '@reef-defi/evm-provider';
+import Identicon from '@polkadot/react-identicon';
+import { Provider } from '@reef-defi/evm-provider';
 import Uik from '@reef-defi/ui-kit';
-import {Contract} from 'ethers';
-import React, {useEffect, useState} from 'react';
-import {ERC20} from '../../assets/abi/ERC20';
+import { Contract } from 'ethers';
+import React, { useEffect, useState, useMemo } from 'react';
+import BigNumber from 'bignumber.js';
+import { ERC20 } from '../../assets/abi/ERC20';
 import {
   checkMinExistentialReefAmount,
-  createEmptyTokenWithAmount,
   ensureExistentialReefAmount,
   ensureTokenAmount,
   isNativeTransfer,
@@ -13,7 +14,7 @@ import {
   ReefSigner,
   reefTokenWithAmount,
   Token,
-  TokenWithAmount
+  TokenWithAmount,
 } from '../../state';
 import {
   ButtonStatus,
@@ -21,26 +22,20 @@ import {
   ensure,
   errorHandler,
   nativeTransfer,
-  removeReefSpecificStringFromAddress
+  removeReefSpecificStringFromAddress,
+  shortAddress,
+  showBalance,
 } from '../../utils';
-import {AccountListModal} from '../AccountSelector/AccountListModal';
-import {SwitchTokenButton} from '../common/Button';
-import {Card, CardHeader, CardHeaderBlank, CardTitle, SubCard} from '../common/Card';
-import {CenterColumn, ComponentCenter, MT} from '../common/Display';
-import {DownIcon} from '../common/Icons';
-import {Input} from '../common/Input';
-import {LoadingButtonIconWithText} from '../common/Loading';
-import {OpenModalButton} from '../common/Modal';
-import {TokenAmountFieldMax} from '../TokenFields';
 import SendConfirmationModal from './SendConfirmationModal';
 import './Send.css';
+import TokenField from '../PoolActions/TokenField';
+import '../PoolActions/pool-actions.css';
 
 interface Send {
   tokens: Token[];
   signer: ReefSigner;
   provider: Provider;
   accounts: ReefSigner[];
-
   notify: NotifyFun;
 }
 
@@ -57,6 +52,10 @@ const getSignerEvmAddress = async (address: string, provider: Provider): Promise
   return addr;
 };
 
+function isNativeAddress(toAddress: string): boolean {
+  return toAddress.length === 48 && toAddress[0] === '5';
+}
+
 const getSignerNativeAddress = async (evmAddress: string, provider: Provider): Promise<string> => {
   if (isNativeAddress(evmAddress)) {
     return evmAddress;
@@ -69,10 +68,6 @@ const getSignerNativeAddress = async (evmAddress: string, provider: Provider): P
   }
   return addr;
 };
-
-function isNativeAddress(toAddress: string) {
-  return toAddress.length === 48 && toAddress[0] === '5';
-}
 
 const sendStatus = (to: string, token: TokenWithAmount, signer: ReefSigner): ButtonStatus => {
   try {
@@ -90,6 +85,63 @@ const sendStatus = (to: string, token: TokenWithAmount, signer: ReefSigner): But
   } catch (e) {
     return { isValid: false, text: e.message };
   }
+};
+
+const Accounts = ({
+  accounts,
+  selectAccount,
+  isOpen,
+  onClose,
+  query,
+}: {
+  accounts: ReefSigner[];
+  selectAccount: (index: number, signer: ReefSigner) => void;
+  isOpen: boolean;
+  onClose: () => void;
+  query: string
+}): JSX.Element => {
+  const getAccounts = useMemo(() => {
+    if (!query) return accounts;
+
+    const perfectMatch = accounts.find((acc) => acc.address === query);
+    if (perfectMatch) {
+      return [
+        perfectMatch,
+        ...accounts.filter((acc) => acc.address !== query),
+      ];
+    }
+
+    return accounts.filter((acc) => acc.address.toLowerCase().startsWith(query.toLowerCase())
+        || acc.name.replaceAll(' ', '').toLowerCase().startsWith(query.toLowerCase()));
+  }, [accounts, query]);
+
+  return (
+    <div className="send-accounts">
+      <Uik.Dropdown
+        isOpen={isOpen}
+        onClose={onClose}
+      >
+        {
+          getAccounts.map((account, index) => (
+            <Uik.DropdownItem
+              key={`account-${index}`}
+              className={`
+                send-accounts__account
+                ${account.address === query ? 'send-accounts__account--selected' : ''}
+              `}
+              onClick={() => selectAccount(index, account)}
+            >
+              <Identicon className="send-accounts__account-identicon" value={account.address} size={44} theme="substrate" />
+              <div className="send-accounts__account-info">
+                <div className="send-accounts__account-name">{ account.name }</div>
+                <div className="send-accounts__account-address">{ shortAddress(account.address) }</div>
+              </div>
+            </Uik.DropdownItem>
+          ))
+        }
+      </Uik.Dropdown>
+    </div>
+  );
 };
 
 export const Send = ({
@@ -110,13 +162,11 @@ export const Send = ({
   }, [tokens]);
 
   const tokenContract = new Contract(token.address, ERC20, signer.signer);
-  const { text, isValid } = sendStatus(to, token, signer);
+  const { isValid } = sendStatus(to, token, signer);
   const existentialValidity = checkMinExistentialReefAmount(token, signer.balance);
 
-  const onTokenSelect = (newToken: Token): void => setToken({ ...createEmptyTokenWithAmount(false), ...newToken });
-
   const onAmountChange = (amount: string, token: TokenWithAmount): void => {
-    setToken({ ...token, amount: amount });
+    setToken({ ...token, amount });
     setAmountPristine(false);
   };
 
@@ -147,7 +197,7 @@ export const Send = ({
 
       Uik.dropConfetti();
     } catch (error) {
-      const message = errorHandler(error.message)
+      const message = errorHandler(error.message);
       Uik.notify.danger({
         message: `There was an error while sending tokens: ${message}`,
         keepAlive: true,
@@ -157,79 +207,116 @@ export const Send = ({
     }
   };
 
+  const [isAccountListOpen, setAccountsListOpen] = useState(false);
+
+  const closeAccountsList = (): void => {
+    const close = (): void => {
+      setAccountsListOpen(false);
+      document.removeEventListener('mouseup', close);
+    };
+
+    document.addEventListener('mouseup', close);
+  };
+
+  const maxAmount = useMemo((): number => Math.floor(
+    new BigNumber(
+      showBalance(token)
+        .replace(` ${token.symbol}`, '')
+        .replace(` ${token.name}`, ''),
+    ).toNumber(),
+  ), [token]);
+
+  const percentage = useMemo((): number => {
+    let percentage = new BigNumber(token.amount || 0).times(100).dividedBy(maxAmount).toNumber();
+    if (percentage < 0) percentage = 0;
+    if (percentage > 100) percentage = 100;
+    return percentage;
+  }, [token.amount, maxAmount]);
+
+  const setPercentage = (perc): void => {
+    const amount = new BigNumber(perc).times(maxAmount).dividedBy(100).toNumber();
+    onAmountChange(String(amount), token);
+  };
+
   return (
-    <ComponentCenter>
-      <Card>
-        <CardHeader>
-          <CardHeaderBlank />
-          <CardTitle title="Send Tokens" />
-          <CardHeaderBlank />
-        </CardHeader>
-        <SubCard>
-          <MT size="1" />
-          <div className="input-group">
-            <Input
-              value={to}
-              maxLength={70}
-              onChange={(toVal: string) => setTo(removeReefSpecificStringFromAddress(toVal))}
-              placeholder="Send to address"
-              disabled={isLoading}
-            />
-            <div className="input-group-append">
-              <span className="input-group-text p-0 h-100" id="basic-addon2">
-                <OpenModalButton
-                  id="selectMyAddress"
-                  disabled={isLoading}
-                  // TODO add custom css class for border radious insted of rounded
-                  className="btn btn-reef btn-outline-secondary rounded px-3 h-100"
-                >
-                  <DownIcon small />
-                </OpenModalButton>
-              </span>
-            </div>
-          </div>
-          <MT size="2" />
-        </SubCard>
-        <SwitchTokenButton disabled addIcon />
-        <TokenAmountFieldMax
-          onTokenSelect={onTokenSelect}
-          onAmountChange={(amt)=>onAmountChange(amt, token)}
-          signer={signer}
+    <div className="send">
+      <div className="send__address">
+        <Identicon className="send__address-identicon" value={to} size={46} theme="substrate" />
+
+        <input
+          className="send__address-input"
+          value={to}
+          maxLength={70}
+          onChange={(event) => setTo(removeReefSpecificStringFromAddress(event.target.value))}
+          placeholder="Send to address"
+          disabled={isLoading}
+          onFocus={() => setAccountsListOpen(true)}
+          onBlur={closeAccountsList}
+        />
+
+        <Accounts
+          isOpen={isAccountListOpen}
+          onClose={() => setAccountsListOpen(false)}
+          accounts={accounts}
+          query={to}
+          selectAccount={(_, signer) => setTo(signer.address)}
+        />
+      </div>
+
+      <div className="uik-pool-actions__tokens">
+        <TokenField
           token={token}
           tokens={tokens}
+          onAmountChange={(amt) => onAmountChange(amt, token)}
         />
+      </div>
 
-        <MT size="2">
-          <CenterColumn>
-            <OpenModalButton id="send-confirmation-modal-toggle" disabled={isLoading || !isValid}>
-              {isLoading
-                ? (<LoadingButtonIconWithText text={status} />)
-                : (text)}
-            </OpenModalButton>
+      {
+        !isAmountPristine
+        && !existentialValidity.valid && (
+          <div className="send__error">
+            {existentialValidity.message}
+          </div>
+        )
+      }
 
-            {!isAmountPristine && !existentialValidity.valid
-              && (
-                <div className="existential-error">
-                  {existentialValidity.message}
-                </div>
-              )}
-          </CenterColumn>
-        </MT>
-
-        <SendConfirmationModal
-          to={to}
-          token={token}
-          confirmFun={onSend}
-          id="send-confirmation-modal-toggle"
+      <div className="uik-pool-actions__slider">
+        <Uik.Slider
+          className="send__slider"
+          value={percentage}
+          onChange={setPercentage}
+          tooltip={`${Uik.utils.maxDecimals(percentage, 2)}%`}
+          helpers={[
+            { position: 0, text: '0%' },
+            { position: 25 },
+            { position: 50, text: '50%' },
+            { position: 75 },
+            { position: 100, text: '100%' },
+          ]}
         />
+      </div>
 
-        <AccountListModal
-          id="selectMyAddress"
-          accounts={accounts}
-          selectAccount={(_, signer) => setTo(signer.address)}
-          title="Select Account"
+      <button
+        type="button"
+        className="send__cta"
+        data-bs-toggle="modal"
+        data-bs-target="#send-confirmation-modal-toggle"
+        disabled={isLoading || !isValid}
+      >
+        <Uik.Button
+          size="large"
+          disabled={isLoading || !isValid}
+          fill
+          text={isLoading ? status : 'Send'}
         />
-      </Card>
-    </ComponentCenter>
+      </button>
+
+      <SendConfirmationModal
+        to={to}
+        token={token}
+        confirmFun={onSend}
+        id="send-confirmation-modal-toggle"
+      />
+    </div>
   );
 };

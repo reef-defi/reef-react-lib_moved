@@ -11,11 +11,28 @@
   color: var(--primary) !important;
 }
 
+.uik-pool-actions-token__select-wrapper {
+  width: 100%;
+}
+
+.uik-pool-actions-token--select .uik-pool-actions-token__image {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  background-color: #dad5ea;
+  border-radius: 50%;
+  margin-left: 15px;
+}
+
+.uik-pool-actions-token--select .uik-pool-actions-token__image + span {
+  margin-left: 13px;
+}
+
 .uik-pool-actions .uik-pool-actions-token.uik-pool-actions-token--select {
   height: 74px;
   display: flex;
   flex-flow: row nowrap;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   text-align: center;
   border: none;
@@ -32,4 +49,58 @@
 .uik-pool-actions .uik-pool-actions-token.uik-pool-actions-token--select:hover {
   cursor: pointer;
   color: var(--primary);
+}
+
+.uik-pool-actions-token__select-dropdown {
+  width: 100% !important;
+}
+
+.uik-pool-actions-token__select-dropdown .uik-dropdown__dropdown {
+  width: 100% !important;
+  max-height: calc(100vh - 400px);
+  overflow: auto;
+  overflow-x: hidden;
+}
+
+.uik-pool-actions-token__select-dropdown .uik-dropdown__dropdown::-webkit-scrollbar {
+  display: none;
+}
+
+.uik-pool-actions-token__select-dropdown .uik-dropdown__dropdown .uik-input {
+  position: sticky;
+  top: 0;
+}
+
+.uik-pool-actions-token__select-dropdown .uik-dropdown__dropdown .uik-input .uik-input__input:focus {
+  background-color: white !important;
+}
+
+.uik-pool-actions-token__select-dropdown-token img {
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+}
+
+.uik-pool-actions-token__select-dropdown-token-info {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.uik-pool-actions-token__select-dropdown-token-info .uik-text:last-child {
+  color: var(--text-light);
+  font-weight: 400;
+  font-size: 0.813rem;
+}
+
+.uik-pool-actions-token__select-dropdown .uik-dropdown__item-text {
+  width: 100%;
+}
+
+.uik-pool-actions-token__select-dropdown-token-balance {
+  margin-left: auto !important;
+  color: #a328ab;
+  background: -webkit-linear-gradient(0deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  white-space: nowrap;
+  -webkit-text-fill-color: transparent;
 }

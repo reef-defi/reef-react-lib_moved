@@ -42,7 +42,7 @@ export const useLoadSigners = (
   boolean,
   { code?: number; message: string; url?: string } | undefined
 ] => {
-  const [signersVal, setSignersVal] = useState<ReefSigner[]>(signers||[]);
+  const [signersVal, setSignersVal] = useState<ReefSigner[]>(signers || []);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<{ message: string; code?: number; url?: string }>();
 
@@ -97,8 +97,8 @@ export const useLoadSigners = (
       return;
     }
 
-    let storedAddr = localStorage.getItem('selected_address_reef');
-    if(storedAddr && signersVal.some((s)=>storedAddr===s.address)){
+    const storedAddr = localStorage.getItem('selected_address_reef');
+    if (storedAddr && signersVal.some((s) => storedAddr === s.address)) {
       setCurrentAddress(storedAddr);
       return;
     }

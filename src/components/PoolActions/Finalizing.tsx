@@ -12,4 +12,3 @@ export const Finalizing = (): JSX.Element => (
     <Uik.Text type="mini" text="This proccess usually takes up to one minute." />
   </div>
 );
-

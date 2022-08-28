@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { utils } from 'ethers';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { useAsyncEffect } from '../../hooks';
 import { ReefSigner, Token } from '../../state';
 import {
@@ -32,7 +33,6 @@ import {
 } from '../common/Text';
 import { QuestionTooltip } from '../common/Tooltip';
 import { loadToken } from '../../rpc';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { closeModal, openModal } from '../../utils/modalUtil';
 
 interface SelectToken {

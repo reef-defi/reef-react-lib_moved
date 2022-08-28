@@ -16,19 +16,19 @@ import {
   take,
   withLatestFrom,
 } from 'rxjs';
-import {Provider} from '@reef-defi/evm-provider';
-import {BigNumber} from 'ethers';
-import {filter} from 'rxjs/operators';
-import {gql} from '@apollo/client';
-import {UpdateDataCtx} from './updateStateModel';
-import {replaceUpdatedSigners, updateSignersEvmBindings,} from './accountStateUtil';
-import {currentProvider$} from './providerState';
-import {ReefSigner} from '../state';
-import {apolloClientInstance$, zenToRx} from '../graphql/apollo';
-import {AccountJson} from '@reef-defi/extension-base/background/types';
-import type {InjectedAccountWithMeta} from "@reef-defi/extension-inject/types";
-import {accountJsonToMeta, metaAccountToSigner} from "../rpc/accounts";
-import type {Signer as InjectedSigningKey} from '@polkadot/api/types';
+import { Provider } from '@reef-defi/evm-provider';
+import { BigNumber } from 'ethers';
+import { filter } from 'rxjs/operators';
+import { gql } from '@apollo/client';
+import { AccountJson } from '@reef-defi/extension-base/background/types';
+import type { InjectedAccountWithMeta } from '@reef-defi/extension-inject/types';
+import type { Signer as InjectedSigningKey } from '@polkadot/api/types';
+import { UpdateDataCtx } from './updateStateModel';
+import { replaceUpdatedSigners, updateSignersEvmBindings } from './accountStateUtil';
+import { currentProvider$ } from './providerState';
+import { ReefSigner } from '../state';
+import { apolloClientInstance$, zenToRx } from '../graphql/apollo';
+import { accountJsonToMeta, metaAccountToSigner } from '../rpc/accounts';
 
 export const accountsSubj = new ReplaySubject<ReefSigner[] | null>(1);
 export const accountsJsonSubj = new ReplaySubject<AccountJson[]| InjectedAccountWithMeta[] | null>(1);
@@ -43,9 +43,9 @@ const signersFromJson$: Observable<ReefSigner[]> = combineLatest([accountsJsonSu
     }
     return Promise.all(
       accounts.map((account) => metaAccountToSigner(account, provider as Provider, signingKey as InjectedSigningKey)),
-    ).then((signers:ReefSigner[])=>signers.filter(s=>!!s)) as Promise<ReefSigner[]>;
+    ).then((signers:ReefSigner[]) => signers.filter((s) => !!s)) as Promise<ReefSigner[]>;
   }),
-  shareReplay(1)
+  shareReplay(1),
 );
 
 export const signersInjected$ = merge(accountsSubj, signersFromJson$).pipe(
@@ -99,7 +99,7 @@ const signersLocallyUpdatedData$: Observable<ReefSigner[]> = reloadSignersSubj.p
   filter((val: any) => !!val.lastUpdated.length),
   map((val: any): any => val.all),
   startWith([]),
-  catchError(err => {
+  catchError((err) => {
     console.log('signersLocallyUpdatedData$ ERROR=', err.message);
     return of([]);
   }),
@@ -147,7 +147,7 @@ const signersWithUpdatedBalances$ = combineLatest([
       },
       {
         unsub: null,
-        balancesByAddressSubj: new ReplaySubject<any>(1)
+        balancesByAddressSubj: new ReplaySubject<any>(1),
       },
     ),
     distinctUntilChanged(
@@ -168,16 +168,16 @@ const signersWithUpdatedBalances$ = combineLatest([
           .eq(sig.balance)) {
           return {
             ...sig,
-            balance: BigNumber.from(bal.balance)
+            balance: BigNumber.from(bal.balance),
           };
         }
         return sig;
       }))),
     shareReplay(1),
-    catchError(err => {
+    catchError((err) => {
       console.log('signersWithUpdatedBalances$ ERROR=', err.message);
       return of([]);
-    })
+    }),
   );
 
 const EVM_ADDRESS_UPDATE_GQL = gql`
@@ -274,16 +274,16 @@ const signersWithUpdatedData$ = combineLatest([
     ),
     map(({ signers }) => signers),
     shareReplay(1),
-    catchError(err => {
+    catchError((err) => {
       console.log('signersWithUpdatedData$ ERROR=', err.message);
       return of(null);
-    })
+    }),
   );
 
 export const signers$: Observable<ReefSigner[] | null> = signersWithUpdatedData$;
 
 const currentAddressSubj: Subject<string | undefined> = new Subject<string | undefined>();
-export const setCurrentAddress = (address: string|undefined)=> currentAddressSubj.next(address);
+export const setCurrentAddress = (address: string|undefined) => currentAddressSubj.next(address);
 export const currentAddress$: Observable<string | undefined> = currentAddressSubj.asObservable()
   .pipe(
     startWith(''),
@@ -306,9 +306,9 @@ combineLatest([signers$, currentAddress$])
     }
 
     if (!saved) {
-      let firstSigner = signers && signers[0] ? signers[0].address : undefined;
+      const firstSigner = signers && signers[0] ? signers[0].address : undefined;
       setCurrentAddress(
-        saved || firstSigner
+        saved || firstSigner,
       );
     }
   });
@@ -348,4 +348,3 @@ export const selectedSigner$: Observable<ReefSigner | undefined | null> = combin
     }),
     shareReplay(1),
   );
-

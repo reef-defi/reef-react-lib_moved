@@ -1,7 +1,7 @@
-import { gql, useSubscription } from "@apollo/client";
-import { useMemo } from "react";
-import { ERC1155ContractData, ERC721ContractData, NFT } from "../state";
-import { getIconUrl } from "../utils";
+import { gql, useSubscription } from '@apollo/client';
+import { useMemo } from 'react';
+import { ERC1155ContractData, ERC721ContractData, NFT } from '../state';
+import { getIconUrl } from '../utils';
 
 interface VerifiedNft {
   token_address: string;
@@ -39,13 +39,13 @@ subscription nfts($signer: String_comparison_exp!) {
     }
   }
 }
-`
+`;
 
 type UseAllNfts = [NFT[], boolean];
 export const useAllNfts = (signer?: string): UseAllNfts => {
-  const {data, loading} = useSubscription<NftQuery>(
+  const { data, loading } = useSubscription<NftQuery>(
     userBalances,
-    { variables: { signer: signer ? { _eq: signer } : {} } }
+    { variables: { signer: signer ? { _eq: signer } : {} } },
   );
 
   const nfts: NFT[] = useMemo(() => {
@@ -53,7 +53,9 @@ export const useAllNfts = (signer?: string): UseAllNfts => {
       return [];
     }
     return data.token_holder.map(
-      ({ balance, nft_id, token_address, contract: {verified_contract: {contract_data, type}} }) => ({
+      ({
+        balance, nft_id, token_address, contract: { verified_contract: { contract_data, type } },
+      }) => ({
         type,
         balance,
         nftId: nft_id,
@@ -61,10 +63,9 @@ export const useAllNfts = (signer?: string): UseAllNfts => {
         address: token_address,
         iconUrl: getIconUrl(token_address),
         name: contract_data.type === 'ERC721' ? contract_data.name : '',
-      })
+      }),
     );
   }, [data]);
 
   return [nfts, loading];
-}
-
+};

@@ -44,7 +44,7 @@ const splitLink$ = apolloUrlsSubj.pipe(
       httpLink,
     );
   }),
-  shareReplay(1)
+  shareReplay(1),
 );
 const apolloLinksClientInstance$: Observable<ApolloClient<any>> = splitLink$.pipe(
   map(

@@ -1,6 +1,6 @@
 import {
   QueryResult, SubscriptionResult, useQuery,
-  useSubscription
+  useSubscription,
 } from '@apollo/client';
 import {
   PoolBasicTransactionVar, PoolCountQuery, PoolCountVar, PoolDayCandlestickQuery,
@@ -9,7 +9,7 @@ import {
   PoolTransactionVar, PoolTvlQuery,
   PoolTvlVar, PoolVar, PoolVolumeAggregateQuery,
   PoolVolumeAggregateVar, PoolVolumeVar, POOL_COUNT_GQL, POOL_CURRENT_RESERVES_GQL, POOL_DAY_CANDLESTICK_GQL, POOL_DAY_FEE_QUERY_GQL, POOL_DAY_TVL_GQL, POOL_DAY_VOLUME_GQL, POOL_FEES_GQL, POOL_GQL, POOL_LAST_CANDLESTICH_GQL, POOL_SUPPLY_GQL, POOL_TRANSACTIONS_GQL, POOL_TRANSACTION_COUNT_GQL, POOL_VOLUME_AGGREGATE_GQL,
-  TransactionTypes
+  TransactionTypes,
 } from '../graphql/pools';
 
 // Intermediat query hooks

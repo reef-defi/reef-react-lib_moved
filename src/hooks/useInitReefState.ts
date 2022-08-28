@@ -11,13 +11,15 @@ import {
 import { accountsSubj } from '../appState/accountState';
 import { useLoadSigners } from './useLoadSigners';
 import { disconnectProvider } from '../utils/providerUtil';
-import {_NFT_IPFS_RESOLVER_FN, initApolloClient, setNftIpfsResolverFn, State, StateOptions} from '../appState/util';
+import {
+  _NFT_IPFS_RESOLVER_FN, initApolloClient, setNftIpfsResolverFn, State, StateOptions,
+} from '../appState/util';
 
 const getNetworkFallback = (): Network => {
   let storedNetwork;
-  try{
+  try {
     storedNetwork = localStorage.getItem(ACTIVE_NETWORK_LS_KEY);
-  }catch (e) {
+  } catch (e) {
     // when cookies disabled localStorage can throw
   }
   return storedNetwork != null ? JSON.parse(storedNetwork) : availableNetworks.mainnet;
@@ -27,7 +29,9 @@ export const useInitReefState = (
   applicationDisplayName: string,
   options: StateOptions = {},
 ): State => {
-  const { network, client, signers, ipfsHashResolverFn } = options;
+  const {
+    network, client, signers, ipfsHashResolverFn,
+  } = options;
   const selectedNetwork: Network|undefined = useObservableState(currentNetwork$);
   const [provider, isProviderLoading] = useProvider((selectedNetwork as Network)?.rpcUrl);
   const [loadedSigners, isSignersLoading, error] = useLoadSigners(applicationDisplayName, signers ? undefined : provider, signers);
@@ -52,8 +56,8 @@ export const useInitReefState = (
       setCurrentProvider(provider);
     }
     return () => {
-      if(provider){
-        const disc = async(prov) => {
+      if (provider) {
+        const disc = async (prov) => {
           await disconnectProvider(prov);
         };
         disc(provider);

@@ -1,0 +1,93 @@
+.bind-evm .uik-button {
+  width: 100%;
+  margin-top: 25px;
+}
+
+.bind-evm-account {
+  width: 100%;
+  border-radius: 15px;
+  box-shadow: var(--neomorph-out);
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-start;
+  align-items: center;
+  transition: all 0.125s;
+  padding: 15px;
+  background-color: transparent;
+  border: none;
+  margin: 1rem 0;
+}
+
+.bind-evm-account__identicon {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+}
+
+.bind-evm-account__info {
+  margin-left: 13px;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.bind-evm-account__name {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.bind-evm-account__address {
+  font-size: 13px;
+  font-weight: 500;
+  color: hsla(
+    var(--text--h),
+    var(--text--s),
+    var(--text--l),
+    0.85
+  );
+  white-space: nowrap;
+  line-height: 1.3;
+  padding-left: 0.5px;
+  margin-top: 1px;
+}
+
+.bind-evm p {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.bind-evm__select-account {
+  display: flex;
+  width: 100%;
+}
+
+.bind-evm__select-account > span {
+  width: 100%;
+}
+
+.bind-evm__select-account:hover .bind-evm-account {
+  box-shadow: var(--neomorph-out), inset 0 0 0 2px var(--primary);
+  background-color: hsla(
+    var(--primary--h),
+    var(--primary--s),
+    var(--primary--l),
+    0.05
+  );
+}
+
+.bind-evm__loading {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.bind-evm__loading span {
+  margin-left: 25px;
+}

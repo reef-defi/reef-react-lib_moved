@@ -5,12 +5,12 @@ import {
   Pool24HVolume, PoolInfoQuery,
   PoolInfoVar, PoolsTotalSupply,
   PoolsTotalValueLockedVar, POOLS_TOTAL_VALUE_LOCKED, PoolVolume24HVar, POOL_24H_VOLUME,
-  POOL_INFO_GQL
+  POOL_INFO_GQL,
 } from '../graphql/pools';
 import { getTokenPrice, TokenPrices } from '../state';
 import { getIconUrl, normalize } from '../utils';
 
-export const useTotalSupply = (tokenPrices: TokenPrices, previous=false): string => {
+export const useTotalSupply = (tokenPrices: TokenPrices, previous = false): string => {
   const toTime = useMemo(() => {
     const tm = new Date();
     if (previous) {
@@ -20,14 +20,15 @@ export const useTotalSupply = (tokenPrices: TokenPrices, previous=false): string
   }, []);
   const { data } = useQuery<PoolsTotalSupply, PoolsTotalValueLockedVar>(
     POOLS_TOTAL_VALUE_LOCKED,
-    { variables: {
-      toTime: toTime.toISOString()
-    }}
+    {
+      variables: {
+        toTime: toTime.toISOString(),
+      },
+    },
   );
   if (!data || data.pool_event.length === 0) {
     return '0';
   }
-
 
   return data.pool_event.reduce((acc, { reserved_1, reserved_2, pool: { token_1, token_2 } }) => {
     const tokenPrice1 = getTokenPrice(token_1, tokenPrices);
@@ -89,21 +90,20 @@ export interface PoolStats {
   volumeChange24h: number;
 }
 
-
 export const usePoolInfo = (address: string, signerAddress: string, tokenPrices: TokenPrices): [PoolStats|undefined, boolean] => {
   const toTime = useMemo(() => {
-    let date = new Date()
+    const date = new Date();
     date.setDate(date.getDate() - 1);
     return date.toISOString();
-  }, [address, signerAddress])
+  }, [address, signerAddress]);
 
   const fromTime = useMemo(() => {
-    let date = new Date()
+    const date = new Date();
     date.setDate(date.getDate() - 2);
     return date.toISOString();
-  }, [address, signerAddress])
+  }, [address, signerAddress]);
 
-  const {data, loading} = useSubscription<PoolInfoQuery, PoolInfoVar>(
+  const { data, loading } = useSubscription<PoolInfoQuery, PoolInfoVar>(
     POOL_INFO_GQL,
     {
       variables: {
@@ -111,22 +111,22 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
         toTime,
         fromTime,
         signerAddress,
-      }
-    }
-  )
+      },
+    },
+  );
 
   const info = useMemo<PoolStats|undefined>(() => {
     if (!data || data.pool.length === 0) {
       return undefined;
     }
-    const pool = data.pool[0]
-    const {decimals: decimal1, name: name1, symbol: symbol1} = pool.tokenContract1.verified_contract!.contract_data;
-    const {decimals: decimal2, name: name2, symbol: symbol2} = pool.tokenContract2.verified_contract!.contract_data;
+    const pool = data.pool[0];
+    const { decimals: decimal1, name: name1, symbol: symbol1 } = pool.tokenContract1.verified_contract!.contract_data;
+    const { decimals: decimal2, name: name2, symbol: symbol2 } = pool.tokenContract2.verified_contract!.contract_data;
 
     const amountLocked1 = normalize(pool.reserves[0].reserved_1, decimal1);
     const amountLocked2 = normalize(pool.reserves[0].reserved_2, decimal2);
-    const fee1 =  normalize(pool.fee.aggregate.sum.fee_1, decimal1);
-    const fee2 =  normalize(pool.fee.aggregate.sum.fee_2, decimal2);
+    const fee1 = normalize(pool.fee.aggregate.sum.fee_1, decimal1);
+    const fee2 = normalize(pool.fee.aggregate.sum.fee_2, decimal2);
     const volume1 = normalize(pool.currentDayVolume.aggregate.sum.amount_1, decimal1);
     const volume2 = normalize(pool.currentDayVolume.aggregate.sum.amount_2, decimal2);
     const previousVolume1 = normalize(pool.previousDayVolume.aggregate.sum.amount_1, decimal1);
@@ -154,20 +154,15 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
       .plus(previousVolume2.multipliedBy(tokenPrices[pool.token2]));
 
     let volDiff = 0;
-    if (prevVolume24USD.eq(0) && volume24hUSD.eq(0)) {}
-    else if (prevVolume24USD.isNaN() && volume24hUSD.isNaN()) {}
-    else if (prevVolume24USD.eq(0) || prevVolume24USD.isNaN()) {
-      volDiff = 100
-    }
-    else if (volume24hUSD.eq(0) || volume24hUSD.isNaN()) {
-      volDiff = -100
-    }
-    else {
-      volDiff = prevVolume24USD.minus(volume24hUSD).dividedBy(prevVolume24USD).multipliedBy(100).toNumber()
+    if (prevVolume24USD.eq(0) && volume24hUSD.eq(0)) {} else if (prevVolume24USD.isNaN() && volume24hUSD.isNaN()) {} else if (prevVolume24USD.eq(0) || prevVolume24USD.isNaN()) {
+      volDiff = 100;
+    } else if (volume24hUSD.eq(0) || volume24hUSD.isNaN()) {
+      volDiff = -100;
+    } else {
+      volDiff = prevVolume24USD.minus(volume24hUSD).dividedBy(prevVolume24USD).multipliedBy(100).toNumber();
     }
 
-
-    const all = amountLocked1.plus(amountLocked2)
+    const all = amountLocked1.plus(amountLocked2);
 
     return {
       firstToken: {
@@ -205,7 +200,7 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
       volume24hUSD: volume24hUSD.toFormat(2),
       volumeChange24h: volDiff,
     };
-  }, [data, tokenPrices])
+  }, [data, tokenPrices]);
 
-  return [info, loading]
-}
+  return [info, loading];
+};
