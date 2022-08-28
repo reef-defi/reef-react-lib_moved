@@ -6,13 +6,13 @@ import { ReefswapPair } from '../assets/abi/ReefswapPair';
 import { getReefswapRouter } from '../rpc';
 import {
   AddressToNumber,
-  Network, NotifyFun, Pool, ReefSigner, REMOVE_DEFAULT_SLIPPAGE_TOLERANCE, resolveSettings, Token
+  Network, NotifyFun, Pool, ReefSigner, REMOVE_DEFAULT_SLIPPAGE_TOLERANCE, resolveSettings, Token,
 } from '../state';
 import {
-  RemoveLiquidityActions, RemoveLiquidityState, setCompleteStatusAction, setLoadingAction, setPercentageAction, setPoolAction, setStatusAction, setToken1Action, setToken2Action
+  RemoveLiquidityActions, RemoveLiquidityState, setCompleteStatusAction, setLoadingAction, setPercentageAction, setPoolAction, setStatusAction, setToken1Action, setToken2Action,
 } from '../store';
 import {
-  ButtonStatus, calculateDeadline, ensure, errorHandler
+  ButtonStatus, calculateDeadline, ensure, errorHandler,
 } from '../utils';
 import { useKeepTokenUpdated } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
@@ -67,7 +67,7 @@ export const useRemoveLiquidity = ({
     token2,
     network?.factoryAddress || '',
     signer?.signer,
-    isLoading
+    isLoading,
   );
   // Updating pool
   useEffect(() => {
@@ -104,7 +104,7 @@ export const onRemoveLiquidity = ({
 }: OnRemoveLiquidity) => async (): Promise<void> => {
   const { pool, percentage: percentageAmount, settings } = state;
   if (!pool || !sig || !network || percentageAmount === 0) { return; }
-  const {signer, evmAddress, address} = sig;
+  const { signer, evmAddress, address } = sig;
   const { percentage, deadline } = resolveSettings(
     settings,
     REMOVE_DEFAULT_SLIPPAGE_TOLERANCE,
@@ -125,7 +125,7 @@ export const onRemoveLiquidity = ({
     .multipliedBy(poolPercentage)
     .multipliedBy(percentageAmount)
     .div(100)
-    .multipliedBy(100-percentage)
+    .multipliedBy(100 - percentage)
     .div(100)
     .toFixed(0);
 
@@ -133,7 +133,7 @@ export const onRemoveLiquidity = ({
     .multipliedBy(poolPercentage)
     .multipliedBy(percentageAmount)
     .div(100)
-    .multipliedBy(100-percentage)
+    .multipliedBy(100 - percentage)
     .div(100)
     .toFixed(0);
 
@@ -143,7 +143,7 @@ export const onRemoveLiquidity = ({
     const poolContract = new Contract(pool.poolAddress, ReefswapPair, signer);
 
     const approveTransaction = await poolContract.populateTransaction.approve(network.routerAddress, removedLiquidity);
-    let withdrawTransaction = await reefswapRouter.populateTransaction.removeLiquidity(
+    const withdrawTransaction = await reefswapRouter.populateTransaction.removeLiquidity(
       pool.token1.address,
       pool.token2.address,
       removedLiquidity,
@@ -159,7 +159,7 @@ export const onRemoveLiquidity = ({
       approveTransaction.data,
       BigNumber.from(approveTransaction.value || 0),
       approveResources.gas,
-      approveResources.storage.lt(0) ? BigNumber.from(0) : approveResources.storage
+      approveResources.storage.lt(0) ? BigNumber.from(0) : approveResources.storage,
     );
     const withdrawExtrinsic = await signer.provider.api.tx.evm.call(
       withdrawTransaction.to,
@@ -184,13 +184,12 @@ export const onRemoveLiquidity = ({
           }
           // If you want to await until block is finalized use below if
           // if (status.status.isFinalized) {
-            // resolve();
+          // resolve();
           // }
-        }
+        },
       );
     });
     await signAndSend;
-
 
     Uik.notify.success({
       message: 'Tokens were successfully withdrawn.\nBalances will reload after blocks are finalized.',

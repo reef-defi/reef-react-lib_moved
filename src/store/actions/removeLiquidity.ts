@@ -1,8 +1,7 @@
 import { Settings } from '../../state';
 import {
-  SetCompleteStatus, SetLoading, SetPercentage, SetPool, SetSettings, SetStatus, SetToken1, SetToken2, SetValidity
+  SetCompleteStatus, SetLoading, SetPercentage, SetPool, SetSettings, SetStatus, SetToken1, SetToken2, SetValidity,
 } from './defaultActions';
-
 
 export type RemoveLiquidityActions =
   | SetLoading

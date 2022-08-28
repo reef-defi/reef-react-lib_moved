@@ -38,11 +38,13 @@ const applyPercentage = (state: SwapState, percentage: number): SwapState => {
     .div(100)
     .div(new BigNumber(10).pow(state.token1.decimals));
 
-  return {...state, percentage,
-    token1: {...state.token1, amount: amount.toFixed(2)}, // TODO s
-    token2: {...state.token2, amount: !!state.pool ? getOutputAmount({...state.token1, amount: amount.toString()}, state.pool).toFixed(2) : '' }
+  return {
+    ...state,
+    percentage,
+    token1: { ...state.token1, amount: amount.toFixed(2) }, // TODO s
+    token2: { ...state.token2, amount: state.pool ? getOutputAmount({ ...state.token1, amount: amount.toString() }, state.pool).toFixed(2) : '' },
   };
-}
+};
 
 export const swapReducer = (state = initialSwapState, action: SwapAction): SwapState => {
   const {
@@ -59,22 +61,24 @@ export const swapReducer = (state = initialSwapState, action: SwapAction): SwapS
           ? getOutputAmount({ ...token1, amount: action.amount }, pool).toFixed(4)
           : '',
       },
-      percentage: action.amount === '' ? 0 : Math.min(new BigNumber(action.amount).multipliedBy(new BigNumber(10).pow(state.token1.decimals)).div(token1.balance.toString()).multipliedBy(100).toNumber(), 100)
+      percentage: action.amount === '' ? 0 : Math.min(new BigNumber(action.amount).multipliedBy(new BigNumber(10).pow(state.token1.decimals)).div(token1.balance.toString()).multipliedBy(100)
+        .toNumber(), 100),
     };
     case SET_TOKEN2_AMOUNT:
       const otherAmount = pool && action.amount
         ? getInputAmount({ ...token2, amount: action.amount }, pool).toFixed(4)
         : '';
       return {
-      ...state,
-      focus: 'buy',
-      token2: { ...token2, amount: action.amount },
-      token1: {
-        ...token1,
-        amount: otherAmount,
-      },
-      percentage: otherAmount === '' ? 0 : Math.min(new BigNumber(otherAmount).multipliedBy(new BigNumber(10).pow(state.token1.decimals)).div(token1.balance.toString()).multipliedBy(100).toNumber(), 100)
-    };
+        ...state,
+        focus: 'buy',
+        token2: { ...token2, amount: action.amount },
+        token1: {
+          ...token1,
+          amount: otherAmount,
+        },
+        percentage: otherAmount === '' ? 0 : Math.min(new BigNumber(otherAmount).multipliedBy(new BigNumber(10).pow(state.token1.decimals)).div(token1.balance.toString()).multipliedBy(100)
+          .toNumber(), 100),
+      };
     case SWITCH_TOKENS: return {
       ...state,
       token1: { ...token2 },

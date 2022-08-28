@@ -81,13 +81,14 @@ export const Withdraw = ({
         className="uik-pool-actions__cta"
         fill
         icon={faArrowUpFromBracket}
-        text={isLoading ? status : 'Withdraw'}
+        text={isLoading ? status : 'Unstake'}
         size="large"
         disabled={!isValid || isLoading}
         loading={isLoading}
         onClick={() => setPopupOpen(true)}
       />
-      { !!pool &&
+      { !!pool
+        && (
         <WithdrawPopup
           isOpen={isPopupOpen}
           onClose={() => setPopupOpen(false)}
@@ -99,8 +100,7 @@ export const Withdraw = ({
           LPTokens={removeUserPoolSupply(percentage, pool).toFixed(8)}
           poolShare={`${calculatePoolShare(pool).toFixed(8)} %`}
         />
-      }
+        )}
     </div>
   );
 };
-

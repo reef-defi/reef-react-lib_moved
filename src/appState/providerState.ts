@@ -14,7 +14,7 @@ export const setCurrentNetwork = (network: Network): void => {
   if (network != null) {
     try {
       localStorage.setItem(ACTIVE_NETWORK_LS_KEY, JSON.stringify(network));
-    }catch (e) {
+    } catch (e) {
       // when cookies disabled localStorage can throw
     }
   }

@@ -14,7 +14,7 @@ import {
 import { BigNumber, FixedNumber, utils } from 'ethers';
 import { gql } from '@apollo/client';
 import { filter } from 'rxjs/operators';
-import {combineTokensDistinct, _NFT_IPFS_RESOLVER_FN, toTokensWithPrice} from './util';
+import { combineTokensDistinct, _NFT_IPFS_RESOLVER_FN, toTokensWithPrice } from './util';
 import { selectedSigner$ } from './accountState';
 import { currentProvider$, currentNetwork$ } from './providerState';
 import { apolloClientInstance$, zenToRx } from '../graphql/apollo';
@@ -219,10 +219,10 @@ export const selectedSignerTokenBalances$: Observable<Token[]|null> = combineLat
       }))),
       map(sortReefTokenFirst),
     ))),
-  catchError((err => {
-    console.log('selectedSignerTokenBalances$ ERROR=',err.message);
+  catchError(((err) => {
+    console.log('selectedSignerTokenBalances$ ERROR=', err.message);
     return of(null);
-  }))
+  })),
 );
 
 export const selectedSignerAddressUpdate$ = selectedSigner$.pipe(

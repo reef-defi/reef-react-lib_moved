@@ -9,11 +9,11 @@ import {
   NotifyFun, ReefSigner,
   resolveSettings,
   Token,
-  TokenWithAmount
+  TokenWithAmount,
 } from '../state';
 import {
   AddLiquidityActions,
-  SetNewPoolSupplyAction
+  SetNewPoolSupplyAction,
 } from '../store/actions/addLiquidity';
 import {
   clearTokenAmountsAction,
@@ -22,7 +22,7 @@ import {
   setPoolAction,
   setStatusAction,
   setToken1Action,
-  setToken2Action
+  setToken2Action,
 } from '../store/actions/defaultActions';
 import { AddLiquidityState } from '../store/reducers/addLiquidity';
 import {
@@ -33,7 +33,7 @@ import {
   calculatePoolSupply,
   ensure,
   ensureAmount,
-  errorHandler
+  errorHandler,
 } from '../utils';
 import { useKeepTokenUpdated } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
@@ -93,7 +93,7 @@ export const useAddLiquidity = ({
     token2,
     network?.factoryAddress || '',
     signer?.signer,
-    isLoading
+    isLoading,
   );
   const newPoolSupply = calculatePoolSupply(token1, token2, pool);
 
@@ -226,28 +226,28 @@ export const onAddLiquidity = ({
       approvetTransaction1.data,
       BigNumber.from(approvetTransaction1.value || 0),
       resources.gas,
-      resources.storage.lt(0) ? BigNumber.from(0) : resources.storage
+      resources.storage.lt(0) ? BigNumber.from(0) : resources.storage,
     );
     const approveExtrinsic2 = await signer.signer.provider.api.tx.evm.call(
       approvetTransaction2.to,
       approvetTransaction2.data,
       BigNumber.from(approvetTransaction2.value || 0),
       resources.gas,
-      resources.storage.lt(0) ? BigNumber.from(0) : resources.storage
+      resources.storage.lt(0) ? BigNumber.from(0) : resources.storage,
     );
     const provideExtrinsic = await signer.signer.provider.api.tx.evm.call(
       provideTransaction.to,
       provideTransaction.data,
       BigNumber.from(provideTransaction.value || 0),
       BigNumber.from(605379).mul(2), // Value was used from estimateResources, which can only be ran if tokens are approved. multiple 2 is a safty net.
-      BigNumber.from(0)
+      BigNumber.from(0),
     );
 
     // Batching extrinsics
     const batch = await signer.signer.provider.api.tx.utility.batchAll([
       approveExtrinsic1,
       approveExtrinsic2,
-      provideExtrinsic
+      provideExtrinsic,
     ]);
 
     // Signing and awaiting when data comes in block
@@ -264,9 +264,9 @@ export const onAddLiquidity = ({
 
           // If you want to await until block is finalized use below if
           // if (status.status.isFinalized) {
-            // resolve();
+          // resolve();
           // }
-        }
+        },
       );
     });
 

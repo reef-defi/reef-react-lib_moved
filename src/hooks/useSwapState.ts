@@ -11,11 +11,11 @@ import {
   Pool,
   ReefSigner,
   resolveSettings, Token,
-  TokenWithAmount
+  TokenWithAmount,
 } from '../state';
 import { SwapAction } from '../store';
 import {
-  clearTokenAmountsAction, setCompleteStatusAction, setLoadingAction, setPoolAction, setStatusAction, setToken1Action, setToken2Action
+  clearTokenAmountsAction, setCompleteStatusAction, setLoadingAction, setPoolAction, setStatusAction, setToken1Action, setToken2Action,
 } from '../store/actions/defaultActions';
 import { SwapState } from '../store/reducers/swap';
 import {
@@ -25,7 +25,7 @@ import {
   calculateDeadline,
   convert2Normal,
   ensure,
-  errorHandler
+  errorHandler,
 } from '../utils';
 import { useKeepTokenUpdated } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
@@ -182,7 +182,7 @@ export const onSwap = ({
     dispatch(setStatusAction('Executing trade'));
     const approveTransaction = await sellTokenContract.populateTransaction.approve(
       network.routerAddress,
-      sellAmount
+      sellAmount,
     );
     const tradeTransaction = await reefswapRouter.populateTransaction.swapExactTokensForTokensSupportingFeeOnTransferTokens(
       sellAmount,
@@ -199,7 +199,7 @@ export const onSwap = ({
       approveTransaction.data,
       BigNumber.from(approveTransaction.value || 0),
       approveResources.gas,
-      approveResources.storage.lt(0) ? BigNumber.from(0) : approveResources.storage
+      approveResources.storage.lt(0) ? BigNumber.from(0) : approveResources.storage,
     );
     const tradeExtrinsic = await signer.provider.api.tx.evm.call(
       tradeTransaction.to,
@@ -224,9 +224,9 @@ export const onSwap = ({
           }
           // If you want to await until block is finalized use below if
           // if (status.status.isFinalized) {
-            // resolve();
+          // resolve();
           // }
-        }
+        },
       );
     });
     await signAndSend;
@@ -238,7 +238,7 @@ export const onSwap = ({
 
     Uik.dropConfetti();
   } catch (error) {
-    const message = errorHandler(error.message)
+    const message = errorHandler(error.message);
     Uik.notify.danger({
       message: `An error occurred while trying to complete your trade: ${message}`,
       keepAlive: true,
@@ -247,8 +247,7 @@ export const onSwap = ({
     await updateTokenState().catch(() => Uik.notify.danger({
       message: 'Please reaload the page to update token balances',
       keepAlive: true,
-    }))
-
+    }));
 
     dispatch(setLoadingAction(false));
     dispatch(clearTokenAmountsAction());

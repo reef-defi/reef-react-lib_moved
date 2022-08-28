@@ -1,4 +1,5 @@
 import React, { ReactElement } from 'react';
+import { BigNumber } from 'ethers';
 import {
   checkMinExistentialReefAmount,
   Color, isNativeTransfer, REEF_TOKEN, ReefSigner, Token, TokenWithAmount,
@@ -12,7 +13,6 @@ import { InputAmount } from '../common/Input';
 import { ColorText, MiniText } from '../common/Text';
 import { SelectToken } from '../SelectToken';
 import { getData } from '../../utils';
-import {BigNumber} from "ethers";
 
 interface TokenAmountFieldProps {
   id?: string;
@@ -112,11 +112,11 @@ interface TokenAmountFieldMax extends TokenAmountFieldProps {
 }
 
 function getMaxAmt(token: TokenWithAmount, signerBalance: BigNumber) {
-  if(!isNativeTransfer(token)){
+  if (!isNativeTransfer(token)) {
     return toUnits(token);
   }
-  var {maxTransfer} = checkMinExistentialReefAmount(token, signerBalance)
-  return toUnits({balance:maxTransfer, decimals: REEF_TOKEN.decimals});
+  const { maxTransfer } = checkMinExistentialReefAmount(token, signerBalance);
+  return toUnits({ balance: maxTransfer, decimals: REEF_TOKEN.decimals });
 }
 
 export const TokenAmountFieldMax = ({

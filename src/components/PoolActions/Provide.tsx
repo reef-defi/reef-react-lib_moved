@@ -57,6 +57,8 @@ export const Provide = ({
 
   return (
     <div>
+      <Uik.Text type="mini" className="uik-pool-actions__description">Earn trading fees on this liquidity pool by staking your tokens into it.</Uik.Text>
+
       <div className="uik-pool-actions__tokens">
         <TokenField
           token={token1}
@@ -107,7 +109,7 @@ export const Provide = ({
         className="uik-pool-actions__cta"
         fill
         icon={faCoins}
-        text={isLoading ? status : 'Provide'}
+        text={isLoading ? status : 'Stake'}
         size="large"
         disabled={!isValid || isLoading}
         loading={isLoading}
@@ -127,4 +129,3 @@ export const Provide = ({
     </div>
   );
 };
-

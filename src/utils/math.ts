@@ -47,9 +47,7 @@ interface CalculateAmount {
 export const calculateAmount = ({
   decimals,
   amount,
-}: CalculateAmount): string => {
-  return BigNumber.from(transformAmount(decimals, assertAmount(amount))).toString()
-};
+}: CalculateAmount): string => BigNumber.from(transformAmount(decimals, assertAmount(amount))).toString();
 
 export const calculateAmountWithPercentage = (
   { amount: oldAmount, decimals }: CalculateAmount,
@@ -331,11 +329,11 @@ export const toHumanAmount = (amount: string): string => {
 
 export const formatAmount = (amount: number, decimals: number): string => {
   let amo = amount.toLocaleString('fullwide', { useGrouping: false });
-  if (amo.indexOf(".") !== -1) {
-    amo = amo.substring(0, amo.indexOf("."))
+  if (amo.indexOf('.') !== -1) {
+    amo = amo.substring(0, amo.indexOf('.'));
   }
-  if (amo.indexOf(",") !== -1) {
-    amo = amo.substring(0, amo.indexOf(","))
+  if (amo.indexOf(',') !== -1) {
+    amo = amo.substring(0, amo.indexOf(','));
   }
   return toHumanAmount(
     utils.formatUnits(
@@ -343,7 +341,7 @@ export const formatAmount = (amount: number, decimals: number): string => {
       decimals,
     ),
   );
-}
+};
 export const mean = (arr: number[]): number => arr.reduce((acc, v) => acc + v) / arr.length;
 export const variance = (arr: number[]): number => {
   const avg = mean(arr);

@@ -16,3 +16,16 @@
 .uik-pool-actions .uik-button--loading .uik-loading__spinner-dot::before {
   background: var(--text-light) !important;
 }
+
+.uik-pool-actions__description {
+  margin-top: 25px;
+  margin-bottom: -20px;
+  padding: 0 3px;
+  color: hsla(
+    var(--text--h),
+    var(--text--s),
+    var(--text--l),
+    0.8
+  ) !important;
+  text-align: center;
+}

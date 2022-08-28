@@ -54,14 +54,15 @@ export const estimatePrice = (
   const poolTokens = findPoolTokens(verifiedPools, tokens);
 
   let priceVector = emptyMatrix(poolTokens.length, 1, 0)[0];
-  let ratioMatrix = emptyMatrix(poolTokens.length, poolTokens.length, 0);
+  const ratioMatrix = emptyMatrix(poolTokens.length, poolTokens.length, 0);
 
   // Defining token positions from current array
   const tokenPosition = createTokenPositions(poolTokens);
   const reefTokenPointer = tokenPosition[REEF_ADDRESS];
 
   // Setting reserved matrix
-  verifiedPools.forEach(({    reserved_1, reserved_2, token_1, token_2,
+  verifiedPools.forEach(({
+    reserved_1, reserved_2, token_1, token_2,
   }) => {
     const position1 = tokenPosition[token_1];
     const position2 = tokenPosition[token_2];

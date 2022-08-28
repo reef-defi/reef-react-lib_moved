@@ -1,9 +1,8 @@
-import Uik from "@reef-defi/ui-kit";
-import React, { useState } from "react"
-import { Token, TokenWithAmount } from "../../state";
-import { showBalance } from "../../utils";
+import Uik from '@reef-defi/ui-kit';
+import React, { useState } from 'react';
+import { Token, TokenWithAmount } from '../../state';
+import { showBalance } from '../../utils';
 import './token-field.css';
-import { faQuestion } from '@fortawesome/free-solid-svg-icons';
 
 interface TokenDropdown {
   token: TokenWithAmount;
@@ -16,20 +15,25 @@ interface TokenDropdownItem {
   selectToken: (token: Token) => void;
 }
 
-const TokenDropdownItem = ({token, selectToken}: TokenDropdownItem): JSX.Element => (
+const TokenDropdownItem = ({ token, selectToken }: TokenDropdownItem): JSX.Element => (
   <Uik.DropdownItem onClick={() => selectToken(token)}>
-    <div className="d-flex flex-row">
-      <img src={token.iconUrl} className="me-2" style={{ width: 30, height: 30 }}/>
-      <div>
-        <Uik.Text>{token.name}</Uik.Text>
-        <Uik.Text>{token.symbol}</Uik.Text>
+    <Uik.Container className="uik-pool-actions-token__select-dropdown-token">
+      <img
+        src={token.iconUrl}
+        alt={token.name}
+      />
+      <div className="uik-pool-actions-token__select-dropdown-token-info">
+        <Uik.Text type="mini">{token.name}</Uik.Text>
+        <Uik.Text type="mini">{token.symbol}</Uik.Text>
       </div>
-    </div>
+
+      <div className="uik-pool-actions-token__select-dropdown-token-balance">{ showBalance(token) }</div>
+    </Uik.Container>
   </Uik.DropdownItem>
 );
 
-const TokenDropdown = ({token, tokens, selectToken} : TokenDropdown): JSX.Element => {
-  const [isOpen, setOpen] = useState(false);
+const TokenDropdown = ({ token, tokens, selectToken } : TokenDropdown): JSX.Element => {
+  const [isOpen, setOpen] = useState(token.isEmpty && !!selectToken);
   const [search, setSearch] = useState('');
 
   const shownTokens = tokens
@@ -38,10 +42,10 @@ const TokenDropdown = ({token, tokens, selectToken} : TokenDropdown): JSX.Elemen
         return false;
       }
       if (
-        search === '' ||
-        token.symbol.startsWith(search) ||
-        token.name.startsWith(search) ||
-        token.address.startsWith(search)
+        search === ''
+        || token.symbol.toLowerCase().startsWith(search.toLowerCase())
+        || token.name.toLowerCase().startsWith(search.toLowerCase())
+        || token.address.toLowerCase().startsWith(search.toLowerCase())
       ) {
         return true;
       }
@@ -59,12 +63,11 @@ const TokenDropdown = ({token, tokens, selectToken} : TokenDropdown): JSX.Elemen
     ));
 
   return (
-    <div>
+    <div className="uik-pool-actions-token__select-wrapper">
       <button
         className={!token.isEmpty
-          ? "uik-pool-actions-token__token"
-          : "uik-pool-actions-token uik-pool-actions-token--select"
-        }
+          ? 'uik-pool-actions-token__token'
+          : 'uik-pool-actions-token uik-pool-actions-token--select'}
         type="button"
         disabled={!selectToken}
         onClick={() => setOpen(true)}
@@ -74,24 +77,29 @@ const TokenDropdown = ({token, tokens, selectToken} : TokenDropdown): JSX.Elemen
           style={{
             backgroundImage: `url(${token.iconUrl})`,
           }}
-        >
-          {token.isEmpty && <Uik.Icon className="mx-3 px-2" icon={faQuestion} />}
-        </div>
-        { !token.isEmpty &&
+        />
+
+        {
+          token.isEmpty
+          && <span>Select token</span>
+        }
+
+        { !token.isEmpty
+          && (
           <div className="uik-pool-actions-token__info">
             <div className="uik-pool-actions-token__symbol">{ token.symbol }</div>
-              <div className="uik-pool-actions-token__amount">
-                Available
-                {' '}
-                { showBalance(token) }
-              </div>
+            <div className="uik-pool-actions-token__amount">
+              Available
+              {' '}
+              { showBalance(token) }
+            </div>
           </div>
-        }
+          )}
       </button>
 
       <Uik.Dropdown
+        className="uik-pool-actions-token__select-dropdown"
         isOpen={isOpen}
-        position="bottomRight"
         onClose={() => setOpen(false)}
       >
         <Uik.Input
@@ -103,6 +111,6 @@ const TokenDropdown = ({token, tokens, selectToken} : TokenDropdown): JSX.Elemen
       </Uik.Dropdown>
     </div>
   );
-}
+};
 
 export default TokenDropdown;

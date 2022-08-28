@@ -1,16 +1,16 @@
-import {BigNumber} from 'ethers';
-import {BigNumber as BN} from 'bignumber.js';
+import { BigNumber } from 'ethers';
+import { BigNumber as BN } from 'bignumber.js';
+import { parseEther } from 'ethers/lib/utils';
 import {
   EMPTY_ADDRESS,
   ensure,
   MIN_EVM_TX_BALANCE,
   MIN_NATIVE_TX_BALANCE,
   REEF_ADDRESS,
-  toReefBalanceDisplay
+  toReefBalanceDisplay,
 } from '../utils/utils';
-import {assertAmount, calculateAmount} from '../utils/math';
-import {TokenPrices} from './pool';
-import {parseEther} from "ethers/lib/utils";
+import { assertAmount, calculateAmount } from '../utils/math';
+import { TokenPrices } from './pool';
 
 export enum ContractType {
   ERC20 = 'ERC20',
@@ -110,7 +110,6 @@ export function isNativeTransfer(token: Token) {
 }
 
 export const checkMinExistentialReefAmount = (token: TokenWithAmount, reefBalance: BigNumber): {valid: boolean, message?: string, maxTransfer: BigNumber} => {
-
   const nativeReefTransfer = isNativeTransfer(token);
   const FIXED_TX_FEE = nativeReefTransfer ? 2 : 3;
   const minAmountBesidesTx = (nativeReefTransfer ? MIN_NATIVE_TX_BALANCE : MIN_EVM_TX_BALANCE);
@@ -120,12 +119,12 @@ export const checkMinExistentialReefAmount = (token: TokenWithAmount, reefBalanc
   const maxTransfer = reefBalance.sub(BigNumber.from(reservedTxMin));
   const valid = reefBalance.gte(requiredReefMin);
   let message = '';
-  if(!valid){
+  if (!valid) {
     message = `${toReefBalanceDisplay(BigNumber.from(reservedTxMin))} balance needed to call EVM transaction. Token transfer fee ~2.5 REEF.`;
 
     if (nativeReefTransfer) {
       const maxTransfer = reefBalance.sub(BigNumber.from(reservedTxMin));
-      message = `Maximum transfer amount is ~${toReefBalanceDisplay( maxTransfer)} to allow for fees.`
+      message = `Maximum transfer amount is ~${toReefBalanceDisplay(maxTransfer)} to allow for fees.`;
     }
   }
   return { valid, message, maxTransfer };
@@ -137,7 +136,7 @@ export const ensureTokenAmount = (token: TokenWithAmount): void => ensure(
 );
 
 export const ensureExistentialReefAmount = (token: TokenWithAmount, reefBalance: BigNumber): void => {
-  ensure(checkMinExistentialReefAmount(token, reefBalance).valid, `Insufficient REEF balance.`);
+  ensure(checkMinExistentialReefAmount(token, reefBalance).valid, 'Insufficient REEF balance.');
 };
 
 export const REEF_TOKEN: Token = {
@@ -148,7 +147,7 @@ export const REEF_TOKEN: Token = {
   decimals: 18,
   symbol: 'REEF',
 
-}
+};
 export const reefTokenWithAmount = (): TokenWithAmount => toTokenAmount(
   REEF_TOKEN,
   {
@@ -162,6 +161,4 @@ export const getTokenPrice = (address: string, prices: TokenPrices): BN => new B
   ? prices[address]
   : 0);
 
-export const isNativeAddress = (toAddress: string) => {
-  return toAddress.length === 48 && toAddress[0] === '5';
-}
+export const isNativeAddress = (toAddress: string) => toAddress.length === 48 && toAddress[0] === '5';

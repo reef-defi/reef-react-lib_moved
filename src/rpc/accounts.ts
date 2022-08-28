@@ -1,5 +1,5 @@
 import type {
-  InjectedAccountWithMeta, InjectedExtension
+  InjectedAccountWithMeta, InjectedExtension,
 } from '@polkadot/extension-inject/types';
 import { Provider, Signer } from '@reef-defi/evm-provider';
 
@@ -8,7 +8,7 @@ import type { Signer as InjectedSigner } from '@polkadot/api/types';
 import type {
   InjectedAccount,
   InjectedAccountWithMeta as InjectedAccountWithMetaReef,
-  InjectedExtension as InjectedExtensionReef
+  InjectedExtension as InjectedExtensionReef,
 } from '@reef-defi/extension-inject/types';
 import { BigNumber } from 'ethers';
 // import { firstValueFrom } from 'rxjs';
@@ -65,18 +65,18 @@ const signerToReefSigner = async (
   provider: Provider,
   {
     address, name, source, genesisHash,
-  }: SignerInfo
+  }: SignerInfo,
 ): Promise<ReefSigner> => {
   const evmAddress = await signer.getAddress();
   const isEvmClaimed = await signer.isClaimed();
   let inj;
   try {
     inj = await web3FromAddress(address);
-  }catch (e) {
+  } catch (e) {
     // when web3Enable() is not called before
   }
   const balance = await getReefCoinBalance(address, provider);
-  inj?.signer
+  inj?.signer;
   return {
     signer,
     balance,
@@ -113,7 +113,7 @@ export const metaAccountToSigner = async (
       address: account.address,
       name: account.meta.name || '',
       genesisHash: account.meta.genesisHash || '',
-    }
+    },
   );
 };
 
@@ -150,16 +150,15 @@ export const accountToSigner = async (
   );
 };
 
-
-export function accountJsonToMeta (acc: AccountJson, source=''): InjectedAccountWithMeta {
-  return  {
+export function accountJsonToMeta(acc: AccountJson, source = ''): InjectedAccountWithMeta {
+  return {
     address: acc.address,
     meta: {
       genesisHash: acc.genesisHash,
       name: acc.name,
-      source: source
+      source,
     },
-    type: acc.type
+    type: acc.type,
   };
 }
 

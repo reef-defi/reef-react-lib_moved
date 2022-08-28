@@ -2,7 +2,7 @@ import React from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Network, ReefSigner } from '../../state';
 import {
-  showEvmCopyAddressAlert, REEF_ADDRESS_SPECIFIC_STRING, toReefBalanceDisplay, trim
+  showEvmCopyAddressAlert, REEF_ADDRESS_SPECIFIC_STRING, toReefBalanceDisplay, trim,
 } from '../../utils';
 import {
   Border, FlexRow, Margin, MT, MX,
