@@ -27,6 +27,7 @@ interface EvmBindComponent {
   bindSigner: ReefSigner;
   signers: ReefSigner[];
   onTxUpdate?: TxStatusHandler;
+  onComplete?: ()=>void;
 }
 
 // need to call onTxUpdate even if component is destroyed
@@ -53,7 +54,9 @@ const Account = ({ account }: { account: ReefSigner }): JSX.Element => (
   </div>
 );
 
-export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindComponent): JSX.Element => {
+export const EvmBindComponent = ({
+  bindSigner, onTxUpdate, signers, onComplete,
+}: EvmBindComponent): JSX.Element => {
   const provider: Provider|undefined = useObservableState(currentProvider$);
   const [bindFor, setBindFor] = useState(bindSigner);
   const [availableTxAccounts, setAvailableTxAccounts] = useState<ReefSigner[]>([]);
@@ -122,7 +125,10 @@ export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindCom
             && (
             <div>
               <p>
-                Creating Ethereum VM address for account
+                Start using Reef EVM smart contracts.
+                <br />
+                First connect EVM address for
+                {' '}
               </p>
               <Account account={bindFor} />
             </div>
@@ -133,7 +139,7 @@ export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindCom
               <Account account={bindFor} />
               <p>
                 {' '}
-                Successfully bound to Ethereum VM address&nbsp;
+                Successfully connected to Ethereum VM address&nbsp;
                 <b>{toAddressShortDisplay(bindFor.evmAddress)}</b>
                 .
                 <br />
@@ -141,10 +147,20 @@ export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindCom
 
               <Uik.Button
                 text="Copy EVM address"
-                fill
+                fill={!onComplete}
                 size="large"
                 onClick={() => copyAddress(bindFor.evmAddress)}
               />
+
+              { !!onComplete
+                && (
+                  <Uik.Button
+                    text="Continue"
+                    fill
+                    size="large"
+                    onClick={onComplete}
+                  />
+                )}
             </div>
             )}
       {!bindFor.isEvmClaimed
@@ -157,7 +173,7 @@ export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindCom
                 <p className="bind-evm__loading">
                   <Uik.Loading size="small" />
                   <span>
-                    {txStatus.componentTxType === EvmBindComponentTxType.BIND ? 'Binding' : 'Transfer'}
+                    {txStatus.componentTxType === EvmBindComponentTxType.BIND ? 'Connecting EVM address' : 'Transfer'}
                     {' '}
                     in progress
                   </span>
@@ -165,11 +181,11 @@ export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindCom
                 )}
                 {!txStatus.error && txStatus.isInBlock && txStatus.componentTxType === EvmBindComponentTxType.TRANSFER && (
                 <div>
-                  <p>Transfer complete. Now execute bind transaction.</p>
+                  <p>Transfer complete. Now run connect EVM account transaction.</p>
                   <Uik.Button
                     fill
                     size="large"
-                    text="Continue and Bind"
+                    text="Continue and Connect"
                     onClick={() => bindAccount(getUpdateTxCallback([onTxUpdate as TxStatusHandler, setTxStatus]))}
                   />
                 </div>
@@ -177,7 +193,7 @@ export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindCom
                 {!txStatus.error && txStatus.isInBlock && txStatus.componentTxType === EvmBindComponentTxType.BIND && (
                 <div>
                   <p>
-                    Binding complete Ethereum VM address is
+                    Connected Ethereum VM address is
                     {bindFor.evmAddress}
                   </p>
                 </div>
@@ -190,16 +206,19 @@ export const EvmBindComponent = ({ bindSigner, onTxUpdate, signers }: EvmBindCom
               && (
               <div>
                 {!txStatus && !transferBalanceFrom
-                && <p>Please add some Reef to this address for Ethereum VM binding transaction fee.</p>}
+                && <p>Not enough REEF in account for connect EVM address transaction fee.</p>}
                 {!txStatus && !!transferBalanceFrom && (
                 <div>
                   <p>
-                    <b>{toReefBalanceDisplay(MIN_BALANCE)}</b>
-                    &nbsp;coins will be used to register a new EVM account to which your REEF account will be bound.
+                    <b>
+                      ~
+                      {toReefBalanceDisplay(MIN_BALANCE)}
+                    </b>
+                    &nbsp; is needed for transaction fee.
                     <br />
                     <br />
 
-                    Coins will be used from account
+                    Coins will be transfered from account:&nbsp;
                     <OpenModalButton
                       className="btn-empty bind-evm__select-account"
                       id="selectMyAddress"
