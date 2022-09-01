@@ -20,8 +20,9 @@ interface TradeActions {
 
 interface Trade {
   tokens: Token[];
-  state: SwapState,
-  actions: TradeActions
+  state: SwapState;
+  actions: TradeActions;
+  confirmText?: string;
 }
 
 interface SummaryItem {
@@ -92,6 +93,7 @@ export const Trade = ({
     selectToken2,
   },
   tokens,
+  confirmText = 'Trade',
 } : Trade): JSX.Element => {
   const { percentage: slippage } = resolveSettings(settings);
   const rate = pool ? calculateRate(token1.address, pool) : undefined;
@@ -176,7 +178,7 @@ export const Trade = ({
         className="uik-pool-actions__cta"
         fill
         icon={faRepeat}
-        text={isLoading ? status : 'Trade'}
+        text={isLoading ? status : confirmText}
         size="large"
         loading={isLoading}
         disabled={!isValid || isLoading}
