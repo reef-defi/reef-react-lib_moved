@@ -7,6 +7,8 @@ import './overlay-action.css';
 interface OverlayAction {
   isOpen: boolean;
   onClose?: () => any;
+  onOpened?: () => any;
+  onClosed?: () => any;
   className?: string,
   title?: string,
 }
@@ -14,6 +16,8 @@ interface OverlayAction {
 export const OverlayAction: React.FC<OverlayAction> = ({
   isOpen,
   onClose,
+  onOpened,
+  onClosed,
   className,
   title,
   children,
@@ -22,10 +26,12 @@ export const OverlayAction: React.FC<OverlayAction> = ({
 
   const opened = (): void => {
     document.body.style.overflow = 'hidden';
+    if (onOpened) onOpened();
   };
 
   const closed = (): void => {
     document.body.style.overflow = '';
+    if (onClosed) onClosed();
   };
 
   return (
