@@ -18,10 +18,11 @@ interface ProvideActions {
   selectToken2?: SelectToken;
 }
 
-interface Provider {
+interface Provide {
   tokens: Token[];
   state: AddLiquidityState;
   actions: ProvideActions;
+  confirmText?: string;
 }
 
 export const Provide = ({
@@ -35,7 +36,8 @@ export const Provide = ({
     selectToken1,
     selectToken2,
   },
-}: Provider): JSX.Element => {
+  confirmText = 'Stake',
+}: Provide): JSX.Element => {
   const {
     token1,
     token2,
@@ -109,7 +111,7 @@ export const Provide = ({
         className="uik-pool-actions__cta"
         fill
         icon={faCoins}
-        text={isLoading ? status : 'Stake'}
+        text={isLoading ? status : confirmText}
         size="large"
         disabled={!isValid || isLoading}
         loading={isLoading}

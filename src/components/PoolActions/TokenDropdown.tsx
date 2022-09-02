@@ -1,5 +1,6 @@
 import Uik from '@reef-defi/ui-kit';
 import React, { useState } from 'react';
+import BigNumber from 'bignumber.js';
 import { Token, TokenWithAmount } from '../../state';
 import { showBalance } from '../../utils';
 import './token-field.css';
@@ -15,6 +16,20 @@ interface TokenDropdownItem {
   selectToken: (token: Token) => void;
 }
 
+const formatHumanBalance = (token): string => {
+  const balance = new BigNumber(showBalance(token).replace(token.name, '').replace(token.symbol, '')).toNumber();
+
+  if (isNaN(balance)) return '0';
+
+  if (balance >= 1000000) {
+    const hBalance = Uik.utils.formatHumanAmount(balance);
+    if (hBalance === 'NaN') return '0';
+    return hBalance;
+  }
+
+  return String(balance);
+};
+
 const TokenDropdownItem = ({ token, selectToken }: TokenDropdownItem): JSX.Element => (
   <Uik.DropdownItem onClick={() => selectToken(token)}>
     <Uik.Container className="uik-pool-actions-token__select-dropdown-token">
@@ -27,7 +42,7 @@ const TokenDropdownItem = ({ token, selectToken }: TokenDropdownItem): JSX.Eleme
         <Uik.Text type="mini">{token.symbol}</Uik.Text>
       </div>
 
-      <div className="uik-pool-actions-token__select-dropdown-token-balance">{ showBalance(token) }</div>
+      <div className="uik-pool-actions-token__select-dropdown-token-balance" title={showBalance(token)}>{ formatHumanBalance(token) }</div>
     </Uik.Container>
   </Uik.DropdownItem>
 );
@@ -88,10 +103,12 @@ const TokenDropdown = ({ token, tokens, selectToken } : TokenDropdown): JSX.Elem
           && (
           <div className="uik-pool-actions-token__info">
             <div className="uik-pool-actions-token__symbol">{ token.symbol }</div>
-            <div className="uik-pool-actions-token__amount">
+            <div className="uik-pool-actions-token__amount" title={showBalance(token)}>
               Available
               {' '}
-              { showBalance(token) }
+              { formatHumanBalance(token) }
+              {' '}
+              { token.symbol }
             </div>
           </div>
           )}

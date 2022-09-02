@@ -13,7 +13,8 @@ interface WithdrawActions {
 
 interface Withdraw {
   state: RemoveLiquidityState;
-  actions: WithdrawActions
+  actions: WithdrawActions;
+  confirmText?: string;
 }
 
 export const Withdraw = ({
@@ -30,6 +31,7 @@ export const Withdraw = ({
     onRemoveLiquidity,
     setPercentage,
   },
+  confirmText = 'Unstake',
 }: Withdraw): JSX.Element => {
   const getTotalValue = useMemo((): number => {
     const firstTokenValue = new BigNumber(token1.price).times(token1.amount).toNumber();
@@ -81,7 +83,7 @@ export const Withdraw = ({
         className="uik-pool-actions__cta"
         fill
         icon={faArrowUpFromBracket}
-        text={isLoading ? status : 'Unstake'}
+        text={isLoading ? status : confirmText}
         size="large"
         disabled={!isValid || isLoading}
         loading={isLoading}
