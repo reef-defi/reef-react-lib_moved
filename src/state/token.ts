@@ -11,6 +11,7 @@ import {
 } from '../utils/utils';
 import { assertAmount, calculateAmount } from '../utils/math';
 import { TokenPrices } from './pool';
+import {NFT} from "./nft";
 
 export enum ContractType {
   ERC20 = 'ERC20',
@@ -43,12 +44,6 @@ export interface TokenWithAmount extends Token {
   isEmpty: boolean;
 }
 
-export interface TokenNFT extends Token {
-  nftId: string;
-  contractType: ContractType;
-  mimetype?: string;
-}
-
 export interface TokenState {
   index: number;
   amount: string;
@@ -69,7 +64,7 @@ export interface TokenTransfer {
   to: string;
   inbound: boolean;
   timestamp: number;
-  token: Token|TokenNFT;
+  token: Token|NFT;
   extrinsic: TransferExtrinsic;
   url: string;
 }

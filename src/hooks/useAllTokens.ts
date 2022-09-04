@@ -1,8 +1,8 @@
-import { gql, ApolloClient, useSubscription } from '@apollo/client';
-import { useMemo } from 'react';
-import { BigNumber } from 'ethers';
-import { ERC20ContractData, Token } from '../state';
-import { getIconUrl, REEF_ADDRESS } from '../utils';
+import {ApolloClient, gql, useSubscription} from '@apollo/client';
+import {useMemo} from 'react';
+import {BigNumber} from 'ethers';
+import {ERC20ContractData, Token} from '../state';
+import {getIconUrl, REEF_ADDRESS} from '../utils';
 
 const verifiedTokenQuery = gql`
 subscription tokens {
@@ -78,7 +78,7 @@ export const useAllTokens = (signer?: string, client?: ApolloClient<any>): UseAl
     ? balanceData.token_holder.reduce(
       (acc, current) => ({
         ...acc,
-        [current.token_address]: current.balance.toLocaleString('fullwide', { useGrouping: false }),
+        [current.token_address]: (current.balance.toLocaleString as any)('fullwide', { useGrouping: false }),
       }),
       {},
     )
@@ -86,14 +86,16 @@ export const useAllTokens = (signer?: string, client?: ApolloClient<any>): UseAl
   [balanceData]);
   const tokens = useMemo((): Token[] => (tokenData
     ? tokenData.verified_contract.map(
-      ({ address, contract_data: { decimals, name, symbol } }) => ({
-        address,
-        decimals,
-        name,
-        symbol,
-        iconUrl: getIconUrl(address),
-        balance: BigNumber.from(address in balances ? balances[address] : 0),
-      }),
+      ({ address, contract_data: { decimals, name, symbol } }) => {
+          return ({
+              address,
+              decimals,
+              name,
+              symbol,
+              iconUrl: getIconUrl(address),
+              balance: BigNumber.from(address in balances ? balances[address] : 0),
+          })
+      },
     )
       .sort(sortTokens)
     : []),

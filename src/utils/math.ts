@@ -1,6 +1,6 @@
 import { BigNumber, utils } from 'ethers';
 import { ensure } from './utils';
-import { Pool, Token, TokenWithAmount } from '../state';
+import {NFT, Pool, Token, TokenWithAmount} from '../state';
 
 const findDecimalPoint = (amount: string): number => {
   const { length } = amount;
@@ -157,7 +157,7 @@ interface ShowBalance extends ToBalance {
 export const showBalance = (
   {
     decimals, balance, name, symbol,
-  }: ShowBalance,
+  }: ShowBalance|Token|NFT,
   decimalPoints = 4,
 ): string => {
   if (!balance) {
