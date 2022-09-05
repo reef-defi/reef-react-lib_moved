@@ -100,8 +100,8 @@ export const dropDuplicatesMultiKey = <Obj, Key extends keyof Obj>(
   return filtered;
 };
 
-export const removeReefSpecificStringFromAddress = (address: string): string => address.replace(REEF_ADDRESS_SPECIFIC_STRING, '').trim();
-export const addReefSpecificStringFromAddress = (address: string): string => `${address}${REEF_ADDRESS_SPECIFIC_STRING}`;
+export const fromReefEVMAddressWithNotification = (address: string): string => address.replace(REEF_ADDRESS_SPECIFIC_STRING, '').trim();
+export const toReefEVMAddressWithNotification = (address: string): string => `${address}${REEF_ADDRESS_SPECIFIC_STRING}`;
 
 /**
  *  Returns icnUrl if exists, otherwise return sample icon based on calculated

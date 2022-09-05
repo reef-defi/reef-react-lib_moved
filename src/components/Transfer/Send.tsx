@@ -22,7 +22,7 @@ import {
   ensure,
   errorHandler,
   nativeTransfer,
-  removeReefSpecificStringFromAddress,
+  fromReefEVMAddressWithNotification,
   shortAddress,
   showBalance,
 } from '../../utils';
@@ -247,7 +247,7 @@ export const Send = ({
           className="send__address-input"
           value={to}
           maxLength={70}
-          onChange={(event) => setTo(removeReefSpecificStringFromAddress(event.target.value))}
+          onChange={(event) => setTo(fromReefEVMAddressWithNotification(event.target.value))}
           placeholder="Send to address"
           disabled={isLoading}
           onFocus={() => setAccountsListOpen(true)}
