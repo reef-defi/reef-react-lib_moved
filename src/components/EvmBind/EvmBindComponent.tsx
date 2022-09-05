@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import Uik from '@reef-defi/ui-kit';
 import { ReefSigner } from '../../state';
 import {
+  toReefEVMAddressWithNotification,
   bindEvmAddress,
   sendToNativeAddress,
   toAddressShortDisplay,
@@ -112,6 +113,7 @@ export const EvmBindComponent = ({
   const onAccountSelect = (_: any, selected: ReefSigner): void => setTransferBalanceFrom(selected);
 
   const copyAddress = (address: string): void => {
+    address = toReefEVMAddressWithNotification(address);
     navigator.clipboard.writeText(address).then(() => {
       Uik.notify.info('Copied address to clipboard');
     }, () => {

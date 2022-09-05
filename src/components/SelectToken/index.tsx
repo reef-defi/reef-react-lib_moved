@@ -4,7 +4,7 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { useAsyncEffect } from '../../hooks';
 import { ReefSigner, Token } from '../../state';
 import {
-  addReefSpecificStringFromAddress,
+  toReefEVMAddressWithNotification,
   DataProgress,
   DataWithProgress,
   getData,
@@ -120,7 +120,7 @@ export const SelectToken = ({
             <LeadText>{token.symbol}</LeadText>
             <MutedText>
               <MiniText>{trim(token.address, 20)}</MiniText>
-              <CopyToClipboard text={addReefSpecificStringFromAddress(token.address)}>
+              <CopyToClipboard text={toReefEVMAddressWithNotification(token.address)}>
                 <span
                   onClick={(event) => event.stopPropagation()}
                   className="form-text ms-2"
