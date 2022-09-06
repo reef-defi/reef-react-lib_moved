@@ -251,11 +251,15 @@ export const onAddLiquidity = ({
     ]);
 
     // Signing and awaiting when data comes in block
-    await new Promise<void>(async (resolve) => {
+    await new Promise<void>(async (resolve, reject) => {
       batch.signAndSend(
         signer.address,
         { signer: signer.signer.signingKey },
         (status: any) => {
+
+          if (status.dispatchError) {
+            reject({message: status.dispatchError.toString()});
+          }
           if (status.status.isInBlock) {
             resolve();
           }

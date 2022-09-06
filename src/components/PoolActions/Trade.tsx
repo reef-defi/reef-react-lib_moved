@@ -5,7 +5,7 @@ import React, { useMemo, useState } from 'react';
 import { SwapState } from '../../store';
 import TokenField, { SelectToken } from './TokenField';
 
-import { Pool, resolveSettings, Token } from '../../state';
+import { LastPoolReserves, Pool, resolveSettings, Token } from '../../state';
 import TradePopup from './ConfirmPopups/Trade';
 
 interface TradeActions {
@@ -19,6 +19,7 @@ interface TradeActions {
 }
 
 interface Trade {
+  pools: LastPoolReserves[];
   tokens: Token[];
   state: SwapState;
   actions: TradeActions;
@@ -72,6 +73,23 @@ const calculateRate = (
   return `1 ${symbol2} = ${Uik.utils.maxDecimals(res.toNumber(), 4)} ${symbol1}`;
 };
 
+const selectTokensForToken = (token: Token, tokens: Token[], pools: LastPoolReserves[]): Token[] => useMemo(
+  () => {
+    const availableTokens = pools
+    .filter(({ token_1, token_2 }) => token_1 === token.address || token_2 === token.address)
+    .reduce((acc: Set<string>, pool) => {
+      if (pool.token_1 === token.address) {
+        acc.add(pool.token_2);
+      } else {
+        acc.add(pool.token_1);
+      }
+      return acc;
+    }, new Set<string>());
+  return tokens.filter((t) => availableTokens.has(t.address));
+  },
+  [token, tokens, pools],
+)
+
 export const Trade = ({
   state: {
     token1,
@@ -92,12 +110,15 @@ export const Trade = ({
     selectToken1,
     selectToken2,
   },
+  pools,
   tokens,
-  confirmText = 'Trade',
 } : Trade): JSX.Element => {
   const { percentage: slippage } = resolveSettings(settings);
   const rate = pool ? calculateRate(token1.address, pool) : undefined;
   const [isPopupOpen, setPopupOpen] = useState(false);
+
+  const selectTokens1 = selectTokensForToken(token2, tokens, pools);
+  const selectTokens2 = selectTokensForToken(token1, tokens, pools);
 
   const fee = useMemo(() => {
     if (token1.amount === '') {
@@ -114,7 +135,7 @@ export const Trade = ({
       <div className="uik-pool-actions__tokens">
         <TokenField
           token={token1}
-          tokens={tokens}
+          tokens={selectTokens1}
           onAmountChange={setToken1Amount}
           selectToken={selectToken1}
         />
@@ -134,7 +155,7 @@ export const Trade = ({
 
         <TokenField
           token={token2}
-          tokens={tokens}
+          tokens={selectTokens2 }
           onAmountChange={setToken2Amount}
           selectToken={selectToken2}
         />
@@ -178,7 +199,7 @@ export const Trade = ({
         className="uik-pool-actions__cta"
         fill
         icon={faRepeat}
-        text={isLoading ? status : confirmText}
+        text={status}
         size="large"
         loading={isLoading}
         disabled={!isValid || isLoading}
