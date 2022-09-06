@@ -87,11 +87,15 @@ export const swapReducer = (state = initialSwapState, action: SwapAction): SwapS
     };
     case SET_TOKEN1: return {
       ...state,
-      token1: { ...createEmptyTokenWithAmount(false), ...action.token },
+      percentage: 0,
+      token2: { ...state.token2, amount: '' },
+      token1: { ...createEmptyTokenWithAmount(false), ...action.token, amount: '' },
     };
     case SET_TOKEN2: return {
       ...state,
-      token2: { ...createEmptyTokenWithAmount(false), ...action.token },
+      percentage: 0,
+      token1: { ...state.token1, amount: '' },
+      token2: { ...createEmptyTokenWithAmount(false), ...action.token, amount: '' },
     };
     case SET_POOL: return { ...state, pool: action.pool };
     case SET_STATUS: return { ...state, status: action.status };
