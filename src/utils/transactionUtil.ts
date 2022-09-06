@@ -1,7 +1,6 @@
 import { Provider } from '@reef-defi/evm-provider';
 import { BigNumber } from 'ethers';
 import { availableNetworks, Network, ReefSigner } from '../state';
-import { errorHandler } from './rpcErrorMessageHandler';
 
 export type TxStatusHandler = (status: TxStatusUpdate) => void;
 
