@@ -21,7 +21,10 @@ export const errorHandler = (message: string): string => {
   if (message.includes('ReefswapV2: K')) {
     return 'Pool K value can not be aligned with desired amounts. Try decreasing swap amount or increase slippage tolerance.';
   }
-  if (message.includes('Module { index: 6, error: 2, message: None }')) {
+  if (
+    message.includes('Module { index: 6, error: 2, message: None }') ||
+    message.includes('{"module":{"index":6,"error":2}}')
+  ) {
     return 'Insufficient Reef amount, get more tokens.';
   }
   const errorKey = Object.keys(chainErrors).find((key) => message.includes(key));

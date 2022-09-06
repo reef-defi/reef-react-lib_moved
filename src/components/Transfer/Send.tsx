@@ -1,35 +1,29 @@
 import Identicon from '@polkadot/react-identicon';
 import { Provider } from '@reef-defi/evm-provider';
 import Uik from '@reef-defi/ui-kit';
-import { Contract } from 'ethers';
-import React, { useEffect, useState, useMemo } from 'react';
 import BigNumber from 'bignumber.js';
+import { Contract } from 'ethers';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ERC20 } from '../../assets/abi/ERC20';
 import {
-  checkMinExistentialReefAmount,
-  ensureExistentialReefAmount,
-  ensureTokenAmount,
-  isNativeTransfer,
+  checkMinExistentialReefAmount, ensureExistentialReefAmount, ensureTokenAmount, isNativeTransfer,
   NotifyFun,
   ReefSigner,
   reefTokenWithAmount,
   Token,
-  TokenWithAmount,
+  TokenWithAmount
 } from '../../state';
 import {
   ButtonStatus,
   calculateAmount,
   ensure,
-  errorHandler,
-  nativeTransfer,
-  fromReefEVMAddressWithNotification,
-  shortAddress,
-  showBalance,
+  errorHandler, fromReefEVMAddressWithNotification, nativeTransfer, shortAddress,
+  showBalance
 } from '../../utils';
-import SendConfirmationModal from './SendConfirmationModal';
-import './Send.css';
-import TokenField from '../PoolActions/TokenField';
 import '../PoolActions/pool-actions.css';
+import TokenField from '../PoolActions/TokenField';
+import './Send.css';
+import SendConfirmationModal from './SendConfirmationModal';
 
 interface Send {
   tokens: Token[];
@@ -78,10 +72,10 @@ const sendStatus = (to: string, token: TokenWithAmount, signer: ReefSigner): But
       ensure(signer.isEvmClaimed, 'Bind account');
     }
     ensure(token.amount !== '', 'Insert amount');
+    ensure(token.amount !== '0', 'Insert amount');
     ensureTokenAmount(token);
     ensureExistentialReefAmount(token, signer.balance);
-
-    return { isValid: true, text: 'Confirm Send' };
+    return { isValid: true, text: 'Send' };
   } catch (e) {
     return { isValid: false, text: e.message };
   }
@@ -148,7 +142,7 @@ export const Send = ({
   signer, tokens, accounts, provider,
 }: Send): JSX.Element => {
   const [to, setTo] = useState('');
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState('Send');
   const [isLoading, setLoading] = useState(false);
   const [isAmountPristine, setAmountPristine] = useState(true);
   const [token, setToken] = useState(reefTokenWithAmount());
@@ -162,7 +156,7 @@ export const Send = ({
   }, [tokens]);
 
   const tokenContract = new Contract(token.address, ERC20, signer.signer);
-  const { isValid } = sendStatus(to, token, signer);
+  const { isValid, text } = sendStatus(to, token, signer);
   const existentialValidity = checkMinExistentialReefAmount(token, signer.balance);
 
   const onAmountChange = (amount: string, token: TokenWithAmount): void => {
@@ -204,6 +198,7 @@ export const Send = ({
       });
     } finally {
       setLoading(false);
+      setToken({...token, amount: ''});
     }
   };
 
@@ -305,9 +300,10 @@ export const Send = ({
       >
         <Uik.Button
           size="large"
-          disabled={isLoading || !isValid}
           fill
-          text={isLoading ? status : 'Send'}
+          loading={isLoading}
+          disabled={isLoading || !isValid}
+          text={isLoading ? status : text}
         />
       </button>
 
