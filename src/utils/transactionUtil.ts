@@ -1,6 +1,7 @@
 import { Provider } from '@reef-defi/evm-provider';
 import { BigNumber } from 'ethers';
 import { availableNetworks, Network, ReefSigner } from '../state';
+import { errorHandler } from './rpcErrorMessageHandler';
 
 export type TxStatusHandler = (status: TxStatusUpdate) => void;
 
@@ -61,9 +62,22 @@ export const handleErr = (
 };
 
 export const nativeTransfer = async (amount: string, destinationAddress: string, provider: Provider, signer: ReefSigner): Promise<void> => {
-  await provider.api.tx.balances
-    .transfer(destinationAddress, amount)
-    .signAndSend(signer.address, { signer: signer.signer.signingKey });
+  const transfer = provider.api.tx.balances.transfer(destinationAddress, amount);
+  const send = new Promise<void>((resolve, reject) => {
+    transfer.signAndSend(
+      signer.address,
+      { signer: signer.signer.signingKey },
+      (status) => {
+        if (status.dispatchError) {
+          reject({message: status.dispatchError.toString()});
+        }
+        if (status.status.isInBlock) {
+          resolve();
+        }
+      }
+  );
+  });
+  await send;
 };
 
 export const sendToNativeAddress = (

@@ -214,11 +214,14 @@ export const onSwap = ({
       tradeExtrinsic,
     ]);
 
-    const signAndSend = new Promise<void>(async (resolve) => {
+    const signAndSend = new Promise<void>(async (resolve, reject) => {
       batch.signAndSend(
         address,
         { signer: signer.signingKey },
         (status: any) => {
+          if (status.dispatchError) {
+            reject({message: status.dispatchError.toString()});
+          }
           if (status.status.isInBlock) {
             resolve();
           }
