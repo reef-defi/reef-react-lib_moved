@@ -5,7 +5,7 @@ import React, { useMemo, useState } from 'react';
 import { SwapState } from '../../store';
 import TokenField, { SelectToken } from './TokenField';
 
-import { Pool, resolveSettings, Token } from '../../state';
+import { LastPoolReserves, Pool, resolveSettings, Token } from '../../state';
 import TradePopup from './ConfirmPopups/Trade';
 
 interface TradeActions {
@@ -19,6 +19,7 @@ interface TradeActions {
 }
 
 interface Trade {
+  pools: LastPoolReserves[];
   tokens: Token[];
   state: SwapState;
   actions: TradeActions;
@@ -92,12 +93,46 @@ export const Trade = ({
     selectToken1,
     selectToken2,
   },
+  pools,
   tokens,
   confirmText = 'Trade',
 } : Trade): JSX.Element => {
   const { percentage: slippage } = resolveSettings(settings);
   const rate = pool ? calculateRate(token1.address, pool) : undefined;
   const [isPopupOpen, setPopupOpen] = useState(false);
+
+  const selectTokens1 = useMemo(
+    () => {
+      const availableTokens = pools
+        .filter(({ token_1, token_2 }) => token_1 === token2.address || token_2 === token2.address)
+        .reduce((acc: Set<string>, pool) => {
+          if (pool.token_1 === token2.address) {
+            acc.add(pool.token_2);
+          } else {
+            acc.add(pool.token_1);
+          }
+          return acc;
+        }, new Set<string>());
+      return tokens.filter((t) => availableTokens.has(t.address));
+    },
+    [tokens, token2, pools, token1]
+  );
+  const selectTokens2 = useMemo(
+    () => {
+      const availableTokens = pools
+        .filter(({ token_1, token_2 }) => token_1 === token1.address || token_2 === token1.address)
+        .reduce((acc: Set<string>, pool) => {
+          if (pool.token_1 === token1.address) {
+            acc.add(pool.token_2);
+          } else {
+            acc.add(pool.token_1);
+          }
+          return acc;
+        }, new Set<string>());
+      return tokens.filter((t) => availableTokens.has(t.address));
+    },
+    [tokens, token2, pools, token1]
+  );
 
   const fee = useMemo(() => {
     if (token1.amount === '') {
@@ -114,7 +149,7 @@ export const Trade = ({
       <div className="uik-pool-actions__tokens">
         <TokenField
           token={token1}
-          tokens={tokens}
+          tokens={selectTokens1}
           onAmountChange={setToken1Amount}
           selectToken={selectToken1}
         />
@@ -134,7 +169,7 @@ export const Trade = ({
 
         <TokenField
           token={token2}
-          tokens={tokens}
+          tokens={selectTokens2 }
           onAmountChange={setToken2Amount}
           selectToken={selectToken2}
         />
