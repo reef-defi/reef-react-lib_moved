@@ -1,6 +1,7 @@
 import { BigNumber, utils } from 'ethers';
 import { ensure } from './utils';
 import {NFT, Pool, Token, TokenWithAmount} from '../state';
+import BN from "bignumber.js";
 
 const findDecimalPoint = (amount: string): number => {
   const { length } = amount;
@@ -259,27 +260,26 @@ export const ensureAmount = (token: TokenWithAmount): void => ensure(
 );
 
 export const getOutputAmount = (token: TokenWithAmount, pool: Pool): number => {
-  const inputAmount = parseFloat(assertAmount(token.amount)) * 997;
+  const inputAmount = new BN(assertAmount(token.amount)).multipliedBy(997);
+  const inputReserves = new BN(pool.reserve1)
+  const outputReserves = new BN(pool.reserve2);
 
-  const inputReserve = convert2Normal(pool.token1.decimals, pool.reserve1);
-  const outputReserve = convert2Normal(pool.token2.decimals, pool.reserve2);
+  const numerator = inputAmount.multipliedBy(outputReserves);
+  const denominator = inputReserves.multipliedBy(1000).plus(inputAmount);
 
-  const numerator = inputAmount * outputReserve;
-  const denominator = inputReserve * 1000 + inputAmount;
-
-  return numerator / denominator;
+  return numerator.div(denominator).toNumber();
 };
 
 export const getInputAmount = (token: TokenWithAmount, pool: Pool): number => {
-  const outputAmount = parseFloat(assertAmount(token.amount));
+  const outputAmount = new BN(assertAmount(token.amount));
 
-  const inputReserve = convert2Normal(pool.token1.decimals, pool.reserve1);
-  const outputReserve = convert2Normal(pool.token2.decimals, pool.reserve2);
+  const inputReserves = new BN(pool.reserve1);
+  const outputReserves = new BN(pool.reserve2);
 
-  const numerator = inputReserve * outputAmount * 1000;
-  const denominator = (outputReserve - outputAmount) * 997;
+  const numerator = inputReserves.multipliedBy(outputAmount).multipliedBy(1000);
+  const denominator = outputReserves.minus(outputAmount).multipliedBy(997);
 
-  return numerator / denominator;
+  return numerator.dividedBy(denominator).toNumber();
 };
 
 export const calculateImpactPercentage = (
