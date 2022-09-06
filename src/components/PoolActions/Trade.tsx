@@ -112,7 +112,6 @@ export const Trade = ({
   },
   pools,
   tokens,
-  confirmText = 'Trade',
 } : Trade): JSX.Element => {
   const { percentage: slippage } = resolveSettings(settings);
   const rate = pool ? calculateRate(token1.address, pool) : undefined;
@@ -200,7 +199,7 @@ export const Trade = ({
         className="uik-pool-actions__cta"
         fill
         icon={faRepeat}
-        text={isLoading ? status : confirmText}
+        text={status}
         size="large"
         loading={isLoading}
         disabled={!isValid || isLoading}
