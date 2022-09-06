@@ -231,8 +231,13 @@ export const onSwap = ({
             resolve();
           }
           // If you want to await until block is finalized use below if
-          if (onFinalized && status.status.isFinalized) {
-            onFinalized();
+          if (status.status.isFinalized) {
+            if (onFinalized) onFinalized();
+
+            Uik.notify.success({
+              message: 'Blocks have been finalized',
+              keepAlive: true,
+            });
           }
         },
       );
