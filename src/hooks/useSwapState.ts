@@ -220,6 +220,7 @@ export const onSwap = ({
         address,
         { signer: signer.signingKey },
         (status: any) => {
+          console.log('Swap status:', status);
           const err = captureError(status.events);
           if (err) {
             reject({message: err});
