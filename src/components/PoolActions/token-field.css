@@ -11,7 +11,7 @@
   color: var(--primary) !important;
 }
 
-.uik-pool-actions-token__select-wrapper {
+.uik-pool-actions-token__select-wrapper--select {
   width: 100%;
 }
 

@@ -78,7 +78,11 @@ const TokenDropdown = ({ token, tokens, selectToken } : TokenDropdown): JSX.Elem
     ));
 
   return (
-    <div className="uik-pool-actions-token__select-wrapper">
+    <div className={`
+      uik-pool-actions-token__select-wrapper
+      ${token.isEmpty ? 'uik-pool-actions-token__select-wrapper--select' : ''}
+    `}
+    >
       <button
         className={!token.isEmpty
           ? 'uik-pool-actions-token__token'
@@ -104,8 +108,6 @@ const TokenDropdown = ({ token, tokens, selectToken } : TokenDropdown): JSX.Elem
           <div className="uik-pool-actions-token__info">
             <div className="uik-pool-actions-token__symbol">{ token.symbol }</div>
             <div className="uik-pool-actions-token__amount" title={showBalance(token)}>
-              Available
-              {' '}
               { formatHumanBalance(token) }
               {' '}
               { token.symbol }
