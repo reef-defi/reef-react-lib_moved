@@ -92,7 +92,7 @@ export const addLiquidityReducer = (
   let otherAmount = new BigNumber(0);
   let reserve1 = '0';
   let reserve2 = '0';
-  
+
   if (state.pool) {
     reserve1 = state.token1.address === state.pool.token1.address
       ? state.pool.reserve1 : state.pool.reserve2;
@@ -150,10 +150,12 @@ export const addLiquidityReducer = (
       }
       return {
         ...state,
-        percentage: amount.div(maxValue[0]).multipliedBy(100).toNumber(),
+        percentage: maxValue[0].lte(0)
+          ? 0
+          : amount.div(maxValue[0]).multipliedBy(100).toNumber(),
         token1: { ...state.token1, amount: action.amount },
         token2: { ...state.token2, amount: otherAmount.toString() },
-      }
+      };
     case SET_TOKEN2_AMOUNT:
       if(!state.pool) {
         return {
@@ -192,7 +194,9 @@ export const addLiquidityReducer = (
       }
       return {
         ...state,
-        percentage: amount.div(maxValue[0]).multipliedBy(100).toNumber(),
+        percentage: maxValue[0].lte(0)
+          ? 0
+          : amount.div(maxValue[0]).multipliedBy(100).toNumber(),
         token1: { ...state.token1, amount: amount.toString() },
         token2: { ...state.token2, amount: action.amount },
       };

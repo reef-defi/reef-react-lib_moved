@@ -80,7 +80,13 @@ export const swapReducer = (state = initialSwapState, action: SwapAction): SwapS
           percentage: 100,
         };
       }
-      percentage = sellAmount.multipliedBy(new BigNumber(10).pow(token1.decimals)).div(token1.balance.toString()).multipliedBy(100).toNumber();
+      percentage = token1.balance.lte(0)
+        ? 0
+        : sellAmount
+            .multipliedBy(new BigNumber(10).pow(token1.decimals))
+            .div(token1.balance.toString())
+            .multipliedBy(100)
+            .toNumber();
       return {
         ...state,
         focus: 'sell',
@@ -119,7 +125,14 @@ export const swapReducer = (state = initialSwapState, action: SwapAction): SwapS
         };
       }
 
-      percentage = sellAmount.multipliedBy(new BigNumber(10).pow(token1.decimals)).div(token1.balance.toString()).multipliedBy(100).toNumber();
+      percentage = token1.balance.lte(0)
+        ? 0
+        : sellAmount
+            .multipliedBy(new BigNumber(10).pow(token1.decimals))
+            .div(token1.balance.toString())
+            .multipliedBy(100)
+            .toNumber();
+            
       return {
         ...state,
         focus: 'buy',
