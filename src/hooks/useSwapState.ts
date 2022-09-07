@@ -219,6 +219,7 @@ export const onSwap = ({
         address,
         { signer: signer.signingKey },
         (status: any) => {
+          console.log('Trade status: ', status.toJson());
           if (status.dispatchError) {
             reject({message: status.dispatchError.toString()});
           }
