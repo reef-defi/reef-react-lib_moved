@@ -92,7 +92,7 @@ export const addLiquidityReducer = (
   let otherAmount = new BigNumber(0);
   let reserve1 = '0';
   let reserve2 = '0';
-  console.log(`${maxValue[0].toString()},  ${maxValue[1].toString()}`);
+  
   if (state.pool) {
     reserve1 = state.token1.address === state.pool.token1.address
       ? state.pool.reserve1 : state.pool.reserve2;
