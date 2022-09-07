@@ -23,6 +23,7 @@ import {
   calculateAmount,
   calculateAmountWithPercentage,
   calculateDeadline,
+  captureError,
   convert2Normal,
   ensure,
   errorHandler,
@@ -219,7 +220,10 @@ export const onSwap = ({
         address,
         { signer: signer.signingKey },
         (status: any) => {
-          console.log('Trade status: ', status);
+          const err = captureError(status.events);
+          if (err) {
+            reject({message: err});
+          }
           if (status.dispatchError) {
             reject({message: status.dispatchError.toString()});
           }

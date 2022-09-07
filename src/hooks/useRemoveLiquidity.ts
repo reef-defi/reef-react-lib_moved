@@ -12,7 +12,7 @@ import {
   RemoveLiquidityActions, RemoveLiquidityState, setCompleteStatusAction, setLoadingAction, setPercentageAction, setPoolAction, setStatusAction, setToken1Action, setToken2Action,
 } from '../store';
 import {
-  ButtonStatus, calculateDeadline, ensure, errorHandler,
+  ButtonStatus, calculateDeadline, captureError, ensure, errorHandler,
 } from '../utils';
 import { useKeepTokenUpdated } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
@@ -180,8 +180,9 @@ export const onRemoveLiquidity = ({
         { signer: signer.signingKey },
         (status: any) => {
           console.log('Unstake status: ', status);
-          for(let event of status.events) {
-            console.log('Unstake event: ', event.toString());
+          const err = captureError(status.events);
+          if (err) {
+            reject({message: err});
           }
           if (status.dispatchError) {
             reject({message: status.dispatchError.toString()});

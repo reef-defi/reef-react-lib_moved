@@ -31,6 +31,7 @@ import {
   calculateAmountWithPercentage,
   calculateDeadline,
   calculatePoolSupply,
+  captureError,
   ensure,
   ensureAmount,
   errorHandler,
@@ -257,8 +258,9 @@ export const onAddLiquidity = ({
         { signer: signer.signer.signingKey },
         (status: any) => {
           console.log('Stake status: ', status);
-          for(let event of status.events) {
-            console.log('Stake event: ', event.toString());
+          const err = captureError(status.events);
+          if (err) {
+            reject({message: err});
           }
           if (status.dispatchError) {
             console.error(status.dispatchError.toString());
