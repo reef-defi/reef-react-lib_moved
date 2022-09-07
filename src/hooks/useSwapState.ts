@@ -23,6 +23,7 @@ import {
   calculateAmount,
   calculateAmountWithPercentage,
   calculateDeadline,
+  captureError,
   convert2Normal,
   ensure,
   errorHandler,
@@ -194,14 +195,14 @@ export const onSwap = ({
 
     const approveResources = await signer.provider.estimateResources(approveTransaction);
 
-    const approveExtrinsic = await signer.provider.api.tx.evm.call(
+    const approveExtrinsic = signer.provider.api.tx.evm.call(
       approveTransaction.to,
       approveTransaction.data,
       BigNumber.from(approveTransaction.value || 0),
       approveResources.gas,
       approveResources.storage.lt(0) ? BigNumber.from(0) : approveResources.storage,
     );
-    const tradeExtrinsic = await signer.provider.api.tx.evm.call(
+    const tradeExtrinsic = signer.provider.api.tx.evm.call(
       tradeTransaction.to,
       tradeTransaction.data,
       BigNumber.from(tradeTransaction.value || 0),
@@ -219,6 +220,11 @@ export const onSwap = ({
         address,
         { signer: signer.signingKey },
         (status: any) => {
+          console.log('Swap status:', status);
+          const err = captureError(status.events);
+          if (err) {
+            reject({message: err});
+          }
           if (status.dispatchError) {
             reject({message: status.dispatchError.toString()});
           }

@@ -12,7 +12,7 @@ import {
   RemoveLiquidityActions, RemoveLiquidityState, setCompleteStatusAction, setLoadingAction, setPercentageAction, setPoolAction, setStatusAction, setToken1Action, setToken2Action,
 } from '../store';
 import {
-  ButtonStatus, calculateDeadline, ensure, errorHandler,
+  ButtonStatus, calculateDeadline, captureError, ensure, errorHandler,
 } from '../utils';
 import { useKeepTokenUpdated } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
@@ -41,7 +41,7 @@ const removeStatus = (percentageAmount: number, pool?: Pool): ButtonStatus => {
     ensure(percentageAmount > 0, 'Enter an amount');
     return {
       isValid: true,
-      text: 'Withdraw',
+      text: 'Unstake',
     };
   } catch (e) {
     return {
@@ -154,14 +154,14 @@ export const onRemoveLiquidity = ({
     );
     const approveResources = await signer.provider.estimateResources(approveTransaction);
 
-    const approveExtrinsic = await signer.provider.api.tx.evm.call(
+    const approveExtrinsic = signer.provider.api.tx.evm.call(
       approveTransaction.to,
       approveTransaction.data,
       BigNumber.from(approveTransaction.value || 0),
       approveResources.gas,
       approveResources.storage.lt(0) ? BigNumber.from(0) : approveResources.storage,
     );
-    const withdrawExtrinsic = await signer.provider.api.tx.evm.call(
+    const withdrawExtrinsic = signer.provider.api.tx.evm.call(
       withdrawTransaction.to,
       withdrawTransaction.data,
       BigNumber.from(withdrawTransaction.value || 0),
@@ -179,6 +179,11 @@ export const onRemoveLiquidity = ({
         address,
         { signer: signer.signingKey },
         (status: any) => {
+          console.log('Unstake status: ', status);
+          const err = captureError(status.events);
+          if (err) {
+            reject({message: err});
+          }
           if (status.dispatchError) {
             reject({message: status.dispatchError.toString()});
           }
