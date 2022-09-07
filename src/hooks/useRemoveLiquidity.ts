@@ -154,14 +154,14 @@ export const onRemoveLiquidity = ({
     );
     const approveResources = await signer.provider.estimateResources(approveTransaction);
 
-    const approveExtrinsic = await signer.provider.api.tx.evm.call(
+    const approveExtrinsic = signer.provider.api.tx.evm.call(
       approveTransaction.to,
       approveTransaction.data,
       BigNumber.from(approveTransaction.value || 0),
       approveResources.gas,
       approveResources.storage.lt(0) ? BigNumber.from(0) : approveResources.storage,
     );
-    const withdrawExtrinsic = await signer.provider.api.tx.evm.call(
+    const withdrawExtrinsic = signer.provider.api.tx.evm.call(
       withdrawTransaction.to,
       withdrawTransaction.data,
       BigNumber.from(withdrawTransaction.value || 0),

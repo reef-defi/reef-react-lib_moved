@@ -221,21 +221,21 @@ export const onAddLiquidity = ({
     const resources = await signer.signer.provider.estimateResources(approvetTransaction1);
 
     // Creating transaction extrinsics
-    const approveExtrinsic1 = await signer.signer.provider.api.tx.evm.call(
+    const approveExtrinsic1 = signer.signer.provider.api.tx.evm.call(
       approvetTransaction1.to,
       approvetTransaction1.data,
       BigNumber.from(approvetTransaction1.value || 0),
       resources.gas,
       resources.storage.lt(0) ? BigNumber.from(0) : resources.storage,
     );
-    const approveExtrinsic2 = await signer.signer.provider.api.tx.evm.call(
+    const approveExtrinsic2 = signer.signer.provider.api.tx.evm.call(
       approvetTransaction2.to,
       approvetTransaction2.data,
       BigNumber.from(approvetTransaction2.value || 0),
       resources.gas,
       resources.storage.lt(0) ? BigNumber.from(0) : resources.storage,
     );
-    const provideExtrinsic = await signer.signer.provider.api.tx.evm.call(
+    const provideExtrinsic = signer.signer.provider.api.tx.evm.call(
       provideTransaction.to,
       provideTransaction.data,
       BigNumber.from(provideTransaction.value || 0),
@@ -244,7 +244,7 @@ export const onAddLiquidity = ({
     );
 
     // Batching extrinsics
-    const batch = await signer.signer.provider.api.tx.utility.batchAll([
+    const batch = signer.signer.provider.api.tx.utility.batchAll([
       approveExtrinsic1,
       approveExtrinsic2,
       provideExtrinsic,
