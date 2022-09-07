@@ -41,7 +41,7 @@ const removeStatus = (percentageAmount: number, pool?: Pool): ButtonStatus => {
     ensure(percentageAmount > 0, 'Enter an amount');
     return {
       isValid: true,
-      text: 'Withdraw',
+      text: 'Unstake',
     };
   } catch (e) {
     return {

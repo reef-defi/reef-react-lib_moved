@@ -69,7 +69,7 @@ const status = (
       BigNumber.from(calculateAmount(token2)).lte(token2.balance),
       `Insufficient ${token2.symbol} balance`,
     );
-    return { isValid: true, text: 'Provide' };
+    return { isValid: true, text: 'Stake' };
   } catch (e) {
     return { isValid: false, text: e.message };
   }
