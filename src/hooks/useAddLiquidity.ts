@@ -256,8 +256,12 @@ export const onAddLiquidity = ({
         signer.address,
         { signer: signer.signer.signingKey },
         (status: any) => {
-
+          console.log('Stake status: ', status);
+          for(let event of status.events) {
+            console.log('Stake event: ', event.toString());
+          }
           if (status.dispatchError) {
+            console.error(status.dispatchError.toString());
             reject({message: status.dispatchError.toString()});
           }
           if (status.status.isInBlock) {

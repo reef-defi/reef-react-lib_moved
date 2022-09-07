@@ -179,6 +179,10 @@ export const onRemoveLiquidity = ({
         address,
         { signer: signer.signingKey },
         (status: any) => {
+          console.log('Unstake status: ', status);
+          for(let event of status.events) {
+            console.log('Unstake event: ', event.toString());
+          }
           if (status.dispatchError) {
             reject({message: status.dispatchError.toString()});
           }
