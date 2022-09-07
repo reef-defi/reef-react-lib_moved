@@ -11,14 +11,14 @@ import {
   ReefSigner,
   reefTokenWithAmount,
   Token,
-  TokenWithAmount
+  TokenWithAmount,
 } from '../../state';
 import {
   ButtonStatus,
   calculateAmount,
   ensure,
   errorHandler, fromReefEVMAddressWithNotification, nativeTransfer, shortAddress,
-  showBalance
+  showBalance,
 } from '../../utils';
 import '../PoolActions/pool-actions.css';
 import TokenField from '../PoolActions/TokenField';
@@ -198,7 +198,7 @@ export const Send = ({
       });
     } finally {
       setLoading(false);
-      setToken({...token, amount: ''});
+      setToken({ ...token, amount: '' });
     }
   };
 
@@ -293,7 +293,7 @@ export const Send = ({
 
       <button
         type="button"
-        className="send__cta"
+        className="send__cta uik-pool-actions__cta"
         data-bs-toggle="modal"
         data-bs-target="#send-confirmation-modal-toggle"
         disabled={isLoading || !isValid}
