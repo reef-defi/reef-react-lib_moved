@@ -5,16 +5,22 @@ import { toReefBalanceDisplay, trim } from '../../utils';
 import { WalletIcon } from '../common/Icons';
 import './AccountSelector.css';
 
+export type Network = 'mainnet' | 'testnet';
+
 interface AccountSelector {
   accounts: ReefSigner[];
   selectedSigner?: ReefSigner;
   selectAccount: (index: number, signer: ReefSigner) => void;
+  selectedNetwork?: Network;
+  onNetworkSelect?: (network: Network) => any;
 }
 
 export const AccountSelector = ({
   selectedSigner,
   accounts,
   selectAccount,
+  selectedNetwork,
+  onNetworkSelect,
 }: AccountSelector): JSX.Element => {
   const name = selectedSigner ? selectedSigner.name : '';
   const balance = toReefBalanceDisplay(selectedSigner?.balance);
@@ -66,6 +72,8 @@ export const AccountSelector = ({
         accounts={getAccounts}
         selectedAccount={selectedAccount}
         onSelect={select}
+        selectedNetwork={selectedNetwork}
+        onNetworkSelect={onNetworkSelect}
       />
     </div>
   );
