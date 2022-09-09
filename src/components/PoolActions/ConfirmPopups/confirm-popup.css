@@ -156,6 +156,27 @@
   margin-top: 25px;
 }
 
+.confirm-popup-address {
+  padding: 15px;
+  justify-content: flex-start;
+}
+
+.confirm-popup-address__identicon {
+  background-color: #dad5eaad;
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.confirm-popup-address__address {
+  padding-left: 13px;
+  width: calc(100% - 44px);
+  word-break: break-word;
+  line-height: 1.25;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+}
+
 .confirm-popup-summary {
   width: 100%;
   display: flex;
