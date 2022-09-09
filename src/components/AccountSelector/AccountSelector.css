@@ -25,3 +25,66 @@
   border-left: 0;
   border-right: 0;
 }
+
+.nav-account__account {
+  background: linear-gradient(135deg,#ae27a5,#742cb2);
+  font-size: 0.938rem;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-start;
+  align-items: center;
+  color: white;
+  border: none;
+  border-radius: 999px;
+  box-shadow: 0 5px 20px -10px #742cb2;
+  font-weight: 500;
+  line-height: 22.984px;
+  overflow: hidden;
+  padding: 0.75rem 1.5rem;
+  text-decoration: none;
+  transition: all .125s;
+  white-space: nowrap;
+  vertical-align: middle;
+  user-select: none;
+}
+
+.nav-account__account:hover {
+  cursor: pointer;
+  filter: brightness(1.15);
+  transition: none;
+}
+
+.nav-account__account:active {
+  filter: brightness(1.25);
+  transition: all 0.125s;
+}
+
+.nav-account__hidden-balance {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-end;
+  align-items: center;
+  cursor: pointer;
+  border: none;
+  background-color: transparent;
+  margin-right: 4px;
+}
+
+.nav-account__hidden-balance div {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--primary);
+  margin-left: 3px;
+  animation: nav-balance-hidden-dot 0.15s;
+}
+
+@keyframes nav-balance-hidden-dot {
+  from {
+      transform: scale(0);
+  }
+}
+
+.nav-account__balance {
+  padding-top: 1px;
+}

@@ -2,7 +2,6 @@ import React, { useState, useMemo } from 'react';
 import Uik from '@reef-defi/ui-kit';
 import { ReefSigner } from '../../state';
 import { toReefBalanceDisplay, trim } from '../../utils';
-import { WalletIcon } from '../common/Icons';
 import './AccountSelector.css';
 
 export type Network = 'mainnet' | 'testnet';
@@ -13,6 +12,8 @@ interface AccountSelector {
   selectAccount: (index: number, signer: ReefSigner) => void;
   selectedNetwork?: Network;
   onNetworkSelect?: (network: Network) => any;
+  isBalanceHidden?: boolean;
+  showBalance?: (...args: any[]) => any;
 }
 
 export const AccountSelector = ({
@@ -21,6 +22,8 @@ export const AccountSelector = ({
   selectAccount,
   selectedNetwork,
   onNetworkSelect,
+  isBalanceHidden,
+  showBalance,
 }: AccountSelector): JSX.Element => {
   const name = selectedSigner ? selectedSigner.name : '';
   const balance = toReefBalanceDisplay(selectedSigner?.balance);
@@ -55,14 +58,29 @@ export const AccountSelector = ({
   return (
     <div className="nav-account border-rad">
       <div className="my-auto mx-2 fs-6">
-        {balance}
+        {
+          isBalanceHidden ? (
+            <button
+              type="button"
+              className="nav-account__hidden-balance"
+              onClick={showBalance}
+            >
+              <div />
+              <div />
+              <div />
+              <div />
+              <div />
+            </button>
+          ) : (
+            <span className="nav-account__balance">{ balance }</span>
+          )
+        }
       </div>
       <button
         type="button"
-        className="btn btn-reef border-rad"
+        className="nav-account__account"
         onClick={() => setOpen(true)}
       >
-        <WalletIcon />
         <span>{trim(name)}</span>
       </button>
 
