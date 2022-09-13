@@ -30,6 +30,3 @@ const Example = (): JSX.Element => (
 )
 ```
 
-## License
-
-MIT © [Frenkiee](https://github.com/Frenkiee)
