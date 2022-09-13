@@ -1,3 +1,10 @@
+import { FrameSystemEventRecord } from '@polkadot/types/lookup';
+// export interface ProcessModule {
+//   process(accountsManager: AccountManager): Promise<void>;
+//   save(): Promise<void>;
+// }
+export type Event = FrameSystemEventRecord;
+
 const chainErrors: { [key: string]: string } = {
   INVALID_TO: 'Invalid address.',
   EXPIRED: 'Transaction time expired.',
@@ -35,3 +42,24 @@ export const errorHandler = (message: string): string => {
 
   return chainErrors[errorKey];
 };
+
+const hexToAscii = (str1: string): string => {
+  const hex = str1.toString();
+  let str = '';
+  for (let n = 0; n < hex.length; n += 2) {
+    str += String.fromCharCode(parseInt(hex.substr(n, 2), 16));
+  }
+  return str;
+}
+
+export const captureError = (events: Event[]): string|undefined => {
+  for (const event of events) {
+    const eventCompression = `${event.event.section.toString()}.${event.event.method.toString()}`;
+    if (eventCompression === 'evm.ExecutedFailed') {
+      const eventData = (event.event.data.toJSON() as any[]);
+      const message: string = hexToAscii(eventData[eventData.length - 2].substr(138));
+      return message
+    }
+  }
+  return undefined;
+}

@@ -57,63 +57,89 @@ export const swapReducer = (state = initialSwapState, action: SwapAction): SwapS
   const maxBuyAmount = new BigNumber(pool ? getOutputAmount({ ...token2, amount: maxSellAmount.toString() }, pool) : '0');
   switch (action.type) {
     case SET_TOKEN1_AMOUNT:
+      if (!state.pool) {
+        return state;
+      }
+
       sellAmount = new BigNumber(assertAmount(action.amount));
-      buyAmount = new BigNumber(
-        pool
-          ? getOutputAmount({ ...token2, amount: sellAmount.toString() }, pool)
-          : '0'
-      )
+      buyAmount = new BigNumber(getOutputAmount({ ...token2, amount: sellAmount.toString() }, state.pool))
+
       if (sellAmount.lt(0)) {
-        buyAmount = new BigNumber(0);
-        sellAmount = new BigNumber(0);
+        return {
+          ...state,
+          token1: { ...token1, amount: '0' },
+          token2: { ...token2, amount: '0' },
+          percentage: 0,
+        };
       }
       if (sellAmount.gt(maxSellAmount)) {
-        sellAmount = maxSellAmount;
-        buyAmount = maxBuyAmount;
+        return {
+          ...state,
+          token1: { ...token1, amount: maxSellAmount.toString() },
+          token2: { ...token2, amount: maxBuyAmount.toString() },
+          percentage: 100,
+        };
       }
-      percentage = sellAmount.multipliedBy(new BigNumber(10).pow(token1.decimals)).div(token1.balance.toString()).multipliedBy(100).toNumber();
+      percentage = token1.balance.lte(0)
+        ? 0
+        : sellAmount
+            .multipliedBy(new BigNumber(10).pow(token1.decimals))
+            .div(token1.balance.toString())
+            .multipliedBy(100)
+            .toNumber();
       return {
         ...state,
         focus: 'sell',
         percentage,
         token1: {
           ...token1,
-          amount: sellAmount.toString(),
+          amount: action.amount,
         },
         token2: {
           ...token2,
-          amount: buyAmount.toFixed(4)
+          amount: buyAmount.toString()
         },
       };
     case SET_TOKEN2_AMOUNT:
+      if (!state.pool) {
+        return state;
+      }
+
       buyAmount = new BigNumber(assertAmount(action.amount));
-      sellAmount = new BigNumber(
-        pool
-          ? getInputAmount({ ...token2, amount: buyAmount.toString() }, pool)
-          : '0'
-      )
+      sellAmount = new BigNumber(getInputAmount({ ...token2, amount: buyAmount.toString() }, state.pool));
+
       if (buyAmount.lt(0)) {
-        buyAmount = new BigNumber(0);
-        sellAmount = new BigNumber(0);
+        return {
+          ...state,
+          token1: { ...token1, amount: '0' },
+          token2: { ...token2, amount: '0' },
+          percentage: 0,
+        };
       }
       if (sellAmount.gt(maxSellAmount)) {
-        sellAmount = maxSellAmount;
-        buyAmount = maxBuyAmount;
+        return {
+          ...state,
+          token1: { ...token1, amount: maxSellAmount.toString() },
+          token2: { ...token2, amount: maxBuyAmount.toString() },
+          percentage: 100,
+        };
       }
-      percentage = sellAmount.multipliedBy(new BigNumber(10).pow(token1.decimals)).div(token1.balance.toString()).multipliedBy(100).toNumber();
+
+      percentage = token1.balance.lte(0)
+        ? 0
+        : sellAmount
+            .multipliedBy(new BigNumber(10).pow(token1.decimals))
+            .div(token1.balance.toString())
+            .multipliedBy(100)
+            .toNumber();
+            
       return {
         ...state,
-        percentage,
         focus: 'buy',
-        token1: {
-          ...token1,
-          amount: sellAmount.toFixed(4),
-        },
-        token2: {
-          ...token2,
-          amount: buyAmount.toString(),
-        },
-      };
+        percentage,
+        token1: {...token1, amount: sellAmount.toString()},
+        token2: {...token2, amount: action.amount},
+      }
     case SWITCH_TOKENS: return {
       ...state,
       token1: { ...token2 },
