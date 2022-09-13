@@ -35,8 +35,7 @@ export const Provide = ({
     setToken2Amount,
     selectToken1,
     selectToken2,
-  },
-  confirmText = 'Stake',
+  }
 }: Provide): JSX.Element => {
   const {
     token1,
@@ -111,7 +110,7 @@ export const Provide = ({
         className="uik-pool-actions__cta"
         fill
         icon={faCoins}
-        text={isLoading ? status : confirmText}
+        text={status}
         size="large"
         disabled={!isValid || isLoading}
         loading={isLoading}
