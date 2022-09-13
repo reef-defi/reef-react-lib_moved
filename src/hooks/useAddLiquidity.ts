@@ -171,6 +171,8 @@ interface OnAddLiquidity {
   notify: NotifyFun;
   dispatch: Dispatch<AddLiquidityActions>;
   updateTokenState: () => Promise<void>;
+  onSuccess?: (...args: any[]) => any;
+  onFinalized?: (...args: any[]) => any;
 }
 
 export const onAddLiquidity = ({
@@ -179,6 +181,8 @@ export const onAddLiquidity = ({
   signer,
   dispatch,
   updateTokenState,
+  onSuccess,
+  onFinalized,
 }: OnAddLiquidity) => async (): Promise<void> => {
   if (!signer || !network) {
     return;
@@ -273,12 +277,19 @@ export const onAddLiquidity = ({
           // First find it
 
           // If you want to await until block is finalized use below if
-          // if (status.status.isFinalized) {
-          // resolve();
-          // }
+          if (status.status.isFinalized) {
+            if (onFinalized) onFinalized();
+
+            Uik.notify.success({
+              message: 'Blocks have been finalized',
+              keepAlive: true,
+            });
+          }
         },
       );
     });
+
+    if (onSuccess) onSuccess();
 
     Uik.notify.success({
       message: 'Successfully provided liquidity.\nBalances will reload after blocks are finalized.',

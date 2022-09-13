@@ -25,6 +25,8 @@ interface DefaultVariables {
 }
 interface OnRemoveLiquidity extends DefaultVariables {
   notify: NotifyFun;
+  onSuccess?: (...args: any[]) => any;
+  onFinalized?: (...args: any[]) => any;
 }
 
 interface UseRemoveLiquidity extends DefaultVariables {
@@ -52,7 +54,14 @@ const removeStatus = (percentageAmount: number, pool?: Pool): ButtonStatus => {
 };
 
 export const useRemoveLiquidity = ({
-  address1, address2, state, signer, network, tokens, tokenPrices, dispatch,
+  address1,
+  address2,
+  state,
+  signer,
+  network,
+  tokens,
+  tokenPrices,
+  dispatch,
 }: UseRemoveLiquidity): void => {
   const {
     percentage, token1, token2, pool, isLoading, isValid, status,
@@ -101,6 +110,8 @@ export const onRemoveLiquidity = ({
   dispatch,
   network,
   signer: sig,
+  onSuccess,
+  onFinalized,
 }: OnRemoveLiquidity) => async (): Promise<void> => {
   const { pool, percentage: percentageAmount, settings } = state;
   if (!pool || !sig || !network || percentageAmount === 0) { return; }
@@ -191,13 +202,20 @@ export const onRemoveLiquidity = ({
             resolve();
           }
           // If you want to await until block is finalized use below if
-          // if (status.status.isFinalized) {
-          // resolve();
-          // }
+          if (status.status.isFinalized) {
+            if (onFinalized) onFinalized();
+
+            Uik.notify.success({
+              message: 'Blocks have been finalized',
+              keepAlive: true,
+            });
+          }
         },
       );
     });
     await signAndSend;
+
+    if (onSuccess) onSuccess();
 
     Uik.notify.success({
       message: 'Tokens were successfully withdrawn.\nBalances will reload after blocks are finalized.',

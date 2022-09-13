@@ -46,7 +46,7 @@ export const Withdraw = ({
       <div
         className={`
           uik-pool-actions__withdraw-preview
-          ${!getTotalValue ? 'uik-pool-actions__withdraw-preview--empty' : ''}
+          ${!isValid ? 'uik-pool-actions__withdraw-preview--empty' : ''}
         `}
       >
         <div className="uik-pool-actions__withdraw-percentage">

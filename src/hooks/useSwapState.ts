@@ -156,10 +156,18 @@ interface OnSwap {
   notify: NotifyFun;
   dispatch: Dispatch<SwapAction>;
   updateTokenState: () => Promise<void>;
+  onSuccess?: (...args: any[]) => any;
+  onFinalized?: (...args: any[]) => any;
 }
 
 export const onSwap = ({
-  state, network, account, dispatch, updateTokenState,
+  state,
+  network,
+  account,
+  dispatch,
+  updateTokenState,
+  onSuccess,
+  onFinalized,
 }: OnSwap) => async (): Promise<void> => {
   const {
     token1, settings, token2, isValid, isLoading,
@@ -232,13 +240,20 @@ export const onSwap = ({
             resolve();
           }
           // If you want to await until block is finalized use below if
-          // if (status.status.isFinalized) {
-          // resolve();
-          // }
+          if (status.status.isFinalized) {
+            if (onFinalized) onFinalized();
+
+            Uik.notify.success({
+              message: 'Blocks have been finalized',
+              keepAlive: true,
+            });
+          }
         },
       );
     });
     await signAndSend;
+
+    if (onSuccess) onSuccess();
 
     Uik.notify.success({
       message: 'Trade complete.\nBalances will reload after blocks are finalized',

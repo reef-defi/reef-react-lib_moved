@@ -11,19 +11,19 @@ import {
   ReefSigner,
   reefTokenWithAmount,
   Token,
-  TokenWithAmount
+  TokenWithAmount,
 } from '../../state';
 import {
   ButtonStatus,
   calculateAmount,
   ensure,
   errorHandler, fromReefEVMAddressWithNotification, nativeTransfer, shortAddress,
-  showBalance
+  showBalance,
 } from '../../utils';
 import '../PoolActions/pool-actions.css';
 import TokenField from '../PoolActions/TokenField';
 import './Send.css';
-import SendConfirmationModal from './SendConfirmationModal';
+import SendPopup from '../PoolActions/ConfirmPopups/Send';
 
 interface Send {
   tokens: Token[];
@@ -198,7 +198,7 @@ export const Send = ({
       });
     } finally {
       setLoading(false);
-      setToken({...token, amount: ''});
+      setToken({ ...token, amount: '' });
     }
   };
 
@@ -232,6 +232,8 @@ export const Send = ({
     const amount = new BigNumber(perc).times(maxAmount).dividedBy(100).toNumber();
     onAmountChange(String(amount), token);
   };
+
+  const [isPopupOpen, setPopupOpen] = useState(false);
 
   return (
     <div className="send">
@@ -291,27 +293,22 @@ export const Send = ({
         />
       </div>
 
-      <button
-        type="button"
-        className="send__cta"
-        data-bs-toggle="modal"
-        data-bs-target="#send-confirmation-modal-toggle"
+      <Uik.Button
+        size="large"
+        className="uik-pool-actions__cta"
+        fill
+        loading={isLoading}
         disabled={isLoading || !isValid}
-      >
-        <Uik.Button
-          size="large"
-          fill
-          loading={isLoading}
-          disabled={isLoading || !isValid}
-          text={isLoading ? status : text}
-        />
-      </button>
+        text={isLoading ? status : text}
+        onClick={() => setPopupOpen(true)}
+      />
 
-      <SendConfirmationModal
-        to={to}
+      <SendPopup
+        address={to}
+        isOpen={isPopupOpen}
+        onClose={() => setPopupOpen(false)}
+        onConfirm={onSend}
         token={token}
-        confirmFun={onSend}
-        id="send-confirmation-modal-toggle"
       />
     </div>
   );
