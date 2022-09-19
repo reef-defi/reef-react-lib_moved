@@ -23,6 +23,8 @@ interface PoolData {
   firstToken: CandlestickHolder[];
   secondToken: CandlestickHolder[];
   tvl: BaseDataHolder[];
+  firstTokenVolume: BaseDataHolder[];
+  secondTokenVolume: BaseDataHolder[];
 }
 type UsePoolDataOutput = [PoolData, boolean];
 
@@ -123,6 +125,8 @@ export const usePoolData = ({
         fees: [],
         tvl: [],
         volume: [],
+        firstTokenVolume: [],
+        secondTokenVolume: [],
       };
     }
 
@@ -139,12 +143,40 @@ export const usePoolData = ({
       data.previousCandlestick2.length > 0 ? data.previousCandlestick2[0].close : 0,
       days,
     );
+
     const volume = fillMissingDates(
       data.volume.map(process),
       emptyHolder(days - 1),
       emptyHolder(),
       ({}, lastDate) => ({ value: 0, time: new Date(lastDate) }),
     );
+
+    const firstTokenVolume = fillMissingDates(
+      data.volume.map((item) => ({
+        time: new Date(item.timeframe),
+        value: new BigNumber(item.amount1)
+          .div(new BigNumber(10).pow(decimal1))
+          .multipliedBy(price1)
+          .toNumber(),
+      })),
+      emptyHolder(days - 1),
+      emptyHolder(),
+      ({}, lastDate) => ({ value: 0, time: new Date(lastDate) }),
+    );
+
+    const secondTokenVolume = fillMissingDates(
+      data.volume.map((item) => ({
+        time: new Date(item.timeframe),
+        value: new BigNumber(item.amount2)
+          .div(new BigNumber(10).pow(decimal2))
+          .multipliedBy(price2)
+          .toNumber(),
+      })),
+      emptyHolder(days - 1),
+      emptyHolder(),
+      ({}, lastDate) => ({ value: 0, time: new Date(lastDate) }),
+    );
+
     const fees = fillMissingDates(
       data.fee
         .map(({ fee1, fee2, timeframe }): Amounts => ({
@@ -157,6 +189,7 @@ export const usePoolData = ({
       emptyHolder(),
       ({}, lastDate) => ({ value: 0, time: new Date(lastDate) }),
     );
+
     const tvl = fillMissingDates(
       data.reserves
         .map(({ reserved1, reserved2, timeframe }): Amounts => ({
@@ -176,6 +209,8 @@ export const usePoolData = ({
       fees,
       volume,
       tvl,
+      firstTokenVolume,
+      secondTokenVolume,
     };
   }, [data, price1, price2, decimal1, decimal2]);
 
