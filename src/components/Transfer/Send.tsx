@@ -88,25 +88,29 @@ const Accounts = ({
   isOpen,
   onClose,
   query,
+  selectedAccount,
 }: {
   accounts: ReefSigner[];
   selectAccount: (index: number, signer: ReefSigner) => void;
   isOpen: boolean;
   onClose: () => void;
-  query: string
+  query: string;
+  selectedAccount: ReefSigner;
 }): JSX.Element => {
   const getAccounts = useMemo(() => {
-    if (!query) return accounts;
+    const list = accounts.filter(({ address }) => selectedAccount.address !== address);
 
-    const perfectMatch = accounts.find((acc) => acc.address === query);
+    if (!query) return list;
+
+    const perfectMatch = list.find((acc) => acc.address === query);
     if (perfectMatch) {
       return [
         perfectMatch,
-        ...accounts.filter((acc) => acc.address !== query),
+        ...list.filter((acc) => acc.address !== query),
       ];
     }
 
-    return accounts.filter((acc) => acc.address.toLowerCase().startsWith(query.toLowerCase())
+    return list.filter((acc) => acc.address.toLowerCase().startsWith(query.toLowerCase())
         || acc.name.replaceAll(' ', '').toLowerCase().startsWith(query.toLowerCase()));
   }, [accounts, query]);
 
@@ -274,6 +278,7 @@ export const Send = ({
           accounts={accounts}
           query={to}
           selectAccount={(_, signer) => setTo(signer.address)}
+          selectedAccount={signer}
         />
       </div>
 
