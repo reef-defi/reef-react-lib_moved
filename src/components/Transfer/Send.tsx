@@ -31,6 +31,7 @@ interface Send {
   provider: Provider;
   accounts: ReefSigner[];
   notify: NotifyFun;
+  tokenAddress?: string;
 }
 
 const getSignerEvmAddress = async (address: string, provider: Provider): Promise<string> => {
@@ -139,13 +140,27 @@ const Accounts = ({
 };
 
 export const Send = ({
-  signer, tokens, accounts, provider,
+  signer, tokens, accounts, provider, tokenAddress,
 }: Send): JSX.Element => {
   const [to, setTo] = useState('');
   const [status, setStatus] = useState('Send');
   const [isLoading, setLoading] = useState(false);
   const [isAmountPristine, setAmountPristine] = useState(true);
-  const [token, setToken] = useState(reefTokenWithAmount());
+
+  const getInitToken = (): TokenWithAmount => {
+    if (tokenAddress) {
+      const targetToken = tokens.find(({ address }) => address === tokenAddress);
+      if (targetToken) {
+        return {
+          ...targetToken, isEmpty: false, price: 0, amount: '',
+        };
+      }
+    }
+
+    return reefTokenWithAmount();
+  };
+
+  const [token, setToken] = useState(getInitToken());
 
   useEffect(() => {
     const alignedToken = tokens.find(({ address }) => address === token.address);
