@@ -1,7 +1,7 @@
 import Uik from '@reef-defi/ui-kit';
 import BN from 'bignumber.js';
 import { BigNumber, Contract } from 'ethers';
-import { Dispatch, useEffect } from 'react';
+import React, { Dispatch, useEffect } from 'react';
 import { ReefswapPair } from '../assets/abi/ReefswapPair';
 import { getReefswapRouter } from '../rpc';
 import {
@@ -193,10 +193,10 @@ export const onRemoveLiquidity = ({
           console.log('Unstake status: ', status);
           const err = captureError(status.events);
           if (err) {
-            reject({message: err});
+            reject({ message: err });
           }
           if (status.dispatchError) {
-            reject({message: status.dispatchError.toString()});
+            reject({ message: status.dispatchError.toString() });
           }
           if (status.status.isInBlock) {
             resolve();
@@ -224,9 +224,11 @@ export const onRemoveLiquidity = ({
 
     Uik.dropConfetti();
   } catch (e) {
-    Uik.notify.danger({
-      message: `An error occurred while trying to withdraw tokens: ${errorHandler(e.message)}`,
-      keepAlive: true,
+    Uik.prompt({
+      type: 'danger',
+      title: 'Transaction has failed',
+      message: `An error occurred while trying to withdraw tokens: ${errorHandler(e.message)}\nYour assets remain unchanged.`,
+      actions: <Uik.Button text="Close" danger />,
     });
   } finally {
     dispatch(setLoadingAction(false));

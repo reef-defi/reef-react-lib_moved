@@ -192,9 +192,11 @@ export const Send = ({
       Uik.dropConfetti();
     } catch (error) {
       const message = errorHandler(error.message);
-      Uik.notify.danger({
-        message: `There was an error while sending tokens: ${message}`,
-        keepAlive: true,
+      Uik.prompt({
+        type: 'danger',
+        title: 'Transaction has failed',
+        message: `There was an error while sending tokens: ${message}\nYour assets remain unchanged.`,
+        actions: <Uik.Button text="Close" danger />,
       });
     } finally {
       setLoading(false);
