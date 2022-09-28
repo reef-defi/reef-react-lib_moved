@@ -30,28 +30,71 @@ export const Input = ({
 interface InputAmount {
   amount: string;
   disabled?: boolean;
+  min?: number,
+  max?: number,
   placeholder?: string;
   onAmountChange: (value: string) => void;
+  onValidityChange?: (error: InputAmountValidity) => void;
+}
+
+export interface InputAmountValidity {
+  valid: boolean;
+  errorMessage?: string;
 }
 
 export const InputAmount = ({
   amount,
   onAmountChange,
+  min = 0.0,
+  max,
   placeholder = '',
   disabled = false,
+  onValidityChange,
 }: InputAmount): JSX.Element => {
   const mathDecimals = !amount ? '' : amount.replaceAll(',', '.');
   const [amt, setAmt] = useState(mathDecimals);
-  useEffect(() => setAmt(amount), [amount]);
-  const inputChange = (event: any): void => {
+
+  const checkAmountValidity = (amount: string): void => {
+    if (onValidityChange === undefined) {
+      return;
+    }
+
+    if (amount.length === 0) {
+      onValidityChange({ valid: true });
+      return;
+    }
+
+    const amountNr = +amount;
+    if (min != null && amountNr < min) {
+      onValidityChange({ valid: false, errorMessage: `Amount is too low. The lowest allowed value is ${min}.` });
+      return;
+    }
+
+    if (max != null && amountNr > max) {
+      onValidityChange({ valid: false, errorMessage: `Amount is too big. The largest allowed value is ${max}.` });
+      return;
+    }
+
+    onValidityChange({ valid: true });
+  };
+
+  const inputChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const newVal = event.target.value;
     setAmt(newVal);
     onAmountChange(newVal);
+    checkAmountValidity(newVal);
   };
+
+  useEffect(() => {
+    setAmt(amount);
+    checkAmountValidity(amount);
+  }, [amount]);
+
   return (
     <input
       type="number"
-      min={0.0}
+      min={min ?? 0.0}
+      max={max}
       disabled={disabled}
       value={amt}
       placeholder={placeholder}

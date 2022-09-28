@@ -4,16 +4,18 @@ import { BackIcon, DownArrowIcon, PlusIcon } from '../Icons';
 interface ButtonProps {
   onClick?: () => void;
   disabled?: boolean;
+  className?: string;
 }
 
 export const Button: React.FC<ButtonProps> = ({
   children,
   onClick = () => {},
+  className = '',
   disabled,
 }): JSX.Element => (
   <button
     type="button"
-    className="btn btn-reef border-rad"
+    className={`btn btn-reef border-rad ${className}`}
     disabled={disabled}
     onClick={onClick}
   >
