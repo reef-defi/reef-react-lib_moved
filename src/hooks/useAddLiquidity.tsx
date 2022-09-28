@@ -1,6 +1,6 @@
 import Uik from '@reef-defi/ui-kit';
+import React, { Dispatch, useEffect } from 'react';
 import { BigNumber, Contract } from 'ethers';
-import { Dispatch, useEffect } from 'react';
 import { ERC20 } from '../assets/abi/ERC20';
 import { getReefswapRouter } from '../rpc';
 import {
@@ -264,11 +264,11 @@ export const onAddLiquidity = ({
           console.log('Stake status: ', status);
           const err = captureError(status.events);
           if (err) {
-            reject({message: err});
+            reject({ message: err });
           }
           if (status.dispatchError) {
             console.error(status.dispatchError.toString());
-            reject({message: status.dispatchError.toString()});
+            reject({ message: status.dispatchError.toString() });
           }
           if (status.status.isInBlock) {
             resolve();
@@ -302,9 +302,11 @@ export const onAddLiquidity = ({
       .replace('first', token1.name)
       .replace('second', token2.name);
 
-    Uik.notify.danger({
-      message: `An error occurred while trying to provide liquidity: ${message}`,
-      keepAlive: true,
+    Uik.prompt({
+      type: 'danger',
+      title: 'Transaction has failed',
+      message: `An error occurred while trying to provide liquidity: ${message}\nYour assets remain unchanged.`,
+      actions: <Uik.Button text="Close" danger />,
     });
   } finally {
     /* TODO const newTokens = await loadTokens(tokens, sgnr);

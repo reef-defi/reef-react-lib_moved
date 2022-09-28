@@ -30,10 +30,10 @@ export const AccountSelector = ({
 
   const [isOpen, setOpen] = useState(false);
 
-  const getAccounts = useMemo(() => accounts.map((account) => ({
-    name: account.name,
-    address: account.address,
-    evmAddress: account.evmAddress,
+  const getAccounts = useMemo(() => accounts.map(({
+    name, address, evmAddress, source,
+  }) => ({
+    name, address, evmAddress, source,
   })), [accounts]);
 
   const selectedAccount = useMemo(() => {

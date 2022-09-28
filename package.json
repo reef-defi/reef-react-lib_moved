@@ -35,7 +35,7 @@
     "@reef-defi/extension-base": "^1.0.14",
     "@reef-defi/extension-dapp": "^1.0.14",
     "@reef-defi/extension-inject": "^1.0.14",
-    "@reef-defi/ui-kit": "1.0.5",
+    "@reef-defi/ui-kit": "^1.0.8",
     "@types/react-router-dom": "^5.3.0",
     "axios": "^0.21.4",
     "bignumber.js": "^9.0.2",

@@ -31,6 +31,7 @@ interface Send {
   provider: Provider;
   accounts: ReefSigner[];
   notify: NotifyFun;
+  tokenAddress?: string;
 }
 
 const getSignerEvmAddress = async (address: string, provider: Provider): Promise<string> => {
@@ -87,25 +88,29 @@ const Accounts = ({
   isOpen,
   onClose,
   query,
+  selectedAccount,
 }: {
   accounts: ReefSigner[];
   selectAccount: (index: number, signer: ReefSigner) => void;
   isOpen: boolean;
   onClose: () => void;
-  query: string
+  query: string;
+  selectedAccount: ReefSigner;
 }): JSX.Element => {
   const getAccounts = useMemo(() => {
-    if (!query) return accounts;
+    const list = accounts.filter(({ address }) => selectedAccount.address !== address);
 
-    const perfectMatch = accounts.find((acc) => acc.address === query);
+    if (!query) return list;
+
+    const perfectMatch = list.find((acc) => acc.address === query);
     if (perfectMatch) {
       return [
         perfectMatch,
-        ...accounts.filter((acc) => acc.address !== query),
+        ...list.filter((acc) => acc.address !== query),
       ];
     }
 
-    return accounts.filter((acc) => acc.address.toLowerCase().startsWith(query.toLowerCase())
+    return list.filter((acc) => acc.address.toLowerCase().startsWith(query.toLowerCase())
         || acc.name.replaceAll(' ', '').toLowerCase().startsWith(query.toLowerCase()));
   }, [accounts, query]);
 
@@ -139,13 +144,27 @@ const Accounts = ({
 };
 
 export const Send = ({
-  signer, tokens, accounts, provider,
+  signer, tokens, accounts, provider, tokenAddress,
 }: Send): JSX.Element => {
   const [to, setTo] = useState('');
   const [status, setStatus] = useState('Send');
   const [isLoading, setLoading] = useState(false);
   const [isAmountPristine, setAmountPristine] = useState(true);
-  const [token, setToken] = useState(reefTokenWithAmount());
+
+  const getInitToken = (): TokenWithAmount => {
+    if (tokenAddress) {
+      const targetToken = tokens.find(({ address }) => address === tokenAddress);
+      if (targetToken) {
+        return {
+          ...targetToken, isEmpty: false, price: 0, amount: '',
+        };
+      }
+    }
+
+    return reefTokenWithAmount();
+  };
+
+  const [token, setToken] = useState(getInitToken());
 
   useEffect(() => {
     const alignedToken = tokens.find(({ address }) => address === token.address);
@@ -192,9 +211,11 @@ export const Send = ({
       Uik.dropConfetti();
     } catch (error) {
       const message = errorHandler(error.message);
-      Uik.notify.danger({
-        message: `There was an error while sending tokens: ${message}`,
-        keepAlive: true,
+      Uik.prompt({
+        type: 'danger',
+        title: 'Transaction has failed',
+        message: `There was an error while sending tokens: ${message}\nYour assets remain unchanged.`,
+        actions: <Uik.Button text="Close" danger />,
       });
     } finally {
       setLoading(false);
@@ -257,6 +278,7 @@ export const Send = ({
           accounts={accounts}
           query={to}
           selectAccount={(_, signer) => setTo(signer.address)}
+          selectedAccount={signer}
         />
       </div>
 
