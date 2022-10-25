@@ -29,6 +29,22 @@ subscription balances($signer: String!) {
   }
 }
 `;
+ /*TODO sort so we know what is latest balance*! */
+/*const tokenBalances = gql`
+subscription balances($signer: String!) {
+  token_holder(
+    where: {
+      signer: { _eq: $signer }
+    }
+    order_by: {timestamp: desc}
+    #distinct_on: timestamp
+  ) {
+    token_address
+    balance
+    timestamp
+  }
+}
+`;*/
 
 interface VerifiedTokens {
   address: string;
