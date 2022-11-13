@@ -1,4 +1,4 @@
-import {ContractType, ERC1155ContractData, ERC721ContractData, NFT, ReefSigner} from "../state";
+import {ERC1155ContractData, ERC721ContractData, NFT} from "../state";
 import {combineLatest, map, Observable, switchMap} from "rxjs";
 import {apolloClientInstance$, zenToRx} from "../graphql";
 import {currentProvider$} from "./providerState";
@@ -6,8 +6,7 @@ import {resolveNftImageLinks} from "../utils/nftUtil";
 import {_NFT_IPFS_RESOLVER_FN} from "./util";
 import {selectedSignerAddressUpdate$} from "./tokenState";
 import {gql} from "@apollo/client";
-import {BigNumber, Contract} from "ethers";
-import {Provider} from "@reef-defi/evm-provider";
+import {BigNumber} from "ethers";
 
 const SIGNER_NFTS_GQL = gql`
   subscription query($accountId: String) {
@@ -70,15 +69,17 @@ const parseTokenHolderArray = (resArr: VerifiedNft[]): NFT[] => resArr.map(({
     } as NFT)
 });
 
-async function getSqwidContractNfts(queryResult: any[] | undefined, signer: ReefSigner, provider: Provider) {
+/*async function getSqwidContractNfts(queryResult: any[] | undefined, signer: ReefSigner, provider: Provider) {
     const mainnetGHash = '0x7834781d38e4798d548e34ec947d19deea29df148a7bf32484b7b24dacf8d4b7';
     const network = await provider.api.genesisHash.toHuman();
     const isMainnet = mainnetGHash === network;
+
     if (queryResult?.length || !isMainnet) {
         return queryResult;
     }
 
     const sqwid1155Address = '0x0601202b75C96A61CDb9A99D4e2285E43c6e60e4'
+
     const nftItemsABI = [{
         "inputs": [
             {
@@ -120,7 +121,7 @@ async function getSqwidContractNfts(queryResult: any[] | undefined, signer: Reef
             }
         }
     } as VerifiedNft));
-}
+}*/
 
 export const selectedSignerNFTs$: Observable<NFT[]> = combineLatest([
     apolloClientInstance$,
@@ -128,7 +129,7 @@ export const selectedSignerNFTs$: Observable<NFT[]> = combineLatest([
     currentProvider$,
 ])
     .pipe(
-        switchMap(([apollo, signer, provider]) => (!signer
+        switchMap(([apollo, signer]) => (!signer
             ? []
             : zenToRx(
                 apollo.subscribe({
@@ -143,7 +144,8 @@ export const selectedSignerNFTs$: Observable<NFT[]> = combineLatest([
                     map(({data}) => (data && data.token_holder
                         ? data.token_holder as VerifiedNft[]
                         : undefined)),
-                    switchMap((res: VerifiedNft[] | undefined) => getSqwidContractNfts(res, signer as ReefSigner, provider)),
+                    // indexer fallback, loading directly from sqwid contract
+                    // switchMap((res: VerifiedNft[] | undefined) => getSqwidContractNfts(res, signer as ReefSigner, provider)),
                     map((res: VerifiedNft[] | undefined) => parseTokenHolderArray(res || [])),
                     switchMap((nfts: NFT[]) => (resolveNftImageLinks(nfts, signer.signer, _NFT_IPFS_RESOLVER_FN) as Observable<NFT[]>)),
                 ))),
