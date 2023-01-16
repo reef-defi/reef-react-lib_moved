@@ -2,12 +2,31 @@ import {ERC1155ContractData, ERC721ContractData, NFT} from "../state";
 import {combineLatest, map, Observable, switchMap} from "rxjs";
 import {apolloClientInstance$, zenToRx} from "../graphql";
 import {currentProvider$} from "./providerState";
+import {selectedSignerAddressUpdate$} from "./tokenState";
 import {resolveNftImageLinks} from "../utils/nftUtil";
 import {_NFT_IPFS_RESOLVER_FN} from "./util";
-import {selectedSignerAddressUpdate$} from "./tokenState";
-import {gql} from "@apollo/client";
+import {graphql} from "@reef-chain/util-lib"
 import {BigNumber} from "ethers";
 
+const SIGNER_NFTS_GQL=graphql.SIGNER_NFTS_GQL;
+/* new graphql
+const SIGNER_NFTS_GQL = gql`
+  subscription query($accountId: String) {
+    tokenHolders(
+    orderBy: balance_DESC
+    where: {AND: {nftId_isNull: false, token: {id_isNull: false}, signer: {id_eq: $accountId}, balance_gt: "0"}, type_eq: Account},
+    limit:100
+  ) {
+    token {
+      id
+      type
+    }
+    balance
+    nftId
+  }
+ }`;
+;*/
+/*
 const SIGNER_NFTS_GQL = gql`
   subscription query($accountId: String) {
     token_holder(
@@ -29,6 +48,7 @@ const SIGNER_NFTS_GQL = gql`
     }
   }
  }`;
+*/
 
 
 export interface VerifiedNft {
@@ -45,17 +65,17 @@ export interface VerifiedNft {
 }
 
 const parseTokenHolderArray = (resArr: VerifiedNft[]): NFT[] => resArr.map(({
-                                                                                balance,
-                                                                                nft_id: nftId,
-                                                                                info: {symbol},
-                                                                                token_address,
-                                                                                contract: {
-                                                                                    verified_contract: {
-                                                                                        contract_data,
-                                                                                        type
-                                                                                    }
-                                                                                },
-                                                                            }) => {
+        balance,
+        nft_id: nftId,
+        info: {symbol},
+        token_address,
+        contract: {
+            verified_contract: {
+                contract_data,
+                type
+            }
+        },
+    }) => {
     return ({
         contractType: type,
         balance: BigNumber.from(balance),
@@ -141,9 +161,12 @@ export const selectedSignerNFTs$: Observable<NFT[]> = combineLatest([
                 }),
             )
                 .pipe(
-                    map(({data}) => (data && data.token_holder
-                        ? data.token_holder as VerifiedNft[]
-                        : undefined)),
+                    map(({data}) => {
+                        console.log("NFTSSS=",data);
+                        return data && data.tokenHolders
+                            ? data.tokenHolders as VerifiedNft[]
+                            : undefined
+                    }),
                     // indexer fallback, loading directly from sqwid contract
                     // switchMap((res: VerifiedNft[] | undefined) => getSqwidContractNfts(res, signer as ReefSigner, provider)),
                     map((res: VerifiedNft[] | undefined) => parseTokenHolderArray(res || [])),

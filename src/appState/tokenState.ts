@@ -7,23 +7,21 @@ import {
     Observable,
     of,
     shareReplay,
-    startWith,
     switchMap,
     timer,
 } from 'rxjs';
 import {BigNumber, FixedNumber, utils} from 'ethers';
-import {gql} from '@apollo/client';
 import {filter} from 'rxjs/operators';
-import {_NFT_IPFS_RESOLVER_FN, combineTokensDistinct, toTokensWithPrice} from './util';
+import {combineTokensDistinct, toTokensWithPrice} from './util';
 import {selectedSigner$} from './accountState';
 import {currentNetwork$, currentProvider$} from './providerState';
 import {apolloClientInstance$, zenToRx} from '../graphql/apollo';
-import {getExtrinsicUrl, getIconUrl} from '../utils';
+import {getIconUrl} from '../utils';
 import {getReefCoinBalance, loadPools} from '../rpc';
 import {retrieveReefCoingeckoPrice} from '../api';
-import {ContractType, reefTokenWithAmount, Token, TokenTransfer, TokenWithAmount,} from '../state/token';
-import {Network, NFT, Pool, ReefSigner} from '../state';
-import {resolveNftImageLinks} from '../utils/nftUtil';
+import {reefTokenWithAmount, Token, TokenWithAmount,} from '../state/token';
+import {LastPoolReserves, Pool} from '../state';
+import {graphql} from '@reef-chain/util-lib';
 
 // TODO replace with our own from lib and remove
 const toPlainString = (num: number): string => `${+num}`.replace(
@@ -43,34 +41,9 @@ export const reefPrice$: Observable<number> = timer(0, 60000).pipe(
 );
 
 export const validatedTokens$ = of(validatedTokens.tokens as Token[]);
+export const SIGNER_TOKENS_GQL = graphql.SIGNER_TOKENS_GQL;
 
-const SIGNER_TOKENS_GQL = gql`
-  subscription tokens_query($accountId: String!) {
-    token_holder(
-      order_by: { balance: desc }
-      where: {
-        _and: [
-          { nft_id: { _is_null: true } }
-          { token_address: { _is_null: false } }
-          { signer: { _eq: $accountId } }
-        ]
-      }
-    ) {
-      token_address
-      balance
-    }
-  }
-`;
-
-
-const CONTRACT_DATA_GQL = gql`
-  query contract_data_query($addresses: [String!]!) {
-    verified_contract(where: { address: { _in: $addresses } }) {
-      address
-      contract_data
-    }
-  }
-`;
+const CONTRACT_DATA_GQL = graphql.CONTRACT_DATA_GQL;
 
 // eslint-disable-next-line camelcase
 const fetchTokensData = (
@@ -84,15 +57,16 @@ const fetchTokensData = (
     variables: { addresses: missingCacheContractDataAddresses },
   })
 // eslint-disable-next-line camelcase
-  .then((verContracts) => verContracts.data.verified_contract.map(
+  .then((verContracts) => verContracts.data.verifiedContracts.map(
     // eslint-disable-next-line camelcase
-    (vContract: { address: string; contract_data: any }) => ({
-      address: vContract.address,
-      iconUrl: vContract.contract_data.token_icon_url,
-      decimals: vContract.contract_data.decimals,
-      name: vContract.contract_data.name,
-      symbol: vContract.contract_data.symbol,
-    } as Token),
+    (vContract: { id: string; contractData: any }) => {
+          return ({
+      address: vContract.id,
+      iconUrl: vContract.contractData.tokenIconUrl,
+      decimals: vContract.contractData.decimals,
+      name: vContract.contractData.name,
+      symbol: vContract.contractData.symbol,
+    } as Token)},
   ))
   .then((newTokens) => newTokens.concat(state.contractData));
 
@@ -151,9 +125,11 @@ export const selectedSignerTokenBalances$: Observable<Token[]|null> = combineLat
         fetchPolicy: 'network-only',
       }),
     ).pipe(
-      map((res: any) => (res.data && res.data.token_holder
-        ? res.data.token_holder
-        : undefined)),
+      map((res: any) => {
+          return res.data && res.data.tokenHolders
+              ? res.data.tokenHolders.map(th=>({token_address:th.token.id, balance: th.balance}))
+              : undefined
+      }),
       // eslint-disable-next-line camelcase
       switchMap(
         async (
@@ -164,7 +140,6 @@ export const selectedSignerTokenBalances$: Observable<Token[]|null> = combineLat
           const reefTokenResult = tokenBalances.find(
             (tb) => tb.token_address === reefTkn.address,
           );
-
           const reefBalance = await getReefCoinBalance(
             signer.address,
             provider,
@@ -218,51 +193,34 @@ export const pools$: Observable<Pool[]> = combineLatest([
   shareReplay(1),
 );
 
+export const poolReserves$: Observable<LastPoolReserves[]> = pools$.pipe(
+    map((pools:Pool[])=>{
+        return pools.map(poolToLastPoolReserve)
+    })
+)
+
+const poolToLastPoolReserve = (p:Pool)=>{
+    return {
+        address: p.poolAddress,
+        reserved_1: Number.parseInt(p.reserve1),
+        reserved_2: Number.parseInt(p.reserve2),
+        token_1: p.token1.address,
+        token_2: p.token2.address,
+        token_data_1: {decimals: p.token1.decimals, name: p.token1.name, symbol: p.token1.symbol},
+        token_data_2: {decimals: p.token2.decimals, name: p.token2.name, symbol: p.token2.symbol},
+    } as LastPoolReserves;
+};
 // TODO pools and tokens emit events at same time - check how to make 1 event from it
 export const tokenPrices$: Observable<TokenWithAmount[]> = combineLatest([
   allAvailableSignerTokens$,
   reefPrice$,
   pools$,
-]).pipe(map(toTokensWithPrice), shareReplay(1));
+]).pipe(
+    map(toTokensWithPrice),
+    shareReplay(1)
+    );
 
-const TRANSFER_HISTORY_GQL = gql`
-  subscription query($accountId: String!) {
-    transfer(
-      where: {
-        _or: [
-          { to_address: { _eq: $accountId } }
-          { from_address: { _eq: $accountId } }
-        ]
-        _and: { success: { _eq: true } }
-      }
-      limit: 10
-      order_by: { timestamp: desc }
-    ) {
-      amount
-      success
-      token_address
-      from_address
-      to_address
-      timestamp
-      nft_id
-      token {
-        address
-        verified_contract {
-          name
-          type
-          contract_data
-        }
-      }
-      extrinsic{
-        block_id
-        index
-        hash
-      }
-    }
-  }
-`;
-
-const resolveTransferHistoryNfts = (tokens: (Token | NFT)[], signer: ReefSigner): Observable<(Token | NFT)[]> => {
+/*const resolveTransferHistoryNfts = (tokens: (Token | NFT)[], signer: ReefSigner): Observable<(Token | NFT)[]> => {
   const nftOrNull: (NFT|null)[] = tokens.map((tr) => ('contractType' in tr && (tr.contractType === ContractType.ERC1155 || tr.contractType === ContractType.ERC721) ? tr : null));
   if (!nftOrNull.filter((v) => !!v).length) {
     return of(tokens);
@@ -278,9 +236,9 @@ const resolveTransferHistoryNfts = (tokens: (Token | NFT)[], signer: ReefSigner)
         return resolvedNftTransfers;
       }),
     );
-};
+};*/
 
-const toTransferToken = (transfer): Token|NFT => (transfer.token.verified_contract.type === ContractType.ERC20 ? {
+/*const toTransferToken = (transfer): Token|NFT => (transfer.token.verified_contract.type === ContractType.ERC20 ? {
   address: transfer.token_address,
   balance: BigNumber.from(toPlainString(transfer.amount)),
   name: transfer.token.verified_contract.contract_data.name,
@@ -301,9 +259,9 @@ const toTransferToken = (transfer): Token|NFT => (transfer.token.verified_contra
     nftId: transfer.nft_id,
     contractType: transfer.token.verified_contract.type,
     data:transfer.token.verified_contract.contract_data
-  } as NFT);
+  } as NFT);*/
 
-const toTokenTransfers = (resTransferData: any[], signer, network: Network): TokenTransfer[] => resTransferData.map((transferData): TokenTransfer => ({
+/*const toTokenTransfers = (resTransferData: any[], signer, network: Network): TokenTransfer[] => resTransferData.map((transferData): TokenTransfer => ({
   from: transferData.from_address,
   to: transferData.to_address,
   inbound:
@@ -313,9 +271,10 @@ const toTokenTransfers = (resTransferData: any[], signer, network: Network): Tok
   token: toTransferToken(transferData),
   url: getExtrinsicUrl(transferData.extrinsic.hash, network),
   extrinsic: { blockId: transferData.extrinsic.block_id, hash: transferData.extrinsic.hash, index: transferData.extrinsic.index },
-}));
+}));*/
 
-export const transferHistory$: Observable<
+export const transferHistory$ = of([])
+/*export const transferHistory$: Observable<
   | null
   | TokenTransfer[]
 > = combineLatest([apolloClientInstance$, selectedSigner$, currentNetwork$]).pipe(
@@ -323,7 +282,7 @@ export const transferHistory$: Observable<
     ? []
     : zenToRx(
       apollo.subscribe({
-        query: TRANSFER_HISTORY_GQL,
+        query: graphql.TRANSFER_HISTORY_GQL,
         variables: { accountId: signer.address },
         fetchPolicy: 'network-only',
       }),
@@ -344,4 +303,4 @@ export const transferHistory$: Observable<
       ))),
   startWith(null),
   shareReplay(1),
-);
+);*/

@@ -1,6 +1,5 @@
-// import { REEF_TOKEN, Token } from "./token";
-
-import { REEF_TOKEN, Token } from './token';
+import { REEF_TOKEN, Token } from "./token";
+import {network} from '@reef-chain/util-lib';
 
 export type AvailableNetworks = 'mainnet' | 'testnet' | 'localhost';
 
@@ -29,28 +28,29 @@ export interface Network {
 export const SS58_REEF = 42;
 
 export type Networks = Record<AvailableNetworks, Network>;
-
 export const availableNetworks: Networks = {
   testnet: {
     name: 'testnet',
-    rpcUrl: 'wss://rpc-testnet.reefscan.com/ws',
-    reefscanUrl: 'https://testnet.reefscan.com',
+    rpcUrl: network.AVAILABLE_NETWORKS.testnet.rpcUrl,
+    reefscanUrl: network.AVAILABLE_NETWORKS.testnet.reefscanUrl,
     factoryAddress: '0xcA36bA38f2776184242d3652b17bA4A77842707e',
     routerAddress: '0x0A2906130B1EcBffbE1Edb63D5417002956dFd41',
-    graphqlUrl: 'wss://testnet.reefscan.com/graphql',
+    graphqlUrl: network.AVAILABLE_NETWORKS.testnet.graphqlUrl,
+    // graphqlUrl: 'wss://testnet.reefscan.com/graphql',
     genesisHash: '0x0f89efd7bf650f2d521afef7456ed98dff138f54b5b7915cc9bce437ab728660',
-    reefscanFrontendUrl: 'https://testnet.reefscan.com',
+    reefscanFrontendUrl: network.AVAILABLE_NETWORKS.testnet.reefscanFrontendUrl,
     bonds: [],
   },
   mainnet: {
     name: 'mainnet',
-    rpcUrl: 'wss://rpc.reefscan.com/ws',
-    reefscanUrl: 'https://reefscan.com',
+    rpcUrl: network.AVAILABLE_NETWORKS.mainnet.rpcUrl,
+    reefscanUrl: network.AVAILABLE_NETWORKS.mainnet.reefscanUrl,
     routerAddress: '0x641e34931C03751BFED14C4087bA395303bEd1A5',
     factoryAddress: '0x380a9033500154872813F6E1120a81ed6c0760a8',
-    graphqlUrl: 'wss://reefscan.com/graphql',
+    graphqlUrl: network.AVAILABLE_NETWORKS.mainnet.graphqlUrl,
+    // graphqlUrl: 'wss://reefscan.com/graphql',
     genesisHash: '0x7834781d38e4798d548e34ec947d19deea29df148a7bf32484b7b24dacf8d4b7',
-    reefscanFrontendUrl: 'https://reefscan.com',
+    reefscanFrontendUrl: network.AVAILABLE_NETWORKS.mainnet.reefscanFrontendUrl,
     bonds: [
       {
         name: 'Reef community staking bond',
