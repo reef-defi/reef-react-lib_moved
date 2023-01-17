@@ -19,10 +19,12 @@ const getNetworkFallback = (): Network => {
   let storedNetwork;
   try {
     storedNetwork = localStorage.getItem(ACTIVE_NETWORK_LS_KEY);
+    storedNetwork = JSON.parse(storedNetwork);
+    storedNetwork = availableNetworks[storedNetwork.name];
   } catch (e) {
     // when cookies disabled localStorage can throw
   }
-  return storedNetwork != null ? JSON.parse(storedNetwork) : availableNetworks.mainnet;
+  return storedNetwork != null ? storedNetwork : availableNetworks.mainnet;
 };
 
 export const useInitReefState = (
@@ -72,7 +74,6 @@ export const useInitReefState = (
   useEffect(() => {
     setLoading(isProviderLoading || isSignersLoading);
   }, [isProviderLoading, isSignersLoading]);
-
   return {
     error,
     loading,

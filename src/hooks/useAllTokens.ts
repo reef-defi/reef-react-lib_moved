@@ -1,10 +1,8 @@
-import {ApolloClient, gql, useSubscription} from '@apollo/client';
-import {useMemo} from 'react';
-import {BigNumber} from 'ethers';
-import {ERC20ContractData, Token} from '../state';
-import {getIconUrl, REEF_ADDRESS} from '../utils';
+import {TokenWithAmount} from '../state';
+import {useObservableState} from "./useObservableState";
+import {tokenPrices$} from "../appState/tokenState";
 
-const verifiedTokenQuery = gql`
+/*const verifiedTokenQuery = gql`
 subscription tokens {
   verified_contract(
     where: {
@@ -28,7 +26,7 @@ subscription balances($signer: String!) {
     balance
   }
 }
-`;
+`;*/
  /*TODO sort so we know what is latest balance*! */
 /*const tokenBalances = gql`
 subscription balances($signer: String!) {
@@ -46,7 +44,7 @@ subscription balances($signer: String!) {
 }
 `;*/
 
-interface VerifiedTokens {
+/*interface VerifiedTokens {
   address: string;
   // eslint-disable-next-line
   contract_data: ERC20ContractData;
@@ -55,9 +53,9 @@ interface TokenHolder {
   // eslint-disable-next-line
   token_address: string;
   balance: number;
-}
+}*/
 
-interface VerifiedTokenQuery {
+/*interface VerifiedTokenQuery {
   // eslint-disable-next-line
   verified_contract: VerifiedTokens[];
 }
@@ -78,9 +76,18 @@ const sortTokens = (t1: Token, t2: Token): number => {
 
 interface Balances {
   [signer: string]: string;
+}*/
+type UseAllTokens = [TokenWithAmount[], boolean]
+export const useAllTokens = (): UseAllTokens => {
+
+    const tokens = useObservableState(tokenPrices$);
+    const loading = tokens === undefined;
+
+    return [tokens||[], loading];
 }
-type UseAllTokens = [Token[], boolean]
-export const useAllTokens = (signer?: string, client?: ApolloClient<any>): UseAllTokens => {
+
+/*
+export const useAllTokens_old = (signer?: string, client?: ApolloClient<any>): UseAllTokens => {
   const { data: tokenData, loading: tokenLoading } = useSubscription<VerifiedTokenQuery>(
     verifiedTokenQuery,
     { client },
@@ -119,3 +126,4 @@ export const useAllTokens = (signer?: string, client?: ApolloClient<any>): UseAl
 
   return [tokens, tokenLoading || balanceLoading];
 };
+*/

@@ -20,4 +20,4 @@ export const setCurrentNetwork = (network: Network): void => {
   }
   selectedNetworkSubj.next(network);
 };
-currentNetwork$.subscribe((network) => console.log('SELECTED NETWORK=', network.rpcUrl));
+currentNetwork$.subscribe((network) => console.log('SELECTED NETWORK=', network));

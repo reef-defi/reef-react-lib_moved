@@ -3288,6 +3288,23 @@
     graphql "^16.6.0"
     subscriptions-transport-ws "^0.11.0"
 
+"@reef-chain/util-lib@^0.5.3":
+  version "0.5.3"
+  resolved "https://registry.yarnpkg.com/@reef-chain/util-lib/-/util-lib-0.5.3.tgz#d0c2828f9fba4c36512f7a7219465d0abe836b3b"
+  integrity sha512-yhzDT1WJY9PigO4dmccPyiSGKRJ5gtJzrvlbrRLQB/bHuge2wD34J3cEG59BUkvvC3hyvcNtJPdM8WsCfWa2aw==
+  dependencies:
+    "@apollo/client" "^3.6.9"
+    "@polkadot/extension-inject" "^0.44.6"
+    "@reef-defi/evm-provider" "^1.0.9"
+    "@reef-defi/extension-base" "^1.0.10"
+    "@reef-defi/extension-dapp" "^1.0.16"
+    "@reef-defi/extension-inject" "^1.0.16"
+    axios "^0.27.2"
+    bignumber.js "^9.1.0"
+    crypto-browserify "^3.12.0"
+    graphql "^16.6.0"
+    graphql-ws "^5.11.2"
+
 "@reef-defi/api-derive@^1.0.4", "@reef-defi/api-derive@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@reef-defi/api-derive/-/api-derive-1.1.0.tgz#db7baedd53c8e7d065649d1f978763190966e344"
@@ -3355,10 +3372,27 @@
     "@reef-defi/util" "^7.8.2"
     "@reef-defi/util-crypto" "^7.8.2"
 
+"@reef-defi/extension-dapp@^1.0.16":
+  version "1.0.19"
+  resolved "https://registry.yarnpkg.com/@reef-defi/extension-dapp/-/extension-dapp-1.0.19.tgz#ed7a83a960659c3ad2d975b77d540a50190c83e2"
+  integrity sha512-Q52EsH/hnXzhfq+mu7bpARm0ZLbXhRBov6E8TMX04N8IsYq6XdXXFiyWOerSrykyZQvMu7KrQ+DpLpM8rm48cA==
+  dependencies:
+    "@babel/runtime" "^7.16.0"
+    "@reef-defi/extension-inject" "^1.0.19"
+    "@reef-defi/util" "^7.8.2"
+    "@reef-defi/util-crypto" "^7.8.2"
+
 "@reef-defi/extension-inject@^1.0.10", "@reef-defi/extension-inject@^1.0.14":
   version "1.0.14"
   resolved "https://registry.yarnpkg.com/@reef-defi/extension-inject/-/extension-inject-1.0.14.tgz#d8cfb0655613ac71140b3d32e0bf4b2c30676b5e"
   integrity sha512-Gl38Zehr0bkl9G0eKE51z9BdX8Jmomn67DtjzJdmLeWLMyVCsywrbMyeLISxhKlk/GTy4AoQex9UEQChVXJlVg==
+  dependencies:
+    "@babel/runtime" "^7.16.0"
+
+"@reef-defi/extension-inject@^1.0.16", "@reef-defi/extension-inject@^1.0.19":
+  version "1.0.19"
+  resolved "https://registry.yarnpkg.com/@reef-defi/extension-inject/-/extension-inject-1.0.19.tgz#974f6a28bdcc61644fe5efdce7b37468725a83c7"
+  integrity sha512-sNOPUU0oaR6mZMge85NjK/qXiuAG9kgpVwNbh9d9GL2mJ3OY+kmTxXgSix7dql+/xSZM33Li0p5efBWIyQOiTQ==
   dependencies:
     "@babel/runtime" "^7.16.0"
 
@@ -9242,10 +9276,10 @@ graphql-tag@^2.12.6:
   dependencies:
     tslib "^2.1.0"
 
-graphql-ws@^5.10.0:
-  version "5.11.1"
-  resolved "https://registry.yarnpkg.com/graphql-ws/-/graphql-ws-5.11.1.tgz#f9c8b7c64986d1d921f2a820dc68a393853c94e8"
-  integrity sha512-AlOO/Gt0fXuSHXe/Weo6o3rIQVnH5MW7ophzeYzL+vYNlkf0NbWRJ6IIFgtSLcv9JpTlQdxSpB3t0SnM47/BHA==
+graphql-ws@^5.11.2:
+  version "5.11.2"
+  resolved "https://registry.yarnpkg.com/graphql-ws/-/graphql-ws-5.11.2.tgz#d5e0acae8b4d4a4cf7be410a24135cfcefd7ddc0"
+  integrity sha512-4EiZ3/UXYcjm+xFGP544/yW1+DVI8ZpKASFbzrV5EDTFWJp0ZvLl4Dy2fSZAzz9imKp5pZMIcjB0x/H69Pv/6w==
 
 graphql@^16.2.0, graphql@^16.6.0:
   version "16.6.0"

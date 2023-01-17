@@ -1,34 +1,34 @@
 import {
-  catchError,
-  combineLatest,
-  distinctUntilChanged,
-  map,
-  merge,
-  mergeScan,
-  Observable,
-  of,
-  ReplaySubject,
-  scan,
-  shareReplay,
-  startWith,
-  Subject,
-  switchMap,
-  take,
-  withLatestFrom,
+    catchError,
+    combineLatest,
+    distinctUntilChanged,
+    map,
+    merge,
+    mergeScan,
+    Observable,
+    of,
+    ReplaySubject,
+    scan,
+    shareReplay,
+    startWith,
+    Subject,
+    switchMap,
+    take,
+    withLatestFrom,
 } from 'rxjs';
-import { Provider } from '@reef-defi/evm-provider';
-import { BigNumber } from 'ethers';
-import { filter } from 'rxjs/operators';
-import { gql } from '@apollo/client';
-import { AccountJson } from '@reef-defi/extension-base/background/types';
-import type { InjectedAccountWithMeta } from '@reef-defi/extension-inject/types';
-import type { Signer as InjectedSigningKey } from '@polkadot/api/types';
-import { UpdateDataCtx } from './updateStateModel';
-import { replaceUpdatedSigners, updateSignersEvmBindings } from './accountStateUtil';
-import { currentProvider$ } from './providerState';
-import { ReefSigner } from '../state';
-import { apolloClientInstance$, zenToRx } from '../graphql/apollo';
-import { accountJsonToMeta, metaAccountToSigner } from '../rpc/accounts';
+import {Provider} from '@reef-defi/evm-provider';
+import {BigNumber} from 'ethers';
+import {filter} from 'rxjs/operators';
+import {AccountJson} from '@reef-defi/extension-base/background/types';
+import type {InjectedAccountWithMeta} from '@reef-defi/extension-inject/types';
+import type {Signer as InjectedSigningKey} from '@polkadot/api/types';
+import {UpdateDataCtx} from './updateStateModel';
+import {replaceUpdatedSigners, updateSignersEvmBindings} from './accountStateUtil';
+import {currentProvider$} from './providerState';
+import {ReefSigner} from '../state';
+import {apolloClientInstance$, zenToRx} from '../graphql/apollo';
+import {accountJsonToMeta, metaAccountToSigner} from '../rpc/accounts';
+import {graphql} from '@reef-chain/util-lib';
 
 export const accountsSubj = new ReplaySubject<ReefSigner[] | null>(1);
 export const accountsJsonSubj = new ReplaySubject<AccountJson[]| InjectedAccountWithMeta[] | null>(1);
@@ -180,6 +180,8 @@ const signersWithUpdatedBalances$ = combineLatest([
     }),
   );
 
+// const EVM_ADDRESS_UPDATE_GQL = graphql.EVM_ADDRESS_UPDATE_GQL;
+/*
 const EVM_ADDRESS_UPDATE_GQL = gql`
   subscription query($accountIds: [String!]!) {
     account(
@@ -191,12 +193,13 @@ const EVM_ADDRESS_UPDATE_GQL = gql`
     }
   }
 `;
+*/
 
 // eslint-disable-next-line camelcase
 interface AccountEvmAddrData {
   address: string;
   // eslint-disable-next-line camelcase
-  evm_address?: string;
+  evmAddress?: string;
   isEvmClaimed?: boolean;
 }
 
@@ -209,12 +212,14 @@ const indexedAccountValues$ = combineLatest([
       ? []
       : zenToRx(
         apollo.subscribe({
-          query: EVM_ADDRESS_UPDATE_GQL,
+          query: graphql.EVM_ADDRESS_UPDATE_GQL,
           variables: { accountIds: signers.map((s: any) => s.address) },
           fetchPolicy: 'network-only',
         }),
       ))),
-    map((result: any): AccountEvmAddrData[] => result.data.account),
+    map((result: any): AccountEvmAddrData[] => {
+        return result.data.accounts.map(a=>({address:a.id, evmAddress: a.evmAddress, isEvmClaimed: !!a.evmAddress} as AccountEvmAddrData))
+    }),
     filter((v) => !!v),
     startWith([]),
   );
@@ -244,7 +249,7 @@ const signersWithUpdatedData$ = combineLatest([
         } else if (state.lastIndexed !== indexed) {
           updateBindValues = indexed.map((updSigner: AccountEvmAddrData) => ({
             address: updSigner.address,
-            isEvmClaimed: !!updSigner.evm_address,
+            isEvmClaimed: updSigner.isEvmClaimed,
           }));
         } else {
           updateBindValues = state.lastSigners.map((updSigner) => ({
@@ -281,7 +286,6 @@ const signersWithUpdatedData$ = combineLatest([
   );
 
 export const signers$: Observable<ReefSigner[] | null> = signersWithUpdatedData$;
-
 const currentAddressSubj: Subject<string | undefined> = new Subject<string | undefined>();
 export const setCurrentAddress = (address: string|undefined) => currentAddressSubj.next(address);
 export const currentAddress$: Observable<string | undefined> = currentAddressSubj.asObservable()
