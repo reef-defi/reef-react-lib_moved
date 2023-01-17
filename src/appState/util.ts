@@ -40,11 +40,11 @@ export const combineTokensDistinct = ([tokens1, tokens2]: [
   Token[]
 ]): Token[] => {
   const combinedT = [...tokens1];
-  console.log('COMBINED=', combinedT);
+  // console.log('COMBINED=', combinedT);
   tokens2.forEach((vT: Token) => (!combinedT.some((cT) => cT.address === vT.address)
     ? combinedT.push(vT)
     : null));
-  console.log('1111COMBINED=', combinedT);
+  // console.log('1111COMBINED=', combinedT);
   return combinedT;
 };
 
