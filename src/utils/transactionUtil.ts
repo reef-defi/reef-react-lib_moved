@@ -68,13 +68,13 @@ export const nativeTransfer = async (amount: string, destinationAddress: string,
       { signer: signer.signer.signingKey },
       (status) => {
         if (status.dispatchError) {
-          reject({message: status.dispatchError.toString()});
+          reject({ message: status.dispatchError.toString() });
         }
         if (status.status.isInBlock) {
           resolve();
         }
-      }
-  );
+      },
+    );
   });
   await send;
 };
@@ -113,5 +113,12 @@ export const sendToNativeAddress = (
   return txIdent;
 };
 
-export const getExtrinsicUrl = (hash: string, network: Network = availableNetworks.mainnet): string => `${network.reefscanFrontendUrl}/extrinsic/${hash}`;
+export const getExtrinsicUrl = (extrinsic: {id:string}, network: Network = availableNetworks.mainnet): string => {
+  const [blockHeight, extrinsicIndex] = extrinsic.id.split('-');
+  return `${network.reefscanFrontendUrl}/extrinsic/${blockHeight}/${extrinsicIndex}`;
+};
+export const getTransferUrl = (extrinsic: {id:string}, network: Network = availableNetworks.mainnet): string => {
+  const [blockHeight, extrinsicIndex] = extrinsic.id.split('-');
+  return `${network.reefscanFrontendUrl}/transfer/${blockHeight}/${extrinsicIndex}`;
+};
 export const getContractUrl = (address: string, network: Network = availableNetworks.mainnet): string => `${network.reefscanFrontendUrl}/contract/${address}`;

@@ -1,4 +1,4 @@
-import {ContractType, Token} from './token';
+import { ContractType, Token } from './token';
 
 export interface ERC721ContractData {
   type: ContractType.ERC721
@@ -12,7 +12,7 @@ export interface ERC1155ContractData {
 
 export interface NFT extends Token {
   nftId: string;
-  data: ERC1155ContractData | ERC721ContractData;
+  // data: ERC1155ContractData | ERC721ContractData;
   contractType: ContractType;
   mimetype?: string;
 }
