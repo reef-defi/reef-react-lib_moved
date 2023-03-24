@@ -16,7 +16,7 @@ import { graphql } from '@reef-chain/util-lib';
 import { _NFT_IPFS_RESOLVER_FN, combineTokensDistinct, toTokensWithPrice } from './util';
 import { selectedSigner$ } from './accountState';
 import { currentNetwork$, currentProvider$ } from './providerState';
-import { apolloClientInstance$, zenToRx } from '../graphql/apollo';
+import { apolloExplorerClientInstance$, zenToRx } from '../graphql/apollo';
 import { getIconUrl, getTransferUrl } from '../utils';
 import { getReefCoinBalance, loadPools } from '../rpc';
 import { retrieveReefCoingeckoPrice } from '../api';
@@ -116,7 +116,7 @@ const sortReefTokenFirst = (tokens): Token[] => {
 };
 
 export const selectedSignerTokenBalances$: Observable<Token[]|null> = combineLatest([
-  apolloClientInstance$,
+  apolloExplorerClientInstance$,
   selectedSigner$,
   currentProvider$,
 ]).pipe(
@@ -274,7 +274,7 @@ const toTokenTransfers = (resTransferData: any[], signer, network: Network): Tok
 export const transferHistory$: Observable<
   | null
   | TokenTransfer[]
-> = combineLatest([apolloClientInstance$, selectedSigner$, currentNetwork$]).pipe(
+> = combineLatest([apolloExplorerClientInstance$, selectedSigner$, currentNetwork$]).pipe(
   switchMap(([apollo, signer, network]) => (!signer
     ? []
     : zenToRx(

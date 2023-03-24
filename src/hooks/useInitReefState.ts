@@ -12,7 +12,7 @@ import { accountsSubj } from '../appState/accountState';
 import { useLoadSigners } from './useLoadSigners';
 import { disconnectProvider } from '../utils/providerUtil';
 import {
-  _NFT_IPFS_RESOLVER_FN, initApolloClient, setNftIpfsResolverFn, State, StateOptions,
+  _NFT_IPFS_RESOLVER_FN, initApolloClients, setNftIpfsResolverFn, State, StateOptions,
 } from '../appState/util';
 
 const getNetworkFallback = (): Network => {
@@ -32,7 +32,7 @@ export const useInitReefState = (
   options: StateOptions = {},
 ): State => {
   const {
-    network, client, signers, ipfsHashResolverFn,
+    network, explorerClient, dexClient, signers, ipfsHashResolverFn,
   } = options;
   const selectedNetwork: Network|undefined = useObservableState(currentNetwork$);
   const [provider, isProviderLoading] = useProvider((selectedNetwork as Network)?.rpcUrl);
@@ -50,8 +50,8 @@ export const useInitReefState = (
   }, [ipfsHashResolverFn]);
 
   useEffect(() => {
-    initApolloClient(selectedNetwork, client);
-  }, [selectedNetwork, client]);
+    initApolloClients(selectedNetwork, explorerClient, dexClient);
+  }, [selectedNetwork, explorerClient, dexClient]);
 
   useEffect(() => {
     if (provider) {

@@ -5,10 +5,11 @@ import { TokenPrices } from '../state';
 import { getIconUrl } from '../utils';
 import { useAsyncEffect } from './useAsyncEffect';
 
-const ALL_POOLS_LIST_ENDPOINT = '/api/pools/list';
-const USER_POOLS_LIST_ENDPOINT = '/api/pools/users-list';
-const ALL_POOLS_LIST_COUNT_ENDPOINT = '/api/pools/list-count';
-const USER_POOLS_LIST_COUNT_ENDPOINT = '/api/pools/users-list-count';
+// https://github.com/reef-defi/reef-explorer/blob/develop/api/src/controllers/pools.ts
+const ALL_POOLS_LIST_ENDPOINT = '/api/pools/list'; // queryVerifiedPoolsWithUserLP
+const USER_POOLS_LIST_ENDPOINT = '/api/pools/users-list'; // queryVerifiedUserPools
+const ALL_POOLS_LIST_COUNT_ENDPOINT = '/api/pools/list-count'; // countVerifiedPoolsWithUserLP
+const USER_POOLS_LIST_COUNT_ENDPOINT = '/api/pools/users-list-count'; // countVerifiedUserPools
 
 interface ContractData {
   name: string;

@@ -4,7 +4,7 @@ import {
 import { graphql } from '@reef-chain/util-lib';
 import { BigNumber } from 'ethers';
 import { NFT } from '../state';
-import { apolloClientInstance$, zenToRx } from '../graphql';
+import { apolloExplorerClientInstance$, zenToRx } from '../graphql';
 import { currentProvider$ } from './providerState';
 import { selectedSignerAddressUpdate$ } from './tokenState';
 import { resolveNftImageLinks } from '../utils/nftUtil';
@@ -132,7 +132,7 @@ const parseTokenHolderArray = (resArr: VerifiedNft[]): NFT[] => resArr.map(({
 } */
 
 export const selectedSignerNFTs$: Observable<NFT[]> = combineLatest([
-  apolloClientInstance$,
+  apolloExplorerClientInstance$,
   selectedSignerAddressUpdate$,
   currentProvider$,
 ])
