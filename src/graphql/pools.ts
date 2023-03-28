@@ -216,36 +216,38 @@ export type PoolDayCandlestickQuery = { pool_day_candlestick: CandlestickData[];
 export type PoolVolumeAggregateQuery = {
   pool_hour_volume_aggregate: { aggregate: { sum: Amounts } };
 };
-export type PoolsTotalSupplyQuery = {
-  pool_event: {
-    pool: {
-      address: string;
-    }
-    total_supply: number;
-  }[];
-}
-export type PoolLPQuery = {
-  pool_event: {
-    total_supply: number
-  }[];
-};
+// TODO: remove all commented code ?
 
-export type PoolUserLPQuery = {
-  pool_event_aggregate: {
-    aggregate: {
-      sum: {
-        supply: number;
-      };
-    };
-  };
-};
-export type UserPoolsQuery = {
-  pool_event: {
-    pool: {
-      address: string;
-    }
-  }[];
-}
+// export type PoolsTotalSupplyQuery = {
+//   pool_event: {
+//     pool: {
+//       address: string;
+//     }
+//     total_supply: number;
+//   }[];
+// }
+// export type PoolLPQuery = {
+//   pool_event: {
+//     total_supply: number
+//   }[];
+// };
+
+// export type PoolUserLPQuery = {
+//   pool_event_aggregate: {
+//     aggregate: {
+//       sum: {
+//         supply: number;
+//       };
+//     };
+//   };
+// };
+// export type UserPoolsQuery = {
+//   pool_event: {
+//     pool: {
+//       address: string;
+//     }
+//   }[];
+// }
 
 export type PoolFeeQuery = {
   pool_hour_fee_aggregate: {
@@ -261,13 +263,13 @@ export type PoolTransactionCountQuery = {
     };
   };
 }
-export type PoolCountQuery = {
-  verified_pool_aggregate: {
-    aggregate: {
-      count: number;
-    };
-  };
-}
+// export type PoolCountQuery = {
+//   verified_pool_aggregate: {
+//     aggregate: {
+//       count: number;
+//     };
+//   };
+// }
 
 export type PoolHourVolumeAggregate = {
   pool_hour_volume_aggregate: {
@@ -360,8 +362,8 @@ export type PoolVar = AddressVar
 export type PoolSupplyVar = AddressVar
 export type PoolVolume24HVar = FromVar;
 export type PoolReservesVar = AddressVar
-export type PoolCountVar = OptionalSearchVar
-export type UserPoolsVar = AddressVar
+// export type PoolCountVar = OptionalSearchVar
+// export type UserPoolsVar = AddressVar
 export type PoolsTotalValueLockedVar = ToVar
 export type PoolTokensVar = AddressVar
 export type ContractDataVar = AddressVar
@@ -371,7 +373,7 @@ export interface PoolDataVar extends AddressVar, FromVar { }
 export interface PoolVolumeVar extends AddressVar, FromVar { }
 export interface PoolHourFeeVar extends AddressVar, FromVar { }
 export interface PoolVolumeAggregateVar extends PoolFeeVar, ToVar { }
-export interface PoolUserLpVar extends AddressVar, SignerAddressVar { }
+// export interface PoolUserLpVar extends AddressVar, SignerAddressVar { }
 export interface PoolsVar extends FromVar, OffsetVar, OptionalSearchVar { }
 export interface PoolLastCandlestickVar extends AddressVar, WhichTokenVar { }
 export interface PoolInfoVar extends AddressVar, FromVar, ToVar, SignerAddressVar { }
@@ -429,97 +431,97 @@ query volume($fromTime: timestamptz!) {
 }
 `;
 
-export const POOL_USER_LP = gql`
-query user_lp($address: String!, $signerAddress: String!) {
-  pool_event_aggregate(
-    where: {
-      pool_id: { _eq: 13 }
-      pool: {
-        address: { _eq: $address }
-      }
-      evm_event: {
-        event: {
-          extrinsic: {
-            signer: { _eq: $signerAddress }
-          }
-        }
-      }
-    }
-  ) {
-    aggregate {
-      sum {
-        supply
-      }
-    }
-  }
-}
-`;
+// export const POOL_USER_LP = gql`
+// query user_lp($address: String!, $signerAddress: String!) {
+//   pool_event_aggregate(
+//     where: {
+//       pool_id: { _eq: 13 }
+//       pool: {
+//         address: { _eq: $address }
+//       }
+//       evm_event: {
+//         event: {
+//           extrinsic: {
+//             signer: { _eq: $signerAddress }
+//           }
+//         }
+//       }
+//     }
+//   ) {
+//     aggregate {
+//       sum {
+//         supply
+//       }
+//     }
+//   }
+// }
+// `;
 
-export const POOL_TOTAL_SUPPLY = gql`
-query pool_lp($address: String!) {
-  pool_event(
-    distinct_on: pool_id
-    where: {
-      type: { _eq: "Transfer" }
-      pool: {
-        address: { _eq: $address }
-      }
-    }
-    order_by: {
-      pool_id: asc
-      timestamp: desc
-    }
-    limit: 1
-  ) {
-    total_supply
-  }
-}
-`;
-export const POOLS_TOTAL_SUPPLY = gql`
-query pool_lp {
-  pool_event(
-    distinct_on: pool_id
-    where: {
-      type: { _eq: "Transfer" }
-    }
-    order_by: {
-      pool_id: asc
-      timestamp: desc
-    }
-  ) {
-    pool {
-      address
-    }
-    total_supply
-  }
-}
-`;
+// export const POOL_TOTAL_SUPPLY = gql`
+// query pool_lp($address: String!) {
+//   pool_event(
+//     distinct_on: pool_id
+//     where: {
+//       type: { _eq: "Transfer" }
+//       pool: {
+//         address: { _eq: $address }
+//       }
+//     }
+//     order_by: {
+//       pool_id: asc
+//       timestamp: desc
+//     }
+//     limit: 1
+//   ) {
+//     total_supply
+//   }
+// }
+// `;
+// export const POOLS_TOTAL_SUPPLY = gql`
+// query pool_lp {
+//   pool_event(
+//     distinct_on: pool_id
+//     where: {
+//       type: { _eq: "Transfer" }
+//     }
+//     order_by: {
+//       pool_id: asc
+//       timestamp: desc
+//     }
+//   ) {
+//     pool {
+//       address
+//     }
+//     total_supply
+//   }
+// }
+// `;
 
-export const USER_POOLS = gql`
-query user_pools($address: String!) {
-  pool_event(
-    distinct_on: pool_id
-    where: {
-      type: { _eq: "Transfer" }
-      evm_event: {
-        event: {
-          extrinsic: {
-            signer: { _eq: $address }
-          }
-        }
-      }
-    }
-    order_by: {
-      pool_id: asc
-      timestamp: desc
-    }
-  ) {
-    pool {
-      address
-    }
-  }
-}
-`;
+// export const USER_POOLS = gql`
+// query user_pools($address: String!) {
+//   pool_event(
+//     distinct_on: pool_id
+//     where: {
+//       type: { _eq: "Transfer" }
+//       evm_event: {
+//         event: {
+//           extrinsic: {
+//             signer: { _eq: $address }
+//           }
+//         }
+//       }
+//     }
+//     order_by: {
+//       pool_id: asc
+//       timestamp: desc
+//     }
+//   ) {
+//     pool {
+//       address
+//     }
+//   }
+// }
+// `;
 
 export const POOL_SUPPLY_GQL = gql`
   query pool_supply($address: String!) {
@@ -735,25 +737,25 @@ export const POOL_TRANSACTION_COUNT_GQL = gql`
   }
 `;
 
-export const POOL_COUNT_GQL = gql`
-  query pool_count($search: String_comparison_exp!) {
-    verified_pool_aggregate(
-      where: {
-        _or: [
-          { name_1: $search }
-          { name_2: $search }
-          { address: $search }
-          { symbol_1: $search }
-          { symbol_2: $search }
-        ]
-      }
-    ) {
-      aggregate {
-        count
-      }
-    }
-  }
-`;
+// export const POOL_COUNT_GQL = gql`
+//   query pool_count($search: String_comparison_exp!) {
+//     verified_pool_aggregate(
+//       where: {
+//         _or: [
+//           { name_1: $search }
+//           { name_2: $search }
+//           { address: $search }
+//           { symbol_1: $search }
+//           { symbol_2: $search }
+//         ]
+//       }
+//     ) {
+//       aggregate {
+//         count
+//       }
+//     }
+//   }
+// `;
 
 // Charts queryes & subscriptions
 type Time = 'day' | 'hour' | 'minute';
@@ -862,22 +864,22 @@ export const POOL_DAY_FEE_QUERY_GQL = feeQuery('day');
 export const POOL_HOUR_FEE_QUERY_GQL = feeQuery('hour');
 export const POOL_MINUTE_FEE_QUERY_GQL = feeQuery('minute');
 
-export const POOL_RESERVES_SUBSCRITION = gql`
-  subscription pool_event {
-    pool_event(
-      where: { type: { _eq: "Sync" } }
-      distinct_on: [pool_id]
-      order_by: { timestamp: desc, pool_id: asc }
-    ) {
-      reserved_1
-      reserved_2
-      pool {
-        token_1
-        token_2
-      }
-    }
-  }
-`;
+// export const POOL_RESERVES_SUBSCRITION = gql`
+//   subscription pool_event {
+//     pool_event(
+//       where: { type: { _eq: "Sync" } }
+//       distinct_on: [pool_id]
+//       order_by: { timestamp: desc, pool_id: asc }
+//     ) {
+//       reserved_1
+//       reserved_2
+//       pool {
+//         token_1
+//         token_2
+//       }
+//     }
+//   }
+// `;
 
 export const POOL_INFO_GQL = gql`
 subscription pool($address: String!, $signerAddress: String!, $fromTime: timestamptz!, $toTime: timestamptz!) {
@@ -1077,15 +1079,15 @@ query poolData($address: String!, $fromTime: timestamptz!) {
 }
 `;
 
-export const N_VERIFIED_POOLS = gql`
-query nPools {
-  verified_pool_aggregate {
-    aggregate {
-      count
-    }
-  }
-}
-`;
+// export const N_VERIFIED_POOLS = gql`
+// query nPools {
+//   verified_pool_aggregate {
+//     aggregate {
+//       count
+//     }
+//   }
+// }
+// `;
 
 // Subscriptions
 export const ALL_POOL_SUBSCRITION = gql`
