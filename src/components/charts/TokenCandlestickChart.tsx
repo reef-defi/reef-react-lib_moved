@@ -65,15 +65,15 @@ const TokenCandlestickChart = ({ whichToken, address } : TokenCandlestickChart):
   const { loading: lastLoading, data: lastCandlestick } = useLastDayCandlestick(address, fromDate, whichToken);
 
   const candlestick = data
-    ? data.pool_day_candlestick
+    ? data.poolDayCandlesticks
       .map((token) => (whichToken === 1 ? token1Values(token) : token2Values(token)))
     : [];
 
   // Injecting last seen OHCL before the date
-  if (lastCandlestick && lastCandlestick.pool_day_candlestick.length > 0) {
+  if (lastCandlestick && lastCandlestick.poolDayCandlesticks.length > 0) {
     const item = whichToken === 1
-      ? token1Values(lastCandlestick.pool_day_candlestick[0])
-      : token2Values(lastCandlestick.pool_day_candlestick[0]);
+      ? token1Values(lastCandlestick.poolDayCandlesticks[0])
+      : token2Values(lastCandlestick.poolDayCandlesticks[0]);
 
     candlestick.splice(0, 0, item);
   }

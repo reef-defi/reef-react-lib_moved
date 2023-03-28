@@ -29,25 +29,25 @@ interface Data {
 }
 
 const FeeChart = ({
-  address, symbol1, symbol2, decimal1, decimal2,
+  id, symbol1, symbol2, decimal1, decimal2,
 } : BasicPoolInfo): JSX.Element => {
   const toDate = Date.now();
   const fromDate = useMemo(() => toDate - 31 * 24 * 60 * 60 * 1000, []); // last 31 days
 
-  const { data, loading } = useDayPoolFee(address, fromDate);
+  const { data, loading } = useDayPoolFee(id, fromDate);
 
   if (loading || !data) {
     return <Loading />;
   }
 
-  const feeData = data.pool_day_fee
+  const feeData = data.poolDayFees
     .map((d) => ({ ...d, date: new Date(d.timeframe) }));
 
   if (feeData.length <= 1) {
     return <span>Not enough data</span>;
   }
 
-  const values = feeData.reduce((acc, { fee_1, fee_2 }) => [...acc, fee_1, fee_2], [] as number[]);
+  const values = feeData.reduce((acc, { fee1, fee2 }) => [...acc, fee1, fee2], [] as number[]);
   const adjust = std(values);
 
   const f = scaleOrdinal(schemeCategory10)

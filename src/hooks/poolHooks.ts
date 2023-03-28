@@ -60,7 +60,7 @@ export const usePools = (
     search: search ? { _ilike: `${search}%` } : {},
   },
 });
-// TODO: remove?
+
 // export const usePoolCount = (search?: string): QueryResult<PoolCountQuery> => useQuery<PoolCountQuery, PoolCountVar>(POOL_COUNT_GQL, {
 //   variables: { search: search ? { _ilike: `${search}%` } : {} },
 // });

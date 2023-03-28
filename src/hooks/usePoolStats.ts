@@ -1,29 +1,24 @@
-import { ApolloClient, useQuery, useSubscription } from '@apollo/client';
+import { ApolloClient, useQuery } from '@apollo/client';
 import { BigNumber } from 'bignumber.js';
 import { useMemo } from 'react';
 import {
   Pool24HVolume, 
-  Pool24HVolume_, 
   PoolInfoQuery,
-  PoolInfoQuery_,
-  PoolInfoVar, PoolsTotalSupply,
-  PoolsTotalSupply_,
+  PoolInfoVar, 
+  PoolsTotalSupply,
   PoolsTotalValueLockedVar, 
   PoolTokensDataQuery, 
   PoolTokensVar,
   POOLS_TOTAL_VALUE_LOCKED, 
-  POOLS_TOTAL_VALUE_LOCKED_,
   PoolVolume24HVar, 
   POOL_24H_VOLUME,
-  POOL_24H_VOLUME_,
   POOL_INFO_GQL,
-  POOL_INFO_GQL_,
   POOL_TOKENS_DATA_GQL,
 } from '../graphql/pools';
 import { getTokenPrice, TokenPrices } from '../state';
 import { getIconUrl, normalize } from '../utils';
 
-export const useTotalSupply = (tokenPrices: TokenPrices, previous = false): string => {
+export const useTotalSupply = (tokenPrices: TokenPrices,  dexClient: ApolloClient<any>, previous = false): string => {
   const toTime = useMemo(() => {
     const tm = new Date();
     if (previous) {
@@ -34,25 +29,24 @@ export const useTotalSupply = (tokenPrices: TokenPrices, previous = false): stri
   const { data } = useQuery<PoolsTotalSupply, PoolsTotalValueLockedVar>(
     POOLS_TOTAL_VALUE_LOCKED,
     {
-      variables: {
-        toTime: toTime.toISOString(),
-      },
+      client: dexClient,
+      variables: { toTime: toTime.toISOString() },
     },
   );
-  if (!data || data.pool_event.length === 0) {
+  if (!data || data.totalSupply.length === 0) {
     return '0';
   }
 
-  return data.pool_event.reduce((acc, { reserved_1, reserved_2, pool: { token_1, token_2 } }) => {
-    const tokenPrice1 = getTokenPrice(token_1, tokenPrices);
-    const tokenPrice2 = getTokenPrice(token_2, tokenPrices);
-    const r1 = tokenPrice1.multipliedBy(new BigNumber(reserved_1).div(new BigNumber(10).pow(18)));
-    const r2 = tokenPrice2.multipliedBy(new BigNumber(reserved_2).div(new BigNumber(10).pow(18)));
+  return data.totalSupply.reduce((acc, { reserved1, reserved2, pool: { token1, token2 } }) => {
+    const tokenPrice1 = getTokenPrice(token1, tokenPrices);
+    const tokenPrice2 = getTokenPrice(token2, tokenPrices);
+    const r1 = tokenPrice1.multipliedBy(new BigNumber(reserved1).div(new BigNumber(10).pow(18)));
+    const r2 = tokenPrice2.multipliedBy(new BigNumber(reserved2).div(new BigNumber(10).pow(18)));
     return acc.plus(r1).plus(r2);
   }, new BigNumber(0)).toString();
 };
 
-export const usePoolVolume = (tokenPrices: TokenPrices): string => {
+export const usePoolVolume = (tokenPrices: TokenPrices, dexClient: ApolloClient<any>): string => {
   const fromTime = useMemo(
     () => new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
     [],
@@ -60,20 +54,21 @@ export const usePoolVolume = (tokenPrices: TokenPrices): string => {
   const { data } = useQuery<Pool24HVolume, PoolVolume24HVar>(
     POOL_24H_VOLUME,
     {
+      client: dexClient,
       variables: { fromTime },
     },
   );
-  if (!data || data.pool_hour_volume.length === 0) {
+  if (!data || data.volume.length === 0) {
     return '0';
   }
 
-  return data.pool_hour_volume.reduce((acc, { amount_1, amount_2, pool: { token_1, token_2 } }) => {
-    const tokenPrice1 = getTokenPrice(token_1, tokenPrices);
-    const tokenPrice2 = getTokenPrice(token_2, tokenPrices);
+  return data.volume.reduce((acc, { amount1, amount2, pool: { token1, token2 } }) => {
+    const tokenPrice1 = getTokenPrice(token1, tokenPrices);
+    const tokenPrice2 = getTokenPrice(token2, tokenPrices);
 
     return acc
-      .plus(tokenPrice1.multipliedBy(new BigNumber(amount_1).div(new BigNumber(10).pow(18))))
-      .plus(tokenPrice2.multipliedBy(new BigNumber(amount_2).div(new BigNumber(10).pow(18))));
+      .plus(tokenPrice1.multipliedBy(new BigNumber(amount1).div(new BigNumber(10).pow(18))))
+      .plus(tokenPrice2.multipliedBy(new BigNumber(amount2).div(new BigNumber(10).pow(18))));
   }, new BigNumber(0)).toString();
 };
 
@@ -103,177 +98,7 @@ export interface PoolStats {
   volumeChange24h: number;
 }
 
-export const usePoolInfo = (address: string, signerAddress: string, tokenPrices: TokenPrices): [PoolStats|undefined, boolean] => {
-  const toTime = useMemo(() => {
-    const date = new Date();
-    date.setDate(date.getDate() - 1);
-    return date.toISOString();
-  }, [address, signerAddress]);
-
-  const fromTime = useMemo(() => {
-    const date = new Date();
-    date.setDate(date.getDate() - 2);
-    return date.toISOString();
-  }, [address, signerAddress]);
-
-  const { data, loading } = useSubscription<PoolInfoQuery, PoolInfoVar>(
-    POOL_INFO_GQL,
-    {
-      variables: {
-        address,
-        toTime,
-        fromTime,
-        signerAddress,
-      },
-    },
-  );
-
-  const info = useMemo<PoolStats|undefined>(() => {
-    if (!data || data.pool.length === 0) {
-      return undefined;
-    }
-    const pool = data.pool[0];
-    const { decimals: decimal1, name: name1, symbol: symbol1 } = pool.tokenContract1.verified_contract!.contract_data;
-    const { decimals: decimal2, name: name2, symbol: symbol2 } = pool.tokenContract2.verified_contract!.contract_data;
-
-    const amountLocked1 = normalize(pool.reserves[0].reserved_1, decimal1);
-    const amountLocked2 = normalize(pool.reserves[0].reserved_2, decimal2);
-    const fee1 = normalize(pool.fee.aggregate.sum.fee_1, decimal1);
-    const fee2 = normalize(pool.fee.aggregate.sum.fee_2, decimal2);
-    const volume1 = normalize(pool.currentDayVolume.aggregate.sum.amount_1, decimal1);
-    const volume2 = normalize(pool.currentDayVolume.aggregate.sum.amount_2, decimal2);
-    const previousVolume1 = normalize(pool.previousDayVolume.aggregate.sum.amount_1, decimal1);
-    const previousVolume2 = normalize(pool.previousDayVolume.aggregate.sum.amount_2, decimal2);
-
-    const poolShare = new BigNumber(pool.userSupply.aggregate.sum.supply)
-      .div(pool.totalSupply[0].total_supply);
-
-    const mySupply1 = amountLocked1.multipliedBy(poolShare);
-    const mySupply2 = amountLocked2.multipliedBy(poolShare);
-
-    const mySupplyUSD = mySupply1
-      .multipliedBy(tokenPrices[pool.token1])
-      .plus(mySupply2.multipliedBy(tokenPrices[pool.token2]))
-      .toFormat(2);
-    const tvlUSD = amountLocked1
-      .multipliedBy(tokenPrices[pool.token1])
-      .plus(amountLocked2.multipliedBy(tokenPrices[pool.token2]))
-      .toFormat(2);
-    const volume24hUSD = volume1
-      .multipliedBy(tokenPrices[pool.token1])
-      .plus(volume2.multipliedBy(tokenPrices[pool.token2]));
-    const prevVolume24USD = previousVolume1
-      .multipliedBy(tokenPrices[pool.token1])
-      .plus(previousVolume2.multipliedBy(tokenPrices[pool.token2]));
-
-    let volDiff = 0;
-    if (prevVolume24USD.eq(0) && volume24hUSD.eq(0)) {} else if (prevVolume24USD.isNaN() && volume24hUSD.isNaN()) {} else if (prevVolume24USD.eq(0) || prevVolume24USD.isNaN()) {
-      volDiff = 100;
-    } else if (volume24hUSD.eq(0) || volume24hUSD.isNaN()) {
-      volDiff = -100;
-    } else {
-      volDiff = prevVolume24USD.minus(volume24hUSD).dividedBy(prevVolume24USD).multipliedBy(100).toNumber();
-    }
-
-    const all = amountLocked1.plus(amountLocked2);
-
-    return {
-      firstToken: {
-        address: pool.token1,
-        icon: getIconUrl(pool.token1),
-        name: name1,
-        symbol: symbol1,
-        amountLocked: amountLocked1.toFormat(0),
-        fees24h: fee1.toFormat(2),
-        mySupply: mySupply1.toFormat(0),
-        percentage: amountLocked1.div(all).multipliedBy(100).toFormat(2),
-        ratio: {
-          amount: amountLocked1.div(amountLocked2).toFormat(4),
-          name: name2,
-          symbol: symbol2,
-        },
-      },
-      secondToken: {
-        address: pool.token2,
-        icon: getIconUrl(pool.token2),
-        name: name2,
-        symbol: symbol2,
-        amountLocked: amountLocked2.toFormat(0),
-        fees24h: fee2.toFormat(2),
-        mySupply: mySupply2.toFormat(0),
-        percentage: amountLocked2.div(all).multipliedBy(100).toFormat(2),
-        ratio: {
-          amount: amountLocked2.div(amountLocked1).toFormat(4),
-          name: name1,
-          symbol: symbol1,
-        },
-      },
-      mySupplyUSD,
-      tvlUSD,
-      volume24hUSD: volume24hUSD.toFormat(2),
-      volumeChange24h: volDiff,
-    };
-  }, [data, tokenPrices]);
-
-  return [info, loading];
-};
-
-// ************** New implementations ******************
-export const useTotalSupply_ = (tokenPrices: TokenPrices,  dexClient: ApolloClient<any>, previous = false): string => {
-  const toTime = useMemo(() => {
-    const tm = new Date();
-    if (previous) {
-      tm.setDate(tm.getDate() - 1);
-    }
-    return tm;
-  }, []);
-  const { data } = useQuery<PoolsTotalSupply_, PoolsTotalValueLockedVar>(
-    POOLS_TOTAL_VALUE_LOCKED_,
-    {
-      client: dexClient,
-      variables: { toTime: toTime.toISOString() },
-    },
-  );
-  if (!data || data.totalSupply.length === 0) {
-    return '0';
-  }
-
-  return data.totalSupply.reduce((acc, { reserved1, reserved2, pool: { token1, token2 } }) => {
-    const tokenPrice1 = getTokenPrice(token1, tokenPrices);
-    const tokenPrice2 = getTokenPrice(token2, tokenPrices);
-    const r1 = tokenPrice1.multipliedBy(new BigNumber(reserved1).div(new BigNumber(10).pow(18)));
-    const r2 = tokenPrice2.multipliedBy(new BigNumber(reserved2).div(new BigNumber(10).pow(18)));
-    return acc.plus(r1).plus(r2);
-  }, new BigNumber(0)).toString();
-};
-
-export const usePoolVolume_ = (tokenPrices: TokenPrices, dexClient: ApolloClient<any>): string => {
-  const fromTime = useMemo(
-    () => new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-    [],
-  );
-  const { data } = useQuery<Pool24HVolume_, PoolVolume24HVar>(
-    POOL_24H_VOLUME_,
-    {
-      client: dexClient,
-      variables: { fromTime },
-    },
-  );
-  if (!data || data.volume.length === 0) {
-    return '0';
-  }
-
-  return data.volume.reduce((acc, { amount1, amount2, pool: { token1, token2 } }) => {
-    const tokenPrice1 = getTokenPrice(token1, tokenPrices);
-    const tokenPrice2 = getTokenPrice(token2, tokenPrices);
-
-    return acc
-      .plus(tokenPrice1.multipliedBy(new BigNumber(amount1).div(new BigNumber(10).pow(18))))
-      .plus(tokenPrice2.multipliedBy(new BigNumber(amount2).div(new BigNumber(10).pow(18))));
-  }, new BigNumber(0)).toString();
-};
-
-export const usePoolInfo_ = (address: string, signerAddress: string, tokenPrices: TokenPrices, dexClient: ApolloClient<any>): [PoolStats|undefined, boolean] => {
+export const usePoolInfo = (address: string, signerAddress: string, tokenPrices: TokenPrices, dexClient: ApolloClient<any>): [PoolStats|undefined, boolean] => {
   // TODO: move to config
   const POLL_INTERVAL = 1000 * 5; // 5 seconds
 
@@ -295,7 +120,7 @@ export const usePoolInfo_ = (address: string, signerAddress: string, tokenPrices
   });
   console.log("tokens", tokens, tokensLoading);
 
-  const { data: poolInfo, loading: poolInfoLoading } = useQuery<PoolInfoQuery_, PoolInfoVar>(POOL_INFO_GQL_, {
+  const { data: poolInfo, loading: poolInfoLoading } = useQuery<PoolInfoQuery, PoolInfoVar>(POOL_INFO_GQL, {
     client: dexClient,
     variables: { address, signerAddress, fromTime, toTime },
   });

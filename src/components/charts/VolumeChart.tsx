@@ -29,18 +29,18 @@ interface Data {
 }
 
 const VolumeChart = ({
-  address, symbol1, symbol2, decimal1, decimal2,
+  id, symbol1, symbol2, decimal1, decimal2,
 } : BasicPoolInfo): JSX.Element => {
   const toDate = useMemo(() => Date.now(), []);
   const fromDate = toDate - 31 * 24 * 60 * 60 * 1000; // last 50 hour
 
-  const { data, loading } = useDayPoolVolume(address, fromDate);
+  const { data, loading } = useDayPoolVolume(id, fromDate);
 
   if (loading || !data) {
     return <Loading />;
   }
 
-  const volumeData = dropDuplicatesMultiKey(data.pool_day_volume, ['timeframe'])
+  const volumeData = dropDuplicatesMultiKey(data.poolDayVolumes, ['timeframe'])
     .map((d) => ({ ...d, date: new Date(d.timeframe) }))
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 
@@ -48,7 +48,7 @@ const VolumeChart = ({
     return <span>Not enough data</span>;
   }
 
-  const values = volumeData.reduce((acc, { amount_1, amount_2 }) => [...acc, amount_1, amount_2], [] as number[]);
+  const values = volumeData.reduce((acc, { amount1, amount2 }) => [...acc, amount1, amount2], [] as number[]);
   const adjust = std(values);
 
   const f = scaleOrdinal(schemeCategory10)

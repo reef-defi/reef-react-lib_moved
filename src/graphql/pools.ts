@@ -1,50 +1,41 @@
 import { DocumentNode, gql } from '@apollo/client';
-import { BaseFeeData, BaseReservedData, BaseVolumeData, ERC20ContractData, PoolData, ReservedData } from '../state';
+import { BaseFeeData, BaseReservedData, BaseVolumeData, PoolData, ReservedData } from '../state';
 
 // Data interfaces
 export type BasePoolTransactionTypes = 'Swap' | 'Mint' | 'Burn';
 export type TransactionTypes = BasePoolTransactionTypes | 'All';
 
 // Pool information interfaces
-interface Supply {
-  total_supply: number;
-  supply: number;
-}
-export interface Amounts {
-  amount_1: number;
-  amount_2: number;
-}
-
-interface TimeframedVolume extends Amounts {
+interface Timeframe {
   timeframe: string;
 }
-interface Fee {
-  fee_1: number;
-  fee_2: number;
+
+interface Supply {
+  totalSupply: number;
+  supply: number;
 }
+
+export interface Amounts {
+  amount1: number;
+  amount2: number;
+}
+
+interface TimeframedVolume extends Amounts, Timeframe { }
+
+interface Fee {
+  fee1: number;
+  fee2: number;
+}
+
+interface TimeframedFee extends Fee, Timeframe { }
 
 interface Reserves {
-  reserved_1: number;
-  reserved_2: number;
+  reserved1: number;
+  reserved2: number;
 }
-interface AllPool extends Reserves {
-  pool: {
-    address: string;
-    token_1: string;
-    token_2: string;
 
-    token_contract_1: {
-      verified_contract: {
-        contract_data: ERC20ContractData;
-      } | null
-    }
-    token_contract_2: {
-      verified_contract: {
-        contract_data: ERC20ContractData;
-      } | null
-    }
-  }
-}
+interface AllPool extends BasicPoolData, Reserves {}
+
 interface ContractData {
   symbol: string;
   name: string;
@@ -54,41 +45,24 @@ interface ContractData {
 interface Pool {
   address: string;
   supply: Supply[];
-  symbol_1: string;
-  symbol_2: string;
-  decimal_1: number;
-  decimal_2: number;
+  symbol1: string;
+  symbol2: string;
+  decimal1: number;
+  decimal2: number;
   volume_aggregate: { aggregate: { sum: Amounts } };
 }
 
-interface VerifiedContract {
-  verified_contract: null | {
-    contract_data: ContractData;
-  }
-}
-
 interface BasicPoolData {
-  id: number;
-  address: string;
-  token_contract_1: {
-    address: string;
-    verified_contract: null | {
-      contract_data: ContractData;
-    };
-  };
-  token_contract_2: {
-    address: string;
-    verified_contract: null | {
-      contract_data: ContractData;
-    };
-  };
+  id: string;
+  token1: string;
+  token2: string;
+  decimal1: number;
+  decimal2: number;
+  name1: string;
+  name2: string;
+  symbol1: string;
+  symbol2: string;
 }
-
-type AggregateSum <T> = {
-  aggregate: {
-    sum: T;
-  }
-};
 
 interface PoolTokens {
   token1: string;
@@ -110,18 +84,6 @@ interface ContractData {
 }
 
 interface PoolInfo {
-  token1: string;
-  token2: string;
-  reserves: Reserves[];
-  tokenContract1: VerifiedContract;
-  tokenContract2: VerifiedContract;
-  fee: AggregateSum<Fee>;
-  currentDayVolume: AggregateSum<Amounts>;
-  previousDayVolume: AggregateSum<Amounts>;
-  totalSupply: {total_supply: string}[];
-  userSupply: AggregateSum<{supply: string}>;
-}
-interface PoolInfo_ {
   reserves: BaseReservedData;
   fee: BaseFeeData;
   currentDayVolume: BaseVolumeData;
@@ -163,9 +125,8 @@ interface PoolTransaction {
 }
 
 // Charts interfaces
-interface TVLData {
+interface TVLData extends Timeframe {
   total_supply: number;
-  timeframe: string;
 }
 
 export interface CandlestickData {
@@ -186,12 +147,6 @@ export interface CandlestickData {
   }
 }
 
-interface Fee {
-  fee_1: number;
-  fee_2: number;
-  timeframe: string;
-}
-
 interface LastClose {
   close: number;
 }
@@ -201,18 +156,17 @@ export type PoolQuery = { pool: BasicPoolData[] };
 export type PoolTokensQuery = { poolById: PoolTokens }
 export type PoolTokensDataQuery = { poolById: PoolTokensData }
 export type ContractDataQuery = { verifiedContractById: ContractData }
-export type PoolInfoQuery = { pool: PoolInfo[] }
-export type PoolInfoQuery_ = { poolInfo: PoolInfo_ }
-export type PoolDataQuery_ = { poolData: PoolDataFull }
+export type PoolInfoQuery = { poolInfo: PoolInfo }
+export type PoolDataQuery = { poolData: PoolDataFull }
 export type PoolsQuery = { verified_pool: Pool[] };
-export type PoolDayFeeQuery = { pool_day_fee: Fee[] };
+export type PoolDayFeeQuery = { poolDayFees: TimeframedFee[] };
 export type PoolTvlQuery = { pool_day_supply: TVLData[] };
-export type PoolReservesQuery = { pool_event: Reserves[] };
-export type AllPoolSubscription = { pool_event: AllPool[] }
-export type PoolSupplyQuery = { pool_minute_supply: Supply[] };
-export type PoolDayVolumeQuery = { pool_day_volume: TimeframedVolume[] };
+export type PoolReservesQuery = { poolEvents: Reserves[] };
+export type AllPoolSubscription = { poolEvent: AllPool[] }
+export type PoolSupplyQuery = { poolMinuteSupplies: Supply[] };
+export type PoolDayVolumeQuery = { poolDayVolumes: TimeframedVolume[] };
 export type PoolTransactionQuery = { verified_pool_event: PoolTransaction[] };
-export type PoolDayCandlestickQuery = { pool_day_candlestick: CandlestickData[]; }
+export type PoolDayCandlestickQuery = { poolDayCandlesticks: CandlestickData[]; }
 export type PoolVolumeAggregateQuery = {
   pool_hour_volume_aggregate: { aggregate: { sum: Amounts } };
 };
@@ -278,19 +232,8 @@ export type PoolHourVolumeAggregate = {
     }
   }
 }
+
 export type Pool24HVolume = {
-  pool_hour_volume: {
-    pool: {
-      address: string;
-      token_1: string;
-      token_2: string;
-    };
-    timeframe: string;
-    amount_1: number;
-    amount_2: number;
-  }[];
-}
-export type Pool24HVolume_ = {
   volume: {
     pool: {
       address: string;
@@ -302,12 +245,6 @@ export type Pool24HVolume_ = {
   }[];
 }
 
-export interface PoolDataQuery extends PoolData {
-  previousReserved: ReservedData[];
-  previousCandlestick1: LastClose[];
-  previousCandlestick2: LastClose[];
-}
-
 export interface PoolDataFull extends PoolData {
   previousReserved: ReservedData[];
   previousCandlestick1: LastClose[];
@@ -315,9 +252,6 @@ export interface PoolDataFull extends PoolData {
 }
 
 export type PoolsTotalSupply = {
-  pool_event: AllPool[];
-};
-export type PoolsTotalSupply_ = {
   totalSupply: {
     pool: {
       address: string;
@@ -384,51 +318,32 @@ export interface PoolTransactionVar extends PoolBasicTransactionVar, OffsetVar, 
 // Graphql statements
 // Total supply of all pools
 export const POOLS_TOTAL_VALUE_LOCKED = gql`
-query total_supply($toTime: timestamptz!) {
-  pool_event(
-    distinct_on: pool_id
-    where: {
-      type: { _eq: "Sync" }
-      timestamp: { _lt: $toTime }
+  query totalSupply($toTime: String!) {
+    totalSupply(toTime: $toTime) {
+      pool {
+        address
+        token1
+        token2
+      }
+      reserved1
+      reserved2
     }
-    order_by: {
-      pool_id: asc
-      timestamp: desc
-    }
-  ) {
-    pool {
-      address
-      token_1
-      token_2
-    }
-    reserved_1
-    reserved_2
   }
-}
 `;
 
 // Aggregating pool hour volume
 export const POOL_24H_VOLUME = gql`
-query volume($fromTime: timestamptz!) {
-	pool_hour_volume(
-    distinct_on: [pool_id, timeframe]
-    order_by: {
-      pool_id: asc
-      timeframe: desc
+  query volume($fromTime: String!) {
+    volume(fromTime: $fromTime) {
+      pool {
+        address
+        token1
+        token2
+      }
+      amount1
+      amount2
     }
-    where: {
-      timeframe: { _gte: $fromTime }
-    }
-  ) {
-    pool {
-      address
-      token_1
-      token_2
-    }
-    amount_1
-    amount_2
   }
-}
 `;
 
 // export const POOL_USER_LP = gql`
@@ -525,14 +440,13 @@ query volume($fromTime: timestamptz!) {
 
 export const POOL_SUPPLY_GQL = gql`
   query pool_supply($address: String!) {
-    pool_minute_supply(
-      where: { pool: { address: { _ilike: $address } } }
-      order_by: { timeframe: desc }
+    poolMinuteSupplies(
+      where: { poolId_eq: $address }
+      orderBy: timeframe_DESC
       limit: 1
     ) {
-      total_supply
+      totalSupply
       supply
-      timeframe
     }
   }
 `;
@@ -540,15 +454,15 @@ export const POOL_SUPPLY_GQL = gql`
 export const POOL_VOLUME_AGGREGATE_GQL = gql`
   query pool_volume(
     $address: String!
-    $fromTime: timestamptz!
-    $toTime: timestamptz!
+    $fromTime: String!
+    $toTime: String!
   ) {
     pool_hour_volume_aggregate(
       where: {
         _and: [
-          { pool: { address: { _ilike: $address } } }
-          { timeframe: { _gte: $fromTime } }
-          { timeframe: { _lt: $toTime } }
+          { poolId_eq: $address }
+          { timeframe_gte: $fromTime }
+          { timeframe_lt: $toTime }
         ]
       }
     ) {
@@ -563,29 +477,29 @@ export const POOL_VOLUME_AGGREGATE_GQL = gql`
 `;
 
 const volumeQuery = (time: Time): DocumentNode => gql`
-query volume($address: String!, $fromTime: timestamptz!) {
-  pool_${time}_volume(
+query volume($address: String!, $fromTime: String!) {
+  pool${time}Volumes(
     where: {
-      timeframe: { _gte: $fromTime }
-      pool: { address: { _ilike: $address } }
+      timeframe_gte: $fromTime
+      poolId_eq: $address
     }
-    order_by: { timeframe: asc }
+    orderBy: timeframe_ASC
   ) {
-    amount_1
-    amount_2
+    amount1
+    amount2
     timeframe
   }
 }`;
-export const POOL_DAY_VOLUME_GQL = volumeQuery('day');
-export const POOL_HOUR_VOLUME_GQL = volumeQuery('hour');
-export const POOL_MINUTE_VOLUME_GQL = volumeQuery('minute');
+export const POOL_DAY_VOLUME_GQL = volumeQuery('Day');
+export const POOL_HOUR_VOLUME_GQL = volumeQuery('Hour');
+export const POOL_MINUTE_VOLUME_GQL = volumeQuery('Minute');
 
 export const POOL_FEES_GQL = gql`
-  query pool_fee($address: String!, $fromTime: timestamptz!) {
+  query pool_fee($address: String!, $fromTime: String!) {
     pool_hour_fee_aggregate(
       where: {
-        pool: { address: { _ilike: $address } }
-        timeframe: { _gte: $fromTime }
+        poolId_eq: $address
+        timeframe_gte: $fromTime
       }
     ) {
       aggregate {
@@ -600,34 +514,27 @@ export const POOL_FEES_GQL = gql`
 
 export const POOL_GQL = gql`
   query pool($address: String!) {
-    pool(where: { address: { _ilike: $address } }) {
+    poolById(id: $address) {
       id
-      address
-      token_contract_1 {
-        verified_contract {
-          contract_data
-        }
-        address
-      }
-      token_contract_2 {
-        verified_contract {
-          contract_data
-        }
-        address
-      }
+      token1
+      token2
+      decimal1
+    	decimal2
+    	symbol1
+    	symbol2
     }
   }
 `;
 
 export const POOL_CURRENT_RESERVES_GQL = gql`
   query pool_event($address: String!) {
-    pool_event(
-      where: { pool: { address: { _ilike: $address } }, type: { _eq: "Sync" } }
-      order_by: { timestamp: desc }
+    poolEvents(
+      where: { pool: { id_eq: $address }, type_eq: Sync }
+      orderBy: timestamp_DESC
       limit: 1
     ) {
-      reserved_1
-      reserved_2
+      reserved1
+      reserved2
     }
   }
 `;
@@ -636,7 +543,7 @@ export const POOLS_GQL = gql`
   query pool(
     $offset: Int!
     $search: String_comparison_exp!
-    $fromTime: timestamptz!
+    $fromTime: String!
   ) {
     verified_pool(
       where: {
@@ -648,18 +555,18 @@ export const POOLS_GQL = gql`
           { symbol_2: $search }
         ]
       }
-      order_by: { supply_aggregate: { sum: { supply: desc } } }
+      orderBy: { supply_aggregate: { sum: { supply: desc } } }
       limit: 10
       offset: $offset
     ) {
       address
-      supply(limit: 1, order_by: { timeframe: desc }) {
+      supply(limit: 1, orderBy: timeframe_DESC) {
         total_supply
         supply
       }
       volume_aggregate(
         distinct_on: timeframe
-        where: { timeframe: { _gte: $fromTime } }
+        where: { timeframe_gte: $fromTime }
       ) {
         aggregate {
           sum {
@@ -684,7 +591,7 @@ export const POOL_TRANSACTIONS_GQL = gql`
     $limit: Int!
   ) {
     verified_pool_event(
-      order_by: { timestamp: desc }
+      orderby: timestamp_DESC
       where: { pool: { address: $search }, type: { _in: $type } }
       limit: $limit
       offset: $offset
@@ -758,35 +665,35 @@ export const POOL_TRANSACTION_COUNT_GQL = gql`
 // `;
 
 // Charts queryes & subscriptions
-type Time = 'day' | 'hour' | 'minute';
+type Time = 'Day' | 'Hour' | 'Minute';
 
 const tvlQuery = (time: Time): DocumentNode => gql`
-query pool_supply($address: String!, $fromTime: timestamptz!) {
-  pool_${time}_supply(
+query pool_supply($address: String!, $fromTime: String!) {
+  pool${time}Supplies(
     distinct_on: timestamp
     where: {
-      pool: { address: { _ilike: $address } }
-      timeframe: { _gte: $fromTime }
+      poolId_eq: $address
+      timeframe_gte: $fromTime
     }
-    order_by: { timeframe: asc }
+    orderBy: timeframe_ASC
   ) {
     total_supply
     timeframe
   }
 }`;
-export const POOL_DAY_TVL_GQL = tvlQuery('day');
-export const POOL_HOUR_TVL_GQL = tvlQuery('hour');
-export const POOL_MINUTE_TVL_GQL = tvlQuery('minute');
+export const POOL_DAY_TVL_GQL = tvlQuery('Day');
+export const POOL_HOUR_TVL_GQL = tvlQuery('Hour');
+export const POOL_MINUTE_TVL_GQL = tvlQuery('Minute');
 
 const candlestickQuery = (time: Time): DocumentNode => gql`
-query candlestick($address: String!, $whichToken: Int!, $fromTime: timestamptz!) {
-  pool_${time}_candlestick(
-    order_by: { timeframe: asc }
+query candlestick($address: String!, $whichToken: Int!, $fromTime: String!) {
+  pool${time}Candlesticks(
+    orderBy: timeframe_ASC
     distinct_on: timeframe
     where: {
-      pool: { address: { _ilike: $address } }
+      poolId_eq: $address
       which_token: { _eq: $whichToken }
-      timeframe: { _gte: $fromTime }
+      timeframe_gte: $fromTime
     }
   ) {
     pool_id
@@ -808,19 +715,19 @@ query candlestick($address: String!, $whichToken: Int!, $fromTime: timestamptz!)
 }
 `;
 
-export const POOL_DAY_CANDLESTICK_GQL = candlestickQuery('day');
-export const POOL_HOUR_CANDLESTICK_GQL = candlestickQuery('hour');
-export const POOL_MINUTE_CANDLESTICK_GQL = candlestickQuery('minute');
+export const POOL_DAY_CANDLESTICK_GQL = candlestickQuery('Day');
+export const POOL_HOUR_CANDLESTICK_GQL = candlestickQuery('Hour');
+export const POOL_MINUTE_CANDLESTICK_GQL = candlestickQuery('Minute');
 
 export const POOL_LAST_CANDLESTICH_GQL = gql`
-query candlestick($address: String!, $whichToken: Int!, $fromTime: timestamptz!) {
+query candlestick($address: String!, $whichToken: Int!, $fromTime: String!) {
   pool_day_candlestick(
-    order_by: { timeframe: desc }
+    orderBy: timeframe_DESC
     distinct_on: timeframe
     where: {
       pool: { address: { _eq: $address } }
       which_token: { _eq: $whichToken }
-      timeframe: { _lte: $fromTime }
+      timeframe_lte: $fromTime
     }
     limit: 1
   ) {
@@ -844,27 +751,27 @@ query candlestick($address: String!, $whichToken: Int!, $fromTime: timestamptz!)
 `;
 
 const feeQuery = (time: Time): DocumentNode => gql`
-query fee($address: String!, $fromTime: timestamptz!) {
-  pool_${time}_fee(
+query fee($address: String!, $fromTime: String!) {
+  pool${time}Fees(
     distinct_on: timeframe
     where: {
-      timeframe: { _gte: $fromTime }
-      pool: { address: { _ilike: $address } }
+      timeframe_gte: $fromTime
+      poolId_eq: $address
     }
-    order_by: { timeframe: asc }
+    orderBy: timeframe_ASC
   ) {
-    fee_1
-    fee_2
+    fee1
+    fee2
     timeframe
   }
 }
 `;
 
-export const POOL_DAY_FEE_QUERY_GQL = feeQuery('day');
-export const POOL_HOUR_FEE_QUERY_GQL = feeQuery('hour');
-export const POOL_MINUTE_FEE_QUERY_GQL = feeQuery('minute');
+export const POOL_DAY_FEE_QUERY_GQL = feeQuery('Day');
+export const POOL_HOUR_FEE_QUERY_GQL = feeQuery('Hour');
+export const POOL_MINUTE_FEE_QUERY_GQL = feeQuery('Minute');
 
-// export const POOL_RESERVES_SUBSCRITION = gql`
+// export const POOL_RESERVES_SUBSCRIPTION = gql`
 //   subscription pool_event {
 //     pool_event(
 //       where: { type: { _eq: "Sync" } }
@@ -880,275 +787,6 @@ export const POOL_MINUTE_FEE_QUERY_GQL = feeQuery('minute');
 //     }
 //   }
 // `;
-
-export const POOL_INFO_GQL = gql`
-subscription pool($address: String!, $signerAddress: String!, $fromTime: timestamptz!, $toTime: timestamptz!) {
-  pool(
-    where: {
-      address: { _eq: $address }
-    }
-  ) {
-    token1: token_1
-    token2: token_2
-    tokenContract1: token_contract_1 {
-      verified_contract {
-        contract_data
-      }
-    }
-    tokenContract2: token_contract_2 {
-      verified_contract {
-        contract_data
-      }
-    }
-    fee: fee_aggregate(
-      distinct_on: timeframe
-      where: {
-        timeframe: { _gte: $toTime }
-      }
-    ) {
-      aggregate {
-        sum {
-          fee_1
-          fee_2
-        }
-      }
-    }
-    currentDayVolume: volume_aggregate(
-      distinct_on: timeframe
-      where: {
-        timeframe: { _gte: $toTime }
-      }
-    ) {
-      aggregate {
-        sum {
-          amount_1
-          amount_2
-        }
-      }
-    }
-    previousDayVolume: volume_aggregate(
-      distinct_on: timeframe
-      where: {
-        _and: [
-          { timeframe: { _gte: $fromTime } }
-          { timeframe: { _lt: $toTime } }
-        ]
-      }
-    ) {
-      aggregate {
-        sum {
-          amount_1
-          amount_2
-        }
-      }
-    }
-    reserves: pool_event(
-      where: { type: { _eq: "Sync" } }
-      order_by: { timestamp: desc }
-      limit: 1
-    ) {
-        reserved_1
-        reserved_2
-    }
-    totalSupply: pool_event(
-      where: { type: { _eq: "Transfer" } }
-      order_by: { timestamp: desc }
-      limit: 1
-    ) {
-      total_supply
-    }
-    userSupply: pool_event_aggregate(
-      where: {
-        type: { _eq: "Transfer" }
-        evm_event: {
-          event: {
-            extrinsic: {
-              signer: { _eq: $signerAddress }
-            }
-          }
-        }
-      }
-    ) {
-      aggregate {
-        sum {
-          supply
-        }
-      }
-    }
-  }
-}
-`;
-
-export const POOL_DATA_GQL = gql`
-query poolData($address: String!, $fromTime: timestamptz!) {
-  candlestick1: pool_day_candlestick(
-    where: {
-      which_token: { _eq: 1 }
-      pool: { address: { _eq: $address } }
-      timeframe: { _gte: $fromTime }
-    }
-    distinct_on: timeframe
-  ) {
-    close: close_1
-    high: high_1
-    open: open_1
-    low: low_1
-    timeframe
-  }
-  candlestick2: pool_day_candlestick(
-    where: {
-      which_token: { _eq: 2 }
-      pool: { address: { _eq: $address } }
-      timeframe: { _gte: $fromTime }
-    }
-    distinct_on: timeframe
-  ) {
-    close: close_2
-    high: high_2
-    open: open_2
-    low: low_2
-    timeframe
-  }
-  fee: pool_day_fee(
-    where: {
-      pool: { address: { _eq: $address } }
-      timeframe: { _gte: $fromTime }
-    }
-    distinct_on: timeframe
-  ) {
-    fee1: fee_1
-    fee2: fee_2
-    timeframe
-  }
-  volume: pool_day_volume(
-    where: {
-      pool: { address: { _eq: $address } }
-      timeframe: { _gte: $fromTime }
-    }
-    distinct_on: timeframe
-  ) {
-    amount1: amount_1
-    amount2: amount_2
-    timeframe
-  }
-  reserves: pool_day_locked(
-    where: {
-      pool: { address: { _eq: $address } }
-      timeframe: { _gte: $fromTime }
-    }
-    distinct_on: timeframe
-  ) {
-    reserved1: reserved_1
-    reserved2: reserved_2
-    timeframe
-  }
-  previousReserves: pool_day_locked(
-    where: {
-      pool: { address: { _eq: $address } }
-      timeframe: { _lt: $fromTime }
-    }
-    order_by: { timeframe: desc }
-    limit: 1
-  ) {
-    timeframe
-    reserved1: reserved_1
-    reserved2: reserved_2
-  }
-  previousCandlestick1: pool_day_candlestick(
-    where: {
-      which_token: { _eq: 1 }
-      pool: { address: { _eq: $address } }
-      timeframe: { _lt: $fromTime }
-    }
-    order_by: { timeframe: desc }
-    limit: 1
-  ) {
-    close: close_1
-  }
-  previousCandlestick2: pool_day_candlestick(
-    where: {
-      which_token: { _eq: 2 }
-      pool: { address: { _eq: $address } }
-      timeframe: { _lt: $fromTime }
-    }
-    order_by: { timeframe: desc }
-    limit: 1
-  ) {
-    close: close_2
-  }
-}
-`;
-
-// export const N_VERIFIED_POOLS = gql`
-// query nPools {
-//   verified_pool_aggregate {
-//     aggregate {
-//       count
-//     }
-//   }
-// }
-// `;
-
-// Subscriptions
-export const ALL_POOL_SUBSCRITION = gql`
-subscription pool_event {
-  pool_event(
-    where: { type: { _eq: "Sync" } }
-    distinct_on: [pool_id]
-    order_by: { timestamp: desc, pool_id: asc }
-  ) {
-    reserved_1
-    reserved_2
-    pool {
-      address
-      token_1
-      token_2
-      token_contract_1 {
-        verified_contract {
-          contract_data
-        }
-      }
-      token_contract_2 {
-        verified_contract {
-          contract_data
-        }
-      }
-    }
-  }
-}
-`;
-
-// ************** New implementations ******************
-
-// Total supply of all pools
-export const POOLS_TOTAL_VALUE_LOCKED_ = gql`
-  query totalSupply($toTime: String!) {
-    totalSupply(toTime: $toTime) {
-      pool {
-        address
-        token1
-        token2
-      }
-      reserved1
-      reserved2
-    }
-  }
-`;
-
-// Aggregating pool hour volume
-export const POOL_24H_VOLUME_ = gql`
-  query volume($fromTime: String!) {
-    volume(fromTime: $fromTime) {
-      pool {
-        address
-        token1
-        token2
-      }
-      amount1
-      amount2
-    }
-  }
-`;
 
 export const POOL_TOKENS_GQL = gql`
   query pool_tokens($address: String!) {
@@ -1174,7 +812,7 @@ export const POOL_TOKENS_DATA_GQL = gql`
   }
 `;
 
-export const POOL_INFO_GQL_ = gql`
+export const POOL_INFO_GQL = gql`
   query pool_info(
     $address: String!
     $signerAddress: String!
@@ -1209,7 +847,7 @@ export const POOL_INFO_GQL_ = gql`
   }
 `;
 
-export const POOL_DATA_GQL_ = gql`
+export const POOL_DATA_GQL = gql`
   query poolData($address: String!, $fromTime: String!) {
     poolData(address: $address, fromTime: $fromTime) {
       candlestick1 {
@@ -1254,4 +892,43 @@ export const POOL_DATA_GQL_ = gql`
       }
     }
   }
+`;
+
+// export const N_VERIFIED_POOLS = gql`
+// query nPools {
+//   verified_pool_aggregate {
+//     aggregate {
+//       count
+//     }
+//   }
+// }
+// `;
+
+// Subscriptions
+export const ALL_POOL_SUBSCRIPTION = gql`
+subscription pool_event {
+  pool_event(
+    where: { type_eq: Sync }
+    distinct_on: [pool_id]
+    orderBy: [timestamp_DESC, poolId_ASC] }
+  ) {
+    reserved_1
+    reserved_2
+    pool {
+      address
+      token_1
+      token_2
+      token_contract_1 {
+        verified_contract {
+          contract_data
+        }
+      }
+      token_contract_2 {
+        verified_contract {
+          contract_data
+        }
+      }
+    }
+  }
+}
 `;

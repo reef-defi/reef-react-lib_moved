@@ -28,9 +28,9 @@ const SelectButton: React.FC<SelectedButton> = ({ name, onClick, selected }): JS
 export const ChartSelector = (pool: BasicPoolInfo): JSX.Element => {
   const [chart, setChart] = useState<ChartSwitch>('Token 1');
   const {
-    address,
-    address1,
-    address2,
+    id,
+    token1,
+    token2,
     decimal1,
     decimal2,
     symbol1,
@@ -49,17 +49,17 @@ export const ChartSelector = (pool: BasicPoolInfo): JSX.Element => {
       </div>
       <div className="d-flex h-100">
         {chart === 'Token 1' && (
-          <TokenCandlestickChart address={address} whichToken={1} />
+          <TokenCandlestickChart address={id} whichToken={1} />
         )}
         {chart === 'Token 2' && (
-          <TokenCandlestickChart address={address} whichToken={2} />
+          <TokenCandlestickChart address={id} whichToken={2} />
         )}
-        {chart === 'TVL' && <TVLChart address={address} />}
+        {chart === 'TVL' && <TVLChart address={id} />}
         {chart === 'Volume' && (
           <VolumeChart
-            address={address}
-            address1={address1}
-            address2={address2}
+            id={id}
+            token1={token1}
+            token2={token2}
             decimal1={decimal1}
             decimal2={decimal2}
             symbol1={symbol1}
@@ -68,9 +68,9 @@ export const ChartSelector = (pool: BasicPoolInfo): JSX.Element => {
         )}
         {chart === 'Fee' && (
           <FeeChart
-            address={address}
-            address1={address1}
-            address2={address2}
+            id={id}
+            token1={token1}
+            token2={token2}
             decimal1={decimal1}
             decimal2={decimal2}
             symbol1={symbol1}
