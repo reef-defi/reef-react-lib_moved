@@ -95,6 +95,16 @@ interface PoolTokens {
   token2: string;
 }
 
+interface PoolTokensData extends PoolTokens {
+  decimal1: number;
+  decimal2: number;
+  name1: string;
+  name2: string;
+  symbol1: string;
+  symbol2: string;
+}
+
+
 interface ContractData {
   contractData: ContractData
 }
@@ -189,6 +199,7 @@ interface LastClose {
 // Query result interfaces
 export type PoolQuery = { pool: BasicPoolData[] };
 export type PoolTokensQuery = { poolById: PoolTokens }
+export type PoolTokensDataQuery = { poolById: PoolTokensData }
 export type ContractDataQuery = { verifiedContractById: ContractData }
 export type PoolInfoQuery = { pool: PoolInfo[] }
 export type PoolInfoQuery_ = { poolInfo: PoolInfo_ }
@@ -1146,10 +1157,17 @@ export const POOL_TOKENS_GQL = gql`
   }
 `;
 
-export const CONTRACT_DATA_GQL = gql`
-  query contract_data($address: String!) {
-    verifiedContractById(id: $address) {
-      contractData
+export const POOL_TOKENS_DATA_GQL = gql`
+  query pool_tokens($address: String!) {
+    poolById(id: $address) {
+      token1
+      token2
+      decimal1
+      decimal2
+      name1
+      name2
+      symbol1
+      symbol2
     }
   }
 `;

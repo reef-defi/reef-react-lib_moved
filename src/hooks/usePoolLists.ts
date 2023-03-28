@@ -5,7 +5,7 @@ import { TokenPrices } from '../state';
 import { getIconUrl } from '../utils';
 import { useAsyncEffect } from './useAsyncEffect';
 
-// https://github.com/reef-defi/reef-explorer/blob/develop/api/src/controllers/pools.ts
+// TODO: https://github.com/reef-defi/reef-explorer/blob/develop/api/src/controllers/pools.ts
 const ALL_POOLS_LIST_ENDPOINT = '/api/pools/list'; // queryVerifiedPoolsWithUserLP
 const USER_POOLS_LIST_ENDPOINT = '/api/pools/users-list'; // queryVerifiedUserPools
 const ALL_POOLS_LIST_COUNT_ENDPOINT = '/api/pools/list-count'; // countVerifiedPoolsWithUserLP
