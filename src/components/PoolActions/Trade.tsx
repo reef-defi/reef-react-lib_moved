@@ -57,18 +57,18 @@ const calculateRate = (
     token1: {
       address,
       symbol: symbol1,
-      decimals: decimals1,
+      decimals: decimal1,
     },
     token2: {
       symbol: symbol2,
-      decimals: decimals2,
+      decimals: decimal2,
     },
     reserve1,
     reserve2,
   }: Pool,
 ): string => {
-  const r1 = new BigNumber(reserve1).div(new BigNumber(10).pow(decimals1));
-  const r2 = new BigNumber(reserve2).div(new BigNumber(10).pow(decimals2));
+  const r1 = new BigNumber(reserve1).div(new BigNumber(10).pow(decimal1));
+  const r2 = new BigNumber(reserve2).div(new BigNumber(10).pow(decimal2));
   const res = sellTokenAddress === address ? r1.div(r2) : r2.div(r1);
   return `1 ${symbol2} = ${Uik.utils.maxDecimals(res.toNumber(), 4)} ${symbol1}`;
 };
@@ -76,12 +76,12 @@ const calculateRate = (
 const selectTokensForToken = (token: Token, tokens: Token[], pools: LastPoolReserves[]): Token[] => useMemo(
   () => {
     const availableTokens = pools
-    .filter(({ token_1, token_2 }) => token_1 === token.address || token_2 === token.address)
+    .filter(({ token1, token2 }) => token1 === token.address || token2 === token.address)
     .reduce((acc: Set<string>, pool) => {
-      if (pool.token_1 === token.address) {
-        acc.add(pool.token_2);
+      if (pool.token1 === token.address) {
+        acc.add(pool.token2);
       } else {
-        acc.add(pool.token_1);
+        acc.add(pool.token1);
       }
       return acc;
     }, new Set<string>());

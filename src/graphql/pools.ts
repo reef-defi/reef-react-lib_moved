@@ -151,6 +151,26 @@ interface LastClose {
   close: number;
 }
 
+export interface PoolListItem {
+  id: string;
+  token1: string;
+  token2: string;
+  reserved1: string;
+  reserved2: string;
+  decimal1: number;
+  decimal2: number;
+  symbol1: string;
+  symbol2: string;
+  name1: string;
+  name2: string;
+  dayVolume1: string | null;
+  dayVolume2: string | null;
+  prevDayVolume1: string | null;
+  prevDayVolume2: string | null;
+  userLockedAmount1: string | null;
+  userLockedAmount2: string | null;
+}
+
 // Query result interfaces
 export type PoolQuery = { pool: BasicPoolData[] };
 export type PoolTokensQuery = { poolById: PoolTokens }
@@ -167,9 +187,12 @@ export type PoolSupplyQuery = { poolMinuteSupplies: Supply[] };
 export type PoolDayVolumeQuery = { poolDayVolumes: TimeframedVolume[] };
 export type PoolTransactionQuery = { verified_pool_event: PoolTransaction[] };
 export type PoolDayCandlestickQuery = { poolDayCandlesticks: CandlestickData[]; }
-export type PoolVolumeAggregateQuery = {
-  pool_hour_volume_aggregate: { aggregate: { sum: Amounts } };
-};
+export type PoolVolumeAggregateQuery = { pool_hour_volume_aggregate: { aggregate: { sum: Amounts } }; };
+export type AllPoolsListQuery = { allPoolsList: PoolListItem[] };
+export type AllPoolsListCountQuery = { allPoolsListCount: number };
+export type UserPoolsListQuery = { userPoolsList: PoolListItem[] };
+export type UserPoolsListCountQuery = { userPoolsListCount: number };
+
 // TODO: remove all commented code ?
 
 // export type PoolsTotalSupplyQuery = {
@@ -291,6 +314,14 @@ interface TransactionTypeVar {
 interface WhichTokenVar {
   whichToken: number;
 }
+interface PaginationVar {
+  limit: number;
+  offset: number;
+}
+interface PoolSearchVar {
+  search: string;
+  signer: string;
+}
 
 export type PoolVar = AddressVar
 export type PoolSupplyVar = AddressVar
@@ -315,6 +346,9 @@ export interface PoolDayCandlestickVar extends AddressVar, FromVar, WhichTokenVa
 export interface PoolBasicTransactionVar extends OptionalSearchVar, TransactionTypeVar { }
 export interface PoolTransactionCountVar extends OptionalSearchVar, TransactionTypeVar { }
 export interface PoolTransactionVar extends PoolBasicTransactionVar, OffsetVar, LimitVar { }
+export interface PoolsListVar extends PoolSearchVar, PaginationVar { }
+export interface PoolsListCountVar extends PoolSearchVar { }
+
 // Graphql statements
 // Total supply of all pools
 export const POOLS_TOTAL_VALUE_LOCKED = gql`
@@ -931,4 +965,64 @@ subscription pool_event {
     }
   }
 }
+`;
+
+export const ALL_POOLS_LIST = gql`
+  query all_pools_list($signer: String!, $limit: Int!, $offset: Int!, search: String!) {
+    allPoolsList(signer: $signer, limit: $limit, offset: $offset, search: search) {
+      id
+      name1
+      name2
+      prevDayVolume1
+      prevDayVolume2
+      reserved1
+      reserved2
+      symbol1
+      symbol2
+      token1
+      token2
+      userLockedAmount1
+      userLockedAmount2
+      dayVolume2
+      dayVolume1
+      decimal1
+      decimal2
+    }
+  }
+`;
+
+export const ALL_POOLS_LIST_COUNT = gql`
+  query all_pools_list_count($signer: String!, $search: String!) {
+    allPoolsListCount(signer: $signer, search: $search)
+  }
+`;
+
+export const USER_POOLS_LIST = gql`
+  query user_pools_list($signer: String!, $limit: Int!, $offset: Int!, $search: String!) {
+    userPoolsList(signer: $signer, limit: $limit, offset: $offset, search: $search) {
+      id
+      name1
+      name2
+      prevDayVolume1
+      prevDayVolume2
+      reserved1
+      reserved2
+      symbol1
+      symbol2
+      token1
+      token2
+      userLockedAmount1
+      userLockedAmount2
+      dayVolume2
+      dayVolume1
+      decimal1
+      decimal2
+    }
+  }
+`;
+
+export const USER_POOLS_LIST_COUNT = gql`
+  query user_pools_list_count($signer: String!, $search: String!) {
+    userPoolsListCount(signer: $signer, search: $search)
+  }
 `;
