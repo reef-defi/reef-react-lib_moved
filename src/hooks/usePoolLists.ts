@@ -1,7 +1,7 @@
 import { ApolloClient, useQuery } from '@apollo/client';
 import BigNumber from 'bignumber.js';
 import { useMemo } from 'react';
-import { AllPoolsListCountQuery, AllPoolsListQuery, ALL_POOLS_LIST, ALL_POOLS_LIST_COUNT, PoolListItem, PoolsListCountVar, PoolsListVar, USER_POOLS_LIST, USER_POOLS_LIST_COUNT } from '../graphql/pools';
+import { AllPoolsListCountQuery, AllPoolsListQuery, ALL_POOLS_LIST, ALL_POOLS_LIST_COUNT, PoolListItem, PoolsListCountVar, PoolsListVar, UserPoolsListCountQuery, UserPoolsListQuery, USER_POOLS_LIST, USER_POOLS_LIST_COUNT } from '../graphql/pools';
 import { TokenPrices } from '../state';
 import { getIconUrl } from '../utils';
 
@@ -98,7 +98,7 @@ export const usePoolsList = ({
   limit, offset, search, signer, tokenPrices, queryType, dexClient
 }: UsePoolsList): [PoolItem[], boolean, number] => {
 
-  const { data: dataPoolsList, loading: loadingPoolsList } = useQuery<AllPoolsListQuery, PoolsListVar>(
+  const { data: dataPoolsList, loading: loadingPoolsList } = useQuery<AllPoolsListQuery | UserPoolsListQuery, PoolsListVar>(
     queryType === 'User' ? USER_POOLS_LIST : ALL_POOLS_LIST,
     {
       client: dexClient,
@@ -106,7 +106,7 @@ export const usePoolsList = ({
     },
   );
 
-  const { data: dataPoolsCount, loading: loadingPoolsCount } = useQuery<AllPoolsListCountQuery, PoolsListCountVar>(
+  const { data: dataPoolsCount, loading: loadingPoolsCount } = useQuery<AllPoolsListCountQuery | UserPoolsListCountQuery, PoolsListCountVar>(
     queryType === 'User' ? USER_POOLS_LIST_COUNT : ALL_POOLS_LIST_COUNT,
     {
       client: dexClient,
@@ -116,7 +116,10 @@ export const usePoolsList = ({
 
   const processed = useMemo((): PoolItem[] => {
     if (!dataPoolsList) return [];
-    return dataPoolsList.allPoolsList.map((pool) => ({
+    const poolsList = queryType === 'User' 
+      ? (dataPoolsList as UserPoolsListQuery).userPoolsList 
+      : (dataPoolsList as AllPoolsListQuery).allPoolsList;
+    return poolsList.map((pool) => ({
       address: pool.id,
       token1: {
         image: getIconUrl(pool.token1),
@@ -133,5 +136,13 @@ export const usePoolsList = ({
     })); 
   }, [dataPoolsList]);
 
-  return [processed, loadingPoolsList || loadingPoolsCount, dataPoolsCount?.allPoolsListCount || 0];
+  return [
+    processed, 
+    loadingPoolsList || loadingPoolsCount, 
+    dataPoolsCount 
+      ? queryType === 'User' 
+          ? (dataPoolsCount as UserPoolsListCountQuery).userPoolsListCount
+          : (dataPoolsCount as AllPoolsListCountQuery).allPoolsListCount
+      : 0
+  ];
 }

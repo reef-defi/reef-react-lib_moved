@@ -34,7 +34,7 @@ interface Reserves {
   reserved2: number;
 }
 
-interface AllPool extends BasicPoolData, Reserves {}
+export interface AllPool extends BasicPoolData, Reserves {}
 
 interface ContractData {
   symbol: string;
@@ -53,7 +53,7 @@ interface Pool {
 }
 
 interface BasicPoolData {
-  id: string;
+  address: string;
   token1: string;
   token2: string;
   decimal1: number;
@@ -182,7 +182,7 @@ export type PoolsQuery = { verified_pool: Pool[] };
 export type PoolDayFeeQuery = { poolDayFees: TimeframedFee[] };
 export type PoolTvlQuery = { pool_day_supply: TVLData[] };
 export type PoolReservesQuery = { poolEvents: Reserves[] };
-export type AllPoolSubscription = { poolEvent: AllPool[] }
+export type AllPoolsQuery = { allPools: AllPool[] }
 export type PoolSupplyQuery = { poolMinuteSupplies: Supply[] };
 export type PoolDayVolumeQuery = { poolDayVolumes: TimeframedVolume[] };
 export type PoolTransactionQuery = { verified_pool_event: PoolTransaction[] };
@@ -823,7 +823,7 @@ export const POOL_MINUTE_FEE_QUERY_GQL = feeQuery('Minute');
 // `;
 
 export const POOL_TOKENS_GQL = gql`
-  query pool_tokens($address: String!) {
+  query poolTokens($address: String!) {
     poolById(id: $address) {
       token1
       token2
@@ -832,7 +832,7 @@ export const POOL_TOKENS_GQL = gql`
 `;
 
 export const POOL_TOKENS_DATA_GQL = gql`
-  query pool_tokens($address: String!) {
+  query poolTokens($address: String!) {
     poolById(id: $address) {
       token1
       token2
@@ -847,7 +847,7 @@ export const POOL_TOKENS_DATA_GQL = gql`
 `;
 
 export const POOL_INFO_GQL = gql`
-  query pool_info(
+  query poolInfo(
     $address: String!
     $signerAddress: String!
     $fromTime: String!
@@ -938,38 +938,54 @@ export const POOL_DATA_GQL = gql`
 // }
 // `;
 
-// Subscriptions
-export const ALL_POOL_SUBSCRIPTION = gql`
-subscription pool_event {
-  pool_event(
-    where: { type_eq: Sync }
-    distinct_on: [pool_id]
-    orderBy: [timestamp_DESC, poolId_ASC] }
-  ) {
-    reserved_1
-    reserved_2
-    pool {
+// // Subscriptions
+// export const ALL_POOL_SUBSCRIPTION = gql`
+// subscription pool_event {
+//   pool_event(
+//     where: { type_eq: Sync }
+//     distinct_on: [pool_id]
+//     orderBy: [timestamp_DESC, poolId_ASC] }
+//   ) {
+//     reserved_1
+//     reserved_2
+//     pool {
+//       address
+//       token_1
+//       token_2
+//       token_contract_1 {
+//         verified_contract {
+//           contract_data
+//         }
+//       }
+//       token_contract_2 {
+//         verified_contract {
+//           contract_data
+//         }
+//       }
+//     }
+//   }
+// }
+// `;
+
+export const ALL_POOLS = gql`
+  query allPools {
+    allPools {
       address
-      token_1
-      token_2
-      token_contract_1 {
-        verified_contract {
-          contract_data
-        }
-      }
-      token_contract_2 {
-        verified_contract {
-          contract_data
-        }
-      }
+      decimal1
+      decimal2
+      reserved1
+      reserved2
+      symbol1
+      symbol2
+      token1
+      token2
     }
   }
-}
 `;
 
 export const ALL_POOLS_LIST = gql`
-  query all_pools_list($signer: String!, $limit: Int!, $offset: Int!, search: String!) {
-    allPoolsList(signer: $signer, limit: $limit, offset: $offset, search: search) {
+  query allPoolsList($signer: String!, $limit: Float!, $offset: Float!, $search: String!) {
+    allPoolsList(signer: $signer, limit: $limit, offset: $offset, search: $search) {
       id
       name1
       name2
@@ -992,13 +1008,13 @@ export const ALL_POOLS_LIST = gql`
 `;
 
 export const ALL_POOLS_LIST_COUNT = gql`
-  query all_pools_list_count($signer: String!, $search: String!) {
+  query allPoolsList_count($signer: String!, $search: String!) {
     allPoolsListCount(signer: $signer, search: $search)
   }
 `;
 
 export const USER_POOLS_LIST = gql`
-  query user_pools_list($signer: String!, $limit: Int!, $offset: Int!, $search: String!) {
+  query userPoolsList($signer: String!, $limit: Float!, $offset: Float!, $search: String!) {
     userPoolsList(signer: $signer, limit: $limit, offset: $offset, search: $search) {
       id
       name1

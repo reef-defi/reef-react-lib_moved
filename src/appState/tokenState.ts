@@ -197,12 +197,14 @@ export const pools$: Observable<Pool[]> = combineLatest([
 
 const poolToLastPoolReserve = (p:Pool) => ({
   address: p.poolAddress,
-  reserved_1: Number.parseInt(p.reserve1),
-  reserved_2: Number.parseInt(p.reserve2),
-  token_1: p.token1.address,
-  token_2: p.token2.address,
-  token_data_1: { decimals: p.token1.decimals, name: p.token1.name, symbol: p.token1.symbol },
-  token_data_2: { decimals: p.token2.decimals, name: p.token2.name, symbol: p.token2.symbol },
+  reserved1: Number.parseInt(p.reserve1),
+  reserved2: Number.parseInt(p.reserve2),
+  token1: p.token1.address,
+  token2: p.token2.address,
+  symbol1: p.token1.symbol,
+  symbol2: p.token2.symbol,
+  decimal1: p.token1.decimals,
+  decimal2: p.token2.decimals,
 } as LastPoolReserves);
 // TODO pools and tokens emit events at same time - check how to make 1 event from it
 export const tokenPrices$: Observable<TokenWithAmount[]> = combineLatest([

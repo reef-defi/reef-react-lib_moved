@@ -29,12 +29,12 @@ interface Data {
 }
 
 const VolumeChart = ({
-  id, symbol1, symbol2, decimal1, decimal2,
+  address, symbol1, symbol2, decimal1, decimal2,
 } : BasicPoolInfo): JSX.Element => {
   const toDate = useMemo(() => Date.now(), []);
   const fromDate = toDate - 31 * 24 * 60 * 60 * 1000; // last 50 hour
 
-  const { data, loading } = useDayPoolVolume(id, fromDate);
+  const { data, loading } = useDayPoolVolume(address, fromDate);
 
   if (loading || !data) {
     return <Loading />;

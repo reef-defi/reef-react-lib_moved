@@ -16,7 +16,8 @@ import {
   POOL_TOKENS_DATA_GQL,
 } from '../graphql/pools';
 import { getTokenPrice, TokenPrices } from '../state';
-import { getIconUrl, normalize } from '../utils';
+import { getIconUrl, normalize, POLL_INTERVAL } from '../utils';
+import useInterval from './userInterval';
 
 export const useTotalSupply = (tokenPrices: TokenPrices,  dexClient: ApolloClient<any>, previous = false): string => {
   const toTime = useMemo(() => {
@@ -99,9 +100,6 @@ export interface PoolStats {
 }
 
 export const usePoolInfo = (address: string, signerAddress: string, tokenPrices: TokenPrices, dexClient: ApolloClient<any>): [PoolStats|undefined, boolean] => {
-  // TODO: move to config
-  const POLL_INTERVAL = 1000 * 5; // 5 seconds
-
   const toTime = useMemo(() => {
     const date = new Date();
     date.setDate(date.getDate() - 1);
@@ -114,28 +112,27 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
     return date.toISOString();
   }, [address, signerAddress]);
 
-  const { data: tokens, loading: tokensLoading } = useQuery<PoolTokensDataQuery, PoolTokensVar>(POOL_TOKENS_DATA_GQL, {
+  const { data: tokensData, loading: tokensLoading } = useQuery<PoolTokensDataQuery, PoolTokensVar>(POOL_TOKENS_DATA_GQL, {
     client: dexClient,
     variables: { address },
   });
-  console.log("tokens", tokens, tokensLoading);
 
-  const { data: poolInfo, loading: poolInfoLoading } = useQuery<PoolInfoQuery, PoolInfoVar>(POOL_INFO_GQL, {
+  const { data: poolInfoData, loading: poolInfoLoading, refetch: refetchPoolInfo } = useQuery<PoolInfoQuery, PoolInfoVar>(POOL_INFO_GQL, {
     client: dexClient,
     variables: { address, signerAddress, fromTime, toTime },
   });
 
-  setInterval(() => {
-    console.log(poolInfo, poolInfoLoading);
+  useInterval(() => {
+    refetchPoolInfo();
   }, POLL_INTERVAL);
 
   const info = useMemo<PoolStats|undefined>(() => {
-    if (!poolInfo || !tokens) {
+    if (!poolInfoData || !tokensData) {
       return undefined;
     }
 
-    const pool = poolInfo.poolInfo;
-    const poolTokens = tokens!.poolById;
+    const pool = poolInfoData.poolInfo;
+    const poolTokens = tokensData!.poolById;
 
     const amountLocked1 = normalize(pool.reserves.reserved1, poolTokens.decimal1);
     const amountLocked2 = normalize(pool.reserves.reserved2, poolTokens.decimal2);
@@ -213,7 +210,7 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
       volume24hUSD: volume24hUSD.toFormat(2),
       volumeChange24h: volDiff,
     };
-  }, [poolInfo, tokens, tokenPrices]);
+  }, [poolInfoData, tokensData, tokenPrices]);
 
   return [info, tokensLoading || poolInfoLoading];
 };

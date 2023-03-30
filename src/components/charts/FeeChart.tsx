@@ -29,12 +29,12 @@ interface Data {
 }
 
 const FeeChart = ({
-  id, symbol1, symbol2, decimal1, decimal2,
+  address, symbol1, symbol2, decimal1, decimal2,
 } : BasicPoolInfo): JSX.Element => {
   const toDate = Date.now();
   const fromDate = useMemo(() => toDate - 31 * 24 * 60 * 60 * 1000, []); // last 31 days
 
-  const { data, loading } = useDayPoolFee(id, fromDate);
+  const { data, loading } = useDayPoolFee(address, fromDate);
 
   if (loading || !data) {
     return <Loading />;

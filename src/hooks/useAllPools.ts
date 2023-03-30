@@ -1,32 +1,14 @@
-import { useSubscription } from '@apollo/client';
-import { AllPoolSubscription, ALL_POOL_SUBSCRIPTION } from '../graphql/pools';
-import { LastPoolReserves } from '../state';
+import { useQuery } from '@apollo/client';
+import { AllPool, AllPoolsQuery, ALL_POOLS } from '../graphql/pools';
+import { POLL_INTERVAL } from '../utils';
+import useInterval from './userInterval';
 
-export const useAllPools = (): LastPoolReserves[] => {
-  const { data } = useSubscription<AllPoolSubscription>(ALL_POOL_SUBSCRIPTION);
-  return data
-    ? data.poolEvent.map(
-      ({
-        id,
-        reserved1,
-        reserved2,
-        token1,
-        token2,
-        decimal1,
-        decimal2,
-        symbol1,
-        symbol2
-      }) => ({
-        id,
-        token1,
-        token2,
-        reserved1,
-        reserved2,
-        symbol1,
-        symbol2,
-        decimal1,
-        decimal2,
-      }),
-    )
-    : [];
+export const useAllPools = (): AllPool[] => {
+  const { data, refetch } = useQuery<AllPoolsQuery>(ALL_POOLS);
+
+  useInterval(() => {
+    refetch();
+  }, POLL_INTERVAL);
+
+  return data?.allPools || [];
 };

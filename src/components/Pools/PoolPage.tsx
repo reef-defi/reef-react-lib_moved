@@ -57,7 +57,7 @@ export const PoolPage = ({
     : 18;
 
   const poolInfo: BasicPoolInfo = {
-    id: address,
+    address: address,
     decimal1,
     decimal2,
     symbol1: tokenSymbol1,
@@ -179,7 +179,7 @@ export const PoolPage = ({
           <div className="col-sm-12 col-md-6 col-lg-8">
             <div className="border-rad bg-grey p-1 h-100 m-auto mt-xs-3">
               <ChartSelector
-                id={poolInfo.id}
+                address={poolInfo.address}
                 token1={poolInfo.token1}
                 token2={poolInfo.token2}
                 decimal1={poolInfo.decimal1}
