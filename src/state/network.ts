@@ -34,8 +34,8 @@ export const availableNetworks: Networks = {
     name: 'testnet',
     rpcUrl: network.AVAILABLE_NETWORKS.testnet.rpcUrl,
     reefscanUrl: network.AVAILABLE_NETWORKS.testnet.reefscanUrl,
-    factoryAddress: '0xcA36bA38f2776184242d3652b17bA4A77842707e',
-    routerAddress: '0x0A2906130B1EcBffbE1Edb63D5417002956dFd41',
+    factoryAddress: '0x06D7a7334B9329D0750FFd0a636D6C3dFA77E580',
+    routerAddress: '0xa29DFc7329ac30445Ba963E313fD26E171722057',
     graphqlExplorerUrl: network.AVAILABLE_NETWORKS.testnet.graphqlUrl,
     graphqlDexsUrl: "http://localhost:4351/graphql", // TODO - add to util-lib
     // graphqlUrl: 'wss://testnet.reefscan.com/graphql',
