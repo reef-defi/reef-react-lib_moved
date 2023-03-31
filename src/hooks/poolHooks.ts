@@ -5,14 +5,14 @@ import {
 import {
   PoolBasicTransactionVar, PoolDayCandlestickQuery,
   PoolDayCandlestickVar, PoolDayFeeQuery, PoolDayVolumeQuery, PoolFeeQuery,
-  PoolFeeVar, PoolHourFeeVar, PoolQuery, PoolReservesQuery, PoolReservesVar, PoolsQuery, PoolSupplyQuery, PoolSupplyVar, PoolsVar, POOLS_GQL, PoolTransactionCountQuery, PoolTransactionQuery,
+  PoolFeeVar, PoolHourFeeVar, PoolQuery, PoolReservesQuery, PoolReservesVar, PoolSupplyQuery, PoolSupplyVar, PoolTransactionCountQuery, PoolTransactionQuery,
   PoolTransactionVar, PoolTvlQuery,
   PoolTvlVar, PoolVar, PoolVolumeAggregateQuery,
   PoolVolumeAggregateVar, PoolVolumeVar, POOL_CURRENT_RESERVES_GQL, POOL_DAY_CANDLESTICK_GQL, POOL_DAY_FEE_QUERY_GQL, POOL_DAY_TVL_GQL, POOL_DAY_VOLUME_GQL, POOL_FEES_GQL, POOL_GQL, POOL_LAST_CANDLESTICH_GQL, POOL_SUPPLY_GQL, POOL_TRANSACTIONS_GQL, POOL_TRANSACTION_COUNT_GQL, POOL_VOLUME_AGGREGATE_GQL,
   TransactionTypes,
 } from '../graphql/pools';
 
-// Intermediat query hooks
+// Intermediate query hooks
 export const useDayVolume = (
   address: string,
   fromTime: string,
@@ -49,17 +49,17 @@ export const useCurrentPoolReserve = (
   variables: { address },
 });
 
-export const usePools = (
-  fromTime: string,
-  offset: number,
-  search?: string,
-): QueryResult<PoolsQuery> => useQuery<PoolsQuery, PoolsVar>(POOLS_GQL, {
-  variables: {
-    fromTime,
-    offset,
-    search: search || '',
-  },
-});
+// export const usePools = (
+//   fromTime: string,
+//   offset: number,
+//   search?: string,
+// ): QueryResult<PoolsQuery> => useQuery<PoolsQuery, PoolsVar>(POOLS_GQL, {
+//   variables: {
+//     fromTime,
+//     offset,
+//     search: search || '',
+//   },
+// });
 
 // export const usePoolCount = (search?: string): QueryResult<PoolCountQuery> => useQuery<PoolCountQuery, PoolCountVar>(POOL_COUNT_GQL, {
 //   variables: { search: search ? { _ilike: `${search}%` } : {} },

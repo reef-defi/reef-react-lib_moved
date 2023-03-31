@@ -42,15 +42,15 @@ interface ContractData {
   decimals: number;
 }
 
-interface Pool {
-  address: string;
-  supply: Supply[];
-  symbol1: string;
-  symbol2: string;
-  decimal1: number;
-  decimal2: number;
-  volume_aggregate: { aggregate: { sum: Amounts } };
-}
+// interface Pool {
+//   address: string;
+//   supply: Supply[];
+//   symbol1: string;
+//   symbol2: string;
+//   decimal1: number;
+//   decimal2: number;
+//   volume_aggregate: { aggregate: { sum: Amounts } };
+// }
 
 interface BasicPoolData {
   address: string;
@@ -178,7 +178,7 @@ export type PoolTokensDataQuery = { poolById: PoolTokensData }
 export type ContractDataQuery = { verifiedContractById: ContractData }
 export type PoolInfoQuery = { poolInfo: PoolInfo }
 export type PoolDataQuery = { poolData: PoolDataFull }
-export type PoolsQuery = { verified_pool: Pool[] };
+// export type PoolsQuery = { verified_pool: Pool[] };
 export type PoolDayFeeQuery = { poolDayFees: TimeframedFee[] };
 export type PoolTvlQuery = { pool_day_supply: TVLData[] };
 export type PoolReservesQuery = { poolEvents: Reserves[] };
@@ -339,7 +339,7 @@ export interface PoolVolumeVar extends AddressVar, FromVar { }
 export interface PoolHourFeeVar extends AddressVar, FromVar { }
 export interface PoolVolumeAggregateVar extends PoolFeeVar, ToVar { }
 // export interface PoolUserLpVar extends AddressVar, SignerAddressVar { }
-export interface PoolsVar extends FromVar, OffsetVar, OptionalSearchVar { }
+// export interface PoolsVar extends FromVar, OffsetVar, OptionalSearchVar { }
 export interface PoolLastCandlestickVar extends AddressVar, WhichTokenVar { }
 export interface PoolInfoVar extends AddressVar, FromVar, ToVar, SignerAddressVar { }
 export interface PoolDayCandlestickVar extends AddressVar, FromVar, WhichTokenVar { }
@@ -486,26 +486,18 @@ export const POOL_SUPPLY_GQL = gql`
 `;
 
 export const POOL_VOLUME_AGGREGATE_GQL = gql`
-  query pool_volume(
+  query poolVolume(
     $address: String!
     $fromTime: String!
     $toTime: String!
   ) {
-    pool_hour_volume_aggregate(
-      where: {
-        _and: [
-          { poolId_eq: $address }
-          { timeframe_gte: $fromTime }
-          { timeframe_lt: $toTime }
-        ]
-      }
+    poolVolume(
+      address: $address
+      fromTime: $fromTime
+      toTime: $toTime
     ) {
-      aggregate {
-        sum {
-          amount_1
-          amount_2
-        }
-      }
+      amount1
+      amount2
     }
   }
 `;
@@ -529,19 +521,16 @@ export const POOL_HOUR_VOLUME_GQL = volumeQuery('Hour');
 export const POOL_MINUTE_VOLUME_GQL = volumeQuery('Minute');
 
 export const POOL_FEES_GQL = gql`
-  query pool_fee($address: String!, $fromTime: String!) {
-    pool_hour_fee_aggregate(
-      where: {
-        poolId_eq: $address
-        timeframe_gte: $fromTime
-      }
+  query poolFee(
+    $address: String!
+    $fromTime: String!
+  ) {
+    poolFee(
+      address: $address
+      fromTime: $fromTime
     ) {
-      aggregate {
-        sum {
-          fee_1
-          fee_2
-        }
-      }
+      fee1
+      fee2
     }
   }
 `;
@@ -573,49 +562,49 @@ export const POOL_CURRENT_RESERVES_GQL = gql`
   }
 `;
 
-export const POOLS_GQL = gql`
-  query pool(
-    $offset: Int!
-    $search: String_comparison_exp!
-    $fromTime: String!
-  ) {
-    verified_pool(
-      where: {
-        _or: [
-          { name_1: $search }
-          { name_2: $search }
-          { address: $search }
-          { symbol_1: $search }
-          { symbol_2: $search }
-        ]
-      }
-      orderBy: { supply_aggregate: { sum: { supply: desc } } }
-      limit: 10
-      offset: $offset
-    ) {
-      address
-      supply(limit: 1, orderBy: timeframe_DESC) {
-        total_supply
-        supply
-      }
-      volume_aggregate(
-        distinct_on: timeframe
-        where: { timeframe_gte: $fromTime }
-      ) {
-        aggregate {
-          sum {
-            amount_1
-            amount_2
-          }
-        }
-      }
-      symbol_1
-      symbol_2
-      decimal_1
-      decimal_2
-    }
-  }
-`;
+// export const POOLS_GQL = gql`
+//   query pool(
+//     $offset: Int!
+//     $search: String_comparison_exp!
+//     $fromTime: String!
+//   ) {
+//     verified_pool(
+//       where: {
+//         _or: [
+//           { name_1: $search }
+//           { name_2: $search }
+//           { address: $search }
+//           { symbol_1: $search }
+//           { symbol_2: $search }
+//         ]
+//       }
+//       orderBy: { supply_aggregate: { sum: { supply: desc } } }
+//       limit: 10
+//       offset: $offset
+//     ) {
+//       address
+//       supply(limit: 1, orderBy: timeframe_DESC) {
+//         total_supply
+//         supply
+//       }
+//       volume_aggregate(
+//         distinct_on: timeframe
+//         where: { timeframe_gte: $fromTime }
+//       ) {
+//         aggregate {
+//           sum {
+//             amount_1
+//             amount_2
+//           }
+//         }
+//       }
+//       symbol_1
+//       symbol_2
+//       decimal_1
+//       decimal_2
+//     }
+//   }
+// `;
 
 export const POOL_TRANSACTIONS_GQL = gql`
   subscription transactions(
