@@ -57,7 +57,7 @@ export const usePools = (
   variables: {
     fromTime,
     offset,
-    search: search ? { _ilike: `${search}%` } : {},
+    search: search || '',
   },
 });
 
@@ -69,7 +69,7 @@ const resolveTransactionVariables = (
   search: string | undefined,
   type: TransactionTypes,
 ): PoolBasicTransactionVar => ({
-  search: search ? { _ilike: search } : {},
+  search: search || '',
   type: type === 'All' ? ['Swap', 'Mint', 'Burn'] : [type],
 });
 export const usePoolTransactionCountSubscription = (

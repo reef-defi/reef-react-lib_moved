@@ -300,7 +300,7 @@ interface ToVar {
   toTime: string;
 }
 interface OptionalSearchVar {
-  search: { _ilike?: string };
+  search: string;
 }
 interface OffsetVar {
   offset: number;
@@ -619,61 +619,58 @@ export const POOLS_GQL = gql`
 
 export const POOL_TRANSACTIONS_GQL = gql`
   subscription transactions(
-    $search: String_comparison_exp!
+    $search: String!
     $type: [pooltype!]
     $offset: Int!
     $limit: Int!
   ) {
-    verified_pool_event(
-      orderby: timestamp_DESC
-      where: { pool: { address: $search }, type: { _in: $type } }
-      limit: $limit
-      offset: $offset
+    poolEvents(
+      limit: $limit, 
+      offset: $offset, 
+      orderBy: timestamp_DESC, 
+      where: {
+        pool: {
+          id_containsInsensitive: $search, 
+          AND: { verified_eq: true }
+        }, 
+        AND: {type_in: $type}
+      }
     ) {
-      amount_1
-      amount_2
-      amount_in_1
-      amount_in_2
-      sender_address
-      to_address
+      amount1
+      amount2
+      amountIn1
+      amountIn2
+      senderAddress
+      toAddress
       timestamp
       type
       pool {
-        token_contract_2 {
-          verified_contract {
-            contract_data
-          }
-        }
-        token_contract_1 {
-          verified_contract {
-            contract_data
-          }
-        }
+        decimal1
+        decimal2
+        symbol1
+        symbol2
       }
-      evm_event {
-        event {
-          id
-          extrinsic {
-            hash
-            signer
-          }
-        }
-      }
+      signerAddress
     }
   }
 `;
 
 export const POOL_TRANSACTION_COUNT_GQL = gql`
-  subscription transaction_count(
-    $search: String_comparison_exp!
+  subscription transactionCount(
+    $search: String!
     $type: [pooltype]!
   ) {
-    verified_pool_event_aggregate(
-      where: { pool: { address: $search }, type: { _in: $type } }
-    ) {
-      aggregate {
-        count
+    poolEventsConnection(
+      orderBy: timestamp_DESC, 
+      where: {
+        pool: {
+          id_containsInsensitive: $search, 
+          AND: { verified_eq: true }
+        }, 
+        AND: {type_in: $type}
       }
+    ) {
+      totalCount
     }
   }
 `;

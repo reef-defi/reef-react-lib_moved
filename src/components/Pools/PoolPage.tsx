@@ -152,9 +152,9 @@ export const PoolPage = ({
             <div className="d-flex">
               <Button onClick={() => openTrade(tokenAddress1, tokenAddress2)}>Trade</Button>
               <ME size="1" />
-              <Button onClick={() => openAddLiquidity(tokenAddress1, tokenAddress2)}>Add Liqudity</Button>
+              <Button onClick={() => openAddLiquidity(tokenAddress1, tokenAddress2)}>Add Liquidity</Button>
               <ME size="1" />
-              <Button onClick={() => openRemoveLiquidity(tokenAddress1, tokenAddress2)}>Remove Liqudity</Button>
+              <Button onClick={() => openRemoveLiquidity(tokenAddress1, tokenAddress2)}>Remove Liquidity</Button>
             </div>
           </ContentBetween>
         </FullRow>
