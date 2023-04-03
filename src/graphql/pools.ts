@@ -126,25 +126,23 @@ interface PoolTransaction {
 
 // Charts interfaces
 interface TVLData extends Timeframe {
-  total_supply: number;
+  totalSupply: number;
 }
 
 export interface CandlestickData {
-  pool_id: number,
+  poolId: number,
   timeframe: string;
-  close_1: number;
-  close_2: number;
-  high_1: number;
-  high_2: number;
-  open_1: number;
-  open_2: number;
-  low_1: number;
-  low_2: number;
-  which_token: number;
-  pool: {
-    token_1: string;
-    token_2: string;
-  }
+  close1: number;
+  close2: number;
+  high1: number;
+  high2: number;
+  open1: number;
+  open2: number;
+  low1: number;
+  low2: number;
+  whichToken: number;
+  token1: string;
+  token2: string;
 }
 
 interface LastClose {
@@ -179,14 +177,15 @@ export type ContractDataQuery = { verifiedContractById: ContractData }
 export type PoolInfoQuery = { poolInfo: PoolInfo }
 export type PoolDataQuery = { poolData: PoolDataFull }
 // export type PoolsQuery = { verified_pool: Pool[] };
-export type PoolDayFeeQuery = { poolDayFees: TimeframedFee[] };
-export type PoolTvlQuery = { pool_day_supply: TVLData[] };
+export type PoolDayFeeQuery = { poolTimeFees: TimeframedFee[] };
+export type PoolDayTvlQuery = { poolTimeSupply: TVLData[] };
 export type PoolReservesQuery = { poolEvents: Reserves[] };
 export type AllPoolsQuery = { allPools: AllPool[] }
 export type PoolSupplyQuery = { poolMinuteSupplies: Supply[] };
 export type PoolDayVolumeQuery = { poolDayVolumes: TimeframedVolume[] };
 export type PoolTransactionQuery = { verified_pool_event: PoolTransaction[] };
-export type PoolDayCandlestickQuery = { poolDayCandlesticks: CandlestickData[]; }
+export type PoolDayCandlestickQuery = { poolTimeCandlesticks: CandlestickData[]; }
+export type PoolLastCandlestickQuery = { poolLastCandlestick: CandlestickData[]; }
 export type PoolVolumeAggregateQuery = { pool_hour_volume_aggregate: { aggregate: { sum: Amounts } }; };
 export type AllPoolsListQuery = { allPoolsList: PoolListItem[] };
 export type AllPoolsListCountQuery = { allPoolsListCount: number };
@@ -333,10 +332,10 @@ export type PoolsTotalValueLockedVar = ToVar
 export type PoolTokensVar = AddressVar
 export type ContractDataVar = AddressVar
 export interface PoolFeeVar extends AddressVar, FromVar { }
-export interface PoolTvlVar extends AddressVar, FromVar { }
+export interface PoolDayTvlVar extends AddressVar, FromVar { }
 export interface PoolDataVar extends AddressVar, FromVar { }
 export interface PoolVolumeVar extends AddressVar, FromVar { }
-export interface PoolHourFeeVar extends AddressVar, FromVar { }
+export interface PoolDayFeeVar extends AddressVar, FromVar { }
 export interface PoolVolumeAggregateVar extends PoolFeeVar, ToVar { }
 // export interface PoolUserLpVar extends AddressVar, SignerAddressVar { }
 // export interface PoolsVar extends FromVar, OffsetVar, OptionalSearchVar { }
@@ -688,8 +687,12 @@ export const POOL_TRANSACTION_COUNT_GQL = gql`
 type Time = 'Day' | 'Hour' | 'Minute';
 
 const tvlQuery = (time: Time): DocumentNode => gql`
-query pool_supply($address: String!, $fromTime: String!) {
-  pool${time}Supplies(
+query poolSupply($address: String!, $fromTime: String!) {
+  poolTimeSupplies(
+    address: $address
+    fromTime: $fromTime
+    time: ${time}
+
     distinct_on: timestamp
     where: {
       poolId_eq: $address
@@ -697,7 +700,7 @@ query pool_supply($address: String!, $fromTime: String!) {
     }
     orderBy: timeframe_ASC
   ) {
-    total_supply
+    totalSupply
     timeframe
   }
 }`;
@@ -707,30 +710,25 @@ export const POOL_MINUTE_TVL_GQL = tvlQuery('Minute');
 
 const candlestickQuery = (time: Time): DocumentNode => gql`
 query candlestick($address: String!, $whichToken: Int!, $fromTime: String!) {
-  pool${time}Candlesticks(
-    orderBy: timeframe_ASC
-    distinct_on: timeframe
-    where: {
-      poolId_eq: $address
-      which_token: { _eq: $whichToken }
-      timeframe_gte: $fromTime
-    }
+  poolTimeCandlesticks(
+    address: $address
+    whichToken: $whichToken
+    fromTime: $fromTime
+    time: ${time}
   ) {
-    pool_id
+    poolId
     timeframe
-    close_1
-    close_2
-    high_1
-    high_2
-    low_1
-    low_2
-    open_1
-    open_2
-    which_token
-    pool {
-      token_1
-      token_2
-    }
+    close1
+    close2
+    high1
+    high2
+    low1
+    low2
+    open1
+    open2
+    whichToken
+    token1
+    token2
   }
 }
 `;
@@ -739,46 +737,36 @@ export const POOL_DAY_CANDLESTICK_GQL = candlestickQuery('Day');
 export const POOL_HOUR_CANDLESTICK_GQL = candlestickQuery('Hour');
 export const POOL_MINUTE_CANDLESTICK_GQL = candlestickQuery('Minute');
 
-export const POOL_LAST_CANDLESTICH_GQL = gql`
+export const POOL_LAST_CANDLESTICK_GQL = gql`
 query candlestick($address: String!, $whichToken: Int!, $fromTime: String!) {
-  pool_day_candlestick(
-    orderBy: timeframe_DESC
-    distinct_on: timeframe
-    where: {
-      pool: { address: { _eq: $address } }
-      which_token: { _eq: $whichToken }
-      timeframe_lte: $fromTime
-    }
-    limit: 1
+  poolLastCandlestick(
+    address: $address
+    whichToken: $whichToken
+    fromTime: $fromTime
   ) {
-    pool_id
+    poolId
     timeframe
-    close_1
-    close_2
-    high_1
-    high_2
-    low_1
-    low_2
-    open_1
-    open_2
-    which_token
-    pool {
-      token_1
-      token_2
-    }
+    close1
+    close2
+    high1
+    high2
+    low1
+    low2
+    open1
+    open2
+    whichToken
+    token1
+    token2
   }
 }
 `;
 
 const feeQuery = (time: Time): DocumentNode => gql`
 query fee($address: String!, $fromTime: String!) {
-  pool${time}Fees(
-    distinct_on: timeframe
-    where: {
-      timeframe_gte: $fromTime
-      poolId_eq: $address
-    }
-    orderBy: timeframe_ASC
+  poolTimeFees(
+    address: $address
+    fromTime: $fromTime
+    time: ${time}
   ) {
     fee1
     fee2

@@ -40,7 +40,7 @@ const FeeChart = ({
     return <Loading />;
   }
 
-  const feeData = data.poolDayFees
+  const feeData = data.poolTimeFees
     .map((d) => ({ ...d, date: new Date(d.timeframe) }));
 
   if (feeData.length <= 1) {
