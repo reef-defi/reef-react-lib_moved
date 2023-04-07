@@ -153,6 +153,7 @@ interface OnSwap {
   state: SwapState;
   network?: Network;
   account?: ReefSigner;
+  batchTxs?: boolean;
   notify: NotifyFun;
   dispatch: Dispatch<SwapAction>;
   updateTokenState: () => Promise<void>;
@@ -164,6 +165,7 @@ export const onSwap = ({
   state,
   network,
   account,
+  batchTxs,
   dispatch,
   updateTokenState,
   onSuccess,
@@ -218,41 +220,100 @@ export const onSwap = ({
       BigNumber.from(0),
     );
 
-    const batch = signer.provider.api.tx.utility.batchAll([
-      approveExtrinsic,
-      tradeExtrinsic,
-    ]);
+    if (batchTxs) {
+      // Batching extrinsics
+      const batch = signer.provider.api.tx.utility.batchAll([
+        approveExtrinsic,
+        tradeExtrinsic,
+      ]);
 
-    const signAndSend = new Promise<void>(async (resolve, reject) => {
-      batch.signAndSend(
-        address,
-        { signer: signer.signingKey },
-        (status: any) => {
-          console.log('Swap status:', status);
-          const err = captureError(status.events);
-          if (err) {
-            reject({message: err});
-          }
-          if (status.dispatchError) {
-            reject({message: status.dispatchError.toString()});
-          }
-          if (status.status.isInBlock) {
-            resolve();
-          }
-          // If you want to await until block is finalized use below if
-          if (status.status.isFinalized) {
-            if (onFinalized) onFinalized();
+      // Signing and awaiting when data comes in block
+      const signAndSend = new Promise<void>(async (resolve, reject) => {
+        batch.signAndSend(
+          address,
+          { signer: signer.signingKey },
+          (status: any) => {
+            console.log('Swap status:', status);
+            const err = captureError(status.events);
+            if (err) {
+              reject({message: err});
+            }
+            if (status.dispatchError) {
+              reject({message: status.dispatchError.toString()});
+            }
+            if (status.status.isInBlock) {
+              resolve();
+            }
+            // If you want to await until block is finalized use below if
+            if (status.status.isFinalized) {
+              if (onFinalized) onFinalized();
 
-            Uik.notify.success({
-              message: 'Blocks have been finalized',
-              keepAlive: true,
-            });
-          }
-        },
-      );
-    });
-    await signAndSend;
+              Uik.notify.success({
+                message: 'Blocks have been finalized',
+                keepAlive: true,
+              });
+            }
+          },
+        );
+      });
+      await signAndSend;
+    } else {
+      // Approve
+      const signAndSendApprove = new Promise<void>(async (resolve, reject) => {
+        approveExtrinsic.signAndSend(
+          address,
+          { signer: signer.signingKey },
+          (status: any) => {
+            console.log('Swap status:', status);
+            const err = captureError(status.events);
+            if (err) {
+              reject({message: err});
+            }
+            if (status.dispatchError) {
+              console.error(status.dispatchError.toString());
+              reject({message: status.dispatchError.toString()});
+            }
+            if (status.status.isInBlock) {
+              resolve();
+            }
+          },
+        );
+      });
+      await signAndSendApprove;
 
+      // Swap
+      const signAndSendTrade = new Promise<void>(async (resolve, reject) => {
+        tradeExtrinsic.signAndSend(
+          address,
+          { signer: signer.signingKey },
+          (status: any) => {
+            console.log('Swap status:', status);
+            const err = captureError(status.events);
+            if (err) {
+              reject({message: err});
+            }
+            if (status.dispatchError) {
+              console.error(status.dispatchError.toString());
+              reject({message: status.dispatchError.toString()});
+            }
+            if (status.status.isInBlock) {
+              resolve();
+            }
+            // If you want to await until block is finalized use below if
+            if (status.status.isFinalized) {
+              if (onFinalized) onFinalized();
+
+              Uik.notify.success({
+                message: 'Blocks have been finalized',
+                keepAlive: true,
+              });
+            }
+          },
+        );
+      });
+      await signAndSendTrade;
+    }
+    
     if (onSuccess) onSuccess();
 
     Uik.notify.success({

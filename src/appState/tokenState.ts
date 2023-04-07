@@ -258,7 +258,6 @@ const toTransferToken = (transfer): Token|NFT => (transfer.token.type === Contra
     iconUrl: '',
     nftId: transfer.nftId,
     contractType: transfer.token.type,
-    // data: transfer.token.verified_contract.contract_data,
   } as NFT);
 
 const toTokenTransfers = (resTransferData: any[], signer, network: Network): TokenTransfer[] => resTransferData.map((transferData): TokenTransfer => ({

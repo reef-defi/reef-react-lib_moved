@@ -5,7 +5,7 @@ import React, { useMemo, useState } from 'react';
 import { SwapState } from '../../store';
 import TokenField, { SelectToken } from './TokenField';
 
-import { LastPoolReserves, Pool, resolveSettings, Token } from '../../state';
+import { LastPoolReserves, Pool, resolveSettings, Settings, Token } from '../../state';
 import TradePopup from './ConfirmPopups/Trade';
 
 interface TradeActions {
@@ -16,6 +16,7 @@ interface TradeActions {
   setPercentage: (amount: number) => void;
   selectToken1?: SelectToken;
   selectToken2?: SelectToken;
+  setSlippage?: (slippage: number) => void;
 }
 
 interface Trade {
@@ -109,6 +110,7 @@ export const Trade = ({
     setToken2Amount,
     selectToken1,
     selectToken2,
+    setSlippage
   },
   pools,
   tokens,
@@ -194,6 +196,22 @@ export const Trade = ({
           ]}
         />
       </div>
+
+      {/* TODO: add settings option with slippage input */}
+      {/* <div className="uik-pool-actions__slider">
+        <Uik.Slider
+          value={settings.percentage}
+          onChange={setSlippage}
+          tooltip={`${Uik.utils.maxDecimals(settings.percentage, 2)}%`}
+          helpers={[
+            { position: 0, text: '0%' },
+            { position: 25 },
+            { position: 50, text: '5%' },
+            { position: 75 },
+            { position: 100, text: '10%' },
+          ]}
+        />
+      </div> */}
 
       <Uik.Button
         className="uik-pool-actions__cta"

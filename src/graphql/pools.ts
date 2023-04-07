@@ -683,7 +683,7 @@ export const POOL_TRANSACTION_COUNT_GQL = gql`
 //   }
 // `;
 
-// Charts queryes & subscriptions
+// Charts queries & subscriptions
 type Time = 'Day' | 'Hour' | 'Minute';
 
 const tvlQuery = (time: Time): DocumentNode => gql`
@@ -1012,7 +1012,7 @@ export const USER_POOLS_LIST = gql`
 `;
 
 export const USER_POOLS_LIST_COUNT = gql`
-  query user_pools_list_count($signer: String!, $search: String!) {
+  query userPoolsListCount($signer: String!, $search: String!) {
     userPoolsListCount(signer: $signer, search: $search)
   }
 `;

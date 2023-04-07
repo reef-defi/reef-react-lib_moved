@@ -101,16 +101,12 @@ export const getGQLUrls = (network: Network): Map<GQLUrlType, GQLUrl> => {
     ws: wsExplorer,
   });
 
-  // TODO: add dex urls to utils lib
-  // const wsDex = network.graphqlDexUrl.startsWith('http')
-  //   ? network.graphqlDexUrl.replace('http', 'ws')
-  //   : network.graphqlDexUrl;
-  // const httpDex = network.graphqlDexUrl.startsWith('ws')
-  //   ? network.graphqlDexUrl.replace('ws', 'http')
-  //   : network.graphqlDexUrl;
-  const wsDex = availableNetworks.mainnet.graphqlDexsUrl.replace('http', 'ws');
-  const httpDex = availableNetworks.mainnet.graphqlDexsUrl;
-
+  const wsDex = network.graphqlDexsUrl.startsWith('http')
+    ? network.graphqlDexsUrl.replace('http', 'ws')
+    : network.graphqlDexsUrl;
+  const httpDex = network.graphqlDexsUrl.startsWith('ws')
+    ? network.graphqlDexsUrl.replace('ws', 'http')
+    : network.graphqlDexsUrl;
   gqlUrls.set('dex', {
     http: httpDex,
     ws: wsDex,
