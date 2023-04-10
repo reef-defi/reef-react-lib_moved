@@ -1,4 +1,5 @@
 import {
+  ApolloClient,
   QueryResult, SubscriptionResult, useQuery,
   useSubscription,
 } from '@apollo/client';
@@ -12,6 +13,8 @@ import {
   TransactionTypes,
   PoolLastCandlestickQuery,
 } from '../graphql/pools';
+import useInterval from './userInterval';
+import { POLL_INTERVAL } from '../utils';
 
 // Intermediate query hooks
 export const useDayVolume = (
@@ -76,20 +79,36 @@ const resolveTransactionVariables = (
 export const usePoolTransactionCountSubscription = (
   address: string | undefined,
   type: TransactionTypes,
-): SubscriptionResult<PoolTransactionCountQuery> => useSubscription<PoolTransactionCountQuery, PoolBasicTransactionVar>(
-  POOL_TRANSACTION_COUNT_GQL,
-  {
-    variables: resolveTransactionVariables(address, type),
-  },
-);
+  dexClient: ApolloClient<any>,
+): QueryResult<PoolTransactionCountQuery> => {
+  if (dexClient === undefined) {
+    return [undefined, true] as any;
+  };
+
+  const { data, loading, refetch } = useQuery<PoolTransactionCountQuery, PoolBasicTransactionVar>(
+    POOL_TRANSACTION_COUNT_GQL, 
+    {
+      client: dexClient,
+      variables: resolveTransactionVariables(address, type),
+    }
+  );
+
+  useInterval(() => {
+    refetch();
+  }, POLL_INTERVAL);
+
+  return [data, loading] as any;
+}
 export const usePoolTransactionSubscription = (
   address: string | undefined,
   type: TransactionTypes,
   pageIndex = 0,
   limit = 10,
+  dexClient: ApolloClient<any>,
 ): SubscriptionResult<PoolTransactionQuery> => useSubscription<PoolTransactionQuery, PoolTransactionVar>(
   POOL_TRANSACTIONS_GQL,
   {
+    client: dexClient,
     variables: {
       ...resolveTransactionVariables(address, type),
       limit,

@@ -5,7 +5,7 @@ import React, { useMemo, useState } from 'react';
 import { SwapState } from '../../store';
 import TokenField, { SelectToken } from './TokenField';
 
-import { LastPoolReserves, Pool, resolveSettings, Settings, Token } from '../../state';
+import { LastPoolReserves, Pool, resolveSettings, Token } from '../../state';
 import TradePopup from './ConfirmPopups/Trade';
 
 interface TradeActions {
@@ -110,7 +110,7 @@ export const Trade = ({
     setToken2Amount,
     selectToken1,
     selectToken2,
-    setSlippage
+    // setSlippage
   },
   pools,
   tokens,

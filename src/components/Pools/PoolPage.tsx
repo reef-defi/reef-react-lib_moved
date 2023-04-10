@@ -10,21 +10,23 @@ import { BasicPoolInfo } from '../../state/pool';
 import { PoolInfo } from './PoolInfo';
 import { ChartSelector } from '../charts/ChartSelector';
 import { PoolTransactions } from './PoolTransactions';
+import { ApolloClient } from '@apollo/client';
 
 type Open = (address1: string, address2: string) => void;
 
 interface PoolPage {
   address: string;
-  reefscanFrontendUrl: string;
+  reefscanUrl: string;
   openTrade: Open;
   openAddLiquidity: Open;
   openRemoveLiquidity: Open;
   // This is a hack!
   // Put images inside of the lib and make appropriate loader for them which includes icons when the app loads
   getIconUrl: (address: string) => string;
+  dexClient: ApolloClient<any>;
 }
 export const PoolPage = ({
-  address, reefscanFrontendUrl, openTrade, openAddLiquidity, openRemoveLiquidity, getIconUrl,
+  address, reefscanUrl, openTrade, openAddLiquidity, openRemoveLiquidity, getIconUrl, dexClient,
 }: PoolPage): JSX.Element => {
   const { data: poolData } = usePoolQuery(address);
   const { data: reservesData } = useCurrentPoolReserve(address);
@@ -191,7 +193,7 @@ export const PoolPage = ({
           </div>
         </div>
 
-        <PoolTransactions address={address} reefscanFrontendUrl={reefscanFrontendUrl} />
+        <PoolTransactions address={address} reefscanUrl={reefscanUrl} dexClient={dexClient}/>
       </div>
     </div>
   );

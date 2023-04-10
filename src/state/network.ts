@@ -23,7 +23,6 @@ export interface Network {
   graphqlExplorerUrl: string;
   graphqlDexsUrl: string;
   genesisHash: string;
-  reefscanFrontendUrl: string;
   bonds: Bond[]
 }
 
@@ -41,7 +40,6 @@ export const availableNetworks: Networks = {
     graphqlExplorerUrl: network.AVAILABLE_NETWORKS.testnet.graphqlUrl,
     graphqlDexsUrl: "https://squid.subsquid.io/reef-swap-testnet/graphql", // getReefswapNetworkConfig(network.AVAILABLE_NETWORKS.testnet).graphqlDexsUrl,
     genesisHash: '0xb414a8602b2251fa538d38a9322391500bd0324bc7ac6048845d57c37dd83fe6', // network.AVAILABLE_NETWORKS.testnet.genesisHash,
-    reefscanFrontendUrl: network.AVAILABLE_NETWORKS.testnet.reefscanFrontendUrl,
     bonds: [],
   },
   mainnet: {
@@ -54,7 +52,6 @@ export const availableNetworks: Networks = {
     graphqlExplorerUrl: network.AVAILABLE_NETWORKS.mainnet.graphqlUrl,
     graphqlDexsUrl: "https://squid.subsquid.io/reef-swap/graphql", // getReefswapNetworkConfig(network.AVAILABLE_NETWORKS.mainnet).graphqlDexsUrl,
     genesisHash: network.AVAILABLE_NETWORKS.mainnet.genesisHash, // '0x7834781d38e4798d548e34ec947d19deea29df148a7bf32484b7b24dacf8d4b7',
-    reefscanFrontendUrl: network.AVAILABLE_NETWORKS.mainnet.reefscanFrontendUrl,
     bonds: [
       {
         name: 'Reef community staking bond',
@@ -77,7 +74,6 @@ export const availableNetworks: Networks = {
     graphqlExplorerUrl: 'ws://localhost:8080/v1/graphql',
     graphqlDexsUrl: "http://localhost:4351/graphql", // TODO - add to util-lib
     genesisHash: '', // TODO ?
-    reefscanFrontendUrl: 'http://localhost:3000',
     bonds: [],
   },
 };

@@ -78,7 +78,6 @@ interface PoolTokensData extends PoolTokens {
   symbol2: string;
 }
 
-
 interface ContractData {
   contractData: ContractData
 }
@@ -93,35 +92,23 @@ interface PoolInfo {
 }
 
 interface PoolTransaction {
-  amount_1: number;
-  amount_2: number;
-  amount_in_1: number;
-  amount_in_2: number;
-  sender_address: string;
-  to_address: string | null;
+  id: string;
+  amount1: number;
+  amount2: number;
+  amountIn1: number;
+  amountIn2: number;
+  senderAddress: string;
+  toAddress: string | null;
+  hash: string;
   timestamp: string;
   type: BasePoolTransactionTypes;
   pool: {
-    token_contract_1: {
-      verified_contract: null | {
-        contract_data: ContractData;
-      };
-    };
-    token_contract_2: {
-      verified_contract: null | {
-        contract_data: ContractData;
-      };
-    };
+    decimal1: number;
+    decimal2: number;
+    symbol1: string;
+    symbol2: string;
   };
-  evm_event: {
-    event: {
-      id: number;
-      extrinsic: {
-        hash: string;
-        signer: string;
-      };
-    };
-  };
+  signerAddress: string;
 }
 
 // Charts interfaces
@@ -183,7 +170,7 @@ export type PoolReservesQuery = { poolEvents: Reserves[] };
 export type AllPoolsQuery = { allPools: AllPool[] }
 export type PoolSupplyQuery = { poolMinuteSupplies: Supply[] };
 export type PoolDayVolumeQuery = { poolDayVolumes: TimeframedVolume[] };
-export type PoolTransactionQuery = { verified_pool_event: PoolTransaction[] };
+export type PoolTransactionQuery = { poolEvents: PoolTransaction[] };
 export type PoolDayCandlestickQuery = { poolTimeCandlesticks: CandlestickData[]; }
 export type PoolLastCandlestickQuery = { poolLastCandlestick: CandlestickData[]; }
 export type PoolVolumeAggregateQuery = { pool_hour_volume_aggregate: { aggregate: { sum: Amounts } }; };
@@ -233,10 +220,8 @@ export type PoolFeeQuery = {
   };
 };
 export type PoolTransactionCountQuery = {
-  verified_pool_event_aggregate: {
-    aggregate: {
-      count: number;
-    };
+  poolEventsConnection: {
+    totalCount: number;
   };
 }
 // export type PoolCountQuery = {
@@ -608,7 +593,7 @@ export const POOL_CURRENT_RESERVES_GQL = gql`
 export const POOL_TRANSACTIONS_GQL = gql`
   subscription transactions(
     $search: String!
-    $type: [pooltype!]
+    $type: [PoolType!]
     $offset: Int!
     $limit: Int!
   ) {
@@ -624,12 +609,14 @@ export const POOL_TRANSACTIONS_GQL = gql`
         AND: {type_in: $type}
       }
     ) {
+      id
       amount1
       amount2
       amountIn1
       amountIn2
       senderAddress
       toAddress
+      hash
       timestamp
       type
       pool {
@@ -644,9 +631,9 @@ export const POOL_TRANSACTIONS_GQL = gql`
 `;
 
 export const POOL_TRANSACTION_COUNT_GQL = gql`
-  subscription transactionCount(
+  query transactionCount(
     $search: String!
-    $type: [pooltype]!
+    $type: [PoolType!]
   ) {
     poolEventsConnection(
       orderBy: timestamp_DESC, 
