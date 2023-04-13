@@ -225,28 +225,29 @@ export const onAddLiquidity = ({
     );
 
     // estimating resources for token approval
-    const resources = await signer.signer.provider.estimateResources(approveTransaction1);
+    const approveResources1 = await signer.signer.provider.estimateResources(approveTransaction1);
+    const approveResources2 = await signer.signer.provider.estimateResources(approveTransaction2);
 
     // Creating transaction extrinsics
     const approveExtrinsic1 = signer.signer.provider.api.tx.evm.call(
       approveTransaction1.to,
       approveTransaction1.data,
       BigNumber.from(approveTransaction1.value || 0),
-      resources.gas,
-      resources.storage.lt(0) ? BigNumber.from(0) : resources.storage,
+      approveResources1.gas,
+      approveResources1.storage.lt(0) ? BigNumber.from(0) : approveResources1.storage,
     );
     const approveExtrinsic2 = signer.signer.provider.api.tx.evm.call(
       approveTransaction2.to,
       approveTransaction2.data,
       BigNumber.from(approveTransaction2.value || 0),
-      resources.gas,
-      resources.storage.lt(0) ? BigNumber.from(0) : resources.storage,
+      approveResources2.gas,
+      approveResources2.storage.lt(0) ? BigNumber.from(0) : approveResources2.storage,
     );
     const provideExtrinsic = signer.signer.provider.api.tx.evm.call(
       provideTransaction.to,
       provideTransaction.data,
       BigNumber.from(provideTransaction.value || 0),
-      BigNumber.from(605379).mul(2), // Value was used from estimateResources, which can only be ran if tokens are approved. multiple 2 is a safty net.
+      BigNumber.from(605379).mul(2), // Value was used from estimateResources, which can only be ran if tokens are approved. multiple 2 is a safety net.
       BigNumber.from(0),
     );
 
@@ -340,6 +341,7 @@ export const onAddLiquidity = ({
       await signAndSendApprove2;
 
       // Provide liquidity
+      await signer.signer.provider.estimateResources(provideTransaction); // Triggers error with correct message
       const signAndSendProvide = new Promise<void>((resolve, reject) => {
         provideExtrinsic.signAndSend(
           signer.address,

@@ -52,7 +52,7 @@ const swapStatus = (
       `Insufficient ${sell.symbol} balance`,
     );
 
-    // Because of aboves ensure pool would not need explenation mark. Typescript broken...
+    // Because of aboves ensure pool would not need explanation mark. Typescript broken...
     const { reserve1, reserve2 } = pool!;
     const amountOut1 = BigNumber.from(calculateAmount(sell));
     const amountOut2 = BigNumber.from(calculateAmount(buy));
@@ -63,7 +63,7 @@ const swapStatus = (
 
     // WIP checking for ReefswapV2: K error
     // Temporary solution was with `swapExactTokensForTokensSupportingFeeOnTransferTokens` function!
-    // Error still arives when using `swapExactTokensForTokens`
+    // Error still arrives when using `swapExactTokensForTokens`
 
     // const balanceAdjuster1 = token1.balance.mul(1000).sub(amountIn1.mul(3));
     // const balanceAdjuster2 = token2.balance.mul(1000).sub(amountIn2.mul(3));
@@ -282,6 +282,7 @@ export const onSwap = ({
       await signAndSendApprove;
 
       // Swap
+      await signer.provider.estimateResources(tradeTransaction); // Triggers error with correct message
       const signAndSendTrade = new Promise<void>(async (resolve, reject) => {
         tradeExtrinsic.signAndSend(
           address,
@@ -330,7 +331,7 @@ export const onSwap = ({
     });
   } finally {
     await updateTokenState().catch(() => Uik.notify.danger({
-      message: 'Please reaload the page to update token balances',
+      message: 'Please reload the page to update token balances',
       keepAlive: true,
     }));
 

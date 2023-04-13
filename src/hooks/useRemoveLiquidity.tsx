@@ -243,6 +243,7 @@ export const onRemoveLiquidity = ({
       await signAndSendApprove;
 
       // Withdraw liquidity
+      await signer.provider.estimateResources(withdrawTransaction); /// Triggers error with correct message
       const signAndSendWithdraw = new Promise<void>(async (resolve, reject) => {
         withdrawExtrinsic.signAndSend(
           address,

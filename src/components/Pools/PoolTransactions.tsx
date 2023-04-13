@@ -41,7 +41,18 @@ export const PoolTransactions = ({ address, reefscanUrl, dexClient } : PoolTrans
   const transactionView = !loadingTransactions && transactionData
     ? transactionData.poolEvents
       .map(({
-        amount1, amount2, timestamp, toAddress, hash, type: transactionType, amountIn1, amountIn2, id, signerAddress, pool: { decimal1, decimal2, symbol1, symbol2 },
+        amount1, 
+        amount2, 
+        timestamp, 
+        toAddress, 
+        blockHeight,
+        indexInBlock, 
+        type: transactionType, 
+        amountIn1, 
+        amountIn2, 
+        id, 
+        signerAddress, 
+        pool: { decimal1, decimal2, symbol1, symbol2 },
       }) => {
         symbol1 = symbol1 || '?';
         decimal1 = decimal1 || 18;
@@ -52,7 +63,7 @@ export const PoolTransactions = ({ address, reefscanUrl, dexClient } : PoolTrans
           <tr key={id}>
             <td className="fs-5">
               <a 
-                href={`${reefscanUrl}/extrinsic/${hash}`}
+                href={`${reefscanUrl}/extrinsic/${blockHeight}/${indexInBlock}`}
                 >
                 {description(transactionType, amount1, symbol1, symbol2)}</a>
               </td>
