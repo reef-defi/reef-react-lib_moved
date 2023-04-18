@@ -1,6 +1,6 @@
 import React from 'react';
 import { TokenWithAmount } from '../../state';
-import { calculateUsdAmount, minimumRecieveAmount } from '../../utils/math';
+import { calculateUsdAmount, minimumReceiveAmount } from '../../utils/math';
 import { SwitchTokenButton } from '../common/Button';
 import { SubCard } from '../common/Card';
 import { Margin } from '../common/Display';
@@ -65,8 +65,8 @@ const SwapConfirmationModal = ({
         valueSize="mini-text"
       />
       <ConfirmLabel
-        title="Minimum recieved"
-        value={`${minimumRecieveAmount(buy, percentage).toFixed(4)} ${
+        title="Minimum received"
+        value={`${minimumReceiveAmount(buy, percentage).toFixed(4)} ${
           buy.name
         }`}
         titleSize="mini-text"
@@ -83,7 +83,7 @@ const SwapConfirmationModal = ({
       <MutedText>
         Output is estimated. You will receive at least
         <b>
-          {`${minimumRecieveAmount(buy, percentage).toFixed(4)} ${
+          {`${minimumReceiveAmount(buy, percentage).toFixed(4)} ${
             buy.name
           }`}
         </b>

@@ -55,6 +55,8 @@ export const swapReducer = (state = initialSwapState, action: SwapAction): SwapS
   let buyAmount = new BigNumber(0);
   const maxSellAmount = new BigNumber(token1.balance.toString()).div(new BigNumber(10).pow(token1.decimals));
   const maxBuyAmount = new BigNumber(pool ? getOutputAmount({ ...token2, amount: maxSellAmount.toString() }, pool) : '0');
+  const MAX_DECIMALS = 4;
+
   switch (action.type) {
     case SET_TOKEN1_AMOUNT:
       if (!state.pool) {
@@ -75,8 +77,8 @@ export const swapReducer = (state = initialSwapState, action: SwapAction): SwapS
       if (sellAmount.gt(maxSellAmount)) {
         return {
           ...state,
-          token1: { ...token1, amount: maxSellAmount.toString() },
-          token2: { ...token2, amount: maxBuyAmount.toString() },
+          token1: { ...token1, amount: maxSellAmount.toFixed(MAX_DECIMALS).replace(/\.?0+$/, '') },
+          token2: { ...token2, amount: maxBuyAmount.toFixed(MAX_DECIMALS).replace(/\.?0+$/, '') },
           percentage: 100,
         };
       }
@@ -97,7 +99,7 @@ export const swapReducer = (state = initialSwapState, action: SwapAction): SwapS
         },
         token2: {
           ...token2,
-          amount: buyAmount.toString()
+          amount: buyAmount.toFixed(MAX_DECIMALS).replace(/\.?0+$/, '')
         },
       };
     case SET_TOKEN2_AMOUNT:
@@ -119,8 +121,8 @@ export const swapReducer = (state = initialSwapState, action: SwapAction): SwapS
       if (sellAmount.gt(maxSellAmount)) {
         return {
           ...state,
-          token1: { ...token1, amount: maxSellAmount.toString() },
-          token2: { ...token2, amount: maxBuyAmount.toString() },
+          token1: { ...token1, amount: maxSellAmount.toFixed(MAX_DECIMALS).replace(/\.?0+$/, '') },
+          token2: { ...token2, amount: maxBuyAmount.toFixed(MAX_DECIMALS).replace(/\.?0+$/, '') },
           percentage: 100,
         };
       }
@@ -137,7 +139,7 @@ export const swapReducer = (state = initialSwapState, action: SwapAction): SwapS
         ...state,
         focus: 'buy',
         percentage,
-        token1: {...token1, amount: sellAmount.toString()},
+        token1: {...token1, amount: sellAmount.toFixed(MAX_DECIMALS).replace(/\.?0+$/, '')},
         token2: {...token2, amount: action.amount},
       }
     case SWITCH_TOKENS: return {
