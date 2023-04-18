@@ -7,21 +7,23 @@ import { EmptyButton } from '../common/Button';
 import { MT } from '../common/Display';
 import { Loading } from '../common/Loading';
 import { BoldText } from '../common/Text';
+import { ApolloClient } from '@apollo/client';
 
 interface PoolTransactions {
   address?: string;
-  reefscanFrontendUrl: string;
+  reefscanUrl: string;
+  dexClient: ApolloClient<any>;
 }
 
-export const PoolTransactions = ({ address, reefscanFrontendUrl } : PoolTransactions): JSX.Element => {
+export const PoolTransactions = ({ address, reefscanUrl, dexClient } : PoolTransactions): JSX.Element => {
   const [pageIndex, setPageIndex] = useState(0);
   const [type, setType] = useState<TransactionTypes>('All');
 
-  const { loading: loadingTransactions, data: transactionData } = usePoolTransactionSubscription(address, type, pageIndex, 10);
-  const { data } = usePoolTransactionCountSubscription(address, type);
+  const { loading: loadingTransactions, data: transactionData } = usePoolTransactionSubscription(address, type, pageIndex, 10, dexClient);
+  const { data } = usePoolTransactionCountSubscription(address, type, dexClient);
 
   const maxPage = data
-    ? Math.ceil(data.verified_pool_event_aggregate.aggregate.count / 10)
+    ? Math.ceil(data.poolEventsConnection.totalCount / 10)
     : 1;
 
   const nextPage = (): void => setPageIndex(Math.min(maxPage - 1, pageIndex + 1));
@@ -37,29 +39,45 @@ export const PoolTransactions = ({ address, reefscanFrontendUrl } : PoolTransact
   };
 
   const transactionView = !loadingTransactions && transactionData
-    ? transactionData.verified_pool_event
+    ? transactionData.poolEvents
       .map(({
-        amount_1, amount_2, timestamp, to_address, type: transactionType, amount_in_1, amount_in_2, evm_event: { event: { id, extrinsic: { hash, signer } } }, pool: { token_contract_1, token_contract_2 },
+        amount1, 
+        amount2, 
+        timestamp, 
+        toAddress, 
+        blockHeight,
+        indexInBlock, 
+        type: transactionType, 
+        amountIn1, 
+        amountIn2, 
+        id, 
+        signerAddress, 
+        pool: { decimal1, decimal2, symbol1, symbol2 },
       }) => {
-        const symbol1 = token_contract_1.verified_contract?.contract_data.symbol || '?';
-        const decimal1 = token_contract_1.verified_contract?.contract_data.decimals || 18;
-        const symbol2 = token_contract_2.verified_contract?.contract_data.symbol || '?';
-        const decimal2 = token_contract_2.verified_contract?.contract_data.decimals || 18;
+        symbol1 = symbol1 || '?';
+        decimal1 = decimal1 || 18;
+        symbol2 = symbol2 || '?';
+        decimal2 = decimal2 || 18;
 
         return (
           <tr key={id}>
-            <td className="fs-5"><a href={`${reefscanFrontendUrl}/extrinsic/${hash}`}>{description(transactionType, amount_1, symbol1, symbol2)}</a></td>
+            <td className="fs-5">
+              <a 
+                href={`${reefscanUrl}/extrinsic/${blockHeight}/${indexInBlock}`}
+                >
+                {description(transactionType, amount1, symbol1, symbol2)}</a>
+              </td>
             <td className="text-end fs-5 d-none d-md-table-cell d-lg-table-cell d-xl-table-cell">
-              {formatAmount(amount_1 > 0 ? amount_1 : amount_in_1, decimal1)}
+              {formatAmount(amount1 > 0 ? amount1 : amountIn1, decimal1)}
               {' '}
               {symbol1}
             </td>
             <td className="text-end fs-5 d-none d-lg-table-cell d-xl-table-cell">
-              {formatAmount(amount_2 > 0 ? amount_2 : amount_in_2, decimal2)}
+              {formatAmount(amount2 > 0 ? amount2 : amountIn2, decimal2)}
               {' '}
               {symbol2}
             </td>
-            <td className="text-end fs-5 d-none d-xl-table-cell"><a href={`${reefscanFrontendUrl}/account/${to_address || signer}`}>{shortAddress(to_address || signer)}</a></td>
+            <td className="text-end fs-5 d-none d-xl-table-cell"><a href={`${reefscanUrl}/account/${toAddress || signerAddress}`}>{shortAddress(toAddress || signerAddress)}</a></td>
             <td className="text-end pe-4 fs-5">{formatAgoDate(timestamp)}</td>
           </tr>
         );

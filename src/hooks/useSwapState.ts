@@ -52,7 +52,7 @@ const swapStatus = (
       `Insufficient ${sell.symbol} balance`,
     );
 
-    // Because of aboves ensure pool would not need explenation mark. Typescript broken...
+    // Because of aboves ensure pool would not need explanation mark. Typescript broken...
     const { reserve1, reserve2 } = pool!;
     const amountOut1 = BigNumber.from(calculateAmount(sell));
     const amountOut2 = BigNumber.from(calculateAmount(buy));
@@ -63,7 +63,7 @@ const swapStatus = (
 
     // WIP checking for ReefswapV2: K error
     // Temporary solution was with `swapExactTokensForTokensSupportingFeeOnTransferTokens` function!
-    // Error still arives when using `swapExactTokensForTokens`
+    // Error still arrives when using `swapExactTokensForTokens`
 
     // const balanceAdjuster1 = token1.balance.mul(1000).sub(amountIn1.mul(3));
     // const balanceAdjuster2 = token2.balance.mul(1000).sub(amountIn2.mul(3));
@@ -153,6 +153,7 @@ interface OnSwap {
   state: SwapState;
   network?: Network;
   account?: ReefSigner;
+  batchTxs?: boolean;
   notify: NotifyFun;
   dispatch: Dispatch<SwapAction>;
   updateTokenState: () => Promise<void>;
@@ -164,6 +165,7 @@ export const onSwap = ({
   state,
   network,
   account,
+  batchTxs,
   dispatch,
   updateTokenState,
   onSuccess,
@@ -218,41 +220,101 @@ export const onSwap = ({
       BigNumber.from(0),
     );
 
-    const batch = signer.provider.api.tx.utility.batchAll([
-      approveExtrinsic,
-      tradeExtrinsic,
-    ]);
+    if (batchTxs) {
+      // Batching extrinsics
+      const batch = signer.provider.api.tx.utility.batchAll([
+        approveExtrinsic,
+        tradeExtrinsic,
+      ]);
 
-    const signAndSend = new Promise<void>(async (resolve, reject) => {
-      batch.signAndSend(
-        address,
-        { signer: signer.signingKey },
-        (status: any) => {
-          console.log('Swap status:', status);
-          const err = captureError(status.events);
-          if (err) {
-            reject({message: err});
-          }
-          if (status.dispatchError) {
-            reject({message: status.dispatchError.toString()});
-          }
-          if (status.status.isInBlock) {
-            resolve();
-          }
-          // If you want to await until block is finalized use below if
-          if (status.status.isFinalized) {
-            if (onFinalized) onFinalized();
+      // Signing and awaiting when data comes in block
+      const signAndSend = new Promise<void>(async (resolve, reject) => {
+        batch.signAndSend(
+          address,
+          { signer: signer.signingKey },
+          (status: any) => {
+            console.log('Swap status:', status);
+            const err = captureError(status.events);
+            if (err) {
+              reject({message: err});
+            }
+            if (status.dispatchError) {
+              reject({message: status.dispatchError.toString()});
+            }
+            if (status.status.isInBlock) {
+              resolve();
+            }
+            // If you want to await until block is finalized use below if
+            if (status.status.isFinalized) {
+              if (onFinalized) onFinalized();
 
-            Uik.notify.success({
-              message: 'Blocks have been finalized',
-              keepAlive: true,
-            });
-          }
-        },
-      );
-    });
-    await signAndSend;
+              Uik.notify.success({
+                message: 'Blocks have been finalized',
+                keepAlive: true,
+              });
+            }
+          },
+        );
+      });
+      await signAndSend;
+    } else {
+      // Approve
+      const signAndSendApprove = new Promise<void>(async (resolve, reject) => {
+        approveExtrinsic.signAndSend(
+          address,
+          { signer: signer.signingKey },
+          (status: any) => {
+            console.log('Swap status:', status);
+            const err = captureError(status.events);
+            if (err) {
+              reject({message: err});
+            }
+            if (status.dispatchError) {
+              console.error(status.dispatchError.toString());
+              reject({message: status.dispatchError.toString()});
+            }
+            if (status.status.isInBlock) {
+              resolve();
+            }
+          },
+        );
+      });
+      await signAndSendApprove;
 
+      // Swap
+      await signer.provider.estimateResources(tradeTransaction); // Triggers error with correct message
+      const signAndSendTrade = new Promise<void>(async (resolve, reject) => {
+        tradeExtrinsic.signAndSend(
+          address,
+          { signer: signer.signingKey },
+          (status: any) => {
+            console.log('Swap status:', status);
+            const err = captureError(status.events);
+            if (err) {
+              reject({message: err});
+            }
+            if (status.dispatchError) {
+              console.error(status.dispatchError.toString());
+              reject({message: status.dispatchError.toString()});
+            }
+            if (status.status.isInBlock) {
+              resolve();
+            }
+            // If you want to await until block is finalized use below if
+            if (status.status.isFinalized) {
+              if (onFinalized) onFinalized();
+
+              Uik.notify.success({
+                message: 'Blocks have been finalized',
+                keepAlive: true,
+              });
+            }
+          },
+        );
+      });
+      await signAndSendTrade;
+    }
+    
     if (onSuccess) onSuccess();
 
     Uik.notify.success({
@@ -269,7 +331,7 @@ export const onSwap = ({
     });
   } finally {
     await updateTokenState().catch(() => Uik.notify.danger({
-      message: 'Please reaload the page to update token balances',
+      message: 'Please reload the page to update token balances',
       keepAlive: true,
     }));
 

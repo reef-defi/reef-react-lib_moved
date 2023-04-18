@@ -57,7 +57,12 @@ export const captureError = (events: Event[]): string|undefined => {
     const eventCompression = `${event.event.section.toString()}.${event.event.method.toString()}`;
     if (eventCompression === 'evm.ExecutedFailed') {
       const eventData = (event.event.data.toJSON() as any[]);
-      const message: string = hexToAscii(eventData[eventData.length - 2].substr(138));
+      let message = eventData[eventData.length - 2];
+      if (typeof message === 'string' || message instanceof String) {
+        message = hexToAscii(message.substring(138));
+      } else {
+        message = JSON.stringify(message);
+      }
       return message
     }
   }

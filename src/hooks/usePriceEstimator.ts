@@ -21,12 +21,12 @@ const findVerifiedPools = (
   pools: LastPoolReserves[],
   tokens: Token[],
 ): LastPoolReserves[] => pools.filter(
-  ({ token_1, token_2 }) => tokens.find((token) => token.address === token_1) !== undefined
-      && tokens.find((token) => token.address === token_2) !== undefined,
+  ({ token1, token2 }) => tokens.find((token) => token.address === token1) !== undefined
+      && tokens.find((token) => token.address === token2) !== undefined,
 );
 
 const findPoolTokens = (pools: LastPoolReserves[], tokens: Token[]): Token[] => tokens.filter((token) => pools.find(
-  ({ token_1, token_2 }) => token.address === token_1 || token.address === token_2,
+  ({ token1, token2 }) => token.address === token1 || token.address === token2,
 ));
 
 // const normalizeMatrixByNodeDegree = (matrix: number[][]): number[][] => {
@@ -62,16 +62,16 @@ export const estimatePrice = (
 
   // Setting reserved matrix
   verifiedPools.forEach(({
-    reserved_1, reserved_2, token_1, token_2,
+    reserved1, reserved2, token1, token2,
   }) => {
-    const position1 = tokenPosition[token_1];
-    const position2 = tokenPosition[token_2];
+    const position1 = tokenPosition[token1];
+    const position2 = tokenPosition[token2];
 
-    ratioMatrix[position1][position2] = new BigNumber(reserved_2)
-      .div(reserved_1)
+    ratioMatrix[position1][position2] = new BigNumber(reserved2)
+      .div(reserved1)
       .toNumber();
-    ratioMatrix[position2][position1] = new BigNumber(reserved_1)
-      .div(reserved_2)
+    ratioMatrix[position2][position1] = new BigNumber(reserved1)
+      .div(reserved2)
       .toNumber();
   });
 

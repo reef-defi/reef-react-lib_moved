@@ -16,7 +16,7 @@ import { graphql } from '@reef-chain/util-lib';
 import { _NFT_IPFS_RESOLVER_FN, combineTokensDistinct, toTokensWithPrice } from './util';
 import { selectedSigner$ } from './accountState';
 import { currentNetwork$, currentProvider$ } from './providerState';
-import { apolloClientInstance$, zenToRx } from '../graphql/apollo';
+import { apolloExplorerClientInstance$, zenToRx } from '../graphql/apollo';
 import { getIconUrl, getTransferUrl } from '../utils';
 import { getReefCoinBalance, loadPools } from '../rpc';
 import { retrieveReefCoingeckoPrice } from '../api';
@@ -116,7 +116,7 @@ const sortReefTokenFirst = (tokens): Token[] => {
 };
 
 export const selectedSignerTokenBalances$: Observable<Token[]|null> = combineLatest([
-  apolloClientInstance$,
+  apolloExplorerClientInstance$,
   selectedSigner$,
   currentProvider$,
 ]).pipe(
@@ -197,12 +197,14 @@ export const pools$: Observable<Pool[]> = combineLatest([
 
 const poolToLastPoolReserve = (p:Pool) => ({
   address: p.poolAddress,
-  reserved_1: Number.parseInt(p.reserve1),
-  reserved_2: Number.parseInt(p.reserve2),
-  token_1: p.token1.address,
-  token_2: p.token2.address,
-  token_data_1: { decimals: p.token1.decimals, name: p.token1.name, symbol: p.token1.symbol },
-  token_data_2: { decimals: p.token2.decimals, name: p.token2.name, symbol: p.token2.symbol },
+  reserved1: Number.parseInt(p.reserve1),
+  reserved2: Number.parseInt(p.reserve2),
+  token1: p.token1.address,
+  token2: p.token2.address,
+  symbol1: p.token1.symbol,
+  symbol2: p.token2.symbol,
+  decimal1: p.token1.decimals,
+  decimal2: p.token2.decimals,
 } as LastPoolReserves);
 // TODO pools and tokens emit events at same time - check how to make 1 event from it
 export const tokenPrices$: Observable<TokenWithAmount[]> = combineLatest([
@@ -256,7 +258,6 @@ const toTransferToken = (transfer): Token|NFT => (transfer.token.type === Contra
     iconUrl: '',
     nftId: transfer.nftId,
     contractType: transfer.token.type,
-    // data: transfer.token.verified_contract.contract_data,
   } as NFT);
 
 const toTokenTransfers = (resTransferData: any[], signer, network: Network): TokenTransfer[] => resTransferData.map((transferData): TokenTransfer => ({
@@ -274,7 +275,7 @@ const toTokenTransfers = (resTransferData: any[], signer, network: Network): Tok
 export const transferHistory$: Observable<
   | null
   | TokenTransfer[]
-> = combineLatest([apolloClientInstance$, selectedSigner$, currentNetwork$]).pipe(
+> = combineLatest([apolloExplorerClientInstance$, selectedSigner$, currentNetwork$]).pipe(
   switchMap(([apollo, signer, network]) => (!signer
     ? []
     : zenToRx(

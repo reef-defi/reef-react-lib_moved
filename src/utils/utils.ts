@@ -10,6 +10,7 @@ export const EMPTY_ADDRESS = '0x';
 export const REEF_ADDRESS_SPECIFIC_STRING = '(ONLY for Reef chain!)';
 export const MIN_NATIVE_TX_BALANCE = 1;
 export const MIN_EVM_TX_BALANCE = 65;
+export const POLL_INTERVAL = 5000;
 
 export interface ButtonStatus {
   text: string;

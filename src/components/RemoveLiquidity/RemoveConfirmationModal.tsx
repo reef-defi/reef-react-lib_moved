@@ -38,7 +38,7 @@ const RemoveConfirmationModal = ({
       confirmBtnLabel="Confirm and continue"
     >
       <MX size="2">
-        <MutedText>You will recieve</MutedText>
+        <MutedText>You will receive</MutedText>
         <SubCard>
           <ConfirmLabel
             titleSize="h4"

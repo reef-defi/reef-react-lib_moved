@@ -168,6 +168,7 @@ interface OnAddLiquidity {
   state: AddLiquidityState;
   network?: Network;
   signer?: ReefSigner;
+  batchTxs?: boolean;
   notify: NotifyFun;
   dispatch: Dispatch<AddLiquidityActions>;
   updateTokenState: () => Promise<void>;
@@ -179,6 +180,7 @@ export const onAddLiquidity = ({
   state,
   network,
   signer,
+  batchTxs,
   dispatch,
   updateTokenState,
   onSuccess,
@@ -209,8 +211,8 @@ export const onAddLiquidity = ({
     const token2Contract = new Contract(token2.address, ERC20, signer.signer);
 
     // Populating transactions
-    const approvetTransaction1 = await token1Contract.populateTransaction.approve(network.routerAddress, amount1);
-    const approvetTransaction2 = await token2Contract.populateTransaction.approve(network.routerAddress, amount2);
+    const approveTransaction1 = await token1Contract.populateTransaction.approve(network.routerAddress, amount1);
+    const approveTransaction2 = await token2Contract.populateTransaction.approve(network.routerAddress, amount2);
     const provideTransaction = await reefswapRouter.populateTransaction.addLiquidity(
       token1.address,
       token2.address,
@@ -223,71 +225,154 @@ export const onAddLiquidity = ({
     );
 
     // estimating resources for token approval
-    const resources = await signer.signer.provider.estimateResources(approvetTransaction1);
+    const approveResources1 = await signer.signer.provider.estimateResources(approveTransaction1);
+    const approveResources2 = await signer.signer.provider.estimateResources(approveTransaction2);
 
     // Creating transaction extrinsics
     const approveExtrinsic1 = signer.signer.provider.api.tx.evm.call(
-      approvetTransaction1.to,
-      approvetTransaction1.data,
-      BigNumber.from(approvetTransaction1.value || 0),
-      resources.gas,
-      resources.storage.lt(0) ? BigNumber.from(0) : resources.storage,
+      approveTransaction1.to,
+      approveTransaction1.data,
+      BigNumber.from(approveTransaction1.value || 0),
+      approveResources1.gas,
+      approveResources1.storage.lt(0) ? BigNumber.from(0) : approveResources1.storage,
     );
     const approveExtrinsic2 = signer.signer.provider.api.tx.evm.call(
-      approvetTransaction2.to,
-      approvetTransaction2.data,
-      BigNumber.from(approvetTransaction2.value || 0),
-      resources.gas,
-      resources.storage.lt(0) ? BigNumber.from(0) : resources.storage,
+      approveTransaction2.to,
+      approveTransaction2.data,
+      BigNumber.from(approveTransaction2.value || 0),
+      approveResources2.gas,
+      approveResources2.storage.lt(0) ? BigNumber.from(0) : approveResources2.storage,
     );
     const provideExtrinsic = signer.signer.provider.api.tx.evm.call(
       provideTransaction.to,
       provideTransaction.data,
       BigNumber.from(provideTransaction.value || 0),
-      BigNumber.from(605379).mul(2), // Value was used from estimateResources, which can only be ran if tokens are approved. multiple 2 is a safty net.
+      BigNumber.from(605379).mul(2), // Value was used from estimateResources, which can only be ran if tokens are approved. multiple 2 is a safety net.
       BigNumber.from(0),
     );
 
-    // Batching extrinsics
-    const batch = signer.signer.provider.api.tx.utility.batchAll([
-      approveExtrinsic1,
-      approveExtrinsic2,
-      provideExtrinsic,
-    ]);
+    if (batchTxs) {
+      // Batching extrinsics
+      const batch = signer.signer.provider.api.tx.utility.batchAll([
+        approveExtrinsic1,
+        approveExtrinsic2,
+        provideExtrinsic,
+      ]);
 
-    // Signing and awaiting when data comes in block
-    await new Promise<void>(async (resolve, reject) => {
-      batch.signAndSend(
-        signer.address,
-        { signer: signer.signer.signingKey },
-        (status: any) => {
-          console.log('Stake status: ', status);
-          const err = captureError(status.events);
-          if (err) {
-            reject({ message: err });
-          }
-          if (status.dispatchError) {
-            console.error(status.dispatchError.toString());
-            reject({ message: status.dispatchError.toString() });
-          }
-          if (status.status.isInBlock) {
-            resolve();
-          }
-          // TODO handle error - somehow
-          // First find it
+      // Signing and awaiting when data comes in block
+      const signAndSend = new Promise<void>(async (resolve, reject) => {
+        batch.signAndSend(
+          signer.address,
+          { signer: signer.signer.signingKey },
+          (status: any) => {
+            console.log('Stake status: ', status);
+            const err = captureError(status.events);
+            if (err) {
+              reject({ message: err });
+            }
+            if (status.dispatchError) {
+              console.error(status.dispatchError.toString());
+              reject({ message: status.dispatchError.toString() });
+            }
+            if (status.status.isInBlock) {
+              resolve();
+            }
+            // TODO handle error - somehow
+            // First find it
 
-          // If you want to await until block is finalized use below if
-          if (status.status.isFinalized) {
-            if (onFinalized) onFinalized();
+            // If you want to await until block is finalized use below if
+            if (status.status.isFinalized) {
+              if (onFinalized) onFinalized();
 
-            Uik.notify.success({
-              message: 'Blocks have been finalized',
-              keepAlive: true,
-            });
-          }
-        },
-      );
-    });
+              Uik.notify.success({
+                message: 'Blocks have been finalized',
+                keepAlive: true,
+              });
+            }
+          },
+        );
+      });
+      await signAndSend;
+    } else {
+      // Approve token 1
+      const signAndSendApprove1 = new Promise<void>((resolve, reject) => {
+        approveExtrinsic1.signAndSend(
+          signer.address,
+          { signer: signer.signer.signingKey },
+            (status: any) => {
+              console.log('Stake status: ', status);
+              const err = captureError(status.events);
+              if (err) {
+                reject({ message: err });
+              }
+              if (status.dispatchError) {
+                console.error(status.dispatchError.toString());
+                reject({ message: status.dispatchError.toString() });
+              }
+              if (status.status.isInBlock) {
+                resolve();
+              }
+            },
+        );
+      });
+      await signAndSendApprove1;
+
+      // Approve token 2
+      const signAndSendApprove2 = new Promise<void>((resolve, reject) => {
+        approveExtrinsic2.signAndSend(
+          signer.address,
+          { signer: signer.signer.signingKey },
+            (status: any) => {
+              console.log('Stake status: ', status);
+              const err = captureError(status.events);
+              if (err) {
+                reject({ message: err });
+              }
+              if (status.dispatchError) {
+                console.error(status.dispatchError.toString());
+                reject({ message: status.dispatchError.toString() });
+              }
+              if (status.status.isInBlock) {
+                resolve();
+              }
+            },
+        );
+      });
+      await signAndSendApprove2;
+
+      // Provide liquidity
+      await signer.signer.provider.estimateResources(provideTransaction); // Triggers error with correct message
+      const signAndSendProvide = new Promise<void>((resolve, reject) => {
+        provideExtrinsic.signAndSend(
+          signer.address,
+          { signer: signer.signer.signingKey },
+          (status: any) => {
+            console.log('Stake status: ', status);
+            const err = captureError(status.events);
+            if (err) {
+              reject({ message: err });
+            }
+            if (status.dispatchError) {
+              console.error(status.dispatchError.toString());
+              reject({ message: status.dispatchError.toString() });
+            }
+            if (status.status.isInBlock) {
+              resolve();
+            }
+            // If you want to await until block is finalized use below if
+            if (status.status.isFinalized) {
+              if (onFinalized) onFinalized();
+
+              Uik.notify.success({
+                message: 'Blocks have been finalized',
+                keepAlive: true,
+              });
+            }
+          },
+        );
+      });
+      await signAndSendProvide;
+    }
 
     if (onSuccess) onSuccess();
 
@@ -312,7 +397,7 @@ export const onAddLiquidity = ({
     /* TODO const newTokens = await loadTokens(tokens, sgnr);
     dispatch(setAllTokensAction(newTokens)); */
     await updateTokenState().catch(() => Uik.notify.danger({
-      message: 'Please reaload the page to update token balances',
+      message: 'Please reload the page to update token balances',
       keepAlive: true,
     }));
     dispatch(setLoadingAction(false));

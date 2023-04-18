@@ -40,14 +40,14 @@ const FeeChart = ({
     return <Loading />;
   }
 
-  const feeData = data.pool_day_fee
+  const feeData = data.poolTimeFees
     .map((d) => ({ ...d, date: new Date(d.timeframe) }));
 
   if (feeData.length <= 1) {
     return <span>Not enough data</span>;
   }
 
-  const values = feeData.reduce((acc, { fee_1, fee_2 }) => [...acc, fee_1, fee_2], [] as number[]);
+  const values = feeData.reduce((acc, { fee1, fee2 }) => [...acc, fee1, fee2], [] as number[]);
   const adjust = std(values);
 
   const f = scaleOrdinal(schemeCategory10)

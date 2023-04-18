@@ -10,37 +10,39 @@ import { BasicPoolInfo } from '../../state/pool';
 import { PoolInfo } from './PoolInfo';
 import { ChartSelector } from '../charts/ChartSelector';
 import { PoolTransactions } from './PoolTransactions';
+import { ApolloClient } from '@apollo/client';
 
 type Open = (address1: string, address2: string) => void;
 
 interface PoolPage {
   address: string;
-  reefscanFrontendUrl: string;
+  reefscanUrl: string;
   openTrade: Open;
   openAddLiquidity: Open;
   openRemoveLiquidity: Open;
   // This is a hack!
   // Put images inside of the lib and make appropriate loader for them which includes icons when the app loads
   getIconUrl: (address: string) => string;
+  dexClient: ApolloClient<any>;
 }
 export const PoolPage = ({
-  address, reefscanFrontendUrl, openTrade, openAddLiquidity, openRemoveLiquidity, getIconUrl,
+  address, reefscanUrl, openTrade, openAddLiquidity, openRemoveLiquidity, getIconUrl, dexClient,
 }: PoolPage): JSX.Element => {
   const { data: poolData } = usePoolQuery(address);
   const { data: reservesData } = useCurrentPoolReserve(address);
   // Token info
   const poolExists = poolData && poolData.pool.length > 0;
   const tokenAddress1 = poolExists
-    ? poolData.pool[0].token_contract_1.address
+    ? poolData.pool[0].token1
     : '0x';
   const tokenAddress2 = poolExists
-    ? poolData.pool[0].token_contract_2.address
+    ? poolData.pool[0].token2
     : '0x';
-  const tokenSymbol1 = poolExists && poolData.pool[0].token_contract_1.verified_contract
-    ? poolData.pool[0].token_contract_1.verified_contract.contract_data.symbol
+  const tokenSymbol1 = poolExists
+    ? poolData.pool[0].symbol1
     : '?';
-  const tokenSymbol2 = poolExists && poolData.pool[0].token_contract_2.verified_contract
-    ? poolData.pool[0].token_contract_2.verified_contract.contract_data.symbol
+  const tokenSymbol2 = poolExists
+    ? poolData.pool[0].symbol2
     : '?';
   const tokenIcon1 = poolExists
     ? getIconUrl(tokenAddress1)
@@ -49,44 +51,44 @@ export const PoolPage = ({
     ? getIconUrl(tokenAddress2)
     : '';
 
-  const decimal1 = poolExists && poolData.pool[0].token_contract_1.verified_contract
-    ? poolData.pool[0].token_contract_1.verified_contract.contract_data.decimals
+  const decimal1 = poolExists
+    ? poolData.pool[0].decimal1
     : 18;
-  const decimal2 = poolExists && poolData.pool[0].token_contract_2.verified_contract
-    ? poolData.pool[0].token_contract_2.verified_contract.contract_data.decimals
+  const decimal2 = poolExists
+    ? poolData.pool[0].decimal2
     : 18;
 
   const poolInfo: BasicPoolInfo = {
-    address,
+    address: address,
     decimal1,
     decimal2,
     symbol1: tokenSymbol1,
     symbol2: tokenSymbol2,
-    address1: tokenAddress1,
-    address2: tokenAddress2,
+    token1: tokenAddress1,
+    token2: tokenAddress2,
   };
 
   // Reserves
-  const reserved1 = reservesData && reservesData.pool_event.length > 0
-    ? formatAmount(reservesData.pool_event[0].reserved_1, decimal1)
+  const reserved1 = reservesData && reservesData.poolEvents.length > 0
+    ? formatAmount(reservesData.poolEvents[0].reserved1, decimal1)
     : '-';
-  const reserved2 = reservesData && reservesData.pool_event.length > 0
-    ? formatAmount(reservesData.pool_event[0].reserved_2, decimal2)
+  const reserved2 = reservesData && reservesData.poolEvents.length > 0
+    ? formatAmount(reservesData.poolEvents[0].reserved2, decimal2)
     : '-';
 
-  const ratio1 = reservesData && reservesData.pool_event.length > 0
+  const ratio1 = reservesData && reservesData.poolEvents.length > 0
     ? BigNumber
-      .from(reservesData.pool_event[0].reserved_2.toLocaleString('fullwide', { useGrouping: false }))
+      .from(reservesData.poolEvents[0].reserved2.toLocaleString('fullwide', { useGrouping: false }))
       .mul(1000)
-      .div(BigNumber.from(BigNumber.from(reservesData.pool_event[0].reserved_1.toLocaleString('fullwide', { useGrouping: false }))))
+      .div(BigNumber.from(BigNumber.from(reservesData.poolEvents[0].reserved1.toLocaleString('fullwide', { useGrouping: false }))))
       .toNumber() / 1000
     : -1;
 
-  const ratio2 = reservesData && reservesData.pool_event.length > 0
+  const ratio2 = reservesData && reservesData.poolEvents.length > 0
     ? BigNumber
-      .from(reservesData.pool_event[0].reserved_1.toLocaleString('fullwide', { useGrouping: false }))
+      .from(reservesData.poolEvents[0].reserved1.toLocaleString('fullwide', { useGrouping: false }))
       .mul(1000)
-      .div(BigNumber.from(BigNumber.from(reservesData.pool_event[0].reserved_2.toLocaleString('fullwide', { useGrouping: false }))))
+      .div(BigNumber.from(BigNumber.from(reservesData.poolEvents[0].reserved2.toLocaleString('fullwide', { useGrouping: false }))))
       .toNumber() / 1000
     : -1;
 
@@ -152,9 +154,9 @@ export const PoolPage = ({
             <div className="d-flex">
               <Button onClick={() => openTrade(tokenAddress1, tokenAddress2)}>Trade</Button>
               <ME size="1" />
-              <Button onClick={() => openAddLiquidity(tokenAddress1, tokenAddress2)}>Add Liqudity</Button>
+              <Button onClick={() => openAddLiquidity(tokenAddress1, tokenAddress2)}>Add Liquidity</Button>
               <ME size="1" />
-              <Button onClick={() => openRemoveLiquidity(tokenAddress1, tokenAddress2)}>Remove Liqudity</Button>
+              <Button onClick={() => openRemoveLiquidity(tokenAddress1, tokenAddress2)}>Remove Liquidity</Button>
             </div>
           </ContentBetween>
         </FullRow>
@@ -180,8 +182,8 @@ export const PoolPage = ({
             <div className="border-rad bg-grey p-1 h-100 m-auto mt-xs-3">
               <ChartSelector
                 address={poolInfo.address}
-                address1={poolInfo.address1}
-                address2={poolInfo.address2}
+                token1={poolInfo.token1}
+                token2={poolInfo.token2}
                 decimal1={poolInfo.decimal1}
                 decimal2={poolInfo.decimal2}
                 symbol1={poolInfo.symbol1}
@@ -191,7 +193,7 @@ export const PoolPage = ({
           </div>
         </div>
 
-        <PoolTransactions address={address} reefscanFrontendUrl={reefscanFrontendUrl} />
+        <PoolTransactions address={address} reefscanUrl={reefscanUrl} dexClient={dexClient}/>
       </div>
     </div>
   );

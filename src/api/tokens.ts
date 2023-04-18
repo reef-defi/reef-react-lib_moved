@@ -31,6 +31,7 @@ export const loadSignerTokens = async (
 ): Promise<Token[]> => {
   const reefAddress = reefTokenWithAmount().address;
   try {
+    // TODO: end point does not exist anymore
     return axios
       .post<void, AxiosResponse<AccountTokensRes>>(
         `${network.reefscanUrl}/api/account/tokens`,

@@ -17,6 +17,6 @@ export * from './useAllPools';
 export * from './usePriceEstimator';
 export * from './usePoolStats';
 export * from './usePoolData';
-export * from './usePoolSupply';
+// export * from './usePoolSupply'; // TODO remove?
 export * from './usePoolLists';
 export * from './useAllNfts';
