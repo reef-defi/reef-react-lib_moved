@@ -104,7 +104,7 @@ export const AddLiquidity = ({
           title="Confirm Supply"
           confirmFun={onAddLiquidity}
         >
-          <label className="text-muted ms-2">You will recieve</label>
+          <label className="text-muted ms-2">You will receive</label>
           <div className="field border-rad p-3">
             <ConfirmLabel
               titleSize="h4"

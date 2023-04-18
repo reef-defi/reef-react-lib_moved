@@ -3,7 +3,7 @@ import { utils } from 'ethers';
 import {
   from, map, Observable, of, scan, shareReplay, switchMap,
 } from 'rxjs';
-import { apolloClientInstance$, zenToRx } from './apollo';
+import { apolloExplorerClientInstance$, zenToRx } from './apollo';
 
 const getGqlContractEventsQuery = (
   contractAddress: string,
@@ -79,7 +79,7 @@ export function getEvmEvents$(contractAddress: string, methodSignature?: string,
     return of(null);
   }
   if (!fromBlockId) {
-    return apolloClientInstance$.pipe(
+    return apolloExplorerClientInstance$.pipe(
       switchMap((apolloClient: ApolloClient<any>) => zenToRx(apolloClient.subscribe(getGqlLastFinalizedBlock())).pipe(
         scan((state, res: any) => {
           const block = res?.data?.block?.length ? res.data.block[0] : null;
@@ -110,7 +110,7 @@ export function getEvmEvents$(contractAddress: string, methodSignature?: string,
       shareReplay(1),
     );
   }
-  return apolloClientInstance$.pipe(
+  return apolloExplorerClientInstance$.pipe(
     switchMap((apolloClient: ApolloClient<any>) => from(apolloClient?.query(
       getGqlContractEventsQuery(contractAddress, methodSignature, fromBlockId, toBlockId),
     ))),

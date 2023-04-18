@@ -34,22 +34,22 @@ interface OHLC {
 }
 
 const token1Values = ({
-  close_1, high_1, timeframe, low_1, open_1,
+  close1, high1, timeframe, low1, open1,
 }: CandlestickData): OHLC => ({
-  close: close_1,
-  high: high_1,
+  close: close1,
+  high: high1,
   date: new Date(timeframe),
-  low: low_1,
-  open: open_1,
+  low: low1,
+  open: open1,
 });
 const token2Values = ({
-  close_2, high_2, timeframe, low_2, open_2,
+  close2, high2, timeframe, low2, open2,
 }: CandlestickData): OHLC => ({
-  close: close_2,
-  high: high_2,
+  close: close2,
+  high: high2,
   date: new Date(timeframe),
-  low: low_2,
-  open: open_2,
+  low: low2,
+  open: open2,
 });
 
 interface TokenCandlestickChart {
@@ -65,15 +65,15 @@ const TokenCandlestickChart = ({ whichToken, address } : TokenCandlestickChart):
   const { loading: lastLoading, data: lastCandlestick } = useLastDayCandlestick(address, fromDate, whichToken);
 
   const candlestick = data
-    ? data.pool_day_candlestick
+    ? data.poolTimeCandlesticks
       .map((token) => (whichToken === 1 ? token1Values(token) : token2Values(token)))
     : [];
 
   // Injecting last seen OHCL before the date
-  if (lastCandlestick && lastCandlestick.pool_day_candlestick.length > 0) {
+  if (lastCandlestick && lastCandlestick.poolLastCandlestick.length > 0) {
     const item = whichToken === 1
-      ? token1Values(lastCandlestick.pool_day_candlestick[0])
-      : token2Values(lastCandlestick.pool_day_candlestick[0]);
+      ? token1Values(lastCandlestick.poolLastCandlestick[0])
+      : token2Values(lastCandlestick.poolLastCandlestick[0]);
 
     candlestick.splice(0, 0, item);
   }

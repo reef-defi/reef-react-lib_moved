@@ -76,29 +76,29 @@ export const PoolInfo = ({
   const { data: yesterdayVolume } = useDayVolume(address, twoDaysAgo, oneDayAgo);
 
   // Supply
-  const totalSupply = supplyData && supplyData.pool_minute_supply.length > 0
-    ? formatAmount(supplyData.pool_minute_supply[0].total_supply, 18)
+  const totalSupply = supplyData && supplyData.poolMinuteSupplies.length > 0
+    ? formatAmount(supplyData.poolMinuteSupplies[0].totalSupply, 18)
     : '-';
 
-  const totalSupplyPercentage = supplyData && supplyData.pool_minute_supply.length > 0
-    ? supplyData.pool_minute_supply[0].supply / supplyData.pool_minute_supply[0].total_supply * 100
+  const totalSupplyPercentage = supplyData && supplyData.poolMinuteSupplies.length > 0
+    ? supplyData.poolMinuteSupplies[0].supply / supplyData.poolMinuteSupplies[0].totalSupply * 100
     : 0;
 
   // Volume
-  const todayVolume1 = todayVolume ? todayVolume.pool_hour_volume_aggregate.aggregate.sum.amount_1 : 0;
-  const todayVolume2 = todayVolume ? todayVolume.pool_hour_volume_aggregate.aggregate.sum.amount_2 : 0;
-  const yesterdayVolume1 = yesterdayVolume ? yesterdayVolume.pool_hour_volume_aggregate.aggregate.sum.amount_1 : 0;
-  const yesterdayVolume2 = yesterdayVolume ? yesterdayVolume.pool_hour_volume_aggregate.aggregate.sum.amount_2 : 0;
+  const todayVolume1 = todayVolume ? todayVolume.poolVolume.amount1 : 0;
+  const todayVolume2 = todayVolume ? todayVolume.poolVolume.amount2 : 0;
+  const yesterdayVolume1 = yesterdayVolume ? yesterdayVolume.poolVolume.amount1 : 0;
+  const yesterdayVolume2 = yesterdayVolume ? yesterdayVolume.poolVolume.amount2 : 0;
 
   const volumeDifference1 = todayVolume1 > 0 && yesterdayVolume1 > 0 ? (todayVolume1 - yesterdayVolume1) / yesterdayVolume1 * 100 : 0;
   const volumeDifference2 = todayVolume2 > 0 && yesterdayVolume2 > 0 ? (todayVolume2 - yesterdayVolume2) / yesterdayVolume2 * 100 : 0;
 
   // Fee
   const fee1 = feesData && decimal1 !== 1
-    ? formatAmount(feesData.pool_hour_fee_aggregate.aggregate.sum.fee_1 || 0, decimal1)
+    ? formatAmount(feesData.poolFee.fee1 || 0, decimal1)
     : '-';
   const fee2 = feesData && decimal1 !== 1
-    ? formatAmount(feesData.pool_hour_fee_aggregate.aggregate.sum.fee_2 || 0, decimal2)
+    ? formatAmount(feesData.poolFee.fee2 || 0, decimal2)
     : '-';
 
   return (

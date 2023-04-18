@@ -29,8 +29,8 @@ export const ChartSelector = (pool: BasicPoolInfo): JSX.Element => {
   const [chart, setChart] = useState<ChartSwitch>('Token 1');
   const {
     address,
-    address1,
-    address2,
+    token1,
+    token2,
     decimal1,
     decimal2,
     symbol1,
@@ -58,8 +58,8 @@ export const ChartSelector = (pool: BasicPoolInfo): JSX.Element => {
         {chart === 'Volume' && (
           <VolumeChart
             address={address}
-            address1={address1}
-            address2={address2}
+            token1={token1}
+            token2={token2}
             decimal1={decimal1}
             decimal2={decimal2}
             symbol1={symbol1}
@@ -69,8 +69,8 @@ export const ChartSelector = (pool: BasicPoolInfo): JSX.Element => {
         {chart === 'Fee' && (
           <FeeChart
             address={address}
-            address1={address1}
-            address2={address2}
+            token1={token1}
+            token2={token2}
             decimal1={decimal1}
             decimal2={decimal2}
             symbol1={symbol1}

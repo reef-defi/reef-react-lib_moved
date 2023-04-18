@@ -61,7 +61,7 @@ export const calculateAmountWithPercentage = (
   return calculateAmount({ amount: amount.toString(), decimals });
 };
 
-export const minimumRecieveAmount = (
+export const minimumReceiveAmount = (
   { amount }: CalculateAmount,
   percentage: number,
 ): number => (parseFloat(assertAmount(amount)) * (100 - percentage)) / 100;

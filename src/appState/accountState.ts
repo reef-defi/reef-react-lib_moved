@@ -26,7 +26,7 @@ import {UpdateDataCtx} from './updateStateModel';
 import {replaceUpdatedSigners, updateSignersEvmBindings} from './accountStateUtil';
 import {currentProvider$} from './providerState';
 import {ReefSigner} from '../state';
-import {apolloClientInstance$, zenToRx} from '../graphql/apollo';
+import {apolloExplorerClientInstance$, zenToRx} from '../graphql/apollo';
 import {accountJsonToMeta, metaAccountToSigner} from '../rpc/accounts';
 import {graphql} from '@reef-chain/util-lib';
 
@@ -204,7 +204,7 @@ interface AccountEvmAddrData {
 }
 
 const indexedAccountValues$ = combineLatest([
-  apolloClientInstance$,
+  apolloExplorerClientInstance$,
   signersInjected$,
 ])
   .pipe(

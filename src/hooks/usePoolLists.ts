@@ -1,49 +1,9 @@
-import axios, { AxiosResponse } from 'axios';
+import { ApolloClient, useQuery } from '@apollo/client';
 import BigNumber from 'bignumber.js';
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
+import { AllPoolsListCountQuery, AllPoolsListQuery, ALL_POOLS_LIST, ALL_POOLS_LIST_COUNT, PoolListItem, PoolsListCountVar, PoolsListVar, UserPoolsListCountQuery, UserPoolsListQuery, USER_POOLS_LIST, USER_POOLS_LIST_COUNT } from '../graphql/pools';
 import { TokenPrices } from '../state';
 import { getIconUrl } from '../utils';
-import { useAsyncEffect } from './useAsyncEffect';
-
-const ALL_POOLS_LIST_ENDPOINT = '/api/pools/list';
-const USER_POOLS_LIST_ENDPOINT = '/api/pools/users-list';
-const ALL_POOLS_LIST_COUNT_ENDPOINT = '/api/pools/list-count';
-const USER_POOLS_LIST_COUNT_ENDPOINT = '/api/pools/users-list-count';
-
-interface ContractData {
-  name: string;
-  symbol: string;
-  decimals: number
-}
-interface PoolListItemReq {
-  address: string;
-  token_1: string;
-  token_2: string;
-  reserved_1: string;
-  reserved_2: string;
-  contract_data_1: ContractData;
-  contract_data_2: ContractData;
-  day_volume_1: string | null;
-  day_volume_2: string | null;
-  prev_day_volume_1: string | null;
-  prev_day_volume_2: string | null;
-  user_locked_amount_1: string | null;
-  user_locked_amount_2: string | null;
-}
-interface PoolsListReqVar {
-  limit: number;
-  offset: number;
-  signer: string;
-  search: string | undefined;
-}
-
-interface QueryPoolList {
-  limit: number;
-  search: string;
-  signer: string;
-  offset: number;
-  reefscanApi: string;
-}
 
 interface PoolItem {
   address: string;
@@ -61,66 +21,39 @@ interface PoolItem {
   };
 }
 
-const defaultPoolQuery = async <Res>(
-  endpoint: string,
-  {
-    limit,
-    offset,
-    reefscanApi,
-    search,
-    signer,
-  }: QueryPoolList,
-): Promise<Res> => axios.post<PoolsListReqVar, AxiosResponse<Res>>(
-  `${reefscanApi}${endpoint}`,
-  {
-    limit,
-    offset,
-    signer,
-    search: search === '' ? undefined : search,
-  },
-).then((res) => res.data);
-
-const queryPoolList = async (args: QueryPoolList): Promise<PoolListItemReq[]> => defaultPoolQuery(ALL_POOLS_LIST_ENDPOINT, args);
-
-const queryUserPoolList = async (args: QueryPoolList): Promise<PoolListItemReq[]> => defaultPoolQuery(USER_POOLS_LIST_ENDPOINT, args);
-
-const queryPoolListCount = async (args: QueryPoolList): Promise<number> => defaultPoolQuery(ALL_POOLS_LIST_COUNT_ENDPOINT, args);
-
-const queryUserPoolListCount = async (args: QueryPoolList): Promise<number> => defaultPoolQuery(USER_POOLS_LIST_COUNT_ENDPOINT, args);
-
-interface UsePoolsList extends QueryPoolList {
+interface UsePoolsList extends PoolsListVar {
   tokenPrices: TokenPrices;
+  dexClient: ApolloClient<any>;
   queryType: 'All' | 'User';
 }
 
-const calculate24hVolumeUSD = (
-  {
-    token_1,
-    token_2,
-    day_volume_1,
-    day_volume_2,
-    prev_day_volume_1,
-    prev_day_volume_2,
-    contract_data_1: { decimals: decimal1 },
-    contract_data_2: { decimals: decimal2 },
-  }: PoolListItemReq,
+const calculate24hVolumeUSD = ({
+    token1,
+    token2,
+    dayVolume1,
+    dayVolume2,
+    prevDayVolume1,
+    prevDayVolume2,
+    decimal1,
+    decimal2,
+  }: PoolListItem,
   tokenPrices: TokenPrices,
   current: boolean,
 ): BigNumber => {
-  const v1 = current ? day_volume_1 : prev_day_volume_1;
-  const v2 = current ? day_volume_2 : prev_day_volume_2;
+  const v1 = current ? dayVolume1 : prevDayVolume1;
+  const v2 = current ? dayVolume2 : prevDayVolume2;
   if (v1 === null && v2 === null) return new BigNumber(0);
   const dv1 = new BigNumber(v1 === null ? 0 : v1)
     .div(new BigNumber(10).pow(decimal1))
-    .multipliedBy(tokenPrices[token_1]);
+    .multipliedBy(tokenPrices[token1]);
   const dv2 = new BigNumber(v2 === null ? 0 : v2)
     .div(new BigNumber(10).pow(decimal2))
-    .multipliedBy(tokenPrices[token_2]);
+    .multipliedBy(tokenPrices[token2]);
 
   return dv1.plus(dv2);
 };
 
-const calculateVolumeChange = (pool: PoolListItemReq, tokenPrices: TokenPrices): number => {
+const calculateVolumeChange = (pool: PoolListItem, tokenPrices: TokenPrices): number => {
   const current = calculate24hVolumeUSD(pool, tokenPrices, true);
   const previous = calculate24hVolumeUSD(pool, tokenPrices, false);
   if (previous.eq(0) && current.eq(0)) return 0;
@@ -131,88 +64,85 @@ const calculateVolumeChange = (pool: PoolListItemReq, tokenPrices: TokenPrices):
 };
 
 const calculateUSDTVL = ({
-  reserved_1,
-  reserved_2,
-  contract_data_1: { decimals: decimal1 },
-  contract_data_2: { decimals: decimal2 },
-  token_1,
-  token_2,
-}: PoolListItemReq,
+  reserved1,
+  reserved2,
+  decimal1,
+  decimal2,
+  token1,
+  token2,
+}: PoolListItem,
 tokenPrices: TokenPrices): string => {
-  const r1 = new BigNumber(reserved_1).div(new BigNumber(10).pow(decimal1)).multipliedBy(tokenPrices[token_1]);
-  const r2 = new BigNumber(reserved_2).div(new BigNumber(10).pow(decimal2)).multipliedBy(tokenPrices[token_2]);
-  return r1.plus(r2).toFormat(2); // TODO Hudlajf add formating. You can use toFormat function
+  const r1 = new BigNumber(reserved1).div(new BigNumber(10).pow(decimal1)).multipliedBy(tokenPrices[token1]);
+  const r2 = new BigNumber(reserved2).div(new BigNumber(10).pow(decimal2)).multipliedBy(tokenPrices[token2]);
+  return r1.plus(r2).toFormat(2);
 };
 
 const calculateUserLiquidity = (
   {
-    token_1, token_2, user_locked_amount_1, user_locked_amount_2, contract_data_1: { decimals: decimal1 }, contract_data_2: { decimals: decimal2 },
-  }: PoolListItemReq,
+    token1, token2, userLockedAmount1, userLockedAmount2, decimal1, decimal2,
+  }: PoolListItem,
   tokenPrices: TokenPrices,
 ): string|undefined => {
-  const v1 = new BigNumber(user_locked_amount_1 === null ? '0' : user_locked_amount_1)
+  const v1 = new BigNumber(userLockedAmount1 === null ? '0' : userLockedAmount1)
     .div(new BigNumber(10).pow(decimal1))
-    .multipliedBy(tokenPrices[token_1]);
-  const v2 = new BigNumber(user_locked_amount_2 === null ? '0' : user_locked_amount_2)
+    .multipliedBy(tokenPrices[token1]);
+  const v2 = new BigNumber(userLockedAmount2 === null ? '0' : userLockedAmount2)
     .div(new BigNumber(10).pow(decimal2))
-    .multipliedBy(tokenPrices[token_2]);
+    .multipliedBy(tokenPrices[token2]);
   const res = v1.plus(v2);
 
   return res.gt(0) ? res.toFormat(2) : undefined;
 };
 
 export const usePoolsList = ({
-  limit, offset, reefscanApi, search, signer, tokenPrices, queryType,
+  limit, offset, search, signer, tokenPrices, queryType, dexClient
 }: UsePoolsList): [PoolItem[], boolean, number] => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [count, setCount] = useState(0);
-  const [pools, setPools] = useState<PoolItem[]>([]);
-  const [poolsReq, setPoolsReq] = useState<PoolListItemReq[]>([]);
 
-  useAsyncEffect(async () => {
-    if (reefscanApi === '') { return; }
-    const queryArgs = {
-      limit, offset, reefscanApi, search, signer,
-    };
+  const { data: dataPoolsList, loading: loadingPoolsList } = useQuery<AllPoolsListQuery | UserPoolsListQuery, PoolsListVar>(
+    queryType === 'User' ? USER_POOLS_LIST : ALL_POOLS_LIST,
+    {
+      client: dexClient,
+      variables: { limit, offset, search, signer },
+    },
+  );
 
-    Promise.resolve()
-      .then(() => setIsLoading(true))
-      .then(() => (queryType === 'User'
-        ? queryUserPoolList(queryArgs)
-        : queryPoolList(queryArgs)))
-      .then((res) => setPoolsReq(res))
-      .catch((err) => {
-        console.error('Something went wrong when loading pools');
-        console.error(err);
-      })
-      .finally(() => setIsLoading(false));
+  const { data: dataPoolsCount, loading: loadingPoolsCount } = useQuery<AllPoolsListCountQuery | UserPoolsListCountQuery, PoolsListCountVar>(
+    queryType === 'User' ? USER_POOLS_LIST_COUNT : ALL_POOLS_LIST_COUNT,
+    {
+      client: dexClient,
+      variables: { search, signer },
+    },
+  );
 
-    Promise.resolve()
-      .then(() => (queryType === 'User'
-        ? queryUserPoolListCount(queryArgs)
-        : queryPoolListCount(queryArgs)))
-      .then((ctn) => setCount(ctn));
-  }, [limit, offset, search, signer, reefscanApi]);
+  const processed = useMemo((): PoolItem[] => {
+    if (!dataPoolsList) return [];
+    const poolsList = queryType === 'User' 
+      ? (dataPoolsList as UserPoolsListQuery).userPoolsList 
+      : (dataPoolsList as AllPoolsListQuery).allPoolsList;
+    return poolsList.map((pool) => ({
+      address: pool.id,
+      token1: {
+        image: getIconUrl(pool.token1),
+        name: pool.name1,
+      },
+      token2: {
+        image: getIconUrl(pool.token2),
+        name: pool.name2,
+      },
+      tvl: calculateUSDTVL(pool, tokenPrices),
+      volume24h: calculate24hVolumeUSD(pool, tokenPrices, true).toFormat(2),
+      volumeChange24h: calculateVolumeChange(pool, tokenPrices),
+      myLiquidity: calculateUserLiquidity(pool, tokenPrices),
+    })); 
+  }, [dataPoolsList]);
 
-  useEffect(() => {
-    setPools(
-      poolsReq.map((pool) => ({
-        address: pool.address,
-        token1: {
-          image: getIconUrl(pool.token_1),
-          name: pool.contract_data_1.symbol,
-        },
-        token2: {
-          image: getIconUrl(pool.token_2),
-          name: pool.contract_data_2.symbol,
-        },
-        tvl: calculateUSDTVL(pool, tokenPrices),
-        volume24h: calculate24hVolumeUSD(pool, tokenPrices, true).toFormat(2),
-        volumeChange24h: calculateVolumeChange(pool, tokenPrices),
-        myLiquidity: calculateUserLiquidity(pool, tokenPrices),
-      })),
-    );
-  }, [poolsReq, tokenPrices]);
-
-  return [pools, isLoading, count];
-};
+  return [
+    processed, 
+    loadingPoolsList || loadingPoolsCount, 
+    dataPoolsCount 
+      ? queryType === 'User' 
+          ? (dataPoolsCount as UserPoolsListCountQuery).userPoolsListCount
+          : (dataPoolsCount as AllPoolsListCountQuery).allPoolsListCount
+      : 0
+  ];
+}

@@ -40,7 +40,7 @@ const VolumeChart = ({
     return <Loading />;
   }
 
-  const volumeData = dropDuplicatesMultiKey(data.pool_day_volume, ['timeframe'])
+  const volumeData = dropDuplicatesMultiKey(data.poolDayVolumes, ['timeframe'])
     .map((d) => ({ ...d, date: new Date(d.timeframe) }))
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 
@@ -48,7 +48,7 @@ const VolumeChart = ({
     return <span>Not enough data</span>;
   }
 
-  const values = volumeData.reduce((acc, { amount_1, amount_2 }) => [...acc, amount_1, amount_2], [] as number[]);
+  const values = volumeData.reduce((acc, { amount1, amount2 }) => [...acc, amount1, amount2], [] as number[]);
   const adjust = std(values);
 
   const f = scaleOrdinal(schemeCategory10)

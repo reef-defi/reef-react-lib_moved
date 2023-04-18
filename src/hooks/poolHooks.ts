@@ -1,18 +1,22 @@
 import {
+  ApolloClient,
   QueryResult, SubscriptionResult, useQuery,
   useSubscription,
 } from '@apollo/client';
 import {
-  PoolBasicTransactionVar, PoolCountQuery, PoolCountVar, PoolDayCandlestickQuery,
+  PoolBasicTransactionVar, PoolDayCandlestickQuery,
   PoolDayCandlestickVar, PoolDayFeeQuery, PoolDayVolumeQuery, PoolFeeQuery,
-  PoolFeeVar, PoolHourFeeVar, PoolQuery, PoolReservesQuery, PoolReservesVar, PoolsQuery, PoolSupplyQuery, PoolSupplyVar, PoolsVar, POOLS_GQL, PoolTransactionCountQuery, PoolTransactionQuery,
-  PoolTransactionVar, PoolTvlQuery,
-  PoolTvlVar, PoolVar, PoolVolumeAggregateQuery,
-  PoolVolumeAggregateVar, PoolVolumeVar, POOL_COUNT_GQL, POOL_CURRENT_RESERVES_GQL, POOL_DAY_CANDLESTICK_GQL, POOL_DAY_FEE_QUERY_GQL, POOL_DAY_TVL_GQL, POOL_DAY_VOLUME_GQL, POOL_FEES_GQL, POOL_GQL, POOL_LAST_CANDLESTICH_GQL, POOL_SUPPLY_GQL, POOL_TRANSACTIONS_GQL, POOL_TRANSACTION_COUNT_GQL, POOL_VOLUME_AGGREGATE_GQL,
+  PoolFeeVar, PoolDayFeeVar, PoolQuery, PoolReservesQuery, PoolReservesVar, PoolSupplyQuery, PoolSupplyVar, PoolTransactionCountQuery, PoolTransactionQuery,
+  PoolTransactionVar, PoolDayTvlQuery,
+  PoolDayTvlVar, PoolVar, PoolVolumeAggregateQuery,
+  PoolVolumeAggregateVar, PoolVolumeVar, POOL_CURRENT_RESERVES_GQL, POOL_DAY_CANDLESTICK_GQL, POOL_DAY_FEE_QUERY_GQL, POOL_DAY_TVL_GQL, POOL_DAY_VOLUME_GQL, POOL_FEES_GQL, POOL_GQL, POOL_LAST_CANDLESTICK_GQL, POOL_SUPPLY_GQL, POOL_TRANSACTIONS_GQL, POOL_TRANSACTION_COUNT_GQL, POOL_VOLUME_AGGREGATE_GQL,
   TransactionTypes,
+  PoolLastCandlestickQuery,
 } from '../graphql/pools';
+import useInterval from './userInterval';
+import { POLL_INTERVAL } from '../utils';
 
-// Intermediat query hooks
+// Intermediate query hooks
 export const useDayVolume = (
   address: string,
   fromTime: string,
@@ -49,45 +53,62 @@ export const useCurrentPoolReserve = (
   variables: { address },
 });
 
-export const usePools = (
-  fromTime: string,
-  offset: number,
-  search?: string,
-): QueryResult<PoolsQuery> => useQuery<PoolsQuery, PoolsVar>(POOLS_GQL, {
-  variables: {
-    fromTime,
-    offset,
-    search: search ? { _ilike: `${search}%` } : {},
-  },
-});
-export const usePoolCount = (search?: string): QueryResult<PoolCountQuery> => useQuery<PoolCountQuery, PoolCountVar>(POOL_COUNT_GQL, {
-  variables: { search: search ? { _ilike: `${search}%` } : {} },
-});
+// export const usePools = (
+//   fromTime: string,
+//   offset: number,
+//   search?: string,
+// ): QueryResult<PoolsQuery> => useQuery<PoolsQuery, PoolsVar>(POOLS_GQL, {
+//   variables: {
+//     fromTime,
+//     offset,
+//     search: search || '',
+//   },
+// });
+
+// export const usePoolCount = (search?: string): QueryResult<PoolCountQuery> => useQuery<PoolCountQuery, PoolCountVar>(POOL_COUNT_GQL, {
+//   variables: { search: search ? { _ilike: `${search}%` } : {} },
+// });
 
 const resolveTransactionVariables = (
   search: string | undefined,
   type: TransactionTypes,
 ): PoolBasicTransactionVar => ({
-  search: search ? { _ilike: search } : {},
+  search: search || '',
   type: type === 'All' ? ['Swap', 'Mint', 'Burn'] : [type],
 });
 export const usePoolTransactionCountSubscription = (
   address: string | undefined,
   type: TransactionTypes,
-): SubscriptionResult<PoolTransactionCountQuery> => useSubscription<PoolTransactionCountQuery, PoolBasicTransactionVar>(
-  POOL_TRANSACTION_COUNT_GQL,
-  {
-    variables: resolveTransactionVariables(address, type),
-  },
-);
+  dexClient: ApolloClient<any>,
+): QueryResult<PoolTransactionCountQuery> => {
+  if (dexClient === undefined) {
+    return [undefined, true] as any;
+  };
+
+  const { data, loading, refetch } = useQuery<PoolTransactionCountQuery, PoolBasicTransactionVar>(
+    POOL_TRANSACTION_COUNT_GQL, 
+    {
+      client: dexClient,
+      variables: resolveTransactionVariables(address, type),
+    }
+  );
+
+  useInterval(() => {
+    refetch();
+  }, POLL_INTERVAL);
+
+  return [data, loading] as any;
+}
 export const usePoolTransactionSubscription = (
   address: string | undefined,
   type: TransactionTypes,
   pageIndex = 0,
   limit = 10,
+  dexClient: ApolloClient<any>,
 ): SubscriptionResult<PoolTransactionQuery> => useSubscription<PoolTransactionQuery, PoolTransactionVar>(
   POOL_TRANSACTIONS_GQL,
   {
+    client: dexClient,
     variables: {
       ...resolveTransactionVariables(address, type),
       limit,
@@ -99,7 +120,7 @@ export const usePoolTransactionSubscription = (
 export const useDayTvl = (
   address: string,
   fromTime: number,
-): QueryResult<PoolTvlQuery> => useQuery<PoolTvlQuery, PoolTvlVar>(POOL_DAY_TVL_GQL, {
+): QueryResult<PoolDayTvlQuery> => useQuery<PoolDayTvlQuery, PoolDayTvlVar>(POOL_DAY_TVL_GQL, {
   variables: {
     address,
     fromTime: new Date(fromTime).toISOString(),
@@ -134,8 +155,8 @@ export const useLastDayCandlestick = (
   address: string,
   fromTime: number,
   whichToken: number,
-): QueryResult<PoolDayCandlestickQuery> => useQuery<PoolDayCandlestickQuery, PoolDayCandlestickVar>(
-  POOL_LAST_CANDLESTICH_GQL,
+): QueryResult<PoolLastCandlestickQuery> => useQuery<PoolLastCandlestickQuery, PoolDayCandlestickVar>(
+  POOL_LAST_CANDLESTICK_GQL,
   {
     variables: {
       address,
@@ -148,7 +169,7 @@ export const useLastDayCandlestick = (
 export const useDayPoolFee = (
   address: string,
   fromTime: number,
-): SubscriptionResult<PoolDayFeeQuery> => useQuery<PoolDayFeeQuery, PoolHourFeeVar>(
+): SubscriptionResult<PoolDayFeeQuery> => useQuery<PoolDayFeeQuery, PoolDayFeeVar>(
   POOL_DAY_FEE_QUERY_GQL,
   {
     variables: {

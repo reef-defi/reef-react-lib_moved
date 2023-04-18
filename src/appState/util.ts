@@ -24,10 +24,12 @@ import { ERC721Uri } from '../assets/abi/ERC721Uri';
 import { ERC1155Uri } from '../assets/abi/ERC1155Uri';
 import { initProvider } from '../utils/providerUtil';
 import { currentNetwork$, setCurrentNetwork, setCurrentProvider } from './providerState';
-import { apolloClientSubj, setApolloUrls } from '../graphql';
+import { apolloDexClientSubj, apolloExplorerClientSubj, GQLUrl, setApolloDexUrls, setApolloExplorerUrls } from '../graphql';
 import { ipfsUrlResolverFn } from '../utils/nftUtil';
 
 type destroyConnection = ()=>void;
+
+type GQLUrlType = 'explorer' | 'dex';
 
 export let _NFT_IPFS_RESOLVER_FN: ipfsUrlResolverFn|undefined;
 
@@ -82,17 +84,35 @@ export const getContractTypeAbi = (contractType: ContractType): ContractInterfac
   }
 };
 
-export const getGQLUrls = (network: Network): { ws: string; http: string }|undefined => {
-  if (!network.graphqlUrl) {
-    return undefined;
+export const getGQLUrls = (network: Network): Map<GQLUrlType, GQLUrl> => {
+  const gqlUrls = new Map();
+  if (!network.graphqlExplorerUrl) {
+    return gqlUrls;
   }
-  const ws = network.graphqlUrl.startsWith('http')
-    ? network.graphqlUrl.replace('http', 'ws')
-    : network.graphqlUrl;
-  const http = network.graphqlUrl.startsWith('ws')
-    ? network.graphqlUrl.replace('ws', 'http')
-    : network.graphqlUrl;
-  return { ws, http };
+
+  const wsExplorer = network.graphqlExplorerUrl.startsWith('http')
+    ? network.graphqlExplorerUrl.replace('http', 'ws')
+    : network.graphqlExplorerUrl;
+  const httpExplorer = network.graphqlExplorerUrl.startsWith('ws')
+    ? network.graphqlExplorerUrl.replace('ws', 'http')
+    : network.graphqlExplorerUrl;
+  gqlUrls.set('explorer', {
+    http: httpExplorer,
+    ws: wsExplorer,
+  });
+
+  const wsDex = network.graphqlDexsUrl.startsWith('http')
+    ? network.graphqlDexsUrl.replace('http', 'ws')
+    : network.graphqlDexsUrl;
+  const httpDex = network.graphqlDexsUrl.startsWith('ws')
+    ? network.graphqlDexsUrl.replace('ws', 'http')
+    : network.graphqlDexsUrl;
+  gqlUrls.set('dex', {
+    http: httpDex,
+    ws: wsDex,
+  });
+
+  return gqlUrls;
 };
 
 export interface State {
@@ -106,20 +126,31 @@ export interface State {
 export interface StateOptions {
   network?: Network;
   signers?: ReefSigner[];
-  client?: ApolloClient<any>;
+  explorerClient?: ApolloClient<any>;
+  dexClient?: ApolloClient<any>;
   jsonAccounts?:{accounts: AccountJson[] | InjectedAccountWithMeta[] | InjectedAccountWithMetaReef[], injectedSigner: InjectedSigningKey}
   ipfsHashResolverFn?: ipfsUrlResolverFn;
 }
 
-export function initApolloClient(selectedNetwork?: Network, client?: ApolloClient<any>) {
+export function initApolloClients(selectedNetwork?: Network, explorerClient?: ApolloClient<any>, dexClient?: ApolloClient<any>) {
   if (selectedNetwork) {
-    if (!client) {
+    if (!explorerClient && !dexClient) {
       const gqlUrls = getGQLUrls(selectedNetwork);
       if (gqlUrls) {
-        setApolloUrls(gqlUrls);
+        if (gqlUrls.get('explorer')) {
+          setApolloExplorerUrls(gqlUrls.get('explorer')!);
+        }
+        if (gqlUrls.get('dex')) {
+          setApolloDexUrls(gqlUrls.get('dex')!);
+        }
       }
     } else {
-      apolloClientSubj.next(client);
+      if (explorerClient) {
+        apolloExplorerClientSubj.next(explorerClient);
+      }
+      if (dexClient) {
+        apolloDexClientSubj.next(dexClient);
+      }
     }
   }
 }
@@ -127,7 +158,8 @@ export function initApolloClient(selectedNetwork?: Network, client?: ApolloClien
 export const initReefState = (
   {
     network,
-    client,
+    explorerClient,
+    dexClient,
     signers,
     jsonAccounts,
     ipfsHashResolverFn,
@@ -149,7 +181,7 @@ export const initReefState = (
       setCurrentProvider(p_n.provider);
     }),
     tap((p_n) => {
-      initApolloClient(p_n.network, client);
+      initApolloClients(p_n.network, explorerClient, dexClient);
     }),
     finalizeWithValue(((p_n) => disconnectProvider(p_n.provider))),
   )

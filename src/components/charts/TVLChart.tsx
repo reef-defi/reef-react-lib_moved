@@ -36,10 +36,10 @@ const TVLChart = ({ address } : TVLChart): JSX.Element => {
   const { loading, data } = useDayTvl(address, fromDate);
 
   const tvl = data
-    ? data.pool_day_supply
-      .map(({ timeframe, total_supply }) => ({
+    ? data.poolTimeSupply
+      .map(({ timeframe, totalSupply }) => ({
         date: new Date(timeframe),
-        amount: total_supply,
+        amount: totalSupply,
       }))
     : [];
 

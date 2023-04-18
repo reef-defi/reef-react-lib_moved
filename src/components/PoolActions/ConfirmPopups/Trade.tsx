@@ -4,7 +4,7 @@ import SummaryItem from './SummaryItem';
 import Token from './Token';
 import { TokenWithAmount } from '../../../state';
 import './confirm-popup.css';
-import { calculateUsdAmount, minimumRecieveAmount } from '../../../utils/math';
+import { calculateUsdAmount, minimumReceiveAmount } from '../../../utils/math';
 
 export interface TradePopup {
   fee: string;
@@ -104,7 +104,7 @@ const TradePopup = ({
           />
           <SummaryItem
             label="Minimum Received"
-            value={`${Uik.utils.maxDecimals(minimumRecieveAmount(token2, slippage), 4)} ${token2.symbol}`}
+            value={`${Uik.utils.maxDecimals(minimumReceiveAmount(token2, slippage), 4)} ${token2.symbol}`}
           />
         </div>
       </div>

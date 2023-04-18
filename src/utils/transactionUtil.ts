@@ -115,10 +115,10 @@ export const sendToNativeAddress = (
 
 export const getExtrinsicUrl = (extrinsic: {id:string}, network: Network = availableNetworks.mainnet): string => {
   const [blockHeight, extrinsicIndex] = extrinsic.id.split('-');
-  return `${network.reefscanFrontendUrl}/extrinsic/${blockHeight}/${extrinsicIndex}`;
+  return `${network.reefscanUrl}/extrinsic/${blockHeight}/${extrinsicIndex}`;
 };
 export const getTransferUrl = (extrinsic: {id:string}, network: Network = availableNetworks.mainnet): string => {
   const [blockHeight, extrinsicIndex] = extrinsic.id.split('-');
-  return `${network.reefscanFrontendUrl}/transfer/${blockHeight}/${extrinsicIndex}`;
+  return `${network.reefscanUrl}/transfer/${blockHeight}/${extrinsicIndex}`;
 };
-export const getContractUrl = (address: string, network: Network = availableNetworks.mainnet): string => `${network.reefscanFrontendUrl}/contract/${address}`;
+export const getContractUrl = (address: string, network: Network = availableNetworks.mainnet): string => `${network.reefscanUrl}/contract/${address}`;
