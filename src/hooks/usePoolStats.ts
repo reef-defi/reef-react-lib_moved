@@ -78,6 +78,7 @@ export interface TokenStats {
   name: string;
   icon: string;
   symbol: string;
+  decimals: number;
   fees24h: string;
   mySupply: string;
   amountLocked: string;
@@ -180,6 +181,7 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
         icon: getIconUrl(poolTokens.token1),
         name: poolTokens.name1,
         symbol: poolTokens.symbol1,
+        decimals: poolTokens.decimal1,
         amountLocked: amountLocked1.toFormat(0),
         fees24h: fee1.toFormat(2),
         mySupply: mySupply1.toFormat(0),
@@ -195,6 +197,7 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
         icon: getIconUrl(poolTokens.token2),
         name: poolTokens.name2,
         symbol: poolTokens.symbol2,
+        decimals: poolTokens.decimal2,
         amountLocked: amountLocked2.toFormat(0),
         fees24h: fee2.toFormat(2),
         mySupply: mySupply2.toFormat(0),
