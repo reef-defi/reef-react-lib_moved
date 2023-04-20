@@ -16,21 +16,23 @@ const coingeckoApi = axios.create({
   baseURL: 'https://api.coingecko.com/api/v3/',
 });
 
-// const explorerApi = axios.create({
-//   baseURL: 'https://api.reef.io/v1/',
-// });
+const explorerApi = axios.create({
+  baseURL: 'https://api.reefscan.com',
+});
+
+const getCoingeckoPrice = (tokenId: string):Promise<number> => coingeckoApi
+  .get<void, AxiosResponse<PriceRes>>(
+    `/simple/price?ids=${tokenId}&vs_currencies=usd`,
+  )
+  .then((res) => res.data[tokenId].usd);
 
 export const getTokenPrice = async (tokenId: string): Promise<number> => {
-  // if (tokenId === REEF_TOKEN_ID) {
-  //   return explorerApi.get<void, AxiosResponse<any>>(
-  //     '/price',
-  //   ).then((res) => res.data.usd);
-  // }
-  return coingeckoApi
-    .get<void, AxiosResponse<PriceRes>>(
-      `/simple/price?ids=${tokenId}&vs_currencies=usd`,
-    )
-    .then((res) => res.data[tokenId].usd);
+  if (tokenId === REEF_TOKEN_ID) {
+    return explorerApi.get<void, AxiosResponse<any>>(
+      '/price/reef',
+    ).then((res) => res.data.usd).catch(() => getCoingeckoPrice(tokenId));
+  }
+  return getCoingeckoPrice(tokenId);
 };
 
 export const getTokenListPrices = async (
