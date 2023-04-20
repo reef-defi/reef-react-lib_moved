@@ -17,16 +17,15 @@ export const timeDataToMs = (timeData: TimeData): number => {
 
 export const useFromTime = (timeUnit: TimeUnit, timeSpan: number) => useMemo(
   () => {
-    const now = new Date();
-    now.setSeconds(0, 0);
+    const toTime = new Date();
+    const fromTime = new Date(toTime.getTime() - timeDataToMs({timeUnit, timeSpan}));
+    fromTime.setUTCSeconds(0, 0);
     if (timeUnit === 'Hour') {
-      now.setMinutes(0);
+      fromTime.setUTCMinutes(0);
     } else if (timeUnit === 'Day') {
-      now.setHours(0);
-      now.setMinutes(0);
+      fromTime.setUTCHours(0, 0);
     }
-    const fromTime = new Date(now.getTime() - timeDataToMs({timeUnit, timeSpan}));
-    return { now, fromTime };
+    return { fromTime, toTime };
   },
   [timeUnit, timeSpan],
 );

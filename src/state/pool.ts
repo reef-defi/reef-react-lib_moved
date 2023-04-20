@@ -27,4 +27,11 @@ export interface LastPoolReserves extends BasicPoolInfo {
   reserved2: number;
 }
 
+export interface PoolWithReserves extends LastPoolReserves {
+  name1: string;
+  name2: string;
+  icon1: string;
+  icon2: string;
+}
+
 export type TokenPrices = {[tokenAddress: string]: number};

@@ -58,8 +58,6 @@ const fillMissingDates = <T extends Time>(
     // console.log("start", start)
     // console.log("end", end)
 
-    // if (timeUnit === 'Day') item.time.setHours(0, 0, 0, 0);
-
     const last = acc[acc.length - 1];
     let lastDate = new Date(last.time.getTime() + timeDataToMs({ timeUnit, timeSpan: 1 }));
 
@@ -129,7 +127,7 @@ interface UsePoolData {
 export const usePoolData = ({
   address, decimal1, decimal2, price1, price2, timeData = { timeUnit: 'Day', timeSpan: 31 },
 }: UsePoolData, dexClient: ApolloClient<any>): UsePoolDataOutput => {
-  const {now, fromTime} = useFromTime(timeData.timeUnit, timeData.timeSpan);
+  const { fromTime, toTime } = useFromTime(timeData.timeUnit, timeData.timeSpan);
   
   const { data, loading } = useQuery<PoolDataQuery, PoolDataVar>(
     poolDataQuery(timeData.timeUnit),
@@ -172,7 +170,7 @@ export const usePoolData = ({
     const volume = fillMissingDates(
       data.poolData.volume.map(process),
       { value: 0, time: fromTime },
-      { value: 0, time: now },
+      { value: 0, time: toTime },
       timeData.timeUnit,
       ({}, lastDate) => ({ value: 0, time: lastDate }),
     );
@@ -186,7 +184,7 @@ export const usePoolData = ({
           .toNumber(),
       })),
       { value: 0, time: fromTime },
-      { value: 0, time: now },
+      { value: 0, time: toTime },
       timeData.timeUnit,
       ({}, lastDate) => ({ value: 0, time: lastDate }),
     );
@@ -200,7 +198,7 @@ export const usePoolData = ({
           .toNumber(),
       })),
       { value: 0, time: fromTime },
-      { value: 0, time: now },
+      { value: 0, time: toTime },
       timeData.timeUnit,
       ({}, lastDate) => ({ value: 0, time: lastDate }),
     );
@@ -214,7 +212,7 @@ export const usePoolData = ({
         }))
         .map(process),
       { value: 0, time: fromTime },
-      { value: 0, time: now },
+      { value: 0, time: toTime },
       timeData.timeUnit,
       ({}, lastDate) => ({ value: 0, time: lastDate }),
     );
@@ -228,7 +226,7 @@ export const usePoolData = ({
         }))
         .map(process),
       { value: 0, time: fromTime },
-      { value: 0, time: now },
+      { value: 0, time: toTime },
       timeData.timeUnit,
       (last, lastDate) => ({ value: last.value, time: lastDate }),
     );

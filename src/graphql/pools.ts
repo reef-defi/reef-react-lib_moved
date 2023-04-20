@@ -868,6 +868,8 @@ export const ALL_POOLS = gql`
       symbol2
       token1
       token2
+      name1
+      name2
     }
   }
 `;
