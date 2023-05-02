@@ -247,8 +247,8 @@ export const onAddLiquidity = ({
       provideTransaction.to,
       provideTransaction.data,
       BigNumber.from(provideTransaction.value || 0),
-      BigNumber.from(605379).mul(2), // Value was used from estimateResources, which can only be ran if tokens are approved. multiple 2 is a safety net.
-      BigNumber.from(0),
+      BigNumber.from(9636498), // Value was used from estimateResources, which can only be ran if tokens are approved. multiple 2 is a safety net.
+      BigNumber.from(68206),
     );
 
     if (batchTxs) {
