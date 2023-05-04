@@ -34,15 +34,6 @@ export interface TimeData {
   timeSpan: number;
 }
 
-// const emptyHolder = (timeData?: TimeData): BaseDataHolder => {
-//   return {
-//     time: timeData 
-//       ? new Date(Date.now() - timeDataToMs({ timeUnit: timeData.timeUnit, timeSpan: timeData.timeSpan })) 
-//       : new Date(),
-//     value: 0,
-//   }
-// };
-
 const fillMissingDates = <T extends Time>(
   data: T[], 
   start: T, 
@@ -54,16 +45,10 @@ const fillMissingDates = <T extends Time>(
   { ...end },
 ]
   .reduce((acc, item) => {
-    // console.log("************************")
-    // console.log("start", start)
-    // console.log("end", end)
-
     const last = acc[acc.length - 1];
     let lastDate = new Date(last.time.getTime() + timeDataToMs({ timeUnit, timeSpan: 1 }));
 
-    // let i = 0;
     while (lastDate < item.time) {
-      // console.log(++i, lastDate.toISOString())
       acc.push(resolvePrev(last, lastDate));
       lastDate = new Date(lastDate.getTime() + timeDataToMs({ timeUnit, timeSpan: 1 }));
     }
@@ -157,13 +142,13 @@ export const usePoolData = ({
 
     const firstToken = processCandlestick(
       data.poolData.candlestick1,
-      data.poolData.previousCandlestick1.length > 0 ? data.poolData.previousCandlestick1[0].close : 0,
+      data.poolData.previousCandlestick1.close || 0,
       timeData,
     );
 
     const secondToken = processCandlestick(
       data.poolData.candlestick2,
-      data.poolData.previousCandlestick2.length > 0 ? data.poolData.previousCandlestick2[0].close : 0,
+      data.poolData.previousCandlestick2.close || 0,
       timeData,
     );
 
@@ -217,8 +202,16 @@ export const usePoolData = ({
       ({}, lastDate) => ({ value: 0, time: lastDate }),
     );
 
+    let reserves = data.poolData.reserves;
+    if (reserves.every(({ reserved1, reserved2 }) => !reserved1 && !reserved2) && data.poolData.previousReserves) {
+      reserves = [{
+        reserved1: data.poolData.previousReserves.reserved1,
+        reserved2: data.poolData.previousReserves.reserved2,
+        timeframe: fromTime.toISOString(),
+      }];
+    }
     const tvl = fillMissingDates(
-      data.poolData.reserves
+      reserves
         .map(({ reserved1, reserved2, timeframe }): Amounts => ({
           timeframe,
           amount1: reserved1,

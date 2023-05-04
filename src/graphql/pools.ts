@@ -231,9 +231,9 @@ export type Pool24HVolume = {
 }
 
 export interface PoolDataFull extends PoolData {
-  previousReserved: ReservedData[];
-  previousCandlestick1: LastClose[];
-  previousCandlestick2: LastClose[];
+  previousReserves: ReservedData;
+  previousCandlestick1: LastClose;
+  previousCandlestick2: LastClose;
 }
 
 export type PoolsTotalSupply = {
