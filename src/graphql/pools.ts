@@ -107,26 +107,6 @@ interface TVLData extends Timeframe {
   totalSupply: number;
 }
 
-export interface CandlestickData {
-  poolId: number,
-  timeframe: string;
-  close1: number;
-  close2: number;
-  high1: number;
-  high2: number;
-  open1: number;
-  open2: number;
-  low1: number;
-  low2: number;
-  whichToken: number;
-  token1: string;
-  token2: string;
-}
-
-interface LastClose {
-  close: number;
-}
-
 export interface PoolListItem {
   id: string;
   token1: string;
@@ -161,8 +141,6 @@ export type AllPoolsQuery = { allPools: AllPool[] }
 export type PoolSupplyQuery = { poolMinuteSupplies: Supply[] };
 export type PoolDayVolumeQuery = { poolDayVolumes: TimeframedVolume[] };
 export type PoolTransactionQuery = { poolEvents: PoolTransaction[] };
-export type PoolDayCandlestickQuery = { poolTimeCandlesticks: CandlestickData[]; }
-export type PoolLastCandlestickQuery = { poolLastCandlestick: CandlestickData[]; }
 export type PoolVolumeAggregateQuery = { poolVolume: Amounts };
 export type AllPoolsListQuery = { allPoolsList: PoolListItem[] };
 export type AllPoolsListCountQuery = { allPoolsListCount: number };
@@ -191,8 +169,6 @@ export type Pool24HVolume = {
 
 export interface PoolDataFull extends PoolData {
   previousReserves: ReservedData;
-  previousCandlestick1: LastClose;
-  previousCandlestick2: LastClose;
 }
 
 export type PoolsTotalSupply = {
@@ -232,9 +208,6 @@ interface LimitVar {
 interface TransactionTypeVar {
   type: BasePoolTransactionTypes[];
 }
-interface WhichTokenVar {
-  whichToken: number;
-}
 interface PaginationVar {
   limit: number;
   offset: number;
@@ -257,9 +230,7 @@ export interface PoolDataVar extends AddressVar, FromVar { }
 export interface PoolVolumeVar extends AddressVar, FromVar { }
 export interface PoolDayFeeVar extends AddressVar, FromVar { }
 export interface PoolVolumeAggregateVar extends PoolFeeVar, ToVar { }
-export interface PoolLastCandlestickVar extends AddressVar, WhichTokenVar { }
 export interface PoolInfoVar extends AddressVar, FromVar, ToVar, SignerAddressVar { }
-export interface PoolDayCandlestickVar extends AddressVar, FromVar, WhichTokenVar { }
 export interface PoolBasicTransactionVar extends OptionalSearchVar, TransactionTypeVar { }
 export interface PoolTransactionCountVar extends OptionalSearchVar, TransactionTypeVar { }
 export interface PoolTransactionVar extends PoolBasicTransactionVar, OffsetVar, LimitVar { }
@@ -475,59 +446,6 @@ export const POOL_DAY_TVL_GQL = tvlQuery('Day');
 export const POOL_HOUR_TVL_GQL = tvlQuery('Hour');
 export const POOL_MINUTE_TVL_GQL = tvlQuery('Minute');
 
-const candlestickQuery = (time: Time): DocumentNode => gql`
-  query candlestick($address: String!, $whichToken: Int!, $fromTime: String!) {
-    poolTimeCandlestick(
-      address: $address
-      whichToken: $whichToken
-      fromTime: $fromTime
-      time: ${time}
-    ) {
-      poolId
-      timeframe
-      close1
-      close2
-      high1
-      high2
-      low1
-      low2
-      open1
-      open2
-      whichToken
-      token1
-      token2
-    }
-  }
-`;
-
-export const POOL_DAY_CANDLESTICK_GQL = candlestickQuery('Day');
-export const POOL_HOUR_CANDLESTICK_GQL = candlestickQuery('Hour');
-export const POOL_MINUTE_CANDLESTICK_GQL = candlestickQuery('Minute');
-
-export const POOL_LAST_CANDLESTICK_GQL = gql`
-  query candlestick($address: String!, $whichToken: Int!, $fromTime: String!) {
-    poolLastCandlestick(
-      address: $address
-      whichToken: $whichToken
-      fromTime: $fromTime
-    ) {
-      poolId
-      timeframe
-      close1
-      close2
-      high1
-      high2
-      low1
-      low2
-      open1
-      open2
-      whichToken
-      token1
-      token2
-    }
-  }
-`;
-
 const feeQuery = (time: Time): DocumentNode => gql`
   query fee($address: String!, $fromTime: String!) {
     poolTimeFees(
@@ -611,20 +529,6 @@ export const poolDataQuery = (time: Time): DocumentNode => gql`
       fromTime: $fromTime
       time: "${time}"
     ) {
-      candlestick1 {
-        close
-        high
-        open
-        low
-        timeframe
-      }
-      candlestick2 {
-        close
-        high
-        open
-        low
-        timeframe
-      }
       fee {
         fee1
         fee2
@@ -644,12 +548,6 @@ export const poolDataQuery = (time: Time): DocumentNode => gql`
         timeframe
         reserved1
         reserved2
-      }
-      previousCandlestick1 {
-        close
-      }
-      previousCandlestick2 {
-        close
       }
     }
   }

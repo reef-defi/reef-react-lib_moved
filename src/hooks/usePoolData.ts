@@ -2,7 +2,8 @@ import { ApolloClient, useQuery } from '@apollo/client';
 import BigNumber from 'bignumber.js';
 import { useMemo } from 'react';
 import { PoolDataQuery, PoolDataVar, poolDataQuery } from '../graphql/pools';
-import { BaseCandlestickData, BaseVolumeData, CandlestickData } from '../state';
+// import { BaseCandlestickData, BaseVolumeData, CandlestickData } from '../state';
+import { BaseVolumeData } from '../state';
 import { timeDataToMs, useFromTime } from './useFromTime';
 
 interface Time {
@@ -14,14 +15,13 @@ interface Timeframe {
 interface BaseDataHolder extends Time {
   value: number;
 }
-interface CandlestickHolder extends BaseCandlestickData, Time { }
+// interface CandlestickHolder extends BaseCandlestickData, Time { }
 interface Amounts extends Timeframe, BaseVolumeData { }
 
 export interface PoolDataTime {
   fees: BaseDataHolder[];
   volume: BaseDataHolder[];
-  firstToken: CandlestickHolder[];
-  secondToken: CandlestickHolder[];
+  price: BaseDataHolder[];
   tvl: BaseDataHolder[];
   firstTokenVolume: BaseDataHolder[];
   secondTokenVolume: BaseDataHolder[];
@@ -58,34 +58,34 @@ const fillMissingDates = <T extends Time>(
   [start])
   .slice(1, -1);
 
-const processCandlestick = (data: CandlestickData[], prevClose: number, timeData: TimeData): CandlestickHolder[] => fillMissingDates(
-  data.map((item) => ({ ...item, time: new Date(item.timeframe) })), // data
-  {
-    close: prevClose,
-    high: prevClose,
-    low: prevClose,
-    open: prevClose,
-    time: new Date(Date.now() - timeDataToMs({ timeUnit: timeData.timeUnit, timeSpan: timeData.timeSpan })),
-    timeframe: new Date().toString(),
-  }, // start
-  {
-    close: 0,
-    high: 0,
-    open: 0,
-    low: 0,
-    time: new Date(),
-    timeframe: new Date().toString(),
-  }, // end
-  timeData.timeUnit, // timeUnit
-  ({ close }, lastDate) => ({
-    close,
-    high: close,
-    low: close,
-    open: close,
-    time: new Date(lastDate),
-    timeframe: new Date().toString(),
-  }), // resolvePrev
-);
+// const processCandlestick = (data: CandlestickData[], prevClose: number, timeData: TimeData): CandlestickHolder[] => fillMissingDates(
+//   data.map((item) => ({ ...item, time: new Date(item.timeframe) })), // data
+//   {
+//     close: prevClose,
+//     high: prevClose,
+//     low: prevClose,
+//     open: prevClose,
+//     time: new Date(Date.now() - timeDataToMs({ timeUnit: timeData.timeUnit, timeSpan: timeData.timeSpan })),
+//     timeframe: new Date().toString(),
+//   }, // start
+//   {
+//     close: 0,
+//     high: 0,
+//     open: 0,
+//     low: 0,
+//     time: new Date(),
+//     timeframe: new Date().toString(),
+//   }, // end
+//   timeData.timeUnit, // timeUnit
+//   ({ close }, lastDate) => ({
+//     close,
+//     high: close,
+//     low: close,
+//     open: close,
+//     time: new Date(lastDate),
+//     timeframe: new Date().toString(),
+//   }), // resolvePrev
+// );
 
 const defaultProcess = (price1: number, price2: number, decimal1: number, decimal2: number) => ({ timeframe, amount1, amount2 }: Amounts): BaseDataHolder => ({
   time: new Date(timeframe),
@@ -128,8 +128,7 @@ export const usePoolData = ({
   const processed = useMemo((): PoolDataTime => {
     if (!data) {
       return {
-        firstToken: [],
-        secondToken: [],
+        price: [],
         fees: [],
         tvl: [],
         volume: [],
@@ -139,18 +138,6 @@ export const usePoolData = ({
     }
 
     const process = defaultProcess(price1, price2, decimal1, decimal2);
-
-    const firstToken = processCandlestick(
-      data.poolData.candlestick1,
-      data.poolData.previousCandlestick1.close || 0,
-      timeData,
-    );
-
-    const secondToken = processCandlestick(
-      data.poolData.candlestick2,
-      data.poolData.previousCandlestick2.close || 0,
-      timeData,
-    );
 
     const volume = fillMissingDates(
       data.poolData.volume.map(process),
@@ -224,9 +211,33 @@ export const usePoolData = ({
       (last, lastDate) => ({ value: last.value, time: lastDate }),
     );
 
+    const processPrices = (decimal1: number, decimal2: number) => ({ timeframe, amount1, amount2 }: Amounts): BaseDataHolder => ({
+      time: new Date(timeframe),
+      value: new BigNumber(amount1)
+        .div(new BigNumber(10).pow(decimal1))
+        .div(
+          new BigNumber(amount2)
+            .div(new BigNumber(10).pow(decimal2))
+        )
+        .toNumber(),
+    });
+
+    const price = fillMissingDates(
+      reserves
+        .map(({ reserved1, reserved2, timeframe }): Amounts => ({
+          timeframe,
+          amount1: reserved1,
+          amount2: reserved2,
+        }))
+        .map(processPrices(decimal1, decimal2)),
+      { value: 0, time: fromTime },
+      { value: 0, time: toTime },
+      timeData.timeUnit,
+      (last, lastDate) => ({ value: last.value, time: lastDate }),
+    );
+
     return {
-      firstToken,
-      secondToken,
+      price,
       fees,
       volume,
       tvl,
