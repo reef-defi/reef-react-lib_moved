@@ -174,15 +174,16 @@ export const onRemoveLiquidity = ({
       approveResources.gas,
       approveResources.storage.lt(0) ? BigNumber.from(0) : approveResources.storage,
     );
-    const withdrawExtrinsic = signer.provider.api.tx.evm.call(
-      withdrawTransaction.to,
-      withdrawTransaction.data,
-      BigNumber.from(withdrawTransaction.value || 0),
-      BigNumber.from(626914).mul(2),
-      BigNumber.from(0),
-    );
 
     if (batchTxs) {
+      const withdrawExtrinsic = signer.provider.api.tx.evm.call(
+        withdrawTransaction.to,
+        withdrawTransaction.data,
+        BigNumber.from(withdrawTransaction.value || 0),
+        BigNumber.from(626914).mul(2), // hardcoded gas estimation, multiply by 2 as a safety margin
+        BigNumber.from(64).mul(2), // hardcoded storage estimation, multiply by 2 as a safety margin
+      );
+
       // Batching extrinsics
       const batch = signer.provider.api.tx.utility.batchAll([
         approveExtrinsic,
@@ -243,7 +244,14 @@ export const onRemoveLiquidity = ({
       await signAndSendApprove;
 
       // Withdraw liquidity
-      await signer.provider.estimateResources(withdrawTransaction); /// Triggers error with correct message
+      const withdrawResources = await signer.provider.estimateResources(withdrawTransaction);
+      const withdrawExtrinsic = signer.provider.api.tx.evm.call(
+        withdrawTransaction.to,
+        withdrawTransaction.data,
+        BigNumber.from(withdrawTransaction.value || 0),
+        withdrawResources.gas,
+        withdrawResources.storage.lt(0) ? BigNumber.from(0) : withdrawResources.storage,
+      );
       const signAndSendWithdraw = new Promise<void>(async (resolve, reject) => {
         withdrawExtrinsic.signAndSend(
           address,
