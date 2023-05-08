@@ -110,7 +110,7 @@ interface UsePoolData {
 }
 
 export const usePoolData = ({
-  address, decimal1, decimal2, price1, price2, timeData = { timeUnit: 'Day', timeSpan: 31 },
+  address, decimal1, decimal2, price1, price2, timeData = { timeUnit: 'Day', timeSpan: 30 },
 }: UsePoolData, dexClient: ApolloClient<any>): UsePoolDataOutput => {
   const { fromTime, toTime } = useFromTime(timeData.timeUnit, timeData.timeSpan);
   
@@ -189,23 +189,26 @@ export const usePoolData = ({
       ({}, lastDate) => ({ value: 0, time: lastDate }),
     );
 
-    let reserves = data.poolData.reserves;
-    if (reserves.every(({ reserved1, reserved2 }) => !reserved1 && !reserved2) && data.poolData.previousReserves) {
-      reserves = [{
-        reserved1: data.poolData.previousReserves.reserved1,
-        reserved2: data.poolData.previousReserves.reserved2,
-        timeframe: fromTime.toISOString(),
-      }];
-    }
     const tvl = fillMissingDates(
-      reserves
+      data.poolData.reserves
         .map(({ reserved1, reserved2, timeframe }): Amounts => ({
           timeframe,
           amount1: reserved1,
           amount2: reserved2,
         }))
         .map(process),
-      { value: 0, time: fromTime },
+      { value: data.poolData.previousReserves.timeframe 
+          ? new BigNumber(data.poolData.previousReserves.reserved1)
+          .div(new BigNumber(10).pow(decimal1))
+          .multipliedBy(price1)
+          .plus(
+            new BigNumber(data.poolData.previousReserves.reserved2)
+              .div(new BigNumber(10).pow(decimal2))
+              .multipliedBy(price2),
+          )
+          .toNumber() 
+          : 0, 
+        time: fromTime },
       { value: 0, time: toTime },
       timeData.timeUnit,
       (last, lastDate) => ({ value: last.value, time: lastDate }),
@@ -223,14 +226,23 @@ export const usePoolData = ({
     });
 
     const price = fillMissingDates(
-      reserves
+      data.poolData.reserves
         .map(({ reserved1, reserved2, timeframe }): Amounts => ({
           timeframe,
           amount1: reserved1,
           amount2: reserved2,
         }))
         .map(processPrices(decimal1, decimal2)),
-      { value: 0, time: fromTime },
+      { value: data.poolData.previousReserves.timeframe 
+          ? new BigNumber(data.poolData.previousReserves.reserved1)
+            .div(new BigNumber(10).pow(decimal1))
+            .div(
+              new BigNumber(data.poolData.previousReserves.reserved2)
+                .div(new BigNumber(10).pow(decimal2))
+            )
+            .toNumber()
+          :0, 
+          time: fromTime },
       { value: 0, time: toTime },
       timeData.timeUnit,
       (last, lastDate) => ({ value: last.value, time: lastDate }),
