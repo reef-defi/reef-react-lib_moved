@@ -243,15 +243,16 @@ export const onAddLiquidity = ({
       approveResources2.gas,
       approveResources2.storage.lt(0) ? BigNumber.from(0) : approveResources2.storage,
     );
-    const provideExtrinsic = signer.signer.provider.api.tx.evm.call(
-      provideTransaction.to,
-      provideTransaction.data,
-      BigNumber.from(provideTransaction.value || 0),
-      BigNumber.from(605379).mul(2), // Value was used from estimateResources, which can only be ran if tokens are approved. multiple 2 is a safety net.
-      BigNumber.from(0),
-    );
 
     if (batchTxs) {
+      const provideExtrinsic = signer.signer.provider.api.tx.evm.call(
+        provideTransaction.to,
+        provideTransaction.data,
+        BigNumber.from(provideTransaction.value || 0),
+        BigNumber.from(9636498), // Value was used from estimateResources, which can only be ran if tokens are approved
+        BigNumber.from(68206), // Value was used from estimateResources, which can only be ran if tokens are approved
+      );
+
       // Batching extrinsics
       const batch = signer.signer.provider.api.tx.utility.batchAll([
         approveExtrinsic1,
@@ -341,7 +342,15 @@ export const onAddLiquidity = ({
       await signAndSendApprove2;
 
       // Provide liquidity
-      await signer.signer.provider.estimateResources(provideTransaction); // Triggers error with correct message
+      const provideResources = await signer.signer.provider.estimateResources(provideTransaction);
+      const provideExtrinsic = signer.signer.provider.api.tx.evm.call(
+        provideTransaction.to,
+        provideTransaction.data,
+        BigNumber.from(provideTransaction.value || 0),
+        provideResources.gas,
+        provideResources.storage.lt(0) ? BigNumber.from(0) : provideResources.storage,
+      );
+
       const signAndSendProvide = new Promise<void>((resolve, reject) => {
         provideExtrinsic.signAndSend(
           signer.address,

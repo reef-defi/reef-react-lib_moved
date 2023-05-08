@@ -212,15 +212,16 @@ export const onSwap = ({
       approveResources.gas,
       approveResources.storage.lt(0) ? BigNumber.from(0) : approveResources.storage,
     );
-    const tradeExtrinsic = signer.provider.api.tx.evm.call(
-      tradeTransaction.to,
-      tradeTransaction.data,
-      BigNumber.from(tradeTransaction.value || 0),
-      BigNumber.from(542376).mul(2),
-      BigNumber.from(0),
-    );
 
     if (batchTxs) {
+      const tradeExtrinsic = signer.provider.api.tx.evm.call(
+        tradeTransaction.to,
+        tradeTransaction.data,
+        BigNumber.from(tradeTransaction.value || 0),
+        BigNumber.from(582938).mul(2), // hardcoded gas estimation, multiply by 2 as a safety margin
+        BigNumber.from(64).mul(2), // hardcoded storage estimation, multiply by 2 as a safety margin
+      );
+
       // Batching extrinsics
       const batch = signer.provider.api.tx.utility.batchAll([
         approveExtrinsic,
@@ -282,7 +283,15 @@ export const onSwap = ({
       await signAndSendApprove;
 
       // Swap
-      await signer.provider.estimateResources(tradeTransaction); // Triggers error with correct message
+      const tradeResources = await signer.provider.estimateResources(tradeTransaction);
+      const tradeExtrinsic = signer.provider.api.tx.evm.call(
+        tradeTransaction.to,
+        tradeTransaction.data,
+        BigNumber.from(tradeTransaction.value || 0),
+        tradeResources.gas,
+        tradeResources.storage.lt(0) ? BigNumber.from(0) : tradeResources.storage,
+      );
+
       const signAndSendTrade = new Promise<void>(async (resolve, reject) => {
         tradeExtrinsic.signAndSend(
           address,

@@ -39,7 +39,7 @@ export const BackButton = ({ onClick }: ButtonProps): JSX.Element => (
   </EmptyButton>
 );
 
-// TODO Move out or refactore!
+// TODO Move out or refactor!
 interface SwitchTokenButton {
   addIcon?: boolean;
   disabled?: boolean;

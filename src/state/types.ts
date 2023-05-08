@@ -76,15 +76,18 @@ export interface BaseReservedData {
   reserved1: number;
   reserved2: number;
 }
+export interface BasePriceData {
+  price: number;
+}
 export interface CandlestickData extends BaseCandlestickData, Timeframe { }
 export interface FeeData extends BaseFeeData, Timeframe { }
 export interface VolumeData extends BaseVolumeData, Timeframe { }
 export interface ReservedData extends BaseReservedData, Timeframe { }
+export interface PriceData extends BasePriceData, Timeframe { }
 
 export interface PoolData {
   fee: FeeData[];
   volume: VolumeData[];
   reserves: ReservedData[];
-  candlestick1: CandlestickData[];
-  candlestick2: CandlestickData[];
+  price: PriceData[];
 }
