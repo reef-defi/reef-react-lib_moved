@@ -17,7 +17,7 @@ const coingeckoApi = axios.create({
 });
 
 const explorerApi = axios.create({
-  baseURL: 'https://api.reefscan.com',
+  baseURL: 'https://api.reefscan.info',
 });
 
 const getCoingeckoPrice = (tokenId: string):Promise<number> => coingeckoApi
