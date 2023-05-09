@@ -50,6 +50,19 @@ export const swapReducer = (state = initialSwapState, action: SwapAction): SwapS
   const {
     token1, token2, pool, focus,
   } = state;
+  
+  if (pool?.token2.address === token1.address && pool?.token1.address === token2.address) {
+    // Switch order of tokens
+    const poolToken1 = pool.token2;
+    const poolToken2 = pool.token1;
+    const poolReserve1 = pool.reserve2;
+    const poolReserve2 = pool.reserve1;
+    pool.token1 = poolToken1;
+    pool.token2 = poolToken2;
+    pool.reserve1 = poolReserve1;
+    pool.reserve2 = poolReserve2;
+  }
+
   let percentage = 0;
   let sellAmount = new BigNumber(0);
   let buyAmount = new BigNumber(0);
