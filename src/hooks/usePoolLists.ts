@@ -96,14 +96,14 @@ const calculateUserLiquidity = (
 };
 
 export const usePoolsList = ({
-  limit, offset, search, signer, tokenPrices, queryType, dexClient
+  limit, offset, search, signerAddress, tokenPrices, queryType, dexClient
 }: UsePoolsList): [PoolItem[], boolean, number] => {
 
   const { data: dataPoolsList, loading: loadingPoolsList } = useQuery<AllPoolsListQuery | UserPoolsListQuery, PoolsListVar>(
     queryType === 'User' ? USER_POOLS_LIST : ALL_POOLS_LIST,
     {
       client: dexClient,
-      variables: { limit, offset, search, signer },
+      variables: { limit, offset, search, signerAddress },
     },
   );
 
@@ -111,7 +111,7 @@ export const usePoolsList = ({
     queryType === 'User' ? USER_POOLS_LIST_COUNT : ALL_POOLS_LIST_COUNT,
     {
       client: dexClient,
-      variables: { search, signer },
+      variables: { search, signerAddress },
     },
   );
 

@@ -18,7 +18,7 @@ import { selectedSigner$ } from './accountState';
 import { currentNetwork$, currentProvider$ } from './providerState';
 import { apolloExplorerClientInstance$, zenToRx } from '../graphql/apollo';
 import { getIconUrl, getTransferUrl } from '../utils';
-import { getReefCoinBalance, loadPools } from '../rpc';
+import { getReefCoinBalance } from '../rpc';
 import { retrieveReefCoingeckoPrice } from '../api';
 import {
   ContractType, reefTokenWithAmount, Token, TokenTransfer, TokenWithAmount,
@@ -27,6 +27,8 @@ import {
   LastPoolReserves, Network, NFT, Pool, ReefSigner,
 } from '../state';
 import { resolveNftImageLinks } from '../utils/nftUtil';
+import { loadPools } from '../hooks/useLoadPools';
+import { apolloDexClientInstance$ } from '../graphql';
 
 // TODO replace with our own from lib and remove
 const toPlainString = (num: number): string => `${+num}`.replace(
@@ -188,17 +190,17 @@ export const allAvailableSignerTokens$: Observable<Token[]> = combineLatest([
 // TODO when network changes signer changes as well? this could make 2 requests unnecessary - check
 export const pools$: Observable<Pool[]> = combineLatest([
   allAvailableSignerTokens$,
-  currentNetwork$,
+  apolloDexClientInstance$,
   selectedSigner$,
 ]).pipe(
-  switchMap(([tkns, network, signer]) => (signer ? loadPools(tkns, signer.signer, network.factoryAddress) : [])),
+  switchMap(([tkns, dexClient, signer]) => (signer ? loadPools(tkns, signer.address, dexClient) : [])),
   shareReplay(1),
 );
 
 const poolToLastPoolReserve = (p:Pool) => ({
   address: p.poolAddress,
-  reserved1: Number.parseInt(p.reserve1),
-  reserved2: Number.parseInt(p.reserve2),
+  reserved1: p.reserve1,
+  reserved2: p.reserve2,
   token1: p.token1.address,
   token2: p.token2.address,
   symbol1: p.token1.symbol,

@@ -16,7 +16,7 @@ import { MiniText, MutedText } from '../common/Text';
 interface RemoveConfirmationModal {
   id: string;
   pool?: Pool;
-  slipperage: number;
+  slippage: number;
   percentageAmount: number;
   onRemove: () => void;
 }
@@ -24,7 +24,7 @@ interface RemoveConfirmationModal {
 const RemoveConfirmationModal = ({
   id,
   pool,
-  slipperage,
+  slippage,
   percentageAmount,
   onRemove,
 }: RemoveConfirmationModal): JSX.Element => {
@@ -69,7 +69,7 @@ const RemoveConfirmationModal = ({
             <MutedText>
               Output is estimated. If the price changes by more than
               {' '}
-              {slipperage}
+              {slippage}
               % your transaction will revert.
             </MutedText>
           </MiniText>

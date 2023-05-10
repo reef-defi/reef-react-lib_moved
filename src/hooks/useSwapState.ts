@@ -30,6 +30,7 @@ import {
 } from '../utils';
 import { useKeepTokenUpdated } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
+import { ApolloClient } from '@apollo/client';
 
 const swapStatus = (
   sell: TokenWithAmount,
@@ -83,8 +84,8 @@ interface UseSwapState {
   address2: string;
   state: SwapState;
   tokens: Token[];
-  network?: Network;
   account?: ReefSigner;
+  dexClient?: ApolloClient<any>;
   tokenPrices: AddressToNumber<number>;
   dispatch: Dispatch<SwapAction>;
 }
@@ -92,7 +93,7 @@ export const useSwapState = ({
   state,
   tokens,
   account,
-  network,
+  dexClient,
   address1,
   address2,
   tokenPrices,
@@ -108,8 +109,8 @@ export const useSwapState = ({
   const [loadedPool, isPoolLoading] = useLoadPool(
     sell,
     buy,
-    network?.factoryAddress || '',
-    account?.signer,
+    account?.evmAddress || '',
+    dexClient,
     isLoading,
   );
   useEffect(() => {

@@ -39,13 +39,14 @@ import {
 import { useKeepTokenUpdated } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
 import { useUpdateLiquidityAmount } from './useUpdateAmount';
+import { ApolloClient } from '@apollo/client';
 
 interface UseAddLiquidityState {
   address1: string;
   address2: string;
   state: AddLiquidityState;
   tokens: Token[];
-  network?: Network;
+  dexClient?: ApolloClient<any>;
   signer?: ReefSigner;
   tokenPrices: AddressToNumber<number>;
   dispatch: Dispatch<AddLiquidityActions>;
@@ -83,7 +84,7 @@ export const useAddLiquidity = ({
   state,
   tokens,
   signer,
-  network,
+  dexClient,
   tokenPrices,
 }: UseAddLiquidityState): void => {
   const {
@@ -92,8 +93,8 @@ export const useAddLiquidity = ({
   const [loadedPool, isPoolLoading] = useLoadPool(
     token1,
     token2,
-    network?.factoryAddress || '',
-    signer?.signer,
+    signer?.address || '',
+    dexClient,
     isLoading,
   );
   const newPoolSupply = calculatePoolSupply(token1, token2, pool);
@@ -220,7 +221,7 @@ export const onAddLiquidity = ({
       amount2,
       percentage1,
       percentage2,
-      signer.evmAddress,
+      signer.address,
       calculateDeadline(deadline),
     );
 
