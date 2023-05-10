@@ -13,7 +13,6 @@ export const loadPool = async (
   signerAddress: string,
   dexClient: ApolloClient<any>,
 ): Promise<Pool> => {
-  console.log('loadPool', token1, token2, signerAddress)
   const result = await dexClient.query<UserPoolSupplyQuery, UserPoolSupplyVar>(
     {
       query: USER_POOL_SUPPLY,
@@ -24,8 +23,6 @@ export const loadPool = async (
       },
     },
   );
-
-  console.log('loadPool data', result.data)
 
   const userPoolSupply = result.data?.userPoolSupply || undefined;
 

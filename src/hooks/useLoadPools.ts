@@ -11,7 +11,6 @@ export const loadPools = async (
 ): Promise<Pool[]> => {
   const tokenCombinations = uniqueCombinations(tokens);
   const pools: Pool[] = [];
-  console.log('tokenCombinations', tokenCombinations)
   for (let index = 0; index < tokenCombinations.length; index += 1) {
     try {
       const [token1, token2] = tokenCombinations[index];
