@@ -144,7 +144,7 @@ export const RemoveLiquidityComponent = ({
         </OpenModalButton>
         <RemoveConfirmationModal
           pool={pool!}
-          slipperage={percentage}
+          slippage={percentage}
           id="remove-modal-toggle"
           percentageAmount={percentageAmount}
           onRemove={onRemoveLiquidity}

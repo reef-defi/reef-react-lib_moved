@@ -24,6 +24,7 @@ interface Trade {
   tokens: Token[];
   state: SwapState;
   actions: TradeActions;
+  maxSlippage?: number;
   confirmText?: string;
 }
 
@@ -110,10 +111,11 @@ export const Trade = ({
     setToken2Amount,
     selectToken1,
     selectToken2,
-    // setSlippage
+    setSlippage
   },
   pools,
   tokens,
+  maxSlippage = 100
 } : Trade): JSX.Element => {
   const { percentage: slippage } = resolveSettings(settings);
   const rate = pool ? calculateRate(token1.address, pool) : undefined;
@@ -142,17 +144,35 @@ export const Trade = ({
           selectToken={selectToken1}
         />
 
-        <div className="uik-pool-actions__token-switch">
-          <button
-            type="button"
-            className={`
-              uik-pool-actions__token-switch-btn
-              ${focus === 'buy' ? 'uik-pool-actions__token-switch-btn--reversed' : ''}
-            `}
-            onClick={onSwitch}
-          >
-            <Uik.Icon icon={faRepeat} />
-          </button>
+        <div className="uik-pool-actions__switch-slider-container">
+          <div className="uik-pool-actions__token-switch">
+            <button
+              type="button"
+              className={`
+                uik-pool-actions__token-switch-btn
+                ${focus === 'buy' ? 'uik-pool-actions__token-switch-btn--reversed' : ''}
+              `}
+              onClick={onSwitch}
+            >
+              <Uik.Icon icon={faRepeat} />
+            </button>
+          </div>
+
+          <div className="uik-pool-actions__slider">
+            <Uik.Slider
+              value={percentage}
+              onChange={setPercentage}
+              tooltip={`${Uik.utils.maxDecimals(percentage, 2)}%`}
+              steps={0.25}
+              helpers={[
+                { position: 0, text: '0%' },
+                { position: 25 },
+                { position: 50, text: '50%' },
+                { position: 75 },
+                { position: 100, text: '100%' },
+              ]}
+            />
+          </div>
         </div>
 
         <TokenField
@@ -184,34 +204,18 @@ export const Trade = ({
 
       <div className="uik-pool-actions__slider">
         <Uik.Slider
-          value={percentage}
-          onChange={setPercentage}
-          tooltip={`${Uik.utils.maxDecimals(percentage, 2)}%`}
+          value={(slippage * 100) / maxSlippage}
+          onChange={setSlippage}
+          tooltip={`${Uik.utils.maxDecimals(slippage, 2)}%`}
           helpers={[
             { position: 0, text: '0%' },
             { position: 25 },
-            { position: 50, text: '50%' },
+            { position: 50, text: `${maxSlippage/2}%` },
             { position: 75 },
-            { position: 100, text: '100%' },
+            { position: 100, text: `${maxSlippage}%` },
           ]}
         />
       </div>
-
-      {/* TODO: add settings option with slippage input */}
-      {/* <div className="uik-pool-actions__slider">
-        <Uik.Slider
-          value={settings.percentage}
-          onChange={setSlippage}
-          tooltip={`${Uik.utils.maxDecimals(settings.percentage, 2)}%`}
-          helpers={[
-            { position: 0, text: '0%' },
-            { position: 25 },
-            { position: 50, text: '5%' },
-            { position: 75 },
-            { position: 100, text: '10%' },
-          ]}
-        />
-      </div> */}
 
       <Uik.Button
         className="uik-pool-actions__cta"

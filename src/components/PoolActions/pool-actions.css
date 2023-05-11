@@ -29,3 +29,19 @@
   ) !important;
   text-align: center;
 }
+
+.uik-pool-actions__switch-slider-container {
+  display: flex;
+}
+
+.uik-pool-actions__switch-slider-container .uik-pool-actions__token-switch {
+  height: auto !important;
+  width: auto !important;
+  justify-content: start !important;
+  margin-left: 19px;
+}
+
+.uik-pool-actions__switch-slider-container .uik-pool-actions__slider {
+  margin: 30px 0 30px 50px !important;
+  width: 100%;
+}
