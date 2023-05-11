@@ -23,8 +23,8 @@ export interface BasicPoolInfo {
 }
 
 export interface LastPoolReserves extends BasicPoolInfo {
-  reserved1: number;
-  reserved2: number;
+  reserved1: string;
+  reserved2: string;
 }
 
 export interface PoolWithReserves extends LastPoolReserves {

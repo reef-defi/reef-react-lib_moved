@@ -149,20 +149,22 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
     const mySupply1 = amountLocked1.multipliedBy(poolShare);
     const mySupply2 = amountLocked2.multipliedBy(poolShare);
 
+    const price1 = tokenPrices[poolTokens.token1] || 0;
+    const price2 = tokenPrices[poolTokens.token2] || 0;
     const mySupplyUSD = mySupply1
-      .multipliedBy(tokenPrices[poolTokens.token1])
-      .plus(mySupply2.multipliedBy(tokenPrices[poolTokens.token2]))
+      .multipliedBy(price1)
+      .plus(mySupply2.multipliedBy(price2))
       .toFormat(2);
     const tvlUSD = amountLocked1
-      .multipliedBy(tokenPrices[poolTokens.token1])
-      .plus(amountLocked2.multipliedBy(tokenPrices[poolTokens.token2]))
+      .multipliedBy(price1)
+      .plus(amountLocked2.multipliedBy(price2))
       .toFormat(2);
     const volume24hUSD = volume1
-      .multipliedBy(tokenPrices[poolTokens.token1])
-      .plus(volume2.multipliedBy(tokenPrices[poolTokens.token2]));
+      .multipliedBy(price1)
+      .plus(volume2.multipliedBy(price2));
     const prevVolume24USD = previousVolume1
-      .multipliedBy(tokenPrices[poolTokens.token1])
-      .plus(previousVolume2.multipliedBy(tokenPrices[poolTokens.token2]));
+      .multipliedBy(price1)
+      .plus(previousVolume2.multipliedBy(price2));
 
     let volDiff = 0;
     if (prevVolume24USD.eq(0) && volume24hUSD.eq(0)) {} else if (prevVolume24USD.isNaN() && volume24hUSD.isNaN()) {} else if (prevVolume24USD.eq(0) || prevVolume24USD.isNaN()) {

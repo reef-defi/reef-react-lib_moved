@@ -16,25 +16,29 @@ import {
 } from '../utils';
 import { useKeepTokenUpdated } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
+import { ApolloClient } from '@apollo/client';
 
-interface DefaultVariables {
+interface OnRemoveLiquidity {
   network?: Network;
   signer?: ReefSigner;
   batchTxs?: boolean;
   state: RemoveLiquidityState;
   dispatch: Dispatch<RemoveLiquidityActions>;
-}
-interface OnRemoveLiquidity extends DefaultVariables {
   notify: NotifyFun;
   onSuccess?: (...args: any[]) => any;
   onFinalized?: (...args: any[]) => any;
 }
 
-interface UseRemoveLiquidity extends DefaultVariables {
+interface UseRemoveLiquidity {
   address1: string;
   address2: string;
   tokens: Token[];
   tokenPrices: AddressToNumber<number>;
+  dexClient?: ApolloClient<any>;
+  signer?: ReefSigner;
+  batchTxs?: boolean;
+  state: RemoveLiquidityState;
+  dispatch: Dispatch<RemoveLiquidityActions>;
 }
 
 const removeStatus = (percentageAmount: number, pool?: Pool): ButtonStatus => {
@@ -59,7 +63,7 @@ export const useRemoveLiquidity = ({
   address2,
   state,
   signer,
-  network,
+  dexClient,
   tokens,
   tokenPrices,
   dispatch,
@@ -75,8 +79,8 @@ export const useRemoveLiquidity = ({
   const [loadedPool, isPoolLoading] = useLoadPool(
     token1,
     token2,
-    network?.factoryAddress || '',
-    signer?.signer,
+    signer?.address || '',
+    dexClient,
     isLoading,
   );
   // Updating pool
@@ -196,7 +200,6 @@ export const onRemoveLiquidity = ({
           address,
           { signer: signer.signingKey },
           (status: any) => {
-            console.log('Unstake status: ', status);
             const err = captureError(status.events);
             if (err) {
               reject({ message: err });
@@ -227,7 +230,6 @@ export const onRemoveLiquidity = ({
           address,
           { signer: signer.signingKey },
           (status: any) => {
-            console.log('Unstake status: ', status);
             const err = captureError(status.events);
             if (err) {
               reject({ message: err });
@@ -257,7 +259,6 @@ export const onRemoveLiquidity = ({
           address,
           { signer: signer.signingKey },
           (status: any) => {
-            console.log('Unstake status: ', status);
             const err = captureError(status.events);
             if (err) {
               reject({ message: err });

@@ -30,11 +30,11 @@ interface Fee {
 interface TimeframedFee extends Fee, Timeframe { }
 
 interface Reserves {
-  reserved1: number;
-  reserved2: number;
+  reserved1: string;
+  reserved2: string;
 }
 
-export interface AllPool extends BasicPoolData, Reserves {}
+interface AllPool extends BasicPoolData, Reserves {}
 
 interface ContractData {
   symbol: string;
@@ -146,6 +146,7 @@ export type AllPoolsListQuery = { allPoolsList: PoolListItem[] };
 export type AllPoolsListCountQuery = { allPoolsListCount: number };
 export type UserPoolsListQuery = { userPoolsList: PoolListItem[] };
 export type UserPoolsListCountQuery = { userPoolsListCount: number };
+export type UserPoolSupplyQuery = { userPoolSupply: UserPoolSupply }
 
 export type PoolFeeQuery = { poolFee: Fee };
 
@@ -178,10 +179,17 @@ export type PoolsTotalSupply = {
       token1: string;
       token2: string;
     };
-    reserved1: number;
-    reserved2: number;
+    reserved1: string;
+    reserved2: string;
   }[];
 };
+
+export interface UserPoolSupply extends Reserves {
+  address: string;
+  decimals: number;
+  totalSupply: string;
+  userSupply: string;
+}
 
 // Query variable interfaces
 interface FromVar {
@@ -214,7 +222,13 @@ interface PaginationVar {
 }
 interface PoolSearchVar {
   search: string;
-  signer: string;
+  signerAddress: string;
+}
+
+export interface UserPoolSupplyVar { 
+  signerAddress: string;
+  token1: string;
+  token2: string;
 }
 
 export type PoolVar = AddressVar
@@ -572,8 +586,8 @@ export const ALL_POOLS = gql`
 `;
 
 export const ALL_POOLS_LIST = gql`
-  query allPoolsList($signer: String!, $limit: Float!, $offset: Float!, $search: String!) {
-    allPoolsList(signer: $signer, limit: $limit, offset: $offset, search: $search) {
+  query allPoolsList($signerAddress: String!, $limit: Float!, $offset: Float!, $search: String!) {
+    allPoolsList(signerAddress: $signerAddress, limit: $limit, offset: $offset, search: $search) {
       id
       name1
       name2
@@ -596,14 +610,14 @@ export const ALL_POOLS_LIST = gql`
 `;
 
 export const ALL_POOLS_LIST_COUNT = gql`
-  query allPoolsListCount($signer: String!, $search: String!) {
-    allPoolsListCount(signer: $signer, search: $search)
+  query allPoolsListCount($signerAddress: String!, $search: String!) {
+    allPoolsListCount(signerAddress: $signerAddress, search: $search)
   }
 `;
 
 export const USER_POOLS_LIST = gql`
-  query userPoolsList($signer: String!, $limit: Float!, $offset: Float!, $search: String!) {
-    userPoolsList(signer: $signer, limit: $limit, offset: $offset, search: $search) {
+  query userPoolsList($signerAddress: String!, $limit: Float!, $offset: Float!, $search: String!) {
+    userPoolsList(signerAddress: $signerAddress, limit: $limit, offset: $offset, search: $search) {
       id
       name1
       name2
@@ -626,7 +640,20 @@ export const USER_POOLS_LIST = gql`
 `;
 
 export const USER_POOLS_LIST_COUNT = gql`
-  query userPoolsListCount($signer: String!, $search: String!) {
-    userPoolsListCount(signer: $signer, search: $search)
+  query userPoolsListCount($signerAddress: String!, $search: String!) {
+    userPoolsListCount(signerAddress: $signerAddress, search: $search)
+  }
+`;
+
+export const USER_POOL_SUPPLY = gql`
+  query userPoolSupply($token1: String!, $token2: String!, $signerAddress: String!) {
+    userPoolSupply(token1: $token1, token2: $token2, signerAddress: $signerAddress) {
+      address
+      decimals
+      reserved1
+      reserved2
+      totalSupply
+      userSupply
+    }
   }
 `;
