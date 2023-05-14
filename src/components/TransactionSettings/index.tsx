@@ -35,8 +35,8 @@ export const TransactionSettings: React.FC<TransactionSettings> = ({
       <Title>Transaction settings</Title>
       <FormLabel>
         Slippage tolerance
-        <QuestionTooltip id="slipperage-tolerance">
-          Your transaction will revert if the price changes unfacorably by more
+        <QuestionTooltip id="slippage-tolerance">
+          Your transaction will revert if the price changes unfavorably by more
           than this percentage.
         </QuestionTooltip>
       </FormLabel>

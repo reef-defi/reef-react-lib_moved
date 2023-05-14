@@ -4,7 +4,7 @@ export interface Settings {
   deadline: number;
 }
 
-export const DEFAULT_SLIPPAGE_TOLERANCE = 2;
+export const DEFAULT_SLIPPAGE_TOLERANCE = 0.8;
 export const MAX_SLIPPAGE_TOLERANCE = 0.5;
 export const DEFAULT_DEADLINE = 1;
 export const DEFAULT_GAS_LIMIT = '0.000003';

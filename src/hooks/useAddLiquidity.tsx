@@ -221,7 +221,7 @@ export const onAddLiquidity = ({
       amount2,
       percentage1,
       percentage2,
-      signer.address,
+      signer.evmAddress,
       calculateDeadline(deadline),
     );
 

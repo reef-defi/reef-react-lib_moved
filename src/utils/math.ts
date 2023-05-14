@@ -20,9 +20,13 @@ export const transformAmount = (decimals: number, amount: string): string => {
   if (!amount) {
     return '0'.repeat(decimals);
   }
-  const addZeros = findDecimalPoint(amount);
+  const decimalPositions = findDecimalPoint(amount);
   const cleanedAmount = amount.replaceAll(',', '').replaceAll('.', '');
-  return cleanedAmount + '0'.repeat(Math.max(decimals - addZeros, 0));
+  if (decimalPositions > decimals) {
+    return cleanedAmount.slice(0, cleanedAmount.length - (decimalPositions - decimals));
+  } else {
+    return cleanedAmount + '0'.repeat(decimals - decimalPositions);
+  }
 };
 
 export const assertAmount = (amount?: string): string => (!amount ? '0' : amount);
