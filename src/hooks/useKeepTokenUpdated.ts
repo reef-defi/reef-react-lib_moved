@@ -5,8 +5,8 @@ import {
 
 // if address or token list or token in list or on rpc does not exist return default values
 // else combine data with default amount values
-// function also guarenties that the found token is not empty
-const findToken = (address: string, tokens: Token[], defaultAmountValue = createEmptyTokenWithAmount()): TokenWithAmount => {
+// function also guaranties that the found token is not empty
+export const findToken = (address: string, tokens: Token[], defaultAmountValue = createEmptyTokenWithAmount()): TokenWithAmount => {
   if (!address || !tokens) {
     return defaultAmountValue;
   }

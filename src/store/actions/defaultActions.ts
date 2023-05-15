@@ -1,4 +1,5 @@
 import {
+  AddressToNumber,
   createEmptyTokenWithAmount,
   Pool,
   Settings,
@@ -19,6 +20,7 @@ import {
   SET_TOKEN2_AMOUNT,
   SET_VALIDITY,
   SWITCH_TOKENS,
+  SET_TOKEN_PRICES,
 } from '../actionTypes';
 
 type SetAmount<T> = {
@@ -29,10 +31,15 @@ type SetToken<T> = {
   type: T;
   token: TokenWithAmount;
 };
+type SetPrices<T> = {
+  type: T;
+  tokenPrices: AddressToNumber<number>;
+};
 export type SetToken1 = SetToken<typeof SET_TOKEN1>;
 export type SetToken2 = SetToken<typeof SET_TOKEN2>;
 export type SetToken1Amount = SetAmount<typeof SET_TOKEN1_AMOUNT>;
 export type SetToken2Amount = SetAmount<typeof SET_TOKEN2_AMOUNT>;
+export type SetTokenPrices = SetPrices<typeof SET_TOKEN_PRICES>;
 export type SetSettings = {
   type: typeof SET_SETTINGS;
   settings: Settings;
@@ -99,6 +106,10 @@ export const setToken1AmountAction = (amount: string): SetToken1Amount => ({
 export const setToken2AmountAction = (amount: string): SetToken2Amount => ({
   amount,
   type: SET_TOKEN2_AMOUNT,
+});
+export const setTokenPricesAction = (tokenPrices: AddressToNumber<number>): SetTokenPrices => ({
+  tokenPrices,
+  type: SET_TOKEN_PRICES,
 });
 export const switchTokensAction = (): SwitchTokens => ({
   type: SWITCH_TOKENS,

@@ -1,6 +1,6 @@
 import Uik from '@reef-defi/ui-kit';
 import { BigNumber, Contract } from 'ethers';
-import { Dispatch, useEffect } from 'react';
+import { Dispatch, useEffect, useRef } from 'react';
 import { ERC20 } from '../assets/abi/ERC20';
 import { getReefswapRouter } from '../rpc';
 import {
@@ -15,7 +15,7 @@ import {
 } from '../state';
 import { SwapAction } from '../store';
 import {
-  clearTokenAmountsAction, setCompleteStatusAction, setLoadingAction, setPoolAction, setStatusAction, setToken1Action, setToken2Action,
+  clearTokenAmountsAction, setCompleteStatusAction, setLoadingAction, setPoolAction, setStatusAction, setToken1Action, setToken2Action, setTokenPricesAction,
 } from '../store/actions/defaultActions';
 import { SwapState } from '../store/reducers/swap';
 import {
@@ -28,7 +28,7 @@ import {
   ensure,
   errorHandler,
 } from '../utils';
-import { useKeepTokenUpdated } from './useKeepTokenUpdated';
+import { findToken } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
 import { ApolloClient } from '@apollo/client';
 
@@ -104,6 +104,8 @@ export const useSwapState = ({
   } = state;
   const setBuy = (token: TokenWithAmount): void => dispatch(setToken2Action(token));
   const setSell = (token: TokenWithAmount): void => dispatch(setToken1Action(token));
+  const tokenBuySet = useRef<boolean>(false);
+  const tokenSellSet = useRef<boolean>(false);
 
   // Updating swap pool
   const [loadedPool, isPoolLoading] = useLoadPool(
@@ -120,8 +122,27 @@ export const useSwapState = ({
   }, [loadedPool]);
 
   // Updating swap tokens
-  useKeepTokenUpdated(address2, buy, tokens, tokenPrices, setBuy);
-  useKeepTokenUpdated(address1, sell, tokens, tokenPrices, setSell);
+  useEffect(() => {
+    if (!tokenBuySet.current && buy.address) {
+      const foundToken1 = findToken(address2, tokens);
+      const price = tokenPrices[address2];
+      setBuy({ ...foundToken1, amount: buy.amount, price });
+      tokenBuySet.current = true;
+    }
+    if (!tokenSellSet.current && sell.address) {
+      const foundToken2 = findToken(address1, tokens);
+      const price = tokenPrices[address1];
+      setSell({ ...foundToken2, amount: sell.amount, price });
+      tokenSellSet.current = true;
+    }
+  }, [tokens, tokenPrices]);
+
+  // Updating token prices
+  useEffect(() => {
+    if ((tokenPrices[address1] || tokenPrices[address2]) && (tokenBuySet.current || tokenSellSet.current)) {
+      dispatch(setTokenPricesAction(tokenPrices));
+    }
+  }, [tokenPrices]);
 
   // Updating swap state
   useEffect(() => {
