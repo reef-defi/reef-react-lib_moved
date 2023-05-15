@@ -106,6 +106,8 @@ export const useSwapState = ({
   const setSell = (token: TokenWithAmount): void => dispatch(setToken1Action(token));
   const tokenBuySet = useRef<boolean>(false);
   const tokenSellSet = useRef<boolean>(false);
+  const prevAddress1 = useRef<string>('');
+  const prevAddress2 = useRef<string>('');
 
   // Updating swap pool
   const [loadedPool, isPoolLoading] = useLoadPool(
@@ -123,19 +125,21 @@ export const useSwapState = ({
 
   // Updating swap tokens
   useEffect(() => {
-    if (!tokenBuySet.current && buy.address) {
+    if (prevAddress2.current != address2 || (!tokenBuySet.current && buy.address)) {
       const foundToken1 = findToken(address2, tokens);
       const price = tokenPrices[address2];
       setBuy({ ...foundToken1, amount: buy.amount, price });
       tokenBuySet.current = true;
+      prevAddress2.current = address2;
     }
-    if (!tokenSellSet.current && sell.address) {
+    if (prevAddress1.current !== address1 || (!tokenSellSet.current && sell.address)) {
       const foundToken2 = findToken(address1, tokens);
       const price = tokenPrices[address1];
       setSell({ ...foundToken2, amount: sell.amount, price });
       tokenSellSet.current = true;
+      prevAddress1.current = address1;
     }
-  }, [tokens, tokenPrices]);
+  }, [tokens, tokenPrices, address1, address2]);
 
   // Updating token prices
   useEffect(() => {
