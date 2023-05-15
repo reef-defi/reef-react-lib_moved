@@ -1,6 +1,7 @@
-import {TokenWithAmount} from '../state';
-import {useObservableState} from "./useObservableState";
-import {tokenPrices$} from "../appState/tokenState";
+// TODO remove file?
+// import {TokenWithAmount} from '../state';
+// import {useObservableState} from "./useObservableState";
+// import {tokenPrices$} from "../appState/tokenState";
 
 /*const verifiedTokenQuery = gql`
 subscription tokens {
@@ -77,14 +78,14 @@ const sortTokens = (t1: Token, t2: Token): number => {
 interface Balances {
   [signer: string]: string;
 }*/
-type UseAllTokens = [TokenWithAmount[], boolean]
-export const useAllTokens = (): UseAllTokens => {
+// type UseAllTokens = [TokenWithAmount[], boolean]
+// export const useAllTokens = (): UseAllTokens => {
 
-    const tokens = useObservableState(tokenPrices$);
-    const loading = tokens === undefined;
+//     const tokens = useObservableState(tokenPrices$);
+//     const loading = tokens === undefined;
 
-    return [tokens||[], loading];
-}
+//     return [tokens||[], loading];
+// }
 
 /*
 export const useAllTokens_old = (signer?: string, client?: ApolloClient<any>): UseAllTokens => {
