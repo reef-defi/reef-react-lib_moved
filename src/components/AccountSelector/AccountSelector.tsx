@@ -5,19 +5,17 @@ import { toReefBalanceDisplay, trim } from '../../utils';
 import './AccountSelector.css';
 
 export type Network = 'mainnet' | 'testnet';
-export type Language = 'english' | 'hindi';
+export type Language = 'en' | 'hi';
 
 interface AccountSelector {
   accounts: ReefSigner[];
   selectedSigner?: ReefSigner;
   selectAccount: (index: number, signer: ReefSigner) => void;
   selectedNetwork?: Network;
-  selectedLanguage?:Language;
   onNetworkSelect?: (network: Network) => any;
   onLanguageSelect?: (language: Language) => any;
   isBalanceHidden?: boolean;
   showBalance?: (...args: any[]) => any;
-  test:String;
 }
 
 export const AccountSelector = ({
@@ -25,7 +23,6 @@ export const AccountSelector = ({
   accounts,
   selectAccount,
   selectedNetwork,
-  selectedLanguage,
   onNetworkSelect,
   onLanguageSelect,
   isBalanceHidden,
@@ -97,7 +94,6 @@ export const AccountSelector = ({
         selectedAccount={selectedAccount}
         onSelect={select}
         selectedNetwork={selectedNetwork}
-        selectedLanguage={selectedLanguage}
         onNetworkSelect={onNetworkSelect}
         onLanguageSelect={onLanguageSelect}
       />
