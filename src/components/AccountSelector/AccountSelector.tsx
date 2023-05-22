@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import Uik from '@reef-defi/ui-kit';
+import Uik from '@reef-chain/ui-kit';
 import { ReefSigner } from '../../state';
 import { toReefBalanceDisplay, trim } from '../../utils';
 import './AccountSelector.css';
 
 export type Network = 'mainnet' | 'testnet';
+export type Language = 'en' | 'hi';
 
 interface AccountSelector {
   accounts: ReefSigner[];
@@ -12,6 +13,7 @@ interface AccountSelector {
   selectAccount: (index: number, signer: ReefSigner) => void;
   selectedNetwork?: Network;
   onNetworkSelect?: (network: Network) => any;
+  onLanguageSelect?: (language: Language) => any;
   isBalanceHidden?: boolean;
   showBalance?: (...args: any[]) => any;
 }
@@ -22,6 +24,7 @@ export const AccountSelector = ({
   selectAccount,
   selectedNetwork,
   onNetworkSelect,
+  onLanguageSelect,
   isBalanceHidden,
   showBalance,
 }: AccountSelector): JSX.Element => {
@@ -92,6 +95,7 @@ export const AccountSelector = ({
         onSelect={select}
         selectedNetwork={selectedNetwork}
         onNetworkSelect={onNetworkSelect}
+        onLanguageSelect={onLanguageSelect}
       />
     </div>
   );

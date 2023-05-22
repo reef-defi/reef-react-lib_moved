@@ -1,4 +1,4 @@
-import Uik from '@reef-defi/ui-kit';
+import Uik from '@reef-chain/ui-kit';
 import { BigNumber, Contract } from 'ethers';
 import { Dispatch, useEffect, useRef } from 'react';
 import { ERC20 } from '../assets/abi/ERC20';
@@ -346,7 +346,7 @@ export const onSwap = ({
       });
       await signAndSendTrade;
     }
-    
+
     if (onSuccess) onSuccess();
 
     Uik.notify.success({

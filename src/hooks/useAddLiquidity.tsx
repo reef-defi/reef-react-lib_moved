@@ -1,4 +1,4 @@
-import Uik from '@reef-defi/ui-kit';
+import Uik from '@reef-chain/ui-kit';
 import React, { Dispatch, useEffect } from 'react';
 import { BigNumber, Contract } from 'ethers';
 import { ERC20 } from '../assets/abi/ERC20';
