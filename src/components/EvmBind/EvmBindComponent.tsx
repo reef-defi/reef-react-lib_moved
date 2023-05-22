@@ -2,7 +2,7 @@ import Identicon from '@polkadot/react-identicon';
 import { Provider } from '@reef-defi/evm-provider';
 import { BigNumber, ethers } from 'ethers';
 import React, { useEffect, useState } from 'react';
-import Uik from '@reef-defi/ui-kit';
+import Uik from '@reef-chain/ui-kit';
 import { ReefSigner } from '../../state';
 import {
   toReefEVMAddressWithNotification,

@@ -1,5 +1,5 @@
 import { faCoins } from '@fortawesome/free-solid-svg-icons';
-import Uik from '@reef-defi/ui-kit';
+import Uik from '@reef-chain/ui-kit';
 import BigNumber from 'bignumber.js';
 import React, { useState, useMemo } from 'react';
 import { AddLiquidityState } from '../../store';

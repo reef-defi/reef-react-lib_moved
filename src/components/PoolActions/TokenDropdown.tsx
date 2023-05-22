@@ -1,4 +1,4 @@
-import Uik from '@reef-defi/ui-kit';
+import Uik from '@reef-chain/ui-kit';
 import React, { useState } from 'react';
 import BigNumber from 'bignumber.js';
 import { Token, TokenWithAmount } from '../../state';

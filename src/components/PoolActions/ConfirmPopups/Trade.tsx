@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import Uik from '@reef-defi/ui-kit';
+import Uik from '@reef-chain/ui-kit';
 import SummaryItem from './SummaryItem';
 import Token from './Token';
 import { TokenWithAmount } from '../../../state';

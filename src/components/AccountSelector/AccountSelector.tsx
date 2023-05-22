@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import Uik from '@reef-defi/ui-kit';
+import Uik from '@reef-chain/ui-kit';
 import { ReefSigner } from '../../state';
 import { toReefBalanceDisplay, trim } from '../../utils';
 import './AccountSelector.css';
