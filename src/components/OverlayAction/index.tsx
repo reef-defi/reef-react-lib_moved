@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { CSSTransition } from 'react-transition-group';
-import Uik from '@reef-defi/ui-kit';
+import Uik from '@reef-chain/ui-kit';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import './overlay-action.css';
 

@@ -1,4 +1,4 @@
-import Uik from '@reef-defi/ui-kit';
+import Uik from '@reef-chain/ui-kit';
 import BN from 'bignumber.js';
 import { BigNumber, Contract } from 'ethers';
 import React, { Dispatch, useEffect } from 'react';

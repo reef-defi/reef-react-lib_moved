@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import Uik from '@reef-defi/ui-kit';
+import Uik from '@reef-chain/ui-kit';
 import { faArrowUpFromBracket } from '@fortawesome/free-solid-svg-icons';
 import BigNumber from 'bignumber.js';
 import { RemoveLiquidityState } from '../../store';
