@@ -170,6 +170,7 @@ export type Pool24HVolume = {
 
 export interface PoolDataFull extends PoolData {
   previousReserves: ReservedData;
+  allReserves: ReservedData[];
 }
 
 export type PoolsTotalSupply = {
@@ -562,6 +563,11 @@ export const poolDataQuery = (time: Time): DocumentNode => gql`
         timeframe
         reserved1
         reserved2
+      }
+      allReserves {
+        reserved1
+        reserved2
+        timeframe
       }
     }
   }
