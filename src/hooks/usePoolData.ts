@@ -175,6 +175,7 @@ export const usePoolData = ({
 }: UsePoolData, dexClient: ApolloClient<any>): UsePoolDataOutput => {
   const { fromTime, toTime } = calcTimeRange(timeData.timeUnit, timeData.timeSpan);
 
+  // ********************* Get pool data from GraphQL **************************************
   const { data, loading, refetch } = useQuery<PoolDataQuery, PoolDataVar>(
     poolDataQuery(timeData.timeUnit),
     {
@@ -204,6 +205,7 @@ export const usePoolData = ({
     const poolData = data.poolData;
     const process = defaultProcess(price1, price2, decimal1, decimal2);
 
+    // *********************** Process volume ******************************************
     const volume = fillMissingDates(
       poolData.volume.map(process),
       { value: 0, time: fromTime },
@@ -240,6 +242,7 @@ export const usePoolData = ({
       ({}, lastDate) => ({ value: 0, time: lastDate }),
     );
 
+    // *********************** Process fees ********************************************
     const fees = fillMissingDates(
       poolData.fee
         .map(({ fee1, fee2, timeframe }): Amounts => ({
@@ -254,6 +257,7 @@ export const usePoolData = ({
       ({}, lastDate) => ({ value: 0, time: lastDate }),
     );
 
+    // ************************** TVL **************************************************
     const prevTvl = { 
       value: poolData.previousReserves.timeframe 
           ? new BigNumber(poolData.previousReserves.reserved1)
@@ -282,6 +286,7 @@ export const usePoolData = ({
       (last, lastDate) => ({ value: last.value, time: lastDate }),
     );
 
+    // ************************** Prices *********************************************
     const processPrices = (decimal1: number, decimal2: number) => ({ timeframe, amount1, amount2 }: Amounts): BaseDataHolder => ({
       time: new Date(timeframe),
       value: new BigNumber(amount1)
@@ -305,9 +310,8 @@ export const usePoolData = ({
         :0, 
       time: fromTime 
     };
-    console.log("allReserves", poolData.allReserves)
 
-    const prices = poolData.allReserves
+    const allPrices = poolData.allReserves
       .map(({ reserved1, reserved2, timeframe }): Amounts => ({
         timeframe,
         amount1: reserved1,
@@ -315,15 +319,9 @@ export const usePoolData = ({
       }))
       .map(processPrices(decimal1, decimal2));
     
-    // TODO return in reverse order
-    const pricesGrouped: BaseDataHolder[][] = groupByTimeframe(prices.reverse(), timeData.timeUnit);
-    const pricesCandlesticks = calculateCandlesticks(pricesGrouped, timeData.timeUnit, prevPrice);
-    const price = processCandlestick(
-      pricesCandlesticks,
-      prevPrice,
-      toTime,
-      timeData,
-    ); 
+    const allPricesGrouped: BaseDataHolder[][] = groupByTimeframe(allPrices, timeData.timeUnit);
+    const pricesCandlesticks = calculateCandlesticks(allPricesGrouped, timeData.timeUnit, prevPrice);
+    const price = processCandlestick(pricesCandlesticks, prevPrice, toTime, timeData); 
 
     return {
       price,
