@@ -18,8 +18,8 @@ export interface BasicPoolInfo {
   token2: string;
   symbol1: string;
   symbol2: string;
-  decimal1: number;
-  decimal2: number;
+  decimals1: number;
+  decimals2: number;
 }
 
 export interface LastPoolReserves extends BasicPoolInfo {
@@ -30,8 +30,8 @@ export interface LastPoolReserves extends BasicPoolInfo {
 export interface PoolWithReserves extends LastPoolReserves {
   name1: string;
   name2: string;
-  icon1: string;
-  icon2: string;
+  iconUrl1: string;
+  iconUrl2: string;
 }
 
 export type TokenPrices = {[tokenAddress: string]: number};

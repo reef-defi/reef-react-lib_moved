@@ -46,26 +46,27 @@ interface BasicPoolData {
   address: string;
   token1: string;
   token2: string;
-  decimal1: number;
-  decimal2: number;
+  decimals1: number;
+  decimals2: number;
   name1: string;
   name2: string;
   symbol1: string;
   symbol2: string;
+  iconUrl1: string;
+  iconUrl2: string;
 }
 
-interface PoolTokens {
-  token1: string;
-  token2: string;
+interface Token {
+  id: string;
+  decimals: number;
+  name: string;
+  symbol: string;
+  iconUrl: string;
 }
 
-interface PoolTokensData extends PoolTokens {
-  decimal1: number;
-  decimal2: number;
-  name1: string;
-  name2: string;
-  symbol1: string;
-  symbol2: string;
+interface PoolTokensData {
+  token1: Token;
+  token2: Token;
 }
 
 interface ContractData {
@@ -94,8 +95,8 @@ interface PoolTransaction {
   timestamp: string;
   type: BasePoolTransactionTypes;
   pool: {
-    decimal1: number;
-    decimal2: number;
+    decimals1: number;
+    decimals2: number;
     symbol1: string;
     symbol2: string;
   };
@@ -113,12 +114,14 @@ export interface PoolListItem {
   token2: string;
   reserved1: string;
   reserved2: string;
-  decimal1: number;
-  decimal2: number;
+  decimals1: number;
+  decimals2: number;
   symbol1: string;
   symbol2: string;
   name1: string;
   name2: string;
+  iconUrl1: string;
+  iconUrl2: string;
   dayVolume1: string | null;
   dayVolume2: string | null;
   prevDayVolume1: string | null;
@@ -129,7 +132,6 @@ export interface PoolListItem {
 
 // Query result interfaces
 export type PoolQuery = { pool: BasicPoolData[] };
-export type PoolTokensQuery = { poolById: PoolTokens }
 export type PoolTokensDataQuery = { poolById: PoolTokensData }
 export type ContractDataQuery = { verifiedContractById: ContractData }
 export type PoolInfoQuery = { poolInfo: PoolInfo }
@@ -356,8 +358,8 @@ export const POOL_GQL = gql`
       id
       token1
       token2
-      decimal1
-    	decimal2
+      decimals1
+    	decimals2
     	symbol1
     	symbol2
     }
@@ -408,8 +410,8 @@ export const POOL_TRANSACTIONS_GQL = gql`
       timestamp
       type
       pool {
-        decimal1
-        decimal2
+        decimals1
+        decimals2
         symbol1
         symbol2
       }
@@ -481,26 +483,23 @@ export const POOL_DAY_FEE_QUERY_GQL = feeQuery('Day');
 export const POOL_HOUR_FEE_QUERY_GQL = feeQuery('Hour');
 export const POOL_MINUTE_FEE_QUERY_GQL = feeQuery('Minute');
 
-export const POOL_TOKENS_GQL = gql`
-  query poolTokens($address: String!) {
-    poolById(id: $address) {
-      token1
-      token2
-    }
-  }
-`;
-
 export const POOL_TOKENS_DATA_GQL = gql`
   query poolTokens($address: String!) {
     poolById(id: $address) {
-      token1
-      token2
-      decimal1
-      decimal2
-      name1
-      name2
-      symbol1
-      symbol2
+      token1 {
+        id
+        decimals
+        name
+        symbol
+        iconUrl
+      }
+      token2 {
+        id
+        decimals
+        name
+        symbol
+        iconUrl
+      }
     }
   }
 `;
@@ -575,8 +574,8 @@ export const ALL_POOLS = gql`
   query allPools {
     allPools {
       address
-      decimal1
-      decimal2
+      decimals1
+      decimals2
       reserved1
       reserved2
       symbol1
@@ -585,6 +584,8 @@ export const ALL_POOLS = gql`
       token2
       name1
       name2
+      iconUrl1
+      iconUrl2
     }
   }
 `;
@@ -603,12 +604,14 @@ export const ALL_POOLS_LIST = gql`
       symbol2
       token1
       token2
+      iconUrl1
+      iconUrl2
       userLockedAmount1
       userLockedAmount2
       dayVolume2
       dayVolume1
-      decimal1
-      decimal2
+      decimals1
+      decimals2
     }
   }
 `;
@@ -637,8 +640,8 @@ export const USER_POOLS_LIST = gql`
       userLockedAmount2
       dayVolume2
       dayVolume1
-      decimal1
-      decimal2
+      decimals1
+      decimals2
     }
   }
 `;

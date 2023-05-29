@@ -133,24 +133,25 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
     }
 
     const pool = poolInfoData.poolInfo;
-    const poolTokens = tokensData!.poolById;
+    const token1 = tokensData!.poolById.token1;
+    const token2 = tokensData!.poolById.token2;
 
-    const amountLocked1 = normalize(pool.reserves.reserved1, poolTokens.decimal1);
-    const amountLocked2 = normalize(pool.reserves.reserved2, poolTokens.decimal2);
-    const fee1 = normalize(pool.fee.fee1, poolTokens.decimal1);
-    const fee2 = normalize(pool.fee.fee2, poolTokens.decimal2);
-    const volume1 = normalize(pool.currentDayVolume.amount1, poolTokens.decimal1);
-    const volume2 = normalize(pool.currentDayVolume.amount2, poolTokens.decimal2);
-    const previousVolume1 = normalize(pool.previousDayVolume.amount1, poolTokens.decimal1);
-    const previousVolume2 = normalize(pool.previousDayVolume.amount2, poolTokens.decimal2);
+    const amountLocked1 = normalize(pool.reserves.reserved1, token1.decimals);
+    const amountLocked2 = normalize(pool.reserves.reserved2, token2.decimals);
+    const fee1 = normalize(pool.fee.fee1, token1.decimals);
+    const fee2 = normalize(pool.fee.fee2, token2.decimals);
+    const volume1 = normalize(pool.currentDayVolume.amount1, token1.decimals);
+    const volume2 = normalize(pool.currentDayVolume.amount2, token2.decimals);
+    const previousVolume1 = normalize(pool.previousDayVolume.amount1, token1.decimals);
+    const previousVolume2 = normalize(pool.previousDayVolume.amount2, token2.decimals);
 
     const poolShare = new BigNumber(pool.userSupply).div(pool.totalSupply);
 
     const mySupply1 = amountLocked1.multipliedBy(poolShare);
     const mySupply2 = amountLocked2.multipliedBy(poolShare);
 
-    const price1 = tokenPrices[poolTokens.token1] || 0;
-    const price2 = tokenPrices[poolTokens.token2] || 0;
+    const price1 = tokenPrices[token1.id] || 0;
+    const price2 = tokenPrices[token2.id] || 0;
     const mySupplyUSD = mySupply1
       .multipliedBy(price1)
       .plus(mySupply2.multipliedBy(price2))
@@ -179,35 +180,35 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
 
     return {
       firstToken: {
-        address: poolTokens.token1,
-        icon: getIconUrl(poolTokens.token1),
-        name: poolTokens.name1,
-        symbol: poolTokens.symbol1,
-        decimals: poolTokens.decimal1,
+        address: token1.id,
+        icon: token1.iconUrl === '' ? getIconUrl(token1.id) : token1.iconUrl,
+        name: token1.name,
+        symbol: token1.symbol,
+        decimals: token1.decimals,
         amountLocked: amountLocked1.toFormat(0),
         fees24h: fee1.toFormat(2),
         mySupply: mySupply1.toFormat(0),
         percentage: amountLocked1.div(all).multipliedBy(100).toFormat(2),
         ratio: {
           amount: amountLocked1.div(amountLocked2).toFormat(4),
-          name: poolTokens.name2,
-          symbol: poolTokens.symbol2,
+          name: token2.name,
+          symbol: token2.symbol,
         },
       },
       secondToken: {
-        address: poolTokens.token2,
-        icon: getIconUrl(poolTokens.token2),
-        name: poolTokens.name2,
-        symbol: poolTokens.symbol2,
-        decimals: poolTokens.decimal2,
+        address: token2.id,
+        icon: token2.iconUrl === '' ? getIconUrl(token2.id) : token2.iconUrl,
+        name: token2.name,
+        symbol: token2.symbol,
+        decimals: token2.decimals,
         amountLocked: amountLocked2.toFormat(0),
         fees24h: fee2.toFormat(2),
         mySupply: mySupply2.toFormat(0),
         percentage: amountLocked2.div(all).multipliedBy(100).toFormat(2),
         ratio: {
           amount: amountLocked2.div(amountLocked1).toFormat(4),
-          name: poolTokens.name1,
-          symbol: poolTokens.symbol1,
+          name: token1.name,
+          symbol: token1.symbol,
         },
       },
       mySupplyUSD,

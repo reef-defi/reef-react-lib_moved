@@ -34,8 +34,8 @@ const calculate24hVolumeUSD = ({
     dayVolume2,
     prevDayVolume1,
     prevDayVolume2,
-    decimal1,
-    decimal2,
+    decimals1,
+    decimals2,
   }: PoolListItem,
   tokenPrices: TokenPrices,
   current: boolean,
@@ -44,10 +44,10 @@ const calculate24hVolumeUSD = ({
   const v2 = current ? dayVolume2 : prevDayVolume2;
   if (v1 === null && v2 === null) return new BigNumber(0);
   const dv1 = new BigNumber(v1 === null ? 0 : v1)
-    .div(new BigNumber(10).pow(decimal1))
+    .div(new BigNumber(10).pow(decimals1))
     .multipliedBy(tokenPrices[token1]);
   const dv2 = new BigNumber(v2 === null ? 0 : v2)
-    .div(new BigNumber(10).pow(decimal2))
+    .div(new BigNumber(10).pow(decimals2))
     .multipliedBy(tokenPrices[token2]);
 
   return dv1.plus(dv2);
@@ -66,29 +66,29 @@ const calculateVolumeChange = (pool: PoolListItem, tokenPrices: TokenPrices): nu
 const calculateUSDTVL = ({
   reserved1,
   reserved2,
-  decimal1,
-  decimal2,
+  decimals1,
+  decimals2,
   token1,
   token2,
 }: PoolListItem,
 tokenPrices: TokenPrices): string => {
-  const r1 = new BigNumber(reserved1).div(new BigNumber(10).pow(decimal1)).multipliedBy(tokenPrices[token1] || 0);
-  const r2 = new BigNumber(reserved2).div(new BigNumber(10).pow(decimal2)).multipliedBy(tokenPrices[token2] || 0);
+  const r1 = new BigNumber(reserved1).div(new BigNumber(10).pow(decimals1)).multipliedBy(tokenPrices[token1] || 0);
+  const r2 = new BigNumber(reserved2).div(new BigNumber(10).pow(decimals2)).multipliedBy(tokenPrices[token2] || 0);
   const result = r1.plus(r2).toFormat(2);
   return result === 'NaN' ? '0' : result;
 };
 
 const calculateUserLiquidity = (
   {
-    token1, token2, userLockedAmount1, userLockedAmount2, decimal1, decimal2,
+    token1, token2, userLockedAmount1, userLockedAmount2, decimals1, decimals2,
   }: PoolListItem,
   tokenPrices: TokenPrices,
 ): string|undefined => {
   const v1 = new BigNumber(userLockedAmount1 === null ? '0' : userLockedAmount1)
-    .div(new BigNumber(10).pow(decimal1))
+    .div(new BigNumber(10).pow(decimals1))
     .multipliedBy(tokenPrices[token1]);
   const v2 = new BigNumber(userLockedAmount2 === null ? '0' : userLockedAmount2)
-    .div(new BigNumber(10).pow(decimal2))
+    .div(new BigNumber(10).pow(decimals2))
     .multipliedBy(tokenPrices[token2]);
   const res = v1.plus(v2);
 
@@ -123,11 +123,11 @@ export const usePoolsList = ({
     return poolsList.map((pool) => ({
       address: pool.id,
       token1: {
-        image: getIconUrl(pool.token1),
+        image: pool.iconUrl1 === '' ? getIconUrl(pool.token1) : pool.iconUrl1,
         name: pool.name1,
       },
       token2: {
-        image: getIconUrl(pool.token2),
+        image: pool.iconUrl2 === '' ? getIconUrl(pool.token2) : pool.iconUrl2,
         name: pool.name2,
       },
       tvl: calculateUSDTVL(pool, tokenPrices),
