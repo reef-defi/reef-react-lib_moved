@@ -272,6 +272,8 @@ export const usePoolData = ({
           : 0, 
       time: fromTime 
     };
+    let tvl = groupByTimeframe(
+      poolData.allReserves
     const tvl = fillMissingDates(
       poolData.reserves
         .map(({ reserved1, reserved2, timeframe }): Amounts => ({
@@ -280,6 +282,16 @@ export const usePoolData = ({
           amount2: reserved2,
         }))
         .map(process),
+      timeData.timeUnit,
+    ).map((group) => {
+      const close = group[group.length - 1];
+      return {
+        value: close.value,
+        time: truncateDate(close.time, timeData.timeUnit),
+      };
+    });
+    tvl = fillMissingDates(
+      tvl,
       prevTvl,
       { value: 0, time: toTime },
       timeData.timeUnit,

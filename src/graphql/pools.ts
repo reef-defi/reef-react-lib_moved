@@ -1,5 +1,5 @@
 import { DocumentNode, gql } from '@apollo/client';
-import { BaseFeeData, BaseReservedData, BaseVolumeData, PoolData, ReservedData } from '../state';
+import { BaseFeeData, BaseReservedData, BaseVolumeData, FeeData, PriceData, ReservedData, VolumeData } from '../state';
 
 // Data interfaces
 export type BasePoolTransactionTypes = 'Swap' | 'Mint' | 'Burn';
@@ -168,7 +168,10 @@ export type Pool24HVolume = {
   }[];
 }
 
-export interface PoolDataFull extends PoolData {
+export interface PoolDataFull {
+  fee: FeeData[];
+  volume: VolumeData[];
+  price: PriceData[];
   previousReserves: ReservedData;
   allReserves: ReservedData[];
 }
@@ -552,11 +555,6 @@ export const poolDataQuery = (time: Time): DocumentNode => gql`
       volume {
         amount1
         amount2
-        timeframe
-      }
-      reserves {
-        reserved1
-        reserved2
         timeframe
       }
       previousReserves {
