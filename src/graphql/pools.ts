@@ -64,6 +64,13 @@ interface Token {
   iconUrl: string;
 }
 
+interface PoolData {
+  id: string;
+  token1: Token;
+  token2: Token;
+  decimals: number;
+}
+
 interface PoolTokensData {
   token1: Token;
   token2: Token;
@@ -95,10 +102,14 @@ interface PoolTransaction {
   timestamp: string;
   type: BasePoolTransactionTypes;
   pool: {
-    decimals1: number;
-    decimals2: number;
-    symbol1: string;
-    symbol2: string;
+    token1: {
+      decimals: number;
+      symbol: string;
+    };
+    token2: {
+      decimals: number;
+      symbol: string;
+    };
   };
   signerAddress: string;
 }
@@ -131,7 +142,7 @@ export interface PoolListItem {
 }
 
 // Query result interfaces
-export type PoolQuery = { pool: BasicPoolData[] };
+export type PoolQuery = { pool: PoolData[] };
 export type PoolTokensDataQuery = { poolById: PoolTokensData }
 export type ContractDataQuery = { verifiedContractById: ContractData }
 export type PoolInfoQuery = { poolInfo: PoolInfo }
@@ -356,12 +367,21 @@ export const POOL_GQL = gql`
   query pool($address: String!) {
     poolById(id: $address) {
       id
-      token1
-      token2
-      decimals1
-    	decimals2
-    	symbol1
-    	symbol2
+      token1 {
+        id
+        decimals
+        name
+        symbol
+        iconUrl
+      }
+      token2 {
+        id
+        decimals
+        name
+        symbol
+        iconUrl
+      }
+      decimals
     }
   }
 `;
@@ -410,10 +430,14 @@ export const POOL_TRANSACTIONS_GQL = gql`
       timestamp
       type
       pool {
-        decimals1
-        decimals2
-        symbol1
-        symbol2
+        token1 {
+          decimals
+          symbol
+        }
+        token2 {
+          decimals
+          symbol
+        }
       }
       signerAddress
     }
