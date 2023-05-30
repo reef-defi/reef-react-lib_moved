@@ -205,8 +205,8 @@ const poolToLastPoolReserve = (p:Pool) => ({
   token2: p.token2.address,
   symbol1: p.token1.symbol,
   symbol2: p.token2.symbol,
-  decimal1: p.token1.decimals,
-  decimal2: p.token2.decimals,
+  decimals1: p.token1.decimals,
+  decimals2: p.token2.decimals,
 } as LastPoolReserves);
 // TODO pools and tokens emit events at same time - check how to make 1 event from it
 export const tokenPrices$: Observable<TokenWithAmount[]> = combineLatest([

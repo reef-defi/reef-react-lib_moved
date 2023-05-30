@@ -59,18 +59,18 @@ const calculateRate = (
     token1: {
       address,
       symbol: symbol1,
-      decimals: decimal1,
+      decimals: decimals1,
     },
     token2: {
       symbol: symbol2,
-      decimals: decimal2,
+      decimals: decimals2,
     },
     reserve1,
     reserve2,
   }: Pool,
 ): string => {
-  const r1 = new BigNumber(reserve1).div(new BigNumber(10).pow(decimal1));
-  const r2 = new BigNumber(reserve2).div(new BigNumber(10).pow(decimal2));
+  const r1 = new BigNumber(reserve1).div(new BigNumber(10).pow(decimals1));
+  const r2 = new BigNumber(reserve2).div(new BigNumber(10).pow(decimals2));
   const res = sellTokenAddress === address ? r1.div(r2) : r2.div(r1);
   return `1 ${symbol2} = ${Uik.utils.maxDecimals(res.toNumber(), 4)} ${symbol1}`;
 };

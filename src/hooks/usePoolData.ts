@@ -148,14 +148,14 @@ function calculateCandlesticks(
   return candlesticks;
 }
 
-const defaultProcess = (price1: number, price2: number, decimal1: number, decimal2: number) => ({ timeframe, amount1, amount2 }: Amounts): BaseDataHolder => ({
+const defaultProcess = (price1: number, price2: number, decimals1: number, decimals2: number) => ({ timeframe, amount1, amount2 }: Amounts): BaseDataHolder => ({
   time: new Date(timeframe),
   value: new BigNumber(amount1)
-    .div(new BigNumber(10).pow(decimal1))
+    .div(new BigNumber(10).pow(decimals1))
     .multipliedBy(price1)
     .plus(
       new BigNumber(amount2)
-        .div(new BigNumber(10).pow(decimal2))
+        .div(new BigNumber(10).pow(decimals2))
         .multipliedBy(price2),
     )
     .toNumber(),
@@ -165,13 +165,13 @@ interface UsePoolData {
   address: string;
   price1: number;
   price2: number;
-  decimal1: number;
-  decimal2: number;
+  decimals1: number;
+  decimals2: number;
   timeData: TimeData;
 }
 
 export const usePoolData = ({
-  address, decimal1, decimal2, price1, price2, timeData = { timeUnit: 'Day', timeSpan: 31 },
+  address, decimals1, decimals2, price1, price2, timeData = { timeUnit: 'Day', timeSpan: 31 },
 }: UsePoolData, dexClient: ApolloClient<any>): UsePoolDataOutput => {
   const { fromTime, toTime } = calcTimeRange(timeData.timeUnit, timeData.timeSpan);
 
@@ -203,7 +203,7 @@ export const usePoolData = ({
     }
 
     const poolData = data.poolData;
-    const process = defaultProcess(price1, price2, decimal1, decimal2);
+    const process = defaultProcess(price1, price2, decimals1, decimals2);
 
     // *********************** Process volume ******************************************
     const volume = fillMissingDates(
@@ -218,7 +218,7 @@ export const usePoolData = ({
       poolData.volume.map((item) => ({
         time: new Date(item.timeframe),
         value: new BigNumber(item.amount1)
-          .div(new BigNumber(10).pow(decimal1))
+          .div(new BigNumber(10).pow(decimals1))
           .multipliedBy(price1)
           .toNumber(),
       })),
@@ -232,7 +232,7 @@ export const usePoolData = ({
       poolData.volume.map((item) => ({
         time: new Date(item.timeframe),
         value: new BigNumber(item.amount2)
-          .div(new BigNumber(10).pow(decimal2))
+          .div(new BigNumber(10).pow(decimals2))
           .multipliedBy(price2)
           .toNumber(),
       })),
@@ -261,21 +261,20 @@ export const usePoolData = ({
     const prevTvl = { 
       value: poolData.previousReserves.timeframe 
           ? new BigNumber(poolData.previousReserves.reserved1)
-              .div(new BigNumber(10).pow(decimal1))
+              .div(new BigNumber(10).pow(decimals1))
               .multipliedBy(price1)
               .plus(
                 new BigNumber(poolData.previousReserves.reserved2)
-                  .div(new BigNumber(10).pow(decimal2))
+                  .div(new BigNumber(10).pow(decimals2))
                   .multipliedBy(price2),
               )
               .toNumber() 
           : 0, 
       time: fromTime 
     };
+    
     let tvl = groupByTimeframe(
       poolData.allReserves
-    const tvl = fillMissingDates(
-      poolData.reserves
         .map(({ reserved1, reserved2, timeframe }): Amounts => ({
           timeframe,
           amount1: reserved1,
@@ -299,13 +298,13 @@ export const usePoolData = ({
     );
 
     // ************************** Prices *********************************************
-    const processPrices = (decimal1: number, decimal2: number) => ({ timeframe, amount1, amount2 }: Amounts): BaseDataHolder => ({
+    const processPrices = (decimals1: number, decimals2: number) => ({ timeframe, amount1, amount2 }: Amounts): BaseDataHolder => ({
       time: new Date(timeframe),
       value: new BigNumber(amount1)
-        .div(new BigNumber(10).pow(decimal1))
+        .div(new BigNumber(10).pow(decimals1))
         .div(
           new BigNumber(amount2)
-            .div(new BigNumber(10).pow(decimal2))
+            .div(new BigNumber(10).pow(decimals2))
         )
         .toNumber(),
     });
@@ -313,10 +312,10 @@ export const usePoolData = ({
     const prevPrice = { 
       value: poolData.previousReserves.timeframe 
         ? new BigNumber(poolData.previousReserves.reserved1)
-            .div(new BigNumber(10).pow(decimal1))
+            .div(new BigNumber(10).pow(decimals1))
             .div(
               new BigNumber(poolData.previousReserves.reserved2)
-                .div(new BigNumber(10).pow(decimal2))
+                .div(new BigNumber(10).pow(decimals2))
             )
             .toNumber()
         :0, 
@@ -329,7 +328,7 @@ export const usePoolData = ({
         amount1: reserved1,
         amount2: reserved2,
       }))
-      .map(processPrices(decimal1, decimal2));
+      .map(processPrices(decimals1, decimals2));
     
     const allPricesGrouped: BaseDataHolder[][] = groupByTimeframe(allPrices, timeData.timeUnit);
     const pricesCandlesticks = calculateCandlesticks(allPricesGrouped, timeData.timeUnit, prevPrice);
@@ -343,7 +342,7 @@ export const usePoolData = ({
       firstTokenVolume,
       secondTokenVolume,
     };
-  }, [data, price1, price2, decimal1, decimal2]);
+  }, [data, price1, price2, decimals1, decimals2]);
 
   return [processed, loading];
 };
