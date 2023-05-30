@@ -272,7 +272,7 @@ export const usePoolData = ({
           : 0, 
       time: fromTime 
     };
-
+    
     let tvl = groupByTimeframe(
       poolData.allReserves
         .map(({ reserved1, reserved2, timeframe }): Amounts => ({

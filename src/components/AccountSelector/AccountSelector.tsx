@@ -3,6 +3,8 @@ import Uik from '@reef-chain/ui-kit';
 import { ReefSigner } from '../../state';
 import { toReefBalanceDisplay, trim } from '../../utils';
 import './AccountSelector.css';
+import { faGear } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export type Network = 'mainnet' | 'testnet';
 export type Language = 'en' | 'hi';
@@ -59,6 +61,8 @@ export const AccountSelector = ({
   };
 
   return (
+    <div className='account-selector-box--nav'>
+
     <div className="nav-account border-rad">
       <div className="my-auto mx-2 fs-6">
         {
@@ -82,7 +86,6 @@ export const AccountSelector = ({
       <button
         type="button"
         className="nav-account__account"
-        onClick={() => setOpen(true)}
       >
         <span>{trim(name)}</span>
       </button>
@@ -97,6 +100,15 @@ export const AccountSelector = ({
         onNetworkSelect={onNetworkSelect}
         onLanguageSelect={onLanguageSelect}
       />
+    </div>
+    <button
+        type="button"
+        className="nav-account__gear"
+        onClick={() => setOpen(true)}
+        >
+      <FontAwesomeIcon icon={faGear} />
+      </button>
+
     </div>
   );
 };
