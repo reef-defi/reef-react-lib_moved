@@ -78,12 +78,6 @@ export const EvmBindComponent = ({
   const [customBindState, setCustomBindState] = useState<CustomBindState>({useCustomEvmAddress: false});
 
   useEffect(() => {
-    if (bindSigner.signer?._substrateAddress) {
-      const address = provider.api.query.evmAccounts.evmAddresses(
-        bindSigner.signer._substrateAddress
-      );
-      console.log("evm address", address.toString());
-    }
     setBindFor(bindSigner);
   }, [bindSigner]);
 
