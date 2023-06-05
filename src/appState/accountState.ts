@@ -245,22 +245,26 @@ const signersWithUpdatedData$ = combineLatest([
           updateBindValues = locallyUpdated.map((updSigner) => ({
             address: updSigner.address,
             isEvmClaimed: updSigner.isEvmClaimed,
+            evmAddress: updSigner.evmAddress,
           }));
         } else if (state.lastIndexed !== indexed) {
           updateBindValues = indexed.map((updSigner: AccountEvmAddrData) => ({
             address: updSigner.address,
             isEvmClaimed: updSigner.isEvmClaimed,
+            evmAddress: updSigner.evmAddress,
           }));
         } else {
           updateBindValues = state.lastSigners.map((updSigner) => ({
             address: updSigner.address,
             isEvmClaimed: updSigner.isEvmClaimed,
+            evmAddress: updSigner.evmAddress,
           }));
         }
         updateBindValues.forEach((updVal: AccountEvmAddrData) => {
           const signer = signers.find((sig) => sig.address === updVal.address);
           if (signer) {
             signer.isEvmClaimed = !!updVal.isEvmClaimed;
+            signer.evmAddress = updVal.evmAddress ? updVal.evmAddress : signer.evmAddress;
           }
         });
         return {

@@ -105,7 +105,6 @@ export const EvmBindComponent = ({
   };
 
   const bindAccount = (onTxUpdate: TxStatusHandler):void => {
-    console.log("customBindState.useCustomEvmAddress", customBindState.useCustomEvmAddress)
     setCustomBindState({ ...customBindState, error: undefined });
     if (customBindState.useCustomEvmAddress) {
       const txIdent = bindCustomEvmAddress(bindFor, provider as Provider, customBindState.evmAddress!, customBindState.signature!, (val: TxStatusUpdate) => {
@@ -155,22 +154,8 @@ export const EvmBindComponent = ({
     });
   };
 
-  // TODO: bindFor.evmAddress returns always default address
-  // const check1 = () => {
-  //   console.log("bindFor.evmAddress", bindFor.evmAddress);
-  // }
-  // const check2 = () => {
-  //   const address = provider.api.query.evmAccounts.evmAddresses(
-  //     bindSigner.signer._substrateAddress
-  //   );
-  //   console.log("evm address", address.toString());
-  // }
-
   return (
     <div className="mx-auto bind-evm">
-      {/* <button onClick={check1}>Check 1</button>
-      <button onClick={check2}>Check 2</button> */}
-      {/* Account */}
       {!bindFor.isEvmClaimed
         && (
         <div>
@@ -244,7 +229,7 @@ export const EvmBindComponent = ({
             <div>
               <p>
                 Connected Ethereum VM address is {" "}
-                {bindFor.evmAddress}
+                { customBindState.useCustomEvmAddress && customBindState.evmAddress ? customBindState.evmAddress : bindFor.evmAddress }
               </p>
             </div>
             )}
@@ -324,7 +309,7 @@ export const EvmBindComponent = ({
                     >
                       By default, your Reef account will be bound to a predetermined EVM address. 
                       You should use this EVM address <b>only in the Reef network</b>.<br/>
-                      Enabling this option you will bind your Reef account to a EVM address you own by signing a message with an EVM wallet.
+                      Enabling this option you will bind your Reef account to an EVM address you own by signing a message with an EVM wallet.
                     </ReactTooltip>
                   </div>
                 </div>
