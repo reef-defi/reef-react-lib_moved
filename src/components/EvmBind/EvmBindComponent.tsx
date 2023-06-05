@@ -156,182 +156,193 @@ export const EvmBindComponent = ({
   };
 
   // TODO: bindFor.evmAddress returns always default address
+  // const check1 = () => {
+  //   console.log("bindFor.evmAddress", bindFor.evmAddress);
+  // }
+  // const check2 = () => {
+  //   const address = provider.api.query.evmAccounts.evmAddresses(
+  //     bindSigner.signer._substrateAddress
+  //   );
+  //   console.log("evm address", address.toString());
+  // }
 
   return (
     <div className="mx-auto bind-evm">
+      {/* <button onClick={check1}>Check 1</button>
+      <button onClick={check2}>Check 2</button> */}
       {/* Account */}
       {!bindFor.isEvmClaimed
-            && (
-            <div>
-              <p>
-                Start using Reef EVM smart contracts.
-                <br />
-                First connect EVM address for
-                {' '}
-              </p>
-              <Account account={bindFor} />
-            </div>
-            )}
+        && (
+        <div>
+          <p>
+            Start using Reef EVM smart contracts.
+            <br />
+            First connect EVM address for
+            {' '}
+          </p>
+          <Account account={bindFor} />
+        </div>
+        )}
       {bindFor.isEvmClaimed
+        && (
+        <div>
+          <Account account={bindFor} />
+          <p>
+            {' '}
+            Successfully connected to Ethereum VM address&nbsp;
+            <b>{toAddressShortDisplay(bindFor.evmAddress)}</b>
+            .
+            <br />
+          </p>
+
+          <Uik.Button
+            text="Copy EVM address"
+            fill={!onComplete}
+            size="large"
+            onClick={() => copyAddress(bindFor.evmAddress)}
+          />
+
+          { !!onComplete
             && (
-            <div>
-              <Account account={bindFor} />
-              <p>
+              <Uik.Button
+                text="Continue"
+                fill
+                size="large"
+                onClick={onComplete}
+              />
+            )}
+        </div>
+        )}
+      {!bindFor.isEvmClaimed
+        && (
+        <div>
+          {txStatus && (
+          <div>
+            {/* In progress */}
+            {!txStatus.error && !txStatus.isInBlock && !txStatus.isComplete
+            && (
+            <p className="bind-evm__loading">
+              <Uik.Loading size="small" />
+              <span>
+                {txStatus.componentTxType === EvmBindComponentTxType.BIND ? 'Connecting EVM address' : 'Transfer'}
                 {' '}
-                Successfully connected to Ethereum VM address&nbsp;
-                <b>{toAddressShortDisplay(bindFor.evmAddress)}</b>
-                .
+                in progress
+              </span>
+            </p>
+            )}
+            {customBindState.signingInProcess
+            && (
+            <p className="bind-evm__loading">
+              <Uik.Loading size="small" />
+              <span>
+                Signing message with EVM wallet in progress
+              </span>
+            </p>
+            )}
+            {/* Bound */}
+            {!txStatus.error && txStatus.isInBlock && txStatus.componentTxType === EvmBindComponentTxType.BIND && (
+            <div>
+              <p>
+                Connected Ethereum VM address is {" "}
+                {bindFor.evmAddress}
+              </p>
+            </div>
+            )}
+            {/* Error message */}
+            {txStatus.error && <p>{txStatus.error.message}</p>}
+            {customBindState.error && <p>{customBindState.error}</p>}
+          </div>
+          )}
+
+          {/* Not enough balance */}
+          {!txStatus && !hasBalanceForBinding(bindFor.balance)
+          && (
+          <div>
+            {!txStatus && !transferBalanceFrom
+            && <p>Not enough REEF in account for connect EVM address transaction fee.</p>}
+            {!txStatus && !!transferBalanceFrom && (
+            <div>
+              <p>
+                <b>
+                  ~
+                  {toReefBalanceDisplay(MIN_BALANCE)}
+                </b>
+                &nbsp; is needed for transaction fee.
                 <br />
+                <br />
+
+                Coins will be transferred from account:&nbsp;
+                <OpenModalButton
+                  className="btn-empty bind-evm__select-account"
+                  id="selectMyAddress"
+                >
+                  <Account account={transferBalanceFrom} />
+                </OpenModalButton>
               </p>
 
-              <Uik.Button
-                text="Copy EVM address"
-                fill={!onComplete}
-                size="large"
-                onClick={() => copyAddress(bindFor.evmAddress)}
+              <AccountListModal
+                accounts={availableTxAccounts}
+                id="selectMyAddress"
+                selectAccount={onAccountSelect}
+                title="Select account"
               />
-
-              { !!onComplete
-                && (
-                  <Uik.Button
-                    text="Continue"
-                    fill
-                    size="large"
-                    onClick={onComplete}
-                  />
-                )}
+              <Uik.Button
+                text="Continue"
+                fill
+                size="large"
+                onClick={() => transfer(transferBalanceFrom!, bindSigner, MIN_BALANCE, getUpdateTxCallback([onTxUpdate as TxStatusHandler, setTxStatus]))}
+              />
             </div>
             )}
-      {!bindFor.isEvmClaimed
-            && (
-            <div>
-              {txStatus && (
-              <div>
-                {/* In progress */}
-                {!txStatus.error && !txStatus.isInBlock && !txStatus.isComplete
-                && (
-                <p className="bind-evm__loading">
-                  <Uik.Loading size="small" />
-                  <span>
-                    {txStatus.componentTxType === EvmBindComponentTxType.BIND ? 'Connecting EVM address' : 'Transfer'}
-                    {' '}
-                    in progress
-                  </span>
-                </p>
-                )}
-                {customBindState.signingInProcess
-                && (
-                <p className="bind-evm__loading">
-                  <Uik.Loading size="small" />
-                  <span>
-                    Signing message with EVM wallet in progress
-                  </span>
-                </p>
-                )}
-                {/* Bound */}
-                {!txStatus.error && txStatus.isInBlock && txStatus.componentTxType === EvmBindComponentTxType.BIND && (
-                <div>
-                  <p>
-                    Connected Ethereum VM address is {" "}
-                    {bindFor.evmAddress}
-                  </p>
-                </div>
-                )}
-                {/* Error message */}
-                {txStatus.error && <p>{txStatus.error.message}</p>}
-                {customBindState.error && <p>{customBindState.error}</p>}
-              </div>
-              )}
+          </div>
+          )}
 
-              {/* Not enough balance */}
-              {!txStatus && !hasBalanceForBinding(bindFor.balance)
-              && (
-              <div>
-                {!txStatus && !transferBalanceFrom
-                && <p>Not enough REEF in account for connect EVM address transaction fee.</p>}
-                {!txStatus && !!transferBalanceFrom && (
-                <div>
-                  <p>
-                    <b>
-                      ~
-                      {toReefBalanceDisplay(MIN_BALANCE)}
-                    </b>
-                    &nbsp; is needed for transaction fee.
-                    <br />
-                    <br />
-
-                    Coins will be transferred from account:&nbsp;
-                    <OpenModalButton
-                      className="btn-empty bind-evm__select-account"
-                      id="selectMyAddress"
+          {/* Start binding */}
+          {(!customBindState.signingInProcess && ((!txStatus && hasBalanceForBinding(bindFor.balance)) 
+            || (txStatus && !txStatus.error && txStatus.isInBlock && txStatus.componentTxType === EvmBindComponentTxType.TRANSFER)))
+          && (
+          <div>
+            { !customBindState.signature && txStatus && <p>Transfer complete. Now run connect EVM account transaction.</p> }
+            { customBindState.signature && customBindState.evmAddress && <p>Message signed for {customBindState.evmAddress} address. Now run connect EVM account transaction.</p>  }
+            { !customBindState.signature &&
+              <div className='bind-evm__custom-select'>
+                <Uik.Toggle
+                  value={customBindState.useCustomEvmAddress}
+                  onChange={() => setCustomBindState({useCustomEvmAddress: !customBindState.useCustomEvmAddress})}
+                /> 
+                <div className='prompt'>
+                  <span>Use custom EVM address</span>
+                  <div>
+                    <span data-tip data-for="custom-evm-select">
+                      <Uik.Icon icon={faQuestionCircle} className="icon" />
+                    </span>
+                    <ReactTooltip
+                      id="custom-evm-select"
+                      place="top"
+                      effect="solid"
+                      backgroundColor="#46288b"
                     >
-                      <Account account={transferBalanceFrom} />
-                    </OpenModalButton>
-                  </p>
-
-                  <AccountListModal
-                    accounts={availableTxAccounts}
-                    id="selectMyAddress"
-                    selectAccount={onAccountSelect}
-                    title="Select account"
-                  />
-                  <Uik.Button
-                    text="Continue"
-                    fill
-                    size="large"
-                    onClick={() => transfer(transferBalanceFrom!, bindSigner, MIN_BALANCE, getUpdateTxCallback([onTxUpdate as TxStatusHandler, setTxStatus]))}
-                  />
-                </div>
-                )}
-              </div>
-              )}
-
-              {/* Start binding */}
-              {(!customBindState.signingInProcess && ((!txStatus && hasBalanceForBinding(bindFor.balance)) 
-                || (txStatus && !txStatus.error && txStatus.isInBlock && txStatus.componentTxType === EvmBindComponentTxType.TRANSFER)))
-              && (
-              <div>
-                { !customBindState.signature && txStatus && <p>Transfer complete. Now run connect EVM account transaction.</p> }
-                { customBindState.signature && customBindState.evmAddress && <p>Message signed for {customBindState.evmAddress} address. Now run connect EVM account transaction.</p>  }
-                { !customBindState.signature &&
-                  <div className='bind-evm__custom-select'>
-                    <Uik.Toggle
-                      value={customBindState.useCustomEvmAddress}
-                      onChange={() => setCustomBindState({useCustomEvmAddress: !customBindState.useCustomEvmAddress})}
-                    /> 
-                    <div className='prompt'>
-                      <span>Use custom EVM address</span>
-                      <div>
-                        <span data-tip data-for="custom-evm-select">
-                          <Uik.Icon icon={faQuestionCircle} className="icon" />
-                        </span>
-                        <ReactTooltip
-                          id="custom-evm-select"
-                          place="top"
-                          effect="solid"
-                          backgroundColor="#46288b"
-                        >
-                          By default, your Reef account will be bound to a predetermined EVM address. 
-                          You should use this EVM address <b>only in the Reef network</b>.<br/>
-                          Enabling this option you will bind your Reef account to a EVM address you own by signing a message with an EVM wallet.
-                        </ReactTooltip>
-                      </div>
-                    </div>
+                      By default, your Reef account will be bound to a predetermined EVM address. 
+                      You should use this EVM address <b>only in the Reef network</b>.<br/>
+                      Enabling this option you will bind your Reef account to a EVM address you own by signing a message with an EVM wallet.
+                    </ReactTooltip>
                   </div>
-                }
-
-                <Uik.Button
-                  fill
-                  size="large"
-                  text="Continue"
-                  onClick={() => customBindState.useCustomEvmAddress && !customBindState.signature
-                    ? signEvmMessage()
-                    : bindAccount(getUpdateTxCallback([onTxUpdate as TxStatusHandler, setTxStatus]))}
-                />
+                </div>
               </div>
-              )}
-            </div>
-            )}
+            }
+
+            <Uik.Button
+              fill
+              size="large"
+              text="Continue"
+              onClick={() => customBindState.useCustomEvmAddress && !customBindState.signature
+                ? signEvmMessage()
+                : bindAccount(getUpdateTxCallback([onTxUpdate as TxStatusHandler, setTxStatus]))}
+            />
+          </div>
+          )}
+        </div>
+        )}
     </div>
   );
 };
