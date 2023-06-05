@@ -14,12 +14,11 @@ export const useAllPools = (dexClient: ApolloClient<any>): PoolWithReserves[] =>
     refetch();
   }, POLL_INTERVAL);
 
-  // TODO: store icons in Pool table
   const pools = data?.allPools.map((pool) => {
     return {
       ...pool,
-      icon1: getIconUrl(pool.token1),
-      icon2: getIconUrl(pool.token2),
+      iconUrl1: pool.iconUrl1 === '' ? getIconUrl(pool.token1) : pool.iconUrl1,
+      iconUrl2: pool.iconUrl2 === '' ? getIconUrl(pool.token2) : pool.iconUrl2,
     };
   });
 
