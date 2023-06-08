@@ -9,6 +9,6 @@ export const Finalizing = (): JSX.Element => (
       <Uik.FishAnimation />
     </div>
     <Uik.Text text="We're just finalizing your transaction." />
-    <Uik.Text type="mini" text="This proccess usually takes up to one minute." />
+    <Uik.Text type="mini" text="This process usually takes up to one minute." />
   </div>
 );
