@@ -91,3 +91,22 @@
 .bind-evm__loading span {
   margin-left: 25px;
 }
+
+.bind-evm__custom-select {
+  display: flex;
+  align-items: center;
+}
+
+.bind-evm__custom-select .prompt {
+  display: flex;
+  margin-left: 5px;
+}
+
+.bind-evm__custom-select .icon {
+  color: var(--primary);
+  margin-left: 3px;
+}
+
+.bind-evm__custom-select .uik-toggle .uik-toggle__toggle {
+  background-color: var(--border-color-dark);
+}
