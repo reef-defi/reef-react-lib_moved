@@ -88,6 +88,8 @@ interface UseSwapState {
   dexClient?: ApolloClient<any>;
   tokenPrices: AddressToNumber<number>;
   dispatch: Dispatch<SwapAction>;
+  waitForPool?: boolean;
+  pool?: Pool;
 }
 export const useSwapState = ({
   state,
@@ -98,6 +100,8 @@ export const useSwapState = ({
   address2,
   tokenPrices,
   dispatch,
+  waitForPool,
+  pool: poolProp,
 }: UseSwapState): void => {
   const {
     token2: buy, token1: sell, pool, isLoading, isValid,
@@ -112,13 +116,20 @@ export const useSwapState = ({
   const prevSellBalance = useRef<string>('');
   
   // Updating swap pool
-  const [loadedPool, isPoolLoading] = useLoadPool(
-    sell,
-    buy,
-    account?.evmAddress || '',
-    dexClient,
-    isLoading,
-  );
+  let loadedPool: Pool | undefined;
+  let isPoolLoading = false;
+  if (waitForPool) {
+    // Avoid querying pool based on token addresses and receive pool from props
+    loadedPool = poolProp;
+  } else {
+    [loadedPool, isPoolLoading] = useLoadPool(
+      sell,
+      buy,
+      account?.evmAddress || '',
+      dexClient,
+      isLoading,
+    );
+  }
   useEffect(() => {
     if (loadedPool) {
       dispatch(setPoolAction(loadedPool));

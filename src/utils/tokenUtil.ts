@@ -2,43 +2,44 @@ import { BigNumber, utils } from 'ethers';
 import { BigNumber as BN } from 'bignumber.js';
 import { DataProgress, DataWithProgress, isDataSet } from './dataWithProgress';
 import {
-  Pool, reefTokenWithAmount, Token, TokenWithAmount,
+  reefTokenWithAmount, Token, TokenWithAmount,
 } from '../state';
 import { toDecimalPlaces } from './math';
+import { PoolReserves } from '../graphql/pools';
 
 const { parseUnits, formatEther } = utils;
 
 const getReefTokenPoolReserves = (
-  reefTokenPool: Pool,
+  reefTokenPool: PoolReserves,
   reefAddress: string,
 ): { reefReserve: number; tokenReserve: number } => {
   let reefReserve: number;
   let tokenReserve: number;
   if (
-    reefTokenPool.token1.address.toLowerCase() === reefAddress.toLowerCase()
+    reefTokenPool.token1.toLowerCase() === reefAddress.toLowerCase()
   ) {
-    reefReserve = parseInt(reefTokenPool.reserve1, 10);
-    tokenReserve = parseInt(reefTokenPool.reserve2, 10);
+    reefReserve = parseInt(reefTokenPool.reserved1, 10);
+    tokenReserve = parseInt(reefTokenPool.reserved2, 10);
   } else {
-    reefReserve = parseInt(reefTokenPool.reserve2, 10);
-    tokenReserve = parseInt(reefTokenPool.reserve1, 10);
+    reefReserve = parseInt(reefTokenPool.reserved2, 10);
+    tokenReserve = parseInt(reefTokenPool.reserved1, 10);
   }
   return { reefReserve, tokenReserve };
 };
 const findReefTokenPool = (
-  pools: Pool[],
+  pools: PoolReserves[],
   reefAddress: string,
   token: Token,
-): Pool | undefined => pools.find(
-  (pool) => (pool.token1.address.toLowerCase() === reefAddress.toLowerCase()
-        && pool.token2.address.toLowerCase() === token.address.toLowerCase())
-      || (pool.token2.address.toLowerCase() === reefAddress.toLowerCase()
-        && pool.token1.address.toLowerCase() === token.address.toLowerCase()),
+): PoolReserves | undefined => pools.find(
+  (pool) => (pool.token1.toLowerCase() === reefAddress.toLowerCase()
+        && pool.token2.toLowerCase() === token.address.toLowerCase())
+      || (pool.token2.toLowerCase() === reefAddress.toLowerCase()
+        && pool.token1.toLowerCase() === token.address.toLowerCase()),
 );
 
 export const calculateTokenPrice = (
   token: Token,
-  pools: Pool[],
+  pools: PoolReserves[],
   reefPrice: DataWithProgress<number>,
 ): DataWithProgress<number> => {
   if (!isDataSet(reefPrice)) {

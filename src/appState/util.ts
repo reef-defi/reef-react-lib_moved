@@ -16,7 +16,7 @@ import {
 } from './accountState';
 import { UpdateAction } from './updateStateModel';
 import {
-  availableNetworks, Network, Pool, ReefSigner,
+  availableNetworks, Network, ReefSigner,
 } from '../state';
 import { calculateTokenPrice, disconnectProvider, TxStatusUpdate } from '../utils';
 import { ERC20 } from '../assets/abi/ERC20';
@@ -26,6 +26,7 @@ import { initProvider } from '../utils/providerUtil';
 import { currentNetwork$, setCurrentNetwork, setCurrentProvider } from './providerState';
 import { apolloDexClientSubj, apolloExplorerClientSubj, GQLUrl, setApolloDexUrls, setApolloExplorerUrls } from '../graphql';
 import { ipfsUrlResolverFn } from '../utils/nftUtil';
+import { PoolReserves } from '../graphql/pools';
 
 type destroyConnection = ()=>void;
 
@@ -53,7 +54,7 @@ export const combineTokensDistinct = ([tokens1, tokens2]: [
 export const toTokensWithPrice = ([tokens, reefPrice, pools]: [
   Token[],
   number,
-  Pool[]
+  PoolReserves[]
 ]): TokenWithAmount[] => tokens.map(
   (token) => ({
     ...token,

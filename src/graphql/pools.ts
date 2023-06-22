@@ -34,6 +34,11 @@ interface Reserves {
   reserved2: string;
 }
 
+export interface PoolReserves extends Reserves {
+  token1: string;
+  token2: string;
+}
+
 interface AllPool extends BasicPoolData, Reserves {}
 
 interface ContractData {
@@ -150,6 +155,7 @@ export type PoolDataQuery = { poolData: PoolDataFull }
 export type PoolDayFeeQuery = { poolTimeFees: TimeframedFee[] };
 export type PoolDayTvlQuery = { poolTimeSupply: TVLData[] };
 export type PoolReservesQuery = { poolEvents: Reserves[] };
+export type PoolsWithReservesQuery = { poolsReserves: PoolReserves[] };
 export type AllPoolsQuery = { allPools: AllPool[] }
 export type PoolSupplyQuery = { poolMinuteSupplies: Supply[] };
 export type PoolDayVolumeQuery = { poolDayVolumes: TimeframedVolume[] };
@@ -393,6 +399,17 @@ export const POOL_CURRENT_RESERVES_GQL = gql`
       orderBy: timestamp_DESC
       limit: 1
     ) {
+      reserved1
+      reserved2
+    }
+  }
+`;
+
+export const POOLS_RESERVES_GQL = gql`
+  query poolsReserves($tokens: [String!]!) {
+    poolsReserves(tokens: $tokens) {
+      token1
+      token2
       reserved1
       reserved2
     }

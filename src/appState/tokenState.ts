@@ -23,12 +23,11 @@ import { retrieveReefCoingeckoPrice } from '../api';
 import {
   ContractType, reefTokenWithAmount, Token, TokenTransfer, TokenWithAmount,
 } from '../state/token';
-import {
-  LastPoolReserves, Network, NFT, Pool, ReefSigner,
-} from '../state';
+import { Network, NFT, ReefSigner } from '../state';
 import { resolveNftImageLinks } from '../utils/nftUtil';
-import { loadPools } from '../hooks/useLoadPools';
 import { apolloDexClientInstance$ } from '../graphql';
+import { ApolloClient } from '@apollo/client';
+import { PoolReserves, POOLS_RESERVES_GQL, PoolsWithReservesQuery } from '../graphql/pools';
 
 // TODO replace with our own from lib and remove
 const toPlainString = (num: number): string => `${+num}`.replace(
@@ -187,28 +186,27 @@ export const allAvailableSignerTokens$: Observable<Token[]> = combineLatest([
   validatedTokens$,
 ]).pipe(map(combineTokensDistinct), shareReplay(1));
 
-// TODO when network changes signer changes as well? this could make 2 requests unnecessary - check
-export const pools$: Observable<Pool[]> = combineLatest([
+export const pools$: Observable<PoolReserves[]> = combineLatest([
   allAvailableSignerTokens$,
   apolloDexClientInstance$,
-  selectedSigner$,
 ]).pipe(
-  switchMap(([tkns, dexClient, signer]) => (signer ? loadPools(tkns, signer.address, dexClient) : [])),
+  switchMap(([tkns, dexClient]) => loadPoolsReserves(tkns, dexClient)),
   shareReplay(1),
 );
 
-const poolToLastPoolReserve = (p:Pool) => ({
-  address: p.poolAddress,
-  reserved1: p.reserve1,
-  reserved2: p.reserve2,
-  token1: p.token1.address,
-  token2: p.token2.address,
-  symbol1: p.token1.symbol,
-  symbol2: p.token2.symbol,
-  decimals1: p.token1.decimals,
-  decimals2: p.token2.decimals,
-} as LastPoolReserves);
-// TODO pools and tokens emit events at same time - check how to make 1 event from it
+const loadPoolsReserves = async (
+  tokens: Token[],
+  dexClient: ApolloClient<any>
+): Promise<PoolReserves[]> => {
+  if (tokens.length < 2) return [];
+  
+  const tokenAddresses = tokens.map((t) => t.address);
+  const res = await dexClient.query<PoolsWithReservesQuery>(
+    { query: POOLS_RESERVES_GQL, variables: { tokens: tokenAddresses } }
+  );
+  return res.data.poolsReserves || [];
+};
+
 export const tokenPrices$: Observable<TokenWithAmount[]> = combineLatest([
   allAvailableSignerTokens$,
   reefPrice$,
@@ -216,10 +214,6 @@ export const tokenPrices$: Observable<TokenWithAmount[]> = combineLatest([
 ]).pipe(
   map(toTokensWithPrice),
   shareReplay(1),
-);
-
-export const poolReserves$: Observable<LastPoolReserves[]> = pools$.pipe(
-  map((pools:Pool[]) => pools.map(poolToLastPoolReserve)),
 );
 
 const resolveTransferHistoryNfts = (tokens: (Token | NFT)[], signer: ReefSigner): Observable<(Token | NFT)[]> => {

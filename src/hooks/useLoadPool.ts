@@ -62,7 +62,7 @@ export const useLoadPool = (
 
   useEffect(() => {
     const load = async (): Promise<void> => {
-      if (!token1.address || !token2.address || userAddress == '' || !dexClient || disable) {
+      if (!token1.address || !token2.address || token2.address === '0x' || userAddress === '' || !dexClient || disable) {
         return;
       }
       Promise.resolve()
