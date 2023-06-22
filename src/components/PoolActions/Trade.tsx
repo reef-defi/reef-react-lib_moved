@@ -1,4 +1,4 @@
-import { faRepeat } from '@fortawesome/free-solid-svg-icons';
+import { faRepeat, faWarning } from '@fortawesome/free-solid-svg-icons';
 import Uik from '@reef-chain/ui-kit';
 import BigNumber from 'bignumber.js';
 import React, { useMemo, useState } from 'react';
@@ -7,6 +7,7 @@ import TokenField, { SelectToken } from './TokenField';
 
 import { LastPoolReserves, Pool, resolveSettings, Token } from '../../state';
 import TradePopup from './ConfirmPopups/Trade';
+import ReactTooltip from 'react-tooltip';
 
 interface TradeActions {
   onSwitch: () => void;
@@ -33,6 +34,7 @@ interface SummaryItem {
   value?: string,
   empty?: boolean,
   className?: string
+  warn?: string;
 }
 
 const SummaryItem = ({
@@ -40,6 +42,7 @@ const SummaryItem = ({
   value,
   empty,
   className,
+  warn = '',
 }: SummaryItem): JSX.Element => (
   <div
     className={`
@@ -48,7 +51,22 @@ const SummaryItem = ({
       ${className || ''}
     `}
   >
-    <div className="uik-pool-actions__summary-item-label">{ label }</div>
+    <div className="uik-pool-actions__summary-item-label">{ label } 
+    { warn !== '' && (
+      <span className='slippage-warning'>
+        <span data-tip data-for="slippage-warning">
+          <Uik.Icon icon={faWarning} className="icon" />
+        </span>
+        <ReactTooltip
+          id="slippage-warning"
+          place="top"
+          effect="solid"
+        > 
+          { warn }
+        </ReactTooltip>
+      </span>
+    )}
+    </div>
     <div className="uik-pool-actions__summary-item-value">{ value }</div>
   </div>
 );
@@ -196,9 +214,11 @@ export const Trade = ({
         />
         <SummaryItem
           label="Slippage"
-          className={slippage > 3 ? 'uik-pool-actions__trade-slippage--warn' : ''}
+          className={slippage > 3 || slippage < 0.1 ? 'uik-pool-actions__trade-slippage--warn' : ''}
           value={`${slippage}%`}
           empty={!slippage}
+          warn={slippage > 3 ? 'Your transaction may be frontrun and result in an unfavorable trade.' 
+            : slippage < 0.1 ? 'Slippage below 0.1% may result in a failed transaction.' : ''}
         />
       </div>
 

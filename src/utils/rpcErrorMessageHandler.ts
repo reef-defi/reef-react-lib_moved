@@ -16,7 +16,7 @@ const chainErrors: { [key: string]: string } = {
   INSUFFICIENT_LIQUIDITY: 'Insufficient liquidity.',
   INSUFFICIENT_INPUT_AMOUNT: 'Insufficient sell amount.',
   INSUFFICIENT_OUTPUT_AMOUNT:
-    'Insufficient buying amount. Incresse slippage tolerance or lower buying amount.',
+    'Insufficient buying amount. Increase slippage tolerance or lower buying amount.',
   INSUFFICIENT_LIQUIDITY_MINTED: 'Insufficient liquidity minted.',
   INSUFFICIENT_LIQUIDITY_BURNED: 'Insufficient liquidity burned.',
   InsufficientBalance: 'Account Reef token balance is too low.',

@@ -45,3 +45,8 @@
   margin: 30px 0 30px 50px !important;
   width: 100%;
 }
+
+.slippage-warning svg {
+  position: absolute;
+  height: 16px;
+}
