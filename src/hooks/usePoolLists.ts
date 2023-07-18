@@ -1,7 +1,9 @@
 import { ApolloClient, useQuery } from '@apollo/client';
 import BigNumber from 'bignumber.js';
 import { useMemo } from 'react';
-import { AllPoolsListCountQuery, AllPoolsListQuery, ALL_POOLS_LIST, ALL_POOLS_LIST_COUNT, PoolListItem, PoolsListCountVar, PoolsListVar, UserPoolsListCountQuery, UserPoolsListQuery, USER_POOLS_LIST, USER_POOLS_LIST_COUNT } from '../graphql/pools';
+import {
+  AllPoolsListCountQuery, AllPoolsListQuery, ALL_POOLS_LIST, ALL_POOLS_LIST_COUNT, PoolListItem, PoolsListCountVar, PoolsListVar, UserPoolsListCountQuery, UserPoolsListQuery, USER_POOLS_LIST, USER_POOLS_LIST_COUNT,
+} from '../graphql/pools';
 import { TokenPrices } from '../state';
 import { getIconUrl } from '../utils';
 
@@ -28,18 +30,17 @@ interface UsePoolsList extends PoolsListVar {
 }
 
 const calculate24hVolumeUSD = ({
-    token1,
-    token2,
-    dayVolume1,
-    dayVolume2,
-    prevDayVolume1,
-    prevDayVolume2,
-    decimals1,
-    decimals2,
-  }: PoolListItem,
-  tokenPrices: TokenPrices,
-  current: boolean,
-): BigNumber => {
+  token1,
+  token2,
+  dayVolume1,
+  dayVolume2,
+  prevDayVolume1,
+  prevDayVolume2,
+  decimals1,
+  decimals2,
+}: PoolListItem,
+tokenPrices: TokenPrices,
+current: boolean): BigNumber => {
   const v1 = current ? dayVolume1 : prevDayVolume1;
   const v2 = current ? dayVolume2 : prevDayVolume2;
   if (v1 === null && v2 === null) return new BigNumber(0);
@@ -96,14 +97,15 @@ const calculateUserLiquidity = (
 };
 
 export const usePoolsList = ({
-  limit, offset, search, signerAddress, tokenPrices, queryType, dexClient
+  limit, offset, search, signerAddress, tokenPrices, queryType, dexClient,
 }: UsePoolsList): [PoolItem[], boolean, number] => {
-
   const { data: dataPoolsList, loading: loadingPoolsList } = useQuery<AllPoolsListQuery | UserPoolsListQuery, PoolsListVar>(
     queryType === 'User' ? USER_POOLS_LIST : ALL_POOLS_LIST,
     {
       client: dexClient,
-      variables: { limit, offset, search, signerAddress },
+      variables: {
+        limit, offset, search, signerAddress,
+      },
     },
   );
 
@@ -117,8 +119,8 @@ export const usePoolsList = ({
 
   const processed = useMemo((): PoolItem[] => {
     if (!dataPoolsList) return [];
-    const poolsList = queryType === 'User' 
-      ? (dataPoolsList as UserPoolsListQuery).userPoolsList 
+    const poolsList = queryType === 'User'
+      ? (dataPoolsList as UserPoolsListQuery).userPoolsList
       : (dataPoolsList as AllPoolsListQuery).allPoolsList;
     return poolsList.map((pool) => ({
       address: pool.id,
@@ -134,16 +136,16 @@ export const usePoolsList = ({
       volume24h: calculate24hVolumeUSD(pool, tokenPrices, true).toFormat(2),
       volumeChange24h: calculateVolumeChange(pool, tokenPrices),
       myLiquidity: calculateUserLiquidity(pool, tokenPrices),
-    })); 
+    }));
   }, [dataPoolsList]);
 
   return [
-    processed, 
-    loadingPoolsList || loadingPoolsCount, 
-    dataPoolsCount 
-      ? queryType === 'User' 
-          ? (dataPoolsCount as UserPoolsListCountQuery).userPoolsListCount
-          : (dataPoolsCount as AllPoolsListCountQuery).allPoolsListCount
-      : 0
+    processed,
+    loadingPoolsList || loadingPoolsCount,
+    dataPoolsCount
+      ? queryType === 'User'
+        ? (dataPoolsCount as UserPoolsListCountQuery).userPoolsListCount
+        : (dataPoolsCount as AllPoolsListCountQuery).allPoolsListCount
+      : 0,
   ];
-}
+};

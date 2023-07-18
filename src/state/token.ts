@@ -11,7 +11,7 @@ import {
 } from '../utils/utils';
 import { assertAmount, calculateAmount } from '../utils/math';
 import { TokenPrices } from './pool';
-import {NFT} from "./nft";
+import { NFT } from './nft';
 
 export enum ContractType {
   ERC20 = 'ERC20',

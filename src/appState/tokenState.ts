@@ -13,6 +13,7 @@ import {
 import { BigNumber, FixedNumber, utils } from 'ethers';
 import { filter } from 'rxjs/operators';
 import { graphql } from '@reef-chain/util-lib';
+import { ApolloClient } from '@apollo/client';
 import { _NFT_IPFS_RESOLVER_FN, combineTokensDistinct, toTokensWithPrice } from './util';
 import { selectedSigner$ } from './accountState';
 import { currentNetwork$, currentProvider$ } from './providerState';
@@ -26,7 +27,6 @@ import {
 import { Network, NFT, ReefSigner } from '../state';
 import { resolveNftImageLinks } from '../utils/nftUtil';
 import { apolloDexClientInstance$ } from '../graphql';
-import { ApolloClient } from '@apollo/client';
 import { PoolReserves, POOLS_RESERVES_GQL, PoolsWithReservesQuery } from '../graphql/pools';
 
 // TODO replace with our own from lib and remove
@@ -196,13 +196,13 @@ export const pools$: Observable<PoolReserves[]> = combineLatest([
 
 const loadPoolsReserves = async (
   tokens: Token[],
-  dexClient: ApolloClient<any>
+  dexClient: ApolloClient<any>,
 ): Promise<PoolReserves[]> => {
   if (tokens.length < 2) return [];
-  
+
   const tokenAddresses = tokens.map((t) => t.address);
   const res = await dexClient.query<PoolsWithReservesQuery>(
-    { query: POOLS_RESERVES_GQL, variables: { tokens: tokenAddresses } }
+    { query: POOLS_RESERVES_GQL, variables: { tokens: tokenAddresses } },
   );
   return res.data.poolsReserves || [];
 };

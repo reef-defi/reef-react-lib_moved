@@ -29,8 +29,8 @@ export const errorHandler = (message: string): string => {
     return 'Pool K value can not be aligned with desired amounts. Try decreasing swap amount or increase slippage tolerance.';
   }
   if (
-    message.includes('Module { index: 6, error: 2, message: None }') ||
-    message.includes('{"module":{"index":6,"error":2}}')
+    message.includes('Module { index: 6, error: 2, message: None }')
+    || message.includes('{"module":{"index":6,"error":2}}')
   ) {
     return 'Insufficient Reef amount, get more tokens.';
   }
@@ -50,7 +50,7 @@ const hexToAscii = (str1: string): string => {
     str += String.fromCharCode(parseInt(hex.substr(n, 2), 16));
   }
   return str;
-}
+};
 
 export const captureError = (events: Event[]): string|undefined => {
   for (const event of events) {
@@ -63,8 +63,8 @@ export const captureError = (events: Event[]): string|undefined => {
       } else {
         message = JSON.stringify(message);
       }
-      return message
+      return message;
     }
   }
   return undefined;
-}
+};

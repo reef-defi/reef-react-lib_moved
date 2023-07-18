@@ -2,12 +2,14 @@ import { faRepeat, faWarning } from '@fortawesome/free-solid-svg-icons';
 import Uik from '@reef-chain/ui-kit';
 import BigNumber from 'bignumber.js';
 import React, { useMemo, useState } from 'react';
+import ReactTooltip from 'react-tooltip';
 import { SwapState } from '../../store';
 import TokenField, { SelectToken } from './TokenField';
 
-import { LastPoolReserves, Pool, resolveSettings, Token } from '../../state';
+import {
+  LastPoolReserves, Pool, resolveSettings, Token,
+} from '../../state';
 import TradePopup from './ConfirmPopups/Trade';
-import ReactTooltip from 'react-tooltip';
 
 interface TradeActions {
   onSwitch: () => void;
@@ -51,9 +53,10 @@ const SummaryItem = ({
       ${className || ''}
     `}
   >
-    <div className="uik-pool-actions__summary-item-label">{ label } 
-    { warn !== '' && (
-      <span className='slippage-warning'>
+    <div className="uik-pool-actions__summary-item-label">
+      { label }
+      { warn !== '' && (
+      <span className="slippage-warning">
         <span data-tip data-for="slippage-warning">
           <Uik.Icon icon={faWarning} className="icon" />
         </span>
@@ -61,11 +64,11 @@ const SummaryItem = ({
           id="slippage-warning"
           place="top"
           effect="solid"
-        > 
+        >
           { warn }
         </ReactTooltip>
       </span>
-    )}
+      )}
     </div>
     <div className="uik-pool-actions__summary-item-value">{ value }</div>
   </div>
@@ -96,19 +99,19 @@ const calculateRate = (
 const selectTokensForToken = (token: Token, tokens: Token[], pools: LastPoolReserves[]): Token[] => useMemo(
   () => {
     const availableTokens = pools
-    .filter(({ token1, token2 }) => token1 === token.address || token2 === token.address)
-    .reduce((acc: Set<string>, pool) => {
-      if (pool.token1 === token.address) {
-        acc.add(pool.token2);
-      } else {
-        acc.add(pool.token1);
-      }
-      return acc;
-    }, new Set<string>());
-  return tokens.filter((t) => availableTokens.has(t.address));
+      .filter(({ token1, token2 }) => token1 === token.address || token2 === token.address)
+      .reduce((acc: Set<string>, pool) => {
+        if (pool.token1 === token.address) {
+          acc.add(pool.token2);
+        } else {
+          acc.add(pool.token1);
+        }
+        return acc;
+      }, new Set<string>());
+    return tokens.filter((t) => availableTokens.has(t.address));
   },
   [token, tokens, pools],
-)
+);
 
 export const Trade = ({
   state: {
@@ -129,11 +132,11 @@ export const Trade = ({
     setToken2Amount,
     selectToken1,
     selectToken2,
-    setSlippage
+    setSlippage,
   },
   pools,
   tokens,
-  maxSlippage = 100
+  maxSlippage = 100,
 } : Trade): JSX.Element => {
   const { percentage: slippage } = resolveSettings(settings);
   const rate = pool ? calculateRate(token1.address, pool) : undefined;
@@ -195,7 +198,7 @@ export const Trade = ({
 
         <TokenField
           token={token2}
-          tokens={selectTokens2 }
+          tokens={selectTokens2}
           onAmountChange={setToken2Amount}
           selectToken={selectToken2}
         />
@@ -217,7 +220,7 @@ export const Trade = ({
           className={slippage > 3 || slippage < 0.1 ? 'uik-pool-actions__trade-slippage--warn' : ''}
           value={`${slippage}%`}
           empty={!slippage}
-          warn={slippage > 3 ? 'Your transaction may be frontrun and result in an unfavorable trade.' 
+          warn={slippage > 3 ? 'Your transaction may be frontrun and result in an unfavorable trade.'
             : slippage < 0.1 ? 'Slippage below 0.1% may result in a failed transaction.' : ''}
         />
       </div>
@@ -230,7 +233,7 @@ export const Trade = ({
           helpers={[
             { position: 0, text: '0%' },
             { position: 25 },
-            { position: 50, text: `${maxSlippage/2}%` },
+            { position: 50, text: `${maxSlippage / 2}%` },
             { position: 75 },
             { position: 100, text: `${maxSlippage}%` },
           ]}

@@ -2,6 +2,7 @@ import Uik from '@reef-chain/ui-kit';
 import BN from 'bignumber.js';
 import { BigNumber, Contract } from 'ethers';
 import React, { Dispatch, useEffect } from 'react';
+import { ApolloClient } from '@apollo/client';
 import { ReefswapPair } from '../assets/abi/ReefswapPair';
 import { getReefswapRouter } from '../rpc';
 import {
@@ -16,7 +17,6 @@ import {
 } from '../utils';
 import { useKeepTokenUpdated } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
-import { ApolloClient } from '@apollo/client';
 
 interface OnRemoveLiquidity {
   network?: Network;
