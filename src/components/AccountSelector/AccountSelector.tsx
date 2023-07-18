@@ -86,6 +86,7 @@ export const AccountSelector = ({
       <button
         type="button"
         className="nav-account__account"
+        onClick={() => setOpen(true)}
       >
         <span>{trim(name)}</span>
       </button>
