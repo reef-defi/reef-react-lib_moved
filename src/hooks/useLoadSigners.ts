@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { ReefSigner } from '../state';
 import { useAsyncEffect } from './useAsyncEffect';
 import { getExtensionSigners } from '../rpc';
-import { setCurrentAddress } from '../appState/accountState';
+import { setSelectedAddress as setCurrentAddress } from '@reef-chain/util-lib/lib/reefState/account/setAccounts';
 
 function getBrowserExtensionUrl(): string | undefined {
   const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
