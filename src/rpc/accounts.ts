@@ -16,8 +16,6 @@ import { AccountJson } from '@reef-defi/extension-base/background/types';
 import { web3FromAddress, web3FromSource } from '@reef-defi/extension-dapp';
 import { ReefSigner } from '../state/types';
 import { ensure, removeUndefinedItem } from '../utils/utils';
-// import { selectedSigner$ } from '../appState/accountState';
-
 const accountSourceSigners = new Map<string, InjectedSigner>();
 const getAccountInjectedSigner = async (
   source: string,
