@@ -16,7 +16,7 @@ import {
   bindCustomEvmAddress,
 } from '../../utils';
 import { useObservableState } from '../../hooks';
-import { currentProvider$ } from '../../appState/providerState';
+import { selectedProvider$ as currentProvider$ } from '@reef-chain/util-lib/lib/reefState';
 import { OpenModalButton } from '../common/Modal';
 import { AccountListModal } from '../AccountSelector/AccountListModal';
 import './bind.css';
