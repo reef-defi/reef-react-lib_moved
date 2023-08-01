@@ -3,11 +3,17 @@ import { useObservableState } from './useObservableState';
 import { availableNetworks, Network } from '../state';
 import { useProvider } from './useProvider';
 import {
-  ACTIVE_NETWORK_LS_KEY,
   currentNetwork$,
   setCurrentNetwork,
-  setCurrentProvider,
 } from '../appState/providerState';
+
+// TODO need to update network interface in util-lib
+import {
+  ACTIVE_NETWORK_LS_KEY,
+  // selectedNetwork$ as currentNetwork$,
+  // setSelectedNetwork as setCurrentNetwork,
+  setSelectedProvider as setCurrentProvider,
+} from '@reef-chain/util-lib/lib/reefState/providerState';
 import { accountsSubj } from '../appState/accountState';
 import { useLoadSigners } from './useLoadSigners';
 import { disconnectProvider } from '../utils/providerUtil';
