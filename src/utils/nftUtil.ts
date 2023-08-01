@@ -2,7 +2,7 @@ import {forkJoin, Observable, of} from 'rxjs';
 import {Contract} from 'ethers';
 import axios from 'axios';
 import {Signer} from '@reef-defi/evm-provider';
-import {getContractTypeAbi} from '../appState/util';
+import {getContractTypeAbi} from '@reef-chain/util-lib/lib/token';
 import {NFT, NFTMetadata} from '../state';
 
 const extractIpfsHash = (ipfsUri: string): string|null => {
