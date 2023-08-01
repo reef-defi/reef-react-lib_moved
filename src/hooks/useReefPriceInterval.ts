@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { DataProgress, DataWithProgress } from '../utils/dataWithProgress';
 //TODO update reefprice func in util-lib anukulpandey
-import { reefPrice$ } from '../appState/tokenState';
+import { reefPrice$ } from '@reef-chain/util-lib/lib/token/reefPrice';
+import { map, skipWhile } from 'rxjs';
+import { FeedbackStatusCode } from '@reef-chain/util-lib/lib/reefState';
 
 export const useReefPriceInterval = (
 ): DataWithProgress<number> => {
@@ -9,7 +11,12 @@ export const useReefPriceInterval = (
     DataProgress.LOADING,
   );
   useEffect(() => {
-    const subs = reefPrice$.subscribe((price) => setReefPrice(price));
+    const subs = reefPrice$.pipe(
+      skipWhile(
+        value =>
+          !value.hasStatus(FeedbackStatusCode.COMPLETE_DATA) 
+      ),map(value=>value.data)
+    ).subscribe(value=>setReefPrice(value));
     return () => {
       subs.unsubscribe();
     };
