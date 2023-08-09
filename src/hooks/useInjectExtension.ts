@@ -1,6 +1,7 @@
-import { web3Accounts, web3Enable } from '@reef-defi/extension-dapp';
-import { InjectedAccount, InjectedExtension } from '@reef-defi/extension-inject/types';
+import { web3Enable } from '@reef-defi/extension-dapp';
+import { InjectedAccountWithMeta, InjectedExtension } from '@reef-defi/extension-inject/types';
 import { useState } from 'react';
+import { REEF_EXTENSION_IDENT } from '@reef-defi/extension-inject';
 import { useAsyncEffect } from './useAsyncEffect';
 
 function getBrowserExtensionUrl(): string | undefined {
@@ -31,11 +32,13 @@ function getInstallExtensionMessage(): { message: string; url?: string } {
 export const useInjectExtension = (
   appDisplayName: string,
 ): [
-  InjectedAccount[],
+  InjectedAccountWithMeta[],
+  InjectedExtension|undefined,
   boolean,
   { code?: number; message: string; url?: string } | undefined
 ] => {
-  const [accountsVal, setAccountsVal] = useState<InjectedAccount[]>([]);
+  const [accountsVal, setAccountsVal] = useState<InjectedAccountWithMeta[]>([]);
+  const [extensionVal, setExtensionVal] = useState<InjectedExtension>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<{ message: string; code?: number; url?: string }>();
 
@@ -43,7 +46,8 @@ export const useInjectExtension = (
     try {
       setIsLoading(true);
       const extensions: InjectedExtension[] = await web3Enable(appDisplayName);
-      if (extensions.length < 1) {
+      const reefExt = extensions.find((ext) => ext.name === REEF_EXTENSION_IDENT);
+      if (!reefExt) {
         const installExtensionMessage = getInstallExtensionMessage();
         setError({
           code: 1,
@@ -53,8 +57,11 @@ export const useInjectExtension = (
         return;
       }
 
-      const web3accounts = await web3Accounts();
-      if (web3accounts.length < 1) {
+      setExtensionVal(reefExt);
+
+      // const web3accounts = await web3Accounts();
+      const reefAccounts = await reefExt.accounts.get();
+      if (reefAccounts.length < 1) {
         setError({
           code: 2,
           message:
@@ -64,8 +71,17 @@ export const useInjectExtension = (
         return;
       }
 
-      const accounts = await Promise.all(extensions.map((ext) => ext.accounts.get()));
-      setAccountsVal(accounts.reduce((state, curr) => state.concat(curr), []));
+      // const accounts = await Promise.all(extensions.map((ext) => ext.accounts.get()));
+      const accountsWithMeta = reefAccounts.map((acc) => ({
+        address: acc.address,
+        meta: {
+          genesisHash: acc.genesisHash,
+          name: acc.name,
+          source: reefExt.name,
+        },
+        type: acc.type,
+      } as InjectedAccountWithMeta));
+      setAccountsVal(accountsWithMeta);
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log('Error when loading signers!', e);
@@ -88,5 +104,5 @@ export const useInjectExtension = (
     setCurrentAddress(signersVal[0].address);
   }, [accountsVal]); */
 
-  return [accountsVal, isLoading, error];
+  return [accountsVal, extensionVal, isLoading, error];
 };
