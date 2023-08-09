@@ -1,42 +1,25 @@
 import { ContractInterface } from 'ethers';
-import { Provider } from '@reef-defi/evm-provider';
-import { ApolloClient } from '@apollo/client';
-import {
-  defer, finalize, Observable, scan, switchMap, tap,
-} from 'rxjs';
-import type { Signer as InjectedSigningKey } from '@polkadot/api/types';
-import { AccountJson } from '@reef-defi/extension-base/background/types';
-import type { InjectedAccountWithMeta as InjectedAccountWithMetaReef } from '@reef-defi/extension-inject/types';
-import type {
-  InjectedAccountWithMeta,
-} from '@polkadot/extension-inject/types';
 import { ContractType, Token, TokenWithAmount } from '../state/token';
-import {
-  accountsJsonSigningKeySubj, accountsJsonSubj, accountsSubj, reloadSignersSubj,
-} from './accountState';
+import { reloadSignersSubj } from './accountState';
 import { UpdateAction } from './updateStateModel';
-import {
-  availableNetworks, Network, ReefSigner,
-} from '../state';
-import { calculateTokenPrice, disconnectProvider, TxStatusUpdate } from '../utils';
+import { Network } from '../state';
+import { calculateTokenPrice, TxStatusUpdate } from '../utils';
 import { ERC20 } from '../assets/abi/ERC20';
 import { ERC721Uri } from '../assets/abi/ERC721Uri';
 import { ERC1155Uri } from '../assets/abi/ERC1155Uri';
-import { initProvider } from '../utils/providerUtil';
-import { currentNetwork$, setCurrentNetwork, setCurrentProvider } from './providerState';
-import { apolloDexClientSubj, apolloExplorerClientSubj, GQLUrl, setApolloDexUrls, setApolloExplorerUrls } from '../graphql';
+import { GQLUrl } from '../graphql';
 import { ipfsUrlResolverFn } from '../utils/nftUtil';
 import { PoolReserves } from '../graphql/pools';
 
-type destroyConnection = ()=>void;
+// type destroyConnection = ()=>void;
 
 type GQLUrlType = 'explorer' | 'dex';
 
 export let _NFT_IPFS_RESOLVER_FN: ipfsUrlResolverFn|undefined;
 
-export const setNftIpfsResolverFn = (val?: ipfsUrlResolverFn) => {
+/* export const setNftIpfsResolverFn = (val?: ipfsUrlResolverFn) => {
   _NFT_IPFS_RESOLVER_FN = val;
-};
+}; */
 
 export const combineTokensDistinct = ([tokens1, tokens2]: [
   Token[],
@@ -116,7 +99,7 @@ export const getGQLUrls = (network: Network): Map<GQLUrlType, GQLUrl> => {
   return gqlUrls;
 };
 
-export interface State {
+/* export interface State {
   loading: boolean;
   signers?: ReefSigner[];
   provider?: Provider;
@@ -212,3 +195,4 @@ function finalizeWithValue<T>(callback: (value: T) => void) {
     );
   });
 }
+*/
