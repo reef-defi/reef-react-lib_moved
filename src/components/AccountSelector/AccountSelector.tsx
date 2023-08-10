@@ -91,13 +91,14 @@ export const AccountSelector = ({
             <span className="nav-account__balance">{ balance }</span>
           )
         }
-        </div>
-        <button
-          type="button"
-          className="nav-account__account"
-        >
-          <span>{trim(name)}</span>
-        </button>
+      </div>
+      <button
+        type="button"
+        className="nav-account__account"
+        onClick={() => setOpen(true)}
+      >
+        <span>{trim(name)}</span>
+      </button>
 
         <Uik.AccountSelector
           isOpen={isOpen}
