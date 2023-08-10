@@ -1,9 +1,9 @@
 import { Provider } from '@reef-defi/evm-provider';
 import { decodeAddress } from '@polkadot/util-crypto';
-import { ReefSigner } from '../state';
-import { handleErr, TxStatusHandler, TxStatusUpdate } from './transactionUtil';
 import { ethers } from 'ethers';
 import { Buffer } from 'buffer';
+import { ReefSigner } from '../state';
+import { handleErr, TxStatusHandler, TxStatusUpdate } from './transactionUtil';
 
 export const bindEvmAddress = (
   signer: ReefSigner,
@@ -70,14 +70,14 @@ export const bindCustomEvmAddress = (
 };
 
 export const signBindEvmAddress = async (
-  signer: ReefSigner
+  signer: ReefSigner,
 ): Promise<{evmAddress?: string, signature?: string, error?: string}> => {
   const publicKey = decodeAddress(signer.signer._substrateAddress);
-  const message = 'reef evm:' + Buffer.from(publicKey).toString('hex');
+  const message = `reef evm:${Buffer.from(publicKey).toString('hex')}`;
 
   // @ts-ignore
   const ethereumProvider = window.ethereum;
-  if (typeof ethereumProvider === 'undefined') return { error: 'No EVM wallet found.' }
+  if (typeof ethereumProvider === 'undefined') return { error: 'No EVM wallet found.' };
 
   try {
     const provider = new ethers.providers.Web3Provider(ethereumProvider);
@@ -85,10 +85,9 @@ export const signBindEvmAddress = async (
       .catch((err: any) => {
         if (err.code === 4001) {
           return { error: 'Please connect to your EVM wallet.' };
-        } else {
-          console.error(err);
-          return { error: 'Failed to connect to EVM wallet.' };
         }
+        console.error(err);
+        return { error: 'Failed to connect to EVM wallet.' };
       });
     const account = accounts[0];
     const signer = provider.getSigner();
@@ -96,6 +95,6 @@ export const signBindEvmAddress = async (
     return { evmAddress: account, signature };
   } catch (err) {
     console.error(err);
-    return { error: "Failed to sign message" };
+    return { error: 'Failed to sign message' };
   }
 };

@@ -4,7 +4,7 @@ import {
   defaultSettings,
   Pool, Settings,
   Token,
-  TokenWithAmount
+  TokenWithAmount,
 } from '../../state';
 import { assertAmount } from '../../utils';
 import { AddLiquidityActions } from '../actions/addLiquidity';
@@ -21,7 +21,7 @@ import {
   SET_TOKEN1_AMOUNT,
   SET_TOKEN2,
   SET_TOKEN2_AMOUNT,
-  SET_VALIDITY
+  SET_VALIDITY,
 } from '../actionTypes';
 
 export interface AddLiquidityState {
@@ -49,13 +49,13 @@ export const initialAddLiquidityState: AddLiquidityState = {
 };
 
 type MaxToken = [BigNumber, BigNumber]
-const maxToken = (token: Token, pool?: Pool): MaxToken  => {
+const maxToken = (token: Token, pool?: Pool): MaxToken => {
   if (!pool) {
     return [
       new BigNumber(0),
-      new BigNumber(0)
+      new BigNumber(0),
     ];
-  };
+  }
 
   const tokenReserve = pool.token1.address === token.address
     ? pool.reserve1 : pool.reserve2;
@@ -69,9 +69,9 @@ const maxToken = (token: Token, pool?: Pool): MaxToken  => {
     .div(tokenReserve);
   return [
     maxTokenAmount,
-    maxOtherAmount
+    maxOtherAmount,
   ];
-}
+};
 
 const maxValues = (state: AddLiquidityState): MaxToken => {
   const max1 = maxToken(state.token1, state.pool);
@@ -81,7 +81,7 @@ const maxValues = (state: AddLiquidityState): MaxToken => {
     return [max2[1], max2[0]];
   }
   return max1;
-}
+};
 
 export const addLiquidityReducer = (
   state = initialAddLiquidityState,
@@ -157,7 +157,7 @@ export const addLiquidityReducer = (
         token2: { ...state.token2, amount: otherAmount.toString() },
       };
     case SET_TOKEN2_AMOUNT:
-      if(!state.pool) {
+      if (!state.pool) {
         return {
           ...state,
           percentage: 0,

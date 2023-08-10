@@ -1,6 +1,7 @@
 import Uik from '@reef-chain/ui-kit';
 import React, { Dispatch, useEffect } from 'react';
 import { BigNumber, Contract } from 'ethers';
+import { ApolloClient } from '@apollo/client';
 import { ERC20 } from '../assets/abi/ERC20';
 import { getReefswapRouter } from '../rpc';
 import {
@@ -39,7 +40,6 @@ import {
 import { useKeepTokenUpdated } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
 import { useUpdateLiquidityAmount } from './useUpdateAmount';
-import { ApolloClient } from '@apollo/client';
 
 interface UseAddLiquidityState {
   address1: string;
@@ -301,20 +301,20 @@ export const onAddLiquidity = ({
         approveExtrinsic1.signAndSend(
           signer.address,
           { signer: signer.signer.signingKey },
-            (status: any) => {
-              console.log('Stake status: ', status);
-              const err = captureError(status.events);
-              if (err) {
-                reject({ message: err });
-              }
-              if (status.dispatchError) {
-                console.error(status.dispatchError.toString());
-                reject({ message: status.dispatchError.toString() });
-              }
-              if (status.status.isInBlock) {
-                resolve();
-              }
-            },
+          (status: any) => {
+            console.log('Stake status: ', status);
+            const err = captureError(status.events);
+            if (err) {
+              reject({ message: err });
+            }
+            if (status.dispatchError) {
+              console.error(status.dispatchError.toString());
+              reject({ message: status.dispatchError.toString() });
+            }
+            if (status.status.isInBlock) {
+              resolve();
+            }
+          },
         );
       });
       await signAndSendApprove1;
@@ -324,20 +324,20 @@ export const onAddLiquidity = ({
         approveExtrinsic2.signAndSend(
           signer.address,
           { signer: signer.signer.signingKey },
-            (status: any) => {
-              console.log('Stake status: ', status);
-              const err = captureError(status.events);
-              if (err) {
-                reject({ message: err });
-              }
-              if (status.dispatchError) {
-                console.error(status.dispatchError.toString());
-                reject({ message: status.dispatchError.toString() });
-              }
-              if (status.status.isInBlock) {
-                resolve();
-              }
-            },
+          (status: any) => {
+            console.log('Stake status: ', status);
+            const err = captureError(status.events);
+            if (err) {
+              reject({ message: err });
+            }
+            if (status.dispatchError) {
+              console.error(status.dispatchError.toString());
+              reject({ message: status.dispatchError.toString() });
+            }
+            if (status.status.isInBlock) {
+              resolve();
+            }
+          },
         );
       });
       await signAndSendApprove2;
