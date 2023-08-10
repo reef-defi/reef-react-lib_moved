@@ -4,11 +4,11 @@ import {
   useSubscription,
 } from '@apollo/client';
 import {
-  PoolBasicTransactionVar, PoolDayFeeQuery, PoolDayVolumeQuery, PoolFeeQuery, PoolFeeVar, PoolDayFeeVar, 
-  PoolQuery, PoolReservesQuery, PoolReservesVar, PoolSupplyQuery, PoolSupplyVar, PoolTransactionCountQuery, 
+  PoolBasicTransactionVar, PoolDayFeeQuery, PoolDayVolumeQuery, PoolFeeQuery, PoolFeeVar, PoolDayFeeVar,
+  PoolQuery, PoolReservesQuery, PoolReservesVar, PoolSupplyQuery, PoolSupplyVar, PoolTransactionCountQuery,
   PoolTransactionQuery, PoolTransactionVar, PoolDayTvlQuery, PoolDayTvlVar, PoolVar, PoolVolumeAggregateQuery,
-  PoolVolumeAggregateVar, PoolVolumeVar, POOL_CURRENT_RESERVES_GQL, POOL_DAY_FEE_QUERY_GQL, POOL_DAY_TVL_GQL, 
-  POOL_DAY_VOLUME_GQL, POOL_FEES_GQL, POOL_GQL, POOL_SUPPLY_GQL, POOL_TRANSACTIONS_GQL, POOL_TRANSACTION_COUNT_GQL, 
+  PoolVolumeAggregateVar, PoolVolumeVar, POOL_CURRENT_RESERVES_GQL, POOL_DAY_FEE_QUERY_GQL, POOL_DAY_TVL_GQL,
+  POOL_DAY_VOLUME_GQL, POOL_FEES_GQL, POOL_GQL, POOL_SUPPLY_GQL, POOL_TRANSACTIONS_GQL, POOL_TRANSACTION_COUNT_GQL,
   POOL_VOLUME_AGGREGATE_GQL, TransactionTypes,
 } from '../graphql/pools';
 import useInterval from './userInterval';
@@ -81,14 +81,14 @@ export const usePoolTransactionCountSubscription = (
 ): QueryResult<PoolTransactionCountQuery> => {
   if (dexClient === undefined) {
     return [undefined, true] as any;
-  };
+  }
 
   const { data, loading, refetch } = useQuery<PoolTransactionCountQuery, PoolBasicTransactionVar>(
-    POOL_TRANSACTION_COUNT_GQL, 
+    POOL_TRANSACTION_COUNT_GQL,
     {
       client: dexClient,
       variables: resolveTransactionVariables(address, type),
-    }
+    },
   );
 
   useInterval(() => {
@@ -96,7 +96,7 @@ export const usePoolTransactionCountSubscription = (
   }, POLL_INTERVAL);
 
   return [data, loading] as any;
-}
+};
 export const usePoolTransactionSubscription = (
   address: string | undefined,
   type: TransactionTypes,

@@ -2,15 +2,15 @@ import { ApolloClient, useQuery } from '@apollo/client';
 import { BigNumber } from 'bignumber.js';
 import { useMemo } from 'react';
 import {
-  Pool24HVolume, 
+  Pool24HVolume,
   PoolInfoQuery,
-  PoolInfoVar, 
+  PoolInfoVar,
   PoolsTotalSupply,
-  PoolsTotalValueLockedVar, 
-  PoolTokensDataQuery, 
+  PoolsTotalValueLockedVar,
+  PoolTokensDataQuery,
   PoolTokensVar,
-  POOLS_TOTAL_VALUE_LOCKED, 
-  PoolVolume24HVar, 
+  POOLS_TOTAL_VALUE_LOCKED,
+  PoolVolume24HVar,
   POOL_24H_VOLUME,
   POOL_INFO_GQL,
   POOL_TOKENS_DATA_GQL,
@@ -19,7 +19,7 @@ import { getTokenPrice, TokenPrices } from '../state';
 import { getIconUrl, normalize, POLL_INTERVAL } from '../utils';
 import useInterval from './userInterval';
 
-export const useTotalSupply = (tokenPrices: TokenPrices,  dexClient: ApolloClient<any>, previous = false): string => {
+export const useTotalSupply = (tokenPrices: TokenPrices, dexClient: ApolloClient<any>, previous = false): string => {
   const toTime = useMemo(() => {
     const tm = new Date();
     if (previous) {
@@ -120,7 +120,9 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
 
   const { data: poolInfoData, loading: poolInfoLoading, refetch: refetchPoolInfo } = useQuery<PoolInfoQuery, PoolInfoVar>(POOL_INFO_GQL, {
     client: dexClient,
-    variables: { address, signerAddress, fromTime, toTime },
+    variables: {
+      address, signerAddress, fromTime, toTime,
+    },
   });
 
   useInterval(() => {
@@ -133,8 +135,8 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
     }
 
     const pool = poolInfoData.poolInfo;
-    const token1 = tokensData!.poolById.token1;
-    const token2 = tokensData!.poolById.token2;
+    const { token1 } = tokensData!.poolById;
+    const { token2 } = tokensData!.poolById;
 
     const amountLocked1 = normalize(pool.reserves.reserved1, token1.decimals);
     const amountLocked2 = normalize(pool.reserves.reserved2, token2.decimals);

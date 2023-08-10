@@ -35,7 +35,7 @@ export const Provide = ({
     setToken2Amount,
     selectToken1,
     selectToken2,
-  }
+  },
 }: Provide): JSX.Element => {
   const {
     token1,

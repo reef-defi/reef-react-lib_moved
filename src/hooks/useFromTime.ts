@@ -33,7 +33,7 @@ export const truncateDate = (date: Date, timeUnit: TimeUnit, up = false) => {
   }
 
   return date;
-}
+};
 
 // export const useFromTime = (timeUnit: TimeUnit, timeSpan: number) => useMemo(
 //   () => {
@@ -47,7 +47,7 @@ export const truncateDate = (date: Date, timeUnit: TimeUnit, up = false) => {
 
 export const calcTimeRange = (timeUnit: TimeUnit, timeSpan: number) => {
   const toTime = truncateDate(new Date(), timeUnit, true);
-  const fromTime = new Date(toTime.getTime() - timeDataToMs({timeUnit, timeSpan}));
-  
+  const fromTime = new Date(toTime.getTime() - timeDataToMs({ timeUnit, timeSpan }));
+
   return { fromTime, toTime };
 };

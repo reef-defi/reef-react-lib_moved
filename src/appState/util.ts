@@ -24,7 +24,9 @@ import { ERC721Uri } from '../assets/abi/ERC721Uri';
 import { ERC1155Uri } from '../assets/abi/ERC1155Uri';
 import { initProvider } from '../utils/providerUtil';
 import { currentNetwork$, setCurrentNetwork, setCurrentProvider } from './providerState';
-import { apolloDexClientSubj, apolloExplorerClientSubj, GQLUrl, setApolloDexUrls, setApolloExplorerUrls } from '../graphql';
+import {
+  apolloDexClientSubj, apolloExplorerClientSubj, GQLUrl, setApolloDexUrls, setApolloExplorerUrls,
+} from '../graphql';
 import { ipfsUrlResolverFn } from '../utils/nftUtil';
 import { PoolReserves } from '../graphql/pools';
 

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Pool, Token } from '..';
 import { ApolloClient } from '@apollo/client';
+import { BigNumber } from 'ethers';
+import { Pool, Token } from '..';
 import { USER_POOL_SUPPLY, UserPoolSupplyQuery, UserPoolSupplyVar } from '../graphql/pools';
 import { EMPTY_ADDRESS, ensure } from '../utils';
-import { BigNumber } from 'ethers';
 
 type LoadingPool = Pool | undefined;
 
@@ -19,7 +19,7 @@ export const loadPool = async (
       variables: {
         token1: token1.address,
         token2: token2.address,
-        signerAddress: signerAddress,
+        signerAddress,
       },
     },
   );
@@ -28,8 +28,8 @@ export const loadPool = async (
 
   ensure(!!userPoolSupply && userPoolSupply.address !== EMPTY_ADDRESS, 'Pool does not exist!');
 
-  const address = userPoolSupply.address;
-  const decimals = userPoolSupply.decimals;
+  const { address } = userPoolSupply;
+  const { decimals } = userPoolSupply;
   const reserves1 = BigNumber.from(userPoolSupply.reserved1);
   const reserves2 = BigNumber.from(userPoolSupply.reserved2);
   const totalSupply = BigNumber.from(userPoolSupply.totalSupply);
