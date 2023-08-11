@@ -278,7 +278,7 @@ export type PoolsListCountVar = PoolSearchVar
 
 // Graphql statements
 // Total supply of all pools
-export const POOLS_TOTAL_VALUE_LOCKED = gql`
+export const POOLS_TOTAL_VALUE_LOCKED = `
   query totalSupply($toTime: String!) {
     totalSupply(toTime: $toTime) {
       pool {
