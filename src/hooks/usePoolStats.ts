@@ -90,35 +90,39 @@ export const getPoolsTotalValueLockedQuery = (toTime: string) => {
   //   });
   // };
 
-  export const useTotalSupply = async(tokenPrices: TokenPrices, httpClient: AxiosInstance, previous = false): Promise<string> => {
-  const toTime = useMemo(() => {
-    const tm = new Date();
-    if (previous) {
-      tm.setDate(tm.getDate() - 1);
-    }
-    return tm;
-  }, []);
-  return await graphqlRequest(httpClient, getPoolsTotalValueLockedQuery(toTime.toISOString()))
-  .then(response => {
-    const { data } = response;
-    if (!data || data.totalSupply.length === 0) {
+  export const useTotalSupply = async (tokenPrices: TokenPrices, httpClient: AxiosInstance, previous = false): Promise<string> => {
+    const toTime = useMemo(() => {
+      const tm = new Date();
+      if (previous) {
+        tm.setDate(tm.getDate() - 1);
+      }
+      return tm;
+    }, []);
+  
+    try {
+      const queryObj = getPoolsTotalValueLockedQuery(toTime.toISOString());
+      const response = await graphqlRequest(httpClient, queryObj);
+      const data = response.data;
+  
+      if (!data || data.totalSupply.length === 0) {
+        return '0';
+      }
+  
+      const totalSupply = data.totalSupply.reduce((acc, { reserved1, reserved2, pool: { token1, token2 } }) => {
+        const tokenPrice1 = getTokenPrice(token1, tokenPrices);
+        const tokenPrice2 = getTokenPrice(token2, tokenPrices);
+        const r1 = tokenPrice1.multipliedBy(new BigNumber(reserved1).div(new BigNumber(10).pow(18)));
+        const r2 = tokenPrice2.multipliedBy(new BigNumber(reserved2).div(new BigNumber(10).pow(18)));
+        return acc.plus(r1).plus(r2);
+      }, new BigNumber(0));
+  
+      return totalSupply.toString();
+    } catch (error) {
+      console.error("Error fetching total supply:", error);
       return '0';
     }
+  };
   
-    return data.totalSupply.reduce((acc, { reserved1, reserved2, pool: { token1, token2 } }) => {
-      const tokenPrice1 = getTokenPrice(token1, tokenPrices);
-      const tokenPrice2 = getTokenPrice(token2, tokenPrices);
-      const r1 = tokenPrice1.multipliedBy(new BigNumber(reserved1).div(new BigNumber(10).pow(18)));
-      const r2 = tokenPrice2.multipliedBy(new BigNumber(reserved2).div(new BigNumber(10).pow(18)));
-      return acc.plus(r1).plus(r2);
-    }, new BigNumber(0)).toString();
-  })
-  .catch(error => {
-    console.log(error);
-    return "0";
-  });
-};
-
 export const usePoolVolume = (tokenPrices: TokenPrices, dexClient: ApolloClient<any>): string => {
   const fromTime = useMemo(
     () => new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
