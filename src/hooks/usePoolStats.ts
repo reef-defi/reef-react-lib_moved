@@ -20,7 +20,6 @@ import { getIconUrl, normalize, POLL_INTERVAL } from '../utils';
 import useInterval from './userInterval';
 import { AxiosInstance } from 'axios';
 import { from, map } from 'rxjs';
-import { Network } from '@reef-chain/util-lib/lib/network';
 
 // export const useTotalSupply = (tokenPrices: TokenPrices, dexClient: ApolloClient<any>, previous = false): string => {
 //   const toTime = useMemo(() => {
