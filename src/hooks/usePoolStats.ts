@@ -5,8 +5,8 @@ import {
   Pool24HVolume,
   PoolInfoQuery,
   PoolInfoVar,
-  PoolsTotalSupply,
-  PoolsTotalValueLockedVar,
+  // PoolsTotalSupply,
+  // PoolsTotalValueLockedVar,
   PoolTokensDataQuery,
   PoolTokensVar,
   POOLS_TOTAL_VALUE_LOCKED,
@@ -18,34 +18,98 @@ import {
 import { getTokenPrice, TokenPrices } from '../state';
 import { getIconUrl, normalize, POLL_INTERVAL } from '../utils';
 import useInterval from './userInterval';
+import { AxiosInstance } from 'axios';
+import { from, map } from 'rxjs';
+import { Network } from '@reef-chain/util-lib/lib/network';
 
-export const useTotalSupply = (tokenPrices: TokenPrices, dexClient: ApolloClient<any>, previous = false): string => {
-  const toTime = useMemo(() => {
-    const tm = new Date();
-    if (previous) {
-      tm.setDate(tm.getDate() - 1);
-    }
-    return tm;
-  }, []);
-  const { data } = useQuery<PoolsTotalSupply, PoolsTotalValueLockedVar>(
-    POOLS_TOTAL_VALUE_LOCKED,
-    {
-      client: dexClient,
-      variables: { toTime: toTime.toISOString() },
-    },
-  );
-  if (!data || data.totalSupply.length === 0) {
-    return '0';
-  }
+// export const useTotalSupply = (tokenPrices: TokenPrices, dexClient: ApolloClient<any>, previous = false): string => {
+//   const toTime = useMemo(() => {
+//     const tm = new Date();
+//     if (previous) {
+//       tm.setDate(tm.getDate() - 1);
+//     }
+//     return tm;
+//   }, []);
+//   const { data } = useQuery<PoolsTotalSupply, PoolsTotalValueLockedVar>(
+//     POOLS_TOTAL_VALUE_LOCKED,
+//     {
+//       client: dexClient,
+//       variables: { toTime: toTime.toISOString() },
+//     },
+//   );
+//   if (!data || data.totalSupply.length === 0) {
+//     return '0';
+//   }
 
-  return data.totalSupply.reduce((acc, { reserved1, reserved2, pool: { token1, token2 } }) => {
-    const tokenPrice1 = getTokenPrice(token1, tokenPrices);
-    const tokenPrice2 = getTokenPrice(token2, tokenPrices);
-    const r1 = tokenPrice1.multipliedBy(new BigNumber(reserved1).div(new BigNumber(10).pow(18)));
-    const r2 = tokenPrice2.multipliedBy(new BigNumber(reserved2).div(new BigNumber(10).pow(18)));
-    return acc.plus(r1).plus(r2);
-  }, new BigNumber(0)).toString();
+//   return data.totalSupply.reduce((acc, { reserved1, reserved2, pool: { token1, token2 } }) => {
+//     const tokenPrice1 = getTokenPrice(token1, tokenPrices);
+//     const tokenPrice2 = getTokenPrice(token2, tokenPrices);
+//     const r1 = tokenPrice1.multipliedBy(new BigNumber(reserved1).div(new BigNumber(10).pow(18)));
+//     const r2 = tokenPrice2.multipliedBy(new BigNumber(reserved2).div(new BigNumber(10).pow(18)));
+//     return acc.plus(r1).plus(r2);
+//   }, new BigNumber(0)).toString();
+// };
+
+
+export const graphqlRequest = (
+  httpClient: AxiosInstance,
+  queryObj: { query: string; variables: any }
+) => {
+  const graphql = JSON.stringify(queryObj);
+
+  return httpClient.post("", graphql, {
+    headers: { "Content-Type": "application/json" },
+  });
 };
+
+export const queryGql$ = (
+  client: AxiosInstance,
+  queryObj: { query: string; variables: any }
+) =>
+  from(graphqlRequest(client as AxiosInstance, queryObj).then(res => res.data));
+
+export const getPoolsTotalValueLockedQuery = (toTime: string) => {
+    return {
+      query: POOLS_TOTAL_VALUE_LOCKED,
+      variables: { toTime },
+    };
+  };
+
+  export const useTotalSupply = (tokenPrices: TokenPrices, httpClient: AxiosInstance, previous = false): Promise<string> => {
+    const toTime = useMemo(() => {
+      const tm = new Date();
+      if (previous) {
+        tm.setDate(tm.getDate() - 1);
+      }
+      return tm;
+    }, []);
+  
+    const response$ = queryGql$(httpClient, getPoolsTotalValueLockedQuery(toTime.toISOString()));
+  
+    return response$.pipe(
+      map(response => {
+        const data = response.data;
+  
+        if (!data || data.totalSupply.length === 0) {
+          return '0';
+        }
+  
+        const totalSupply = data.totalSupply.reduce((acc, { reserved1, reserved2, pool: { token1, token2 } }) => {
+          const tokenPrice1 = getTokenPrice(token1, tokenPrices);
+          const tokenPrice2 = getTokenPrice(token2, tokenPrices);
+          const r1 = tokenPrice1.multipliedBy(new BigNumber(reserved1).div(new BigNumber(10).pow(18)));
+          const r2 = tokenPrice2.multipliedBy(new BigNumber(reserved2).div(new BigNumber(10).pow(18)));
+          return acc.plus(r1).plus(r2);
+        }, new BigNumber(0));
+  
+        return totalSupply.toString();
+      })
+    ).toPromise()
+    .catch(error => {
+      console.error("Error fetching total supply:", error);
+      return '0';
+    });
+  };
 
 export const usePoolVolume = (tokenPrices: TokenPrices, dexClient: ApolloClient<any>): string => {
   const fromTime = useMemo(
