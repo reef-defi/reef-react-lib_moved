@@ -37,7 +37,7 @@ export const AccountSelector = ({
   const [isOpen, setOpen] = useState(false);
 
   const getAccounts = useMemo(() => {
-    const allAccounts :Account[] = [];
+    const allAccounts: Account[] = [];
     accounts.map(async (acc) => {
       const {
         name, address, evmAddress, source,
@@ -45,7 +45,7 @@ export const AccountSelector = ({
       const isEvmClaimed = await acc.signer.isClaimed();
       allAccounts.push({
         name, address, evmAddress, source, isEvmClaimed,
-      });
+      } as Account);
     });
     return allAccounts;
   }, [accounts]);
@@ -91,14 +91,14 @@ export const AccountSelector = ({
             <span className="nav-account__balance">{ balance }</span>
           )
         }
-      </div>
-      <button
-        type="button"
-        className="nav-account__account"
-        onClick={() => setOpen(true)}
-      >
-        <span>{trim(name)}</span>
-      </button>
+        </div>
+        <button
+          type="button"
+          className="nav-account__account"
+          onClick={() => setOpen(true)}
+        >
+          <span>{trim(name)}</span>
+        </button>
 
         <Uik.AccountSelector
           isOpen={isOpen}
