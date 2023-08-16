@@ -337,7 +337,7 @@ export const POOL_VOLUME_AGGREGATE_GQL = `
   }
 `;
 
-const volumeQuery = (time: Time): DocumentNode => gql`
+const volumeQuery = (time: Time): string => `
   query volume($address: String!, $fromTime: String!) {
     pool${time}Volumes(
       where: {
@@ -356,7 +356,7 @@ export const POOL_DAY_VOLUME_GQL = volumeQuery('Day');
 export const POOL_HOUR_VOLUME_GQL = volumeQuery('Hour');
 export const POOL_MINUTE_VOLUME_GQL = volumeQuery('Minute');
 
-export const POOL_FEES_GQL = gql`
+export const POOL_FEES_GQL = `
   query poolFee(
     $address: String!
     $fromTime: String!
@@ -371,7 +371,7 @@ export const POOL_FEES_GQL = gql`
   }
 `;
 
-export const POOL_GQL = gql`
+export const POOL_GQL = `
   query pool($address: String!) {
     poolById(id: $address) {
       id
@@ -394,7 +394,7 @@ export const POOL_GQL = gql`
   }
 `;
 
-export const POOL_CURRENT_RESERVES_GQL = gql`
+export const POOL_CURRENT_RESERVES_GQL = `
   query poolEvent($address: String!) {
     poolEvents(
       where: { pool: { id_eq: $address }, type_eq: Sync }
@@ -486,7 +486,7 @@ export const POOL_TRANSACTION_COUNT_GQL = `
 // Charts queries & subscriptions
 type Time = 'Day' | 'Hour' | 'Minute';
 
-const tvlQuery = (time: Time): DocumentNode => gql`
+const tvlQuery = (time: Time):string => `
   query poolSupply($address: String!, $fromTime: String!) {
     poolTimeSupplies(
       address: $address
@@ -509,7 +509,7 @@ export const POOL_DAY_TVL_GQL = tvlQuery('Day');
 export const POOL_HOUR_TVL_GQL = tvlQuery('Hour');
 export const POOL_MINUTE_TVL_GQL = tvlQuery('Minute');
 
-const feeQuery = (time: Time): DocumentNode => gql`
+const feeQuery = (time: Time): string => `
   query fee($address: String!, $fromTime: String!) {
     poolTimeFees(
       address: $address
