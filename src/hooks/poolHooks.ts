@@ -1,12 +1,10 @@
 import {
-  ApolloClient,
-  QueryResult, SubscriptionResult, useQuery,
-  useSubscription,
+  QueryResult, SubscriptionResult, useQuery
 } from '@apollo/client';
 import {
   PoolBasicTransactionVar, PoolDayFeeQuery, PoolDayVolumeQuery, PoolFeeQuery, PoolFeeVar, PoolDayFeeVar,
   PoolQuery, PoolReservesQuery, PoolReservesVar, PoolSupplyQuery, PoolSupplyVar, PoolTransactionCountQuery,
-  PoolTransactionQuery, PoolTransactionVar, PoolDayTvlQuery, PoolDayTvlVar, PoolVar, PoolVolumeAggregateQuery,
+ PoolDayTvlQuery, PoolDayTvlVar, PoolVar, PoolVolumeAggregateQuery,
   PoolVolumeAggregateVar, PoolVolumeVar, POOL_CURRENT_RESERVES_GQL, POOL_DAY_FEE_QUERY_GQL, POOL_DAY_TVL_GQL,
   POOL_DAY_VOLUME_GQL, POOL_FEES_GQL, POOL_GQL, POOL_SUPPLY_GQL, POOL_TRANSACTIONS_GQL, POOL_TRANSACTION_COUNT_GQL,
   POOL_VOLUME_AGGREGATE_GQL, TransactionTypes,
@@ -15,6 +13,7 @@ import useInterval from './userInterval';
 import { POLL_INTERVAL } from '../utils';
 import { AxiosInstance } from 'axios';
 import { graphqlRequest } from '../graphql/gqlUtils';
+import {graphql} from '@reef-chain/util-lib';
 
 // Intermediate query hooks
 export const useDayVolume = (
@@ -77,10 +76,21 @@ const resolveTransactionVariables = (
   type: type === 'All' ? ['Swap', 'Mint', 'Burn'] : [type],
 });
 
-export const getPoolTransactionCountQuery = (address: string|undefined,time:TransactionTypes) => {
+export const getPoolTransactionCountQuery = (address: string|undefined,type:TransactionTypes) => {
   return {
     query: POOL_TRANSACTION_COUNT_GQL,
-    variables: resolveTransactionVariables(address,time),
+    variables: resolveTransactionVariables(address,type),
+  };
+};
+
+export const getPoolTransactionQuery = (address: string|undefined,type:TransactionTypes,limit:number,pageIndex:number) => {
+  return {
+    query: POOL_TRANSACTIONS_GQL,
+    variables: {
+      ...resolveTransactionVariables(address, type),
+      limit,
+      offset: pageIndex * limit,
+    },
   };
 };
 
@@ -105,23 +115,29 @@ export const usePoolTransactionCountSubscription = async (
   return [data, loading] as any;
 };
 
-export const usePoolTransactionSubscription = (
+export const usePoolTransactionSubscription = async(
   address: string | undefined,
   type: TransactionTypes,
   pageIndex = 0,
   limit = 10,
-  dexClient: ApolloClient<any>,
-): SubscriptionResult<PoolTransactionQuery> => useSubscription<PoolTransactionQuery, PoolTransactionVar>(
-  POOL_TRANSACTIONS_GQL,
-  {
-    client: dexClient,
-    variables: {
-      ...resolveTransactionVariables(address, type),
-      limit,
-      offset: pageIndex * limit,
-    },
-  },
-);
+  httpClient: AxiosInstance,
+): Promise<any> => {
+  const queryObj = getPoolTransactionQuery(address,type,limit,pageIndex);
+  const response = await graphqlRequest(httpClient, queryObj);
+  return graphql.queryGql$(response.data);
+}
+
+// useSubscription<PoolTransactionQuery, PoolTransactionVar>(
+//   POOL_TRANSACTIONS_GQL,
+//   {
+//     client: dexClient,
+//     variables: {
+//       ...resolveTransactionVariables(address, type),
+//       limit,
+//       offset: pageIndex * limit,
+//     },
+//   },
+// );
 
 export const useDayTvl = (
   address: string,
