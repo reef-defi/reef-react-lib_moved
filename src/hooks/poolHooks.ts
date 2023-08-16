@@ -13,6 +13,8 @@ import {
 } from '../graphql/pools';
 import useInterval from './userInterval';
 import { POLL_INTERVAL } from '../utils';
+import { AxiosInstance } from 'axios';
+import { graphqlRequest } from '../graphql/gqlUtils';
 
 // Intermediate query hooks
 export const useDayVolume = (
@@ -74,22 +76,27 @@ const resolveTransactionVariables = (
   search: search || '',
   type: type === 'All' ? ['Swap', 'Mint', 'Burn'] : [type],
 });
-export const usePoolTransactionCountSubscription = (
+
+export const getPoolTransactionCountQuery = (address: string|undefined,time:TransactionTypes) => {
+  return {
+    query: POOL_TRANSACTION_COUNT_GQL,
+    variables: resolveTransactionVariables(address,time),
+  };
+};
+
+export const usePoolTransactionCountSubscription = async (
   address: string | undefined,
   type: TransactionTypes,
-  dexClient: ApolloClient<any>,
-): QueryResult<PoolTransactionCountQuery> => {
-  if (dexClient === undefined) {
+  httpClient: AxiosInstance,
+): Promise<QueryResult<PoolTransactionCountQuery>> => {
+  if (httpClient === undefined) {
     return [undefined, true] as any;
   }
 
-  const { data, loading, refetch } = useQuery<PoolTransactionCountQuery, PoolBasicTransactionVar>(
-    POOL_TRANSACTION_COUNT_GQL,
-    {
-      client: dexClient,
-      variables: resolveTransactionVariables(address, type),
-    },
-  );
+  const queryObj = getPoolTransactionCountQuery(address, type);
+  const response = await graphqlRequest(httpClient, queryObj);
+
+  const { data, loading, refetch } = response.data;
 
   useInterval(() => {
     refetch();
@@ -97,6 +104,7 @@ export const usePoolTransactionCountSubscription = (
 
   return [data, loading] as any;
 };
+
 export const usePoolTransactionSubscription = (
   address: string | undefined,
   type: TransactionTypes,

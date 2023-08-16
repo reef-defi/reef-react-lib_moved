@@ -463,7 +463,7 @@ export const POOL_TRANSACTIONS_GQL = gql`
   }
 `;
 
-export const POOL_TRANSACTION_COUNT_GQL = gql`
+export const POOL_TRANSACTION_COUNT_GQL = `
   query transactionCount(
     $search: String!
     $type: [PoolType!]
