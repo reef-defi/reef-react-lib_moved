@@ -3,10 +3,6 @@ import { BigNumber } from 'bignumber.js';
 import { useMemo } from 'react';
 import {
   Pool24HVolume,
-  PoolInfoQuery,
-  PoolInfoVar,
-  PoolTokensDataQuery,
-  PoolTokensVar,
   POOLS_TOTAL_VALUE_LOCKED,
   PoolVolume24HVar,
   POOL_24H_VOLUME,
@@ -23,6 +19,20 @@ export const getPoolsTotalValueLockedQuery = (toTime: string) => {
     return {
       query: POOLS_TOTAL_VALUE_LOCKED,
       variables: { toTime },
+    };
+  };
+
+export const getPoolTokensDataQuery = (address: string) => {
+    return {
+      query: POOL_TOKENS_DATA_GQL,
+      variables: { address },
+    };
+  };
+
+export const getPoolInfoQuery = (address:string, signerAddress:string, fromTime:string, toTime:string) => {
+    return {
+      query: POOL_INFO_GQL,
+      variables: { address,signerAddress,fromTime,toTime },
     };
   };
 
@@ -107,7 +117,7 @@ export interface PoolStats {
   volumeChange24h: number;
 }
 
-export const usePoolInfo = (address: string, signerAddress: string, tokenPrices: TokenPrices, dexClient: ApolloClient<any>): [PoolStats|undefined, boolean] => {
+export const usePoolInfo = async (address: string, signerAddress: string, tokenPrices: TokenPrices, httpClient: AxiosInstance): Promise<[PoolStats|undefined, boolean]> => {
   const toTime = useMemo(() => {
     const date = new Date();
     date.setDate(date.getDate() - 1);
@@ -120,17 +130,15 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
     return date.toISOString();
   }, [address, signerAddress]);
 
-  const { data: tokensData, loading: tokensLoading } = useQuery<PoolTokensDataQuery, PoolTokensVar>(POOL_TOKENS_DATA_GQL, {
-    client: dexClient,
-    variables: { address },
-  });
+  const queryObj = getPoolTokensDataQuery(address);
+  const response = await graphqlRequest(httpClient, queryObj);
 
-  const { data: poolInfoData, loading: poolInfoLoading, refetch: refetchPoolInfo } = useQuery<PoolInfoQuery, PoolInfoVar>(POOL_INFO_GQL, {
-    client: dexClient,
-    variables: {
-      address, signerAddress, fromTime, toTime,
-    },
-  });
+  const { data: tokensData, loading: tokensLoading } = response.data;
+
+  const queryObj_ = getPoolInfoQuery(address, signerAddress, fromTime, toTime);
+  const response_ = await graphqlRequest(httpClient, queryObj_);
+
+  const { data: poolInfoData, loading: poolInfoLoading, refetch: refetchPoolInfo } = response_.data;
 
   useInterval(() => {
     refetchPoolInfo();
