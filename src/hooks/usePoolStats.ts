@@ -2,13 +2,11 @@ import { ApolloClient, useQuery } from '@apollo/client';
 import { BigNumber } from 'bignumber.js';
 import { useMemo } from 'react';
 import {
-  Pool24HVolume,
   PoolInfoQuery,
   PoolInfoVar,
   PoolTokensDataQuery,
   PoolTokensVar,
   POOLS_TOTAL_VALUE_LOCKED,
-  PoolVolume24HVar,
   POOL_24H_VOLUME,
   POOL_INFO_GQL,
   POOL_TOKENS_DATA_GQL,
@@ -23,6 +21,13 @@ export const getPoolsTotalValueLockedQuery = (toTime: string) => {
     return {
       query: POOLS_TOTAL_VALUE_LOCKED,
       variables: { toTime },
+    };
+  };
+
+export const getPool24HourQuery = (fromTime: string) => {
+    return {
+      query: POOL_24H_VOLUME,
+      variables: { fromTime },
     };
   };
 
@@ -54,18 +59,15 @@ export const getPoolsTotalValueLockedQuery = (toTime: string) => {
       return totalSupply.toString();
   };
   
-export const usePoolVolume = (tokenPrices: TokenPrices, dexClient: ApolloClient<any>): string => {
+export const usePoolVolume = async (tokenPrices: TokenPrices, httpClient: AxiosInstance): Promise<string> => {
   const fromTime = useMemo(
     () => new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
     [],
   );
-  const { data } = useQuery<Pool24HVolume, PoolVolume24HVar>(
-    POOL_24H_VOLUME,
-    {
-      client: dexClient,
-      variables: { fromTime },
-    },
-  );
+  const queryObj = getPool24HourQuery(fromTime); 
+  const response = await graphqlRequest(httpClient, queryObj);
+  const data = response.data;
+
   if (!data || data.volume.length === 0) {
     return '0';
   }

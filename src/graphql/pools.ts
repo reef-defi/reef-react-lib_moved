@@ -293,7 +293,7 @@ export const POOLS_TOTAL_VALUE_LOCKED = `
 `;
 
 // Aggregating pool hour volume
-export const POOL_24H_VOLUME = gql`
+export const POOL_24H_VOLUME = `
   query volume($fromTime: String!) {
     volume(fromTime: $fromTime) {
       pool {
