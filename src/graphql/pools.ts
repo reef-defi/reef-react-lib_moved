@@ -307,7 +307,7 @@ export const POOL_24H_VOLUME = gql`
   }
 `;
 
-export const POOL_SUPPLY_GQL = gql`
+export const POOL_SUPPLY_GQL = `
   query poolSupply($address: String!) {
     poolMinuteSupplies(
       where: { poolId_eq: $address }
@@ -320,7 +320,7 @@ export const POOL_SUPPLY_GQL = gql`
   }
 `;
 
-export const POOL_VOLUME_AGGREGATE_GQL = gql`
+export const POOL_VOLUME_AGGREGATE_GQL = `
   query poolVolume(
     $address: String!
     $fromTime: String!

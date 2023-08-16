@@ -4,37 +4,63 @@ import {
 import {
   PoolBasicTransactionVar, PoolDayFeeQuery, PoolDayVolumeQuery, PoolFeeQuery, PoolFeeVar, PoolDayFeeVar,
   PoolQuery, PoolReservesQuery, PoolReservesVar, PoolSupplyQuery, PoolSupplyVar, PoolTransactionCountQuery,
- PoolDayTvlQuery, PoolDayTvlVar, PoolVar, PoolVolumeAggregateQuery,
-  PoolVolumeAggregateVar, PoolVolumeVar, POOL_CURRENT_RESERVES_GQL, POOL_DAY_FEE_QUERY_GQL, POOL_DAY_TVL_GQL,
+ PoolDayTvlQuery, PoolDayTvlVar, PoolVar, PoolVolumeVar, POOL_CURRENT_RESERVES_GQL, POOL_DAY_FEE_QUERY_GQL, POOL_DAY_TVL_GQL,
   POOL_DAY_VOLUME_GQL, POOL_FEES_GQL, POOL_GQL, POOL_SUPPLY_GQL, POOL_TRANSACTIONS_GQL, POOL_TRANSACTION_COUNT_GQL,
   POOL_VOLUME_AGGREGATE_GQL, TransactionTypes,
 } from '../graphql/pools';
 import useInterval from './userInterval';
 import { POLL_INTERVAL } from '../utils';
-import { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { graphqlRequest } from '../graphql/gqlUtils';
 import {graphql} from '@reef-chain/util-lib';
 
+export const getPoolVolumeAggregateQuery = (address:string,
+  fromTime:string,
+  toTime:string,) => {
+  return {
+    query: POOL_VOLUME_AGGREGATE_GQL,
+    variables: {address,fromTime,toTime},
+  };
+};
+export const getPoolSupplyQuery = (address:string) => {
+  return {
+    query: POOL_SUPPLY_GQL,
+    variables: {address},
+  };
+};
+
 // Intermediate query hooks
-export const useDayVolume = (
+export const useDayVolume = async(
   address: string,
   fromTime: string,
   toTime: string,
-): QueryResult<PoolVolumeAggregateQuery> => useQuery<PoolVolumeAggregateQuery, PoolVolumeAggregateVar>(
-  POOL_VOLUME_AGGREGATE_GQL,
-  {
-    variables: {
-      address,
-      fromTime,
-      toTime,
-    },
-  },
-);
-export const useCurrentPoolSupply = (
+): Promise<AxiosResponse> =>{
+  const queryObj = getPoolVolumeAggregateQuery(address,fromTime,toTime);
+  const response = await graphqlRequest(axios, queryObj);
+  return response.data;
+}
+//  useQuery<PoolVolumeAggregateQuery, PoolVolumeAggregateVar>(
+  //   POOL_VOLUME_AGGREGATE_GQL,
+  //   {
+    //     variables: {
+      //       address,
+      //       fromTime,
+      //       toTime,
+      //     },
+      //   },
+      // );
+      
+export const useCurrentPoolSupply = async(
   address: string,
-): QueryResult<PoolSupplyQuery> => useQuery<PoolSupplyQuery, PoolSupplyVar>(POOL_SUPPLY_GQL, {
-  variables: { address },
-});
+        ): Promise<AxiosResponse> =>{
+  const queryObj = getPoolSupplyQuery(address);
+  const response = await graphqlRequest(axios, queryObj);
+  return response.data;
+}
+//  useQuery<PoolSupplyQuery, PoolSupplyVar>(POOL_SUPPLY_GQL, {
+//   variables: { address },
+// });
+
 export const useDayFee = (
   address: string,
   fromTime: string,
