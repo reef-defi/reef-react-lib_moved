@@ -419,21 +419,21 @@ export const POOLS_RESERVES_GQL = gql`
 `;
 
 export const POOL_TRANSACTIONS_GQL = `
-  subscription transactions(
+  query transactions(
     $search: String!
     $type: [PoolType!]
     $offset: Int!
     $limit: Int!
   ) {
     poolEvents(
-      limit: $limit, 
-      offset: $offset, 
-      orderBy: timestamp_DESC, 
+      limit: $limit,
+      offset: $offset,
+      orderBy: timestamp_DESC,
       where: {
         pool: {
-          id_containsInsensitive: $search, 
+          id_containsInsensitive: $search,
           AND: { verified_eq: true }
-        }, 
+        },
         AND: {type_in: $type}
       }
     ) {
@@ -469,12 +469,12 @@ export const POOL_TRANSACTION_COUNT_GQL = `
     $type: [PoolType!]
   ) {
     poolEventsConnection(
-      orderBy: timestamp_DESC, 
+      orderBy: timestamp_DESC,
       where: {
         pool: {
-          id_containsInsensitive: $search, 
+          id_containsInsensitive: $search,
           AND: { verified_eq: true }
-        }, 
+        },
         AND: {type_in: $type}
       }
     ) {

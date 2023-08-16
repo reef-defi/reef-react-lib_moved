@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { graphql } from '@reef-chain/util-lib';
+import { graphql, reefState } from '@reef-chain/util-lib';
 import {
   PoolBasicTransactionVar,
  POOL_CURRENT_RESERVES_GQL, POOL_DAY_FEE_QUERY_GQL, POOL_DAY_TVL_GQL,
@@ -9,6 +9,9 @@ import {
 import useInterval from './userInterval';
 import { POLL_INTERVAL } from '../utils';
 import { graphqlRequest } from '../graphql/gqlUtils';
+import { useObservableState } from './useObservableState';
+import { getLatestBlockContractEvents$ } from '@reef-chain/util-lib/dist/network';
+import { useEffect, useState } from 'react';
 
 export const getPoolVolumeAggregateQuery = (address:string,
   fromTime:string,
@@ -180,9 +183,21 @@ export const usePoolTransactionSubscription = async (
   limit = 10,
   httpClient: AxiosInstance,
 ): Promise<any> => {
-  const queryObj = getPoolTransactionQuery(address, type, limit, pageIndex);
-  const response = await graphqlRequest(httpClient, queryObj);
-  return graphql.queryGql$(response.data);
+  const [isLoading, setLoading] = useState(true);
+  const [transactions, setTransactions] = useState([]);
+
+  const contractEvents = useObservableState(reefState.getLatestBlockContractEvents$(address ? [address] : undefined));
+
+  useEffect(() => {
+    setLoading(true);
+    const queryObj = getPoolTransactionQuery(address, type, limit, pageIndex);
+    graphqlRequest(httpClient, queryObj).then((response) => {
+      setTransactions(response.data);
+      setLoading(false);
+    });
+  }, [contractEvents]);
+
+  return { loading: isLoading, data: transactions };
 };
 
 // useSubscription<PoolTransactionQuery, PoolTransactionVar>(
@@ -197,7 +212,7 @@ export const usePoolTransactionSubscription = async (
 //   },
 // );
 
-export const useDayTvl =async (
+export const useDayTvl = async (
   address: string,
   fromTime: number,
 ): Promise<AxiosResponse> => {
@@ -226,7 +241,7 @@ export const useDayPoolVolume =async (
     //     fromTime: new Date(fromTime).toISOString(),
     //   },
     // });
-    
+
     export const useDayPoolFee = async(
       address: string,
       fromTime: number,
@@ -234,7 +249,7 @@ export const useDayPoolVolume =async (
         const queryObj = getPoolDayFeeQuery(address, new Date(fromTime).toISOString());
         const response = await graphqlRequest(axios, queryObj);
         return graphql.queryGql$(response.data);
-        
+
 }
 
 //  useQuery<PoolDayFeeQuery, PoolDayFeeVar>(
