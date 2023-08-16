@@ -1,62 +1,58 @@
 import {
-  QueryResult, SubscriptionResult, useQuery
+  QueryResult, SubscriptionResult, useQuery,
 } from '@apollo/client';
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import { graphql } from '@reef-chain/util-lib';
 import {
   PoolBasicTransactionVar, PoolDayFeeQuery, PoolDayVolumeQuery, PoolFeeQuery, PoolFeeVar, PoolDayFeeVar,
   PoolQuery, PoolReservesQuery, PoolReservesVar, PoolSupplyQuery, PoolSupplyVar, PoolTransactionCountQuery,
- PoolDayTvlQuery, PoolDayTvlVar, PoolVar, PoolVolumeVar, POOL_CURRENT_RESERVES_GQL, POOL_DAY_FEE_QUERY_GQL, POOL_DAY_TVL_GQL,
+  PoolDayTvlQuery, PoolDayTvlVar, PoolVar, PoolVolumeVar, POOL_CURRENT_RESERVES_GQL, POOL_DAY_FEE_QUERY_GQL, POOL_DAY_TVL_GQL,
   POOL_DAY_VOLUME_GQL, POOL_FEES_GQL, POOL_GQL, POOL_SUPPLY_GQL, POOL_TRANSACTIONS_GQL, POOL_TRANSACTION_COUNT_GQL,
   POOL_VOLUME_AGGREGATE_GQL, TransactionTypes,
 } from '../graphql/pools';
 import useInterval from './userInterval';
 import { POLL_INTERVAL } from '../utils';
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { graphqlRequest } from '../graphql/gqlUtils';
-import {graphql} from '@reef-chain/util-lib';
 
 export const getPoolVolumeAggregateQuery = (address:string,
   fromTime:string,
-  toTime:string,) => {
-  return {
-    query: POOL_VOLUME_AGGREGATE_GQL,
-    variables: {address,fromTime,toTime},
-  };
-};
-export const getPoolSupplyQuery = (address:string) => {
-  return {
-    query: POOL_SUPPLY_GQL,
-    variables: {address},
-  };
-};
+  toTime:string) => ({
+  query: POOL_VOLUME_AGGREGATE_GQL,
+  variables: { address, fromTime, toTime },
+});
+export const getPoolSupplyQuery = (address:string) => ({
+  query: POOL_SUPPLY_GQL,
+  variables: { address },
+});
 
 // Intermediate query hooks
-export const useDayVolume = async(
+export const useDayVolume = async (
   address: string,
   fromTime: string,
   toTime: string,
-): Promise<AxiosResponse> =>{
-  const queryObj = getPoolVolumeAggregateQuery(address,fromTime,toTime);
+): Promise<AxiosResponse> => {
+  const queryObj = getPoolVolumeAggregateQuery(address, fromTime, toTime);
   const response = await graphqlRequest(axios, queryObj);
   return response.data;
-}
+};
 //  useQuery<PoolVolumeAggregateQuery, PoolVolumeAggregateVar>(
-  //   POOL_VOLUME_AGGREGATE_GQL,
-  //   {
-    //     variables: {
-      //       address,
-      //       fromTime,
-      //       toTime,
-      //     },
-      //   },
-      // );
-      
-export const useCurrentPoolSupply = async(
+//   POOL_VOLUME_AGGREGATE_GQL,
+//   {
+//     variables: {
+//       address,
+//       fromTime,
+//       toTime,
+//     },
+//   },
+// );
+
+export const useCurrentPoolSupply = async (
   address: string,
-        ): Promise<AxiosResponse> =>{
+): Promise<AxiosResponse> => {
   const queryObj = getPoolSupplyQuery(address);
   const response = await graphqlRequest(axios, queryObj);
   return response.data;
-}
+};
 //  useQuery<PoolSupplyQuery, PoolSupplyVar>(POOL_SUPPLY_GQL, {
 //   variables: { address },
 // });
@@ -102,23 +98,19 @@ const resolveTransactionVariables = (
   type: type === 'All' ? ['Swap', 'Mint', 'Burn'] : [type],
 });
 
-export const getPoolTransactionCountQuery = (address: string|undefined,type:TransactionTypes) => {
-  return {
-    query: POOL_TRANSACTION_COUNT_GQL,
-    variables: resolveTransactionVariables(address,type),
-  };
-};
+export const getPoolTransactionCountQuery = (address: string|undefined, type:TransactionTypes) => ({
+  query: POOL_TRANSACTION_COUNT_GQL,
+  variables: resolveTransactionVariables(address, type),
+});
 
-export const getPoolTransactionQuery = (address: string|undefined,type:TransactionTypes,limit:number,pageIndex:number) => {
-  return {
-    query: POOL_TRANSACTIONS_GQL,
-    variables: {
-      ...resolveTransactionVariables(address, type),
-      limit,
-      offset: pageIndex * limit,
-    },
-  };
-};
+export const getPoolTransactionQuery = (address: string|undefined, type:TransactionTypes, limit:number, pageIndex:number) => ({
+  query: POOL_TRANSACTIONS_GQL,
+  variables: {
+    ...resolveTransactionVariables(address, type),
+    limit,
+    offset: pageIndex * limit,
+  },
+});
 
 export const usePoolTransactionCountSubscription = async (
   address: string | undefined,
@@ -141,17 +133,17 @@ export const usePoolTransactionCountSubscription = async (
   return [data, loading] as any;
 };
 
-export const usePoolTransactionSubscription = async(
+export const usePoolTransactionSubscription = async (
   address: string | undefined,
   type: TransactionTypes,
   pageIndex = 0,
   limit = 10,
   httpClient: AxiosInstance,
 ): Promise<any> => {
-  const queryObj = getPoolTransactionQuery(address,type,limit,pageIndex);
+  const queryObj = getPoolTransactionQuery(address, type, limit, pageIndex);
   const response = await graphqlRequest(httpClient, queryObj);
   return graphql.queryGql$(response.data);
-}
+};
 
 // useSubscription<PoolTransactionQuery, PoolTransactionVar>(
 //   POOL_TRANSACTIONS_GQL,
