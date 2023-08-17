@@ -4,13 +4,10 @@ import {
   PoolBasicTransactionVar,
  POOL_CURRENT_RESERVES_GQL, POOL_DAY_FEE_QUERY_GQL, POOL_DAY_TVL_GQL,
   POOL_DAY_VOLUME_GQL, POOL_FEES_GQL, POOL_GQL, POOL_SUPPLY_GQL, POOL_TRANSACTIONS_GQL, POOL_TRANSACTION_COUNT_GQL,
-  POOL_VOLUME_AGGREGATE_GQL, TransactionTypes,
+  POOL_VOLUME_AGGREGATE_GQL, TransactionTypes
 } from '../graphql/pools';
-import useInterval from './userInterval';
-import { POLL_INTERVAL } from '../utils';
 import { graphqlRequest } from '../graphql/gqlUtils';
 import { useObservableState } from './useObservableState';
-import { getLatestBlockContractEvents$ } from '@reef-chain/util-lib/dist/network';
 import { useEffect, useState } from 'react';
 
 export const getPoolVolumeAggregateQuery = (address:string,
@@ -155,34 +152,41 @@ export const getPoolTransactionQuery = (address: string|undefined, type:Transact
   },
 });
 
-export const usePoolTransactionCountSubscription = async (
+export const usePoolTransactionCountSubscription =  (
   address: string | undefined,
   type: TransactionTypes,
   httpClient: AxiosInstance,
-): Promise<any> => {
+): any => {
+
+
   if (httpClient === undefined) {
     return [undefined, true] as any;
   }
 
-  const queryObj = getPoolTransactionCountQuery(address, type);
-  const response = await graphqlRequest(httpClient, queryObj);
+  const [isLoading, setLoading] = useState(true);
+  const [transactionsCount, setTransactionsCount] = useState([]);
 
-  const { data, loading, refetch } = response.data;
+  const contractEvents = useObservableState(reefState.getLatestBlockContractEvents$(address ? [address] : undefined));
 
-  useInterval(() => {
-    refetch();
-  }, POLL_INTERVAL);
+  useEffect(() => {
+    setLoading(true);
+    const queryObj = getPoolTransactionCountQuery(address, type);
+    graphqlRequest(httpClient, queryObj).then((response) => {
+      setTransactionsCount(response.data);
+      setLoading(false);
+    });
+  }, [contractEvents]);
 
-  return [data, loading] as any;
+  return { loading: isLoading, data: transactionsCount };
 };
 
-export const usePoolTransactionSubscription = async (
+export const usePoolTransactionSubscription = (
   address: string | undefined,
   type: TransactionTypes,
   pageIndex = 0,
   limit = 10,
   httpClient: AxiosInstance,
-): Promise<any> => {
+): any => {
   const [isLoading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState([]);
 
