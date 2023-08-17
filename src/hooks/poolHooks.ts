@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { graphql, reefState } from '@reef-chain/util-lib';
+import { graphql } from '@reef-chain/util-lib';
 import {
   PoolBasicTransactionVar,
  POOL_CURRENT_RESERVES_GQL, POOL_DAY_FEE_QUERY_GQL, POOL_DAY_TVL_GQL,
@@ -9,6 +9,7 @@ import {
 import { graphqlRequest } from '../graphql/gqlUtils';
 import { useObservableState } from './useObservableState';
 import { useEffect, useState } from 'react';
+import {network} from '@reef-chain/util-lib';
 
 export const getPoolVolumeAggregateQuery = (address:string,
   fromTime:string,
@@ -166,7 +167,7 @@ export const usePoolTransactionCountSubscription =  (
   const [isLoading, setLoading] = useState(true);
   const [transactionsCount, setTransactionsCount] = useState([]);
 
-  const contractEvents = useObservableState(reefState.getLatestBlockContractEvents$(address ? [address] : undefined));
+  const contractEvents = useObservableState(network.getLatestBlockContractEvents$(address ? [address] : undefined));
 
   useEffect(() => {
     setLoading(true);
@@ -190,7 +191,7 @@ export const usePoolTransactionSubscription = (
   const [isLoading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState([]);
 
-  const contractEvents = useObservableState(reefState.getLatestBlockContractEvents$(address ? [address] : undefined));
+  const contractEvents = useObservableState(network.getLatestBlockContractEvents$(address ? [address] : undefined));
 
   useEffect(() => {
     setLoading(true);
