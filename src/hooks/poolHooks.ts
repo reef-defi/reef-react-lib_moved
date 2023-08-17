@@ -48,16 +48,6 @@ export const useDayVolume = async (
   const response = await graphqlRequest(axios, queryObj);
   return response.data;
 };
-//  useQuery<PoolVolumeAggregateQuery, PoolVolumeAggregateVar>(
-//   POOL_VOLUME_AGGREGATE_GQL,
-//   {
-//     variables: {
-//       address,
-//       fromTime,
-//       toTime,
-//     },
-//   },
-// );
 
 export const useCurrentPoolSupply = async (
   address: string,
@@ -66,9 +56,6 @@ export const useCurrentPoolSupply = async (
   const response = await graphqlRequest(axios, queryObj);
   return response.data;
 };
-//  useQuery<PoolSupplyQuery, PoolSupplyVar>(POOL_SUPPLY_GQL, {
-//   variables: { address },
-// });
 
 export const useDayFee = async(
   address: string,
@@ -78,18 +65,12 @@ export const useDayFee = async(
   const response = await graphqlRequest(axios, queryObj);
   return response.data;
 }
-// useQuery<PoolFeeQuery, PoolFeeVar>(POOL_FEES_GQL, {
-//   variables: { address, fromTime },
-// });
 
 export const usePoolQuery =async (address: string): Promise<AxiosResponse> => {
   const queryObj = getPoolQuery(address);
   const response = await graphqlRequest(axios, queryObj);
   return response.data;
 }
-// useQuery<PoolQuery, PoolVar>(POOL_GQL, {
-//   variables: { address },
-// });
 
 export const useCurrentPoolReserve = async(
   address: string,
@@ -98,25 +79,6 @@ export const useCurrentPoolReserve = async(
   const response = await graphqlRequest(axios, queryObj);
   return response.data;
 }
-// useQuery<PoolReservesQuery, PoolReservesVar>(POOL_CURRENT_RESERVES_GQL, {
-//   variables: { address },
-// });
-
-// export const usePools = (
-//   fromTime: string,
-//   offset: number,
-//   search?: string,
-// ): QueryResult<PoolsQuery> => useQuery<PoolsQuery, PoolsVar>(POOLS_GQL, {
-//   variables: {
-//     fromTime,
-//     offset,
-//     search: search || '',
-//   },
-// });
-
-// export const usePoolCount = (search?: string): QueryResult<PoolCountQuery> => useQuery<PoolCountQuery, PoolCountVar>(POOL_COUNT_GQL, {
-//   variables: { search: search ? { _ilike: `${search}%` } : {} },
-// });
 
 const resolveTransactionVariables = (
   search: string | undefined,
@@ -205,18 +167,6 @@ export const usePoolTransactionSubscription = (
   return { loading: isLoading, data: transactions };
 };
 
-// useSubscription<PoolTransactionQuery, PoolTransactionVar>(
-//   POOL_TRANSACTIONS_GQL,
-//   {
-//     client: dexClient,
-//     variables: {
-//       ...resolveTransactionVariables(address, type),
-//       limit,
-//       offset: pageIndex * limit,
-//     },
-//   },
-// );
-
 export const useDayTvl = async (
   address: string,
   fromTime: number,
@@ -225,12 +175,6 @@ export const useDayTvl = async (
   const response = await graphqlRequest(axios, queryObj);
   return graphql.queryGql$(response.data);
 }
-// useQuery<PoolDayTvlQuery, PoolDayTvlVar>(POOL_DAY_TVL_GQL, {
-//   variables: {
-//     address,
-//     fromTime: new Date(fromTime).toISOString(),
-//   },
-// });
 
 export const useDayPoolVolume =async (
   address: string,
@@ -240,12 +184,6 @@ export const useDayPoolVolume =async (
   const response = await graphqlRequest(axios, queryObj);
   return graphql.queryGql$(response.data);
 }
-// useQuery<PoolDayVolumeQuery, PoolVolumeVar>(POOL_DAY_VOLUME_GQL, {
-  //   variables: {
-    //     address,
-    //     fromTime: new Date(fromTime).toISOString(),
-    //   },
-    // });
 
     export const useDayPoolFee = async(
       address: string,
@@ -256,13 +194,3 @@ export const useDayPoolVolume =async (
         return graphql.queryGql$(response.data);
 
 }
-
-//  useQuery<PoolDayFeeQuery, PoolDayFeeVar>(
-//   POOL_DAY_FEE_QUERY_GQL,
-//   {
-//     variables: {
-//       address,
-//       fromTime: new Date(fromTime).toISOString(),
-//     },
-//   },
-// );
