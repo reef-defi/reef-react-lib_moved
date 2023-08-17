@@ -31,7 +31,7 @@
     "@fortawesome/free-solid-svg-icons": "^6.1.0",
     "@polkadot/extension-dapp": "^0.40.4",
     "@polkadot/react-identicon": "^0.86.4",
-    "@reef-chain/util-lib": "^0.6.0",
+    "@reef-chain/util-lib": "^1.0.0-rc7",
     "@reef-defi/evm-provider": "^1.0.9",
     "@reef-defi/extension-base": "^1.0.14",
     "@reef-defi/extension-dapp": "^1.0.14",
