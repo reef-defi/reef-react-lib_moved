@@ -633,7 +633,7 @@ export const ALL_POOLS = `
   }
 `;
 
-export const ALL_POOLS_LIST = gql`
+export const ALL_POOLS_LIST = `
   query allPoolsList($signerAddress: String!, $limit: Float!, $offset: Float!, $search: String!) {
     allPoolsList(signerAddress: $signerAddress, limit: $limit, offset: $offset, search: $search) {
       id
@@ -659,13 +659,13 @@ export const ALL_POOLS_LIST = gql`
   }
 `;
 
-export const ALL_POOLS_LIST_COUNT = gql`
+export const ALL_POOLS_LIST_COUNT = `
   query allPoolsListCount($signerAddress: String!, $search: String!) {
     allPoolsListCount(signerAddress: $signerAddress, search: $search)
   }
 `;
 
-export const USER_POOLS_LIST = gql`
+export const USER_POOLS_LIST = `
   query userPoolsList($signerAddress: String!, $limit: Float!, $offset: Float!, $search: String!) {
     userPoolsList(signerAddress: $signerAddress, limit: $limit, offset: $offset, search: $search) {
       id
@@ -689,7 +689,7 @@ export const USER_POOLS_LIST = gql`
   }
 `;
 
-export const USER_POOLS_LIST_COUNT = gql`
+export const USER_POOLS_LIST_COUNT = `
   query userPoolsListCount($signerAddress: String!, $search: String!) {
     userPoolsListCount(signerAddress: $signerAddress, search: $search)
   }
