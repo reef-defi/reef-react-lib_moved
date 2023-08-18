@@ -526,7 +526,7 @@ export const POOL_DAY_FEE_QUERY_GQL = feeQuery('Day');
 export const POOL_HOUR_FEE_QUERY_GQL = feeQuery('Hour');
 export const POOL_MINUTE_FEE_QUERY_GQL = feeQuery('Minute');
 
-export const POOL_TOKENS_DATA_GQL = gql`
+export const POOL_TOKENS_DATA_GQL = `
   query poolTokens($address: String!) {
     poolById(id: $address) {
       token1 {
@@ -547,7 +547,7 @@ export const POOL_TOKENS_DATA_GQL = gql`
   }
 `;
 
-export const POOL_INFO_GQL = gql`
+export const POOL_INFO_GQL = `
   query poolInfo(
     $address: String!
     $signerAddress: String!

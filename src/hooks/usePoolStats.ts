@@ -1,12 +1,7 @@
-import { ApolloClient, useQuery } from '@apollo/client';
 import { BigNumber } from 'bignumber.js';
 import { useMemo } from 'react';
 import { AxiosInstance } from 'axios';
 import {
-  PoolInfoQuery,
-  PoolInfoVar,
-  PoolTokensDataQuery,
-  PoolTokensVar,
   POOLS_TOTAL_VALUE_LOCKED,
   POOL_24H_VOLUME,
   POOL_INFO_GQL,
@@ -29,6 +24,20 @@ export const getPool24HourQuery = (fromTime: string) => {
   };
 };
 
+export const getPoolTokensDataQuery = (address: string) => {
+    return {
+      query: POOL_TOKENS_DATA_GQL,
+      variables: { address },
+    };
+  };
+
+export const getPoolInfoQuery = (address:string, signerAddress:string, fromTime:string, toTime:string) => {
+    return {
+      query: POOL_INFO_GQL,
+      variables: { address,signerAddress,fromTime,toTime },
+    };
+  };
+
   export const useTotalSupply = async (tokenPrices: TokenPrices, httpClient: AxiosInstance, previous = false): Promise<string> => {
     const toTime = useMemo(() => {
       const tm = new Date();
@@ -38,8 +47,8 @@ export const getPool24HourQuery = (fromTime: string) => {
       return tm;
     }, []);
 
-      const queryObj = getPoolsTotalValueLockedQuery(toTime.toISOString());
-      const response = await graphqlRequest(httpClient, queryObj);
+      const poolsTotalValueLockedQry = getPoolsTotalValueLockedQuery(toTime.toISOString());
+      const response = await graphqlRequest(httpClient, poolsTotalValueLockedQry);
       const data = response.data;
 
       if (!data || data.totalSupply.length === 0) {
@@ -62,8 +71,8 @@ export const usePoolVolume = async (tokenPrices: TokenPrices, httpClient: AxiosI
     () => new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
     [],
   );
-  const queryObj = getPool24HourQuery(fromTime);
-  const response = await graphqlRequest(httpClient, queryObj);
+  const pool24HourQry = getPool24HourQuery(fromTime);
+  const response = await graphqlRequest(httpClient, pool24HourQry);
   const data = response.data;
 
   if (!data || data.volume.length === 0) {
@@ -107,7 +116,7 @@ export interface PoolStats {
   volumeChange24h: number;
 }
 
-export const usePoolInfo = (address: string, signerAddress: string, tokenPrices: TokenPrices, dexClient: ApolloClient<any>): [PoolStats|undefined, boolean] => {
+export const usePoolInfo = async (address: string, signerAddress: string, tokenPrices: TokenPrices, httpClient: AxiosInstance): Promise<[PoolStats|undefined, boolean]> => {
   const toTime = useMemo(() => {
     const date = new Date();
     date.setDate(date.getDate() - 1);
@@ -120,17 +129,15 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
     return date.toISOString();
   }, [address, signerAddress]);
 
-  const { data: tokensData, loading: tokensLoading } = useQuery<PoolTokensDataQuery, PoolTokensVar>(POOL_TOKENS_DATA_GQL, {
-    client: dexClient,
-    variables: { address },
-  });
+  const poolTokensDataQry = getPoolTokensDataQuery(address);
+  const response = await graphqlRequest(httpClient, poolTokensDataQry);
 
-  const { data: poolInfoData, loading: poolInfoLoading, refetch: refetchPoolInfo } = useQuery<PoolInfoQuery, PoolInfoVar>(POOL_INFO_GQL, {
-    client: dexClient,
-    variables: {
-      address, signerAddress, fromTime, toTime,
-    },
-  });
+  const { data: tokensData, loading: tokensLoading } = response.data;
+
+  const poolInfoQry = getPoolInfoQuery(address, signerAddress, fromTime, toTime);
+  const response_ = await graphqlRequest(httpClient, poolInfoQry);
+
+  const { data: poolInfoData, loading: poolInfoLoading, refetch: refetchPoolInfo } = response_.data;
 
   useInterval(() => {
     refetchPoolInfo();
