@@ -1,4 +1,4 @@
-import { DocumentNode, gql } from '@apollo/client';
+import {  gql } from '@apollo/client';
 import {
   BaseFeeData, BaseReservedData, BaseVolumeData, FeeData, PriceData, ReservedData, VolumeData,
 } from '../state';
@@ -582,7 +582,7 @@ export const POOL_INFO_GQL = `
   }
 `;
 
-export const poolDataQuery = (time: Time): DocumentNode => gql`
+export const poolDataQuery = (time: Time): string => `
   query poolData($address: String!, $fromTime: String!) {
     poolData(
       address: $address,

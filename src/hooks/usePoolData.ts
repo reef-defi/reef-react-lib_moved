@@ -1,9 +1,10 @@
-import { ApolloClient, useQuery } from '@apollo/client';
 import BigNumber from 'bignumber.js';
-import { useEffect, useMemo } from 'react';
-import { PoolDataQuery, PoolDataVar, poolDataQuery } from '../graphql/pools';
+import { useEffect, useMemo, useState } from 'react';
+import { poolDataQuery } from '../graphql/pools';
 import { BaseCandlestickData, BaseVolumeData, CandlestickData } from '../state';
 import { calcTimeRange, timeDataToMs, truncateDate } from './useFromTime';
+import { AxiosInstance, AxiosResponse } from 'axios';
+import { graphqlRequest } from '../graphql/gqlUtils';
 
 interface Time {
   time: Date;
@@ -172,25 +173,43 @@ interface UsePoolData {
   timeData: TimeData;
 }
 
+export const getPoolQuery = (time:TimeUnit,address:string,fromTime:string) => ({
+  query: poolDataQuery(time),
+  variables: { address,fromTime },
+});
+
 export const usePoolData = ({
   address, decimals1, decimals2, price1, price2, timeData = { timeUnit: 'Day', timeSpan: 31 },
-}: UsePoolData, dexClient: ApolloClient<any>): UsePoolDataOutput => {
+}: UsePoolData, httpClient: AxiosInstance): UsePoolDataOutput => {
   const { fromTime, toTime } = calcTimeRange(timeData.timeUnit, timeData.timeSpan);
+  const [loading,setLoading] = useState(true);
 
   // ********************* Get pool data from GraphQL **************************************
-  const { data, loading, refetch } = useQuery<PoolDataQuery, PoolDataVar>(
-    poolDataQuery(timeData.timeUnit),
-    {
-      client: dexClient,
-      variables: {
-        address,
-        fromTime: fromTime.toISOString(),
-      },
-    },
-  );
+  const poolQry = getPoolQuery(timeData.timeUnit, address,fromTime.toISOString());
+  
+
+  // const { data, loading, refetch } = useQuery<PoolDataQuery, PoolDataVar>(
+  //   poolDataQuery(timeData.timeUnit),
+  //   {
+  //     client: dexClient,
+  //     variables: {
+  //       address,
+  //       fromTime: fromTime.toISOString(),
+  //     },
+  //   },
+  // );
+  let response:AxiosResponse;
+  let data:any;
+
   useEffect(() => {
+    setLoading(true);
+    const refetch = async()=>{
+      response = await graphqlRequest(httpClient, poolQry);
+      data = response.data;
+      setLoading(false);
+    }
     refetch();
-  }, [timeData, refetch]);
+  }, [timeData]);
 
   const processed = useMemo((): PoolDataTime => {
     if (!data) {
