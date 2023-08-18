@@ -21,17 +21,6 @@ export const loadPool = async (
 ): Promise<Pool> => {
   const queryObj = getUserPoolSupply(token1.address, token2.address, signerAddress);
   const result = await graphqlRequest(httpClient, queryObj);
-  // const result = await dexClient.query<UserPoolSupplyQuery, UserPoolSupplyVar>(
-  //   {
-  //     query: USER_POOL_SUPPLY,
-  //     variables: {
-  //       token1: token1.address,
-  //       token2: token2.address,
-  //       signerAddress,
-  //     },
-  //   },
-  // );
-
   const userPoolSupply = result.data?.userPoolSupply || undefined;
 
   ensure(!!userPoolSupply && userPoolSupply.address !== EMPTY_ADDRESS, 'Pool does not exist!');
