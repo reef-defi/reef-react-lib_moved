@@ -613,7 +613,7 @@ export const poolDataQuery = (time: Time): DocumentNode => gql`
   }
 `;
 
-export const ALL_POOLS = gql`
+export const ALL_POOLS = `
   query allPools {
     allPools {
       address
