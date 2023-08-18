@@ -21,7 +21,7 @@ export const loadPool = async (
 ): Promise<Pool> => {
   const queryObj = getUserPoolSupply(token1.address, token2.address, signerAddress);
   const result = await graphqlRequest(httpClient, queryObj);
-  const userPoolSupply = result.data?.userPoolSupply || undefined;
+  const userPoolSupply = result.data.data?.userPoolSupply || undefined;
 
   ensure(!!userPoolSupply && userPoolSupply.address !== EMPTY_ADDRESS, 'Pool does not exist!');
 
