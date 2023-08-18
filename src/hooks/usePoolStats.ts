@@ -47,8 +47,8 @@ export const getPoolInfoQuery = (address:string, signerAddress:string, fromTime:
       return tm;
     }, []);
 
-      const queryObj = getPoolsTotalValueLockedQuery(toTime.toISOString());
-      const response = await graphqlRequest(httpClient, queryObj);
+      const poolsTotalValueLockedQry = getPoolsTotalValueLockedQuery(toTime.toISOString());
+      const response = await graphqlRequest(httpClient, poolsTotalValueLockedQry);
       const data = response.data;
 
       if (!data || data.totalSupply.length === 0) {
@@ -71,8 +71,8 @@ export const usePoolVolume = async (tokenPrices: TokenPrices, httpClient: AxiosI
     () => new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
     [],
   );
-  const queryObj = getPool24HourQuery(fromTime);
-  const response = await graphqlRequest(httpClient, queryObj);
+  const pool24HourQry = getPool24HourQuery(fromTime);
+  const response = await graphqlRequest(httpClient, pool24HourQry);
   const data = response.data;
 
   if (!data || data.volume.length === 0) {
@@ -129,13 +129,13 @@ export const usePoolInfo = async (address: string, signerAddress: string, tokenP
     return date.toISOString();
   }, [address, signerAddress]);
 
-  const queryObj = getPoolTokensDataQuery(address);
-  const response = await graphqlRequest(httpClient, queryObj);
+  const poolTokensDataQry = getPoolTokensDataQuery(address);
+  const response = await graphqlRequest(httpClient, poolTokensDataQry);
 
   const { data: tokensData, loading: tokensLoading } = response.data;
 
-  const queryObj_ = getPoolInfoQuery(address, signerAddress, fromTime, toTime);
-  const response_ = await graphqlRequest(httpClient, queryObj_);
+  const poolInfoQry = getPoolInfoQuery(address, signerAddress, fromTime, toTime);
+  const response_ = await graphqlRequest(httpClient, poolInfoQry);
 
   const { data: poolInfoData, loading: poolInfoLoading, refetch: refetchPoolInfo } = response_.data;
 
