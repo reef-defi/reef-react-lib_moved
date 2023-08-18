@@ -1,13 +1,7 @@
-import { ApolloClient, useQuery } from '@apollo/client';
 import { BigNumber } from 'bignumber.js';
 import { useMemo } from 'react';
 import { AxiosInstance } from 'axios';
 import {
-  Pool24HVolume,
-  PoolInfoQuery,
-  PoolInfoVar,
-  PoolTokensDataQuery,
-  PoolTokensVar,
   POOLS_TOTAL_VALUE_LOCKED,
   POOL_24H_VOLUME,
   POOL_INFO_GQL,
