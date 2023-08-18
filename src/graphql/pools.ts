@@ -695,7 +695,7 @@ export const USER_POOLS_LIST_COUNT = gql`
   }
 `;
 
-export const USER_POOL_SUPPLY = gql`
+export const USER_POOL_SUPPLY = `
   query userPoolSupply($token1: String!, $token2: String!, $signerAddress: String!) {
     userPoolSupply(token1: $token1, token2: $token2, signerAddress: $signerAddress) {
       address
