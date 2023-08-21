@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   AllPoolsListCountQuery, AllPoolsListQuery, ALL_POOLS_LIST, ALL_POOLS_LIST_COUNT, PoolListItem,PoolsListVar, UserPoolsListCountQuery, UserPoolsListQuery, USER_POOLS_LIST, USER_POOLS_LIST_COUNT,
 } from '../graphql/pools';
@@ -106,17 +106,31 @@ export const getUserPoolCount = ( queryType:string,search:string, signerAddress:
   variables: {  search, signerAddress },
 });
 
-export const usePoolsList = async({
+export const usePoolsList = ({
   limit, offset, search, signerAddress, tokenPrices, queryType
-}: UsePoolsList): Promise<[PoolItem[], boolean, number]> => {
+}: UsePoolsList): [PoolItem[], boolean, number] => {
   const [loadingPoolsList, setLoadingPoolsList] = useState(true);
   const [loadingPoolsCount, setLoadingPoolsCount] = useState(true);
+  const [dataPoolsList, setDataPoolsList] = useState<UserPoolsListQuery|AllPoolsListQuery>();
+  const [dataPoolsCount, setDataPoolsCount] = useState<UserPoolsListCountQuery|AllPoolsListCountQuery>();
 
+
+  useEffect(() => {
+   const fetchRes = async()=>{
+    const userPoolCountQry = getUserPoolCount(queryType,search, signerAddress);
+    const userPoolCountQryResp = await graphqlRequest(axios, userPoolCountQry);
+    setDataPoolsCount(userPoolCountQryResp.data);
+    setLoadingPoolsCount(false);
+    const userPoolQry = getUserPoolList(queryType,limit, offset, search, signerAddress,);
+    const response = await graphqlRequest(axios, userPoolQry);
+    setDataPoolsList(response.data);
+    setLoadingPoolsList(false);
+   }
+   fetchRes();
+  }, [])
   
-  const userPoolQry = getUserPoolList(queryType,limit, offset, search, signerAddress,);
-  const response = await graphqlRequest(axios, userPoolQry);
-  const dataPoolsList = response.data;
-  setLoadingPoolsList(false);
+  
+  
   // const { data: dataPoolsList, loading: loadingPoolsList } = useQuery<AllPoolsListQuery | UserPoolsListQuery, PoolsListVar>(
   //   queryType === 'User' ? USER_POOLS_LIST : ALL_POOLS_LIST,
   //   {
@@ -127,10 +141,7 @@ export const usePoolsList = async({
   //   },
   // );
 
-  const userPoolCountQry = getUserPoolCount(queryType,search, signerAddress);
-  const userPoolCountQryResp = await graphqlRequest(axios, userPoolCountQry);
-  const dataPoolsCount = userPoolCountQryResp.data;
-  setLoadingPoolsCount(false);
+  
   // const { data: dataPoolsCount, loading: loadingPoolsCount } = useQuery<AllPoolsListCountQuery | UserPoolsListCountQuery, PoolsListCountVar>(
   //   queryType === 'User' ? USER_POOLS_LIST_COUNT : ALL_POOLS_LIST_COUNT,
   //   {
