@@ -18,7 +18,7 @@ export const useAllPools =  (httpClient: AxiosInstance): PoolWithReserves[] => {
 
   useInterval(async() => {
     const response = await graphqlRequest(httpClient, queryObj);
-    let pools = response.data?.allPools.map((pool) => ({
+    let pools = response.data.data?.allPools.map((pool) => ({
       ...pool,
       iconUrl1: pool.iconUrl1 === '' ? getIconUrl(pool.token1) : pool.iconUrl1,
       iconUrl2: pool.iconUrl2 === '' ? getIconUrl(pool.token2) : pool.iconUrl2,
