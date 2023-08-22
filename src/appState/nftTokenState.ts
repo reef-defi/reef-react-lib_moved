@@ -13,7 +13,7 @@ import axios, { AxiosInstance } from 'axios';
 import { graphqlRequest } from './accountState';
 
 const SIGNER_NFTS_GQL = `
-subscription query($accountId: String) {
+query query($accountId: String) {
   tokenHolders(
   orderBy: balance_DESC
   limit:199
@@ -184,6 +184,7 @@ export const selectedSignerNFTs$: Observable<NFT[]> = combineLatest([
       // )
         .pipe(
           map(({ data }) => {
+            console.log(data);
             const verNfts = data && Array.isArray(data.tokenHolders)
               ? data.tokenHolders.map((th: any) => ({
                 balance: th.balance,
