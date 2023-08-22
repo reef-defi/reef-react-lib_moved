@@ -3438,22 +3438,19 @@
     graphql "^16.6.0"
     subscriptions-transport-ws "^0.11.0"
 
-"@reef-chain/util-lib@^0.6.0":
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/@reef-chain/util-lib/-/util-lib-0.6.0.tgz#ac246df197a37829144ead72af0b69f98c84e595"
-  integrity sha512-YhN2zcboW/MQORD8wzPnOAiW7Wl1ZiM+0FCfUHuog2w8yvtE+VA/udlIs0AjLcXSrOP9ctXTGvOr6bDYRq7gdQ==
+"@reef-chain/util-lib@^1.0.0-rc7":
+  version "1.0.0-rc7"
+  resolved "https://registry.yarnpkg.com/@reef-chain/util-lib/-/util-lib-1.0.0-rc7.tgz#166c94abfb2d6b0f4b783cdd76853c1bf3d43bb0"
+  integrity sha512-XeABSBVYLxvcxYQyJkkvNGcooCoaxoBVJqv9d3kB/hGIoEN4tsFP5xdTJACWGjRQC6LC1EYi2f1oG8Yl735ZBg==
   dependencies:
-    "@apollo/client" "^3.6.9"
     "@polkadot/extension-inject" "^0.44.6"
-    "@reef-defi/evm-provider" "^1.0.9"
+    "@reef-defi/evm-provider" "^1.0.10"
     "@reef-defi/extension-base" "^1.0.10"
     "@reef-defi/extension-dapp" "^1.0.16"
     "@reef-defi/extension-inject" "^1.0.16"
     axios "^0.27.2"
     bignumber.js "^9.1.0"
-    crypto-browserify "^3.12.0"
-    graphql "^16.6.0"
-    graphql-ws "^5.11.2"
+    pusher-js "^8.2.0"
 
 "@reef-defi/api-derive@^1.0.4", "@reef-defi/api-derive@^1.1.0":
   version "1.1.0"
@@ -3477,7 +3474,7 @@
     "@reef-defi/api-derive" "^1.1.0"
     "@reef-defi/types" "^1.1.0"
 
-"@reef-defi/evm-provider@^1.0.9":
+"@reef-defi/evm-provider@^1.0.10", "@reef-defi/evm-provider@^1.0.9":
   version "1.0.11"
   resolved "https://registry.yarnpkg.com/@reef-defi/evm-provider/-/evm-provider-1.0.11.tgz#54174ddbb9bb4fdd3a07052cddf4920738d4ffa6"
   integrity sha512-xYBCv4DqiHNGG2yEvTCay/TdortMuWwe3XMn3YxdfvIPGpFFrkyBM42lezqQRQoR8VO3c6//lx7VmL0N81DVgw==
@@ -13939,6 +13936,13 @@ pupa@^2.1.1:
   integrity sha512-l1jNAspIBSFqbT+y+5FosojNpVpF94nlI+wDUpqP9enwOTfHx9f0gh5nB96vl+6yTpsJsypeNrwfzPrKuHB41A==
   dependencies:
     escape-goat "^2.0.0"
+
+pusher-js@^8.2.0:
+  version "8.3.0"
+  resolved "https://registry.yarnpkg.com/pusher-js/-/pusher-js-8.3.0.tgz#a40d76c373a56ba8b3de2c55414380cb49975207"
+  integrity sha512-6GohP06WlVeomAQQe9qWh1IDzd3+InluWt+ZUOcecVK1SEQkg6a8uYVsvxSJm7cbccfmHhE0jDkmhKIhue8vmA==
+  dependencies:
+    tweetnacl "^1.0.3"
 
 q@^1.1.2:
   version "1.5.1"

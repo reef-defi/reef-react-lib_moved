@@ -230,10 +230,7 @@ const indexedAccountValues$ = combineLatest([
       if (!signers) {
         return [];
       } else {
-        console.log("Subscribing to GraphQL...");
-        const x = graphqlRequest(axios,getAllAccounts(signers.map((s: any) => s.address)),true);
-        console.log(x);
-        return x;
+        return graphqlRequest(axios,getAllAccounts(signers.map((s: any) => s.address)),true);
           // apollo.subscribe({
           //   query: EVM_ADDRESS_UPDATE_GQL,
           //   variables: { accountIds: signers.map((s: any) => s.address) },
@@ -241,7 +238,7 @@ const indexedAccountValues$ = combineLatest([
           // })
       }
     } catch (error) {
-      console.log("anuna error", error);
+      console.log("error", error);
       return [];
     }
   }),

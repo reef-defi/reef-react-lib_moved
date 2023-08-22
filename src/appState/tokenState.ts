@@ -2,6 +2,7 @@ import {
   catchError,
   combineLatest,
   distinctUntilChanged,
+  from,
   map,
   mergeScan,
   Observable,
@@ -13,7 +14,6 @@ import {
 import { BigNumber, FixedNumber, utils } from 'ethers';
 import { filter } from 'rxjs/operators';
 import { graphql } from '@reef-chain/util-lib';
-import { ApolloClient } from '@apollo/client';
 import { _NFT_IPFS_RESOLVER_FN, combineTokensDistinct, toTokensWithPrice } from './util';
 import { selectedSigner$ } from './accountState';
 import { currentNetwork$, currentProvider$ } from './providerState';
@@ -27,8 +27,9 @@ import {
 import { Network, NFT, ReefSigner } from '../state';
 import { resolveNftImageLinks } from '../utils/nftUtil';
 import { apolloDexClientInstance$ } from '../graphql';
-import { PoolReserves, POOLS_RESERVES_GQL, PoolsWithReservesQuery } from '../graphql/pools';
-
+import { PoolReserves, POOLS_RESERVES_GQL } from '../graphql/pools';
+import { graphqlRequest } from '../graphql/gqlUtils';
+import axios, { AxiosInstance } from 'axios';
 // TODO replace with our own from lib and remove
 const toPlainString = (num: number): string => `${+num}`.replace(
   /(-?)(\d*)\.?(\d*)e([+-]\d+)/,
@@ -49,21 +50,39 @@ export const reefPrice$: Observable<number> = timer(0, 60000).pipe(
 export const validatedTokens$ = of(validatedTokens.tokens as Token[]);
 export const { SIGNER_TOKENS_GQL } = graphql;
 
-const { CONTRACT_DATA_GQL } = graphql;
+export const CONTRACT_DATA_GQL = `
+  query contract_data_query($addresses: String!) {
+    verifiedContracts(where: { id_containsInsensitive: $addresses },limit: 1) {
+      id
+      contractData
+    }
+  }
+`;
+
+export const getContractDataQry = (addresses:string) => ({
+  query: CONTRACT_DATA_GQL,
+  variables: {addresses}
+});
 
 // eslint-disable-next-line camelcase
 const fetchTokensData = (
   // apollo: ApolloClient<any>,
-  apollo: any,
+  axios: AxiosInstance,
   missingCacheContractDataAddresses: string[],
   state: { tokens: Token[]; contractData: Token[] },
-): Promise<Token[]> => apollo
-  .query({
-    query: CONTRACT_DATA_GQL,
-    variables: { addresses: missingCacheContractDataAddresses },
-  })
+): Promise<Token[]> =>
+graphqlRequest(axios, getContractDataQry(missingCacheContractDataAddresses[0].toString()),true)
+//  apollo
+//   .query({
+//     query: CONTRACT_DATA_GQL,
+//     variables: { addresses: missingCacheContractDataAddresses },
+//   })
+
 // eslint-disable-next-line camelcase
-  .then((verContracts) => verContracts.data.verifiedContracts.map(
+  .then((res) => 
+  {
+    console.log(res);
+  return res.data.data.verifiedContracts.map(
     // eslint-disable-next-line camelcase
     (vContract: { id: string; contractData: any }) => ({
       address: vContract.id,
@@ -72,12 +91,12 @@ const fetchTokensData = (
       name: vContract.contractData.name,
       symbol: vContract.contractData.symbol,
     } as Token),
-  ))
+  )})
   .then((newTokens) => newTokens.concat(state.contractData));
 
 // eslint-disable-next-line camelcase
 // const tokenBalancesWithContractDataCache = (apollo: ApolloClient<any>) => (
-const tokenBalancesWithContractDataCache = (apollo: any) => (
+const tokenBalancesWithContractDataCache = (axios:AxiosInstance) => (
   state: { tokens: Token[]; contractData: Token[] },
   // eslint-disable-next-line camelcase
   tokenBalances: { token_address: string; balance: number }[],
@@ -88,7 +107,7 @@ const tokenBalancesWithContractDataCache = (apollo: any) => (
     )
     .map((tb) => tb.token_address);
   const contractDataPromise = missingCacheContractDataAddresses.length
-    ? fetchTokensData(apollo, missingCacheContractDataAddresses, state)
+    ? fetchTokensData(axios, missingCacheContractDataAddresses, state)
     : Promise.resolve(state.contractData);
 
   return contractDataPromise.then((cData: Token[]) => {
@@ -116,20 +135,56 @@ const sortReefTokenFirst = (tokens): Token[] => {
   return tokens;
 };
 
+export const queryGql$ = (
+  client: AxiosInstance,
+  queryObj: { query: string; variables: any }
+) =>
+  from(graphqlRequest(client as AxiosInstance, queryObj,true).then(res => res.data));
+
+  export const SIGNER_TOKENS_QUERY = `
+  query tokens_query($accountId: String!) {
+    tokenHolders(
+      where: {
+        AND: {
+          nftId_isNull: true
+          token: { id_isNull: false }
+          signer: { id_eq: $accountId }
+          balance_gt: "0"
+        }
+      }
+      orderBy: balance_DESC
+      limit: 320
+    ) {
+      token {
+        id
+      }
+      balance
+    }
+  }
+`;
+
+  export const getSignerTokensQuery = (address: string) => {
+    return {
+      query: SIGNER_TOKENS_QUERY,
+      variables: {
+        accountId: address,
+      },
+    };
+  };
+
 export const selectedSignerTokenBalances$: Observable<Token[]|null> = combineLatest([
-  apolloExplorerClientInstance$,
   selectedSigner$,
   currentProvider$,
 ]).pipe(
-  switchMap(([apollo, signer, provider]) => (!signer
+  switchMap(([signer, provider]) => (!signer
     ? []
-    : zenToRx(
-      apollo.subscribe({
-        query: SIGNER_TOKENS_GQL,
-        variables: { accountId: signer.address },
-        fetchPolicy: 'network-only',
-      }),
-    ).pipe(
+    : 
+      // apollo.subscribe({
+      //   query: SIGNER_TOKENS_GQL,
+      //   variables: { accountId: signer.address },
+      //   fetchPolicy: 'network-only',
+      // }),
+      queryGql$(axios,getSignerTokensQuery(signer.address)).pipe(
       map((res: any) => (res.data && res.data.tokenHolders
         ? res.data.tokenHolders.map((th) => ({ token_address: th.token.id, balance: th.balance }))
         : undefined)),
@@ -160,7 +215,7 @@ export const selectedSignerTokenBalances$: Observable<Token[]|null> = combineLat
         },
       ),
       // eslint-disable-next-line camelcase
-      mergeScan(tokenBalancesWithContractDataCache(apollo), {
+      mergeScan(tokenBalancesWithContractDataCache(axios), {
         tokens: [],
         contractData: [reefTokenWithAmount()],
       }),
@@ -176,6 +231,8 @@ export const selectedSignerTokenBalances$: Observable<Token[]|null> = combineLat
   })),
 );
 
+
+
 export const selectedSignerAddressUpdate$ = selectedSigner$.pipe(
   filter((v) => !!v),
   distinctUntilChanged((s1, s2) => s1?.address === s2?.address),
@@ -190,20 +247,25 @@ export const pools$: Observable<PoolReserves[]> = combineLatest([
   allAvailableSignerTokens$,
   apolloDexClientInstance$,
 ]).pipe(
-  switchMap(([tkns, dexClient]) => loadPoolsReserves(tkns, dexClient)),
+  switchMap(([tkns]) => loadPoolsReserves(tkns, axios)),
   shareReplay(1),
 );
 
+export const getPoolReservesQry = (tokens:string[]) => ({
+  query: POOLS_RESERVES_GQL,
+  variables: {tokens}
+});
+
 const loadPoolsReserves = async (
   tokens: Token[],
-  dexClient: ApolloClient<any>,
+  httpClient: AxiosInstance,
 ): Promise<PoolReserves[]> => {
   if (tokens.length < 2) return [];
 
-  const tokenAddresses = tokens.map((t) => t.address);
-  const res = await dexClient.query<PoolsWithReservesQuery>(
-    { query: POOLS_RESERVES_GQL, variables: { tokens: tokenAddresses } },
-  );
+  const tokenAddresses = tokens
+  .map((t) => t.address).filter((address)=>address!=undefined);
+  console.log(tokenAddresses);
+  const res = await graphqlRequest(httpClient,getPoolReservesQry(tokenAddresses));
   return res.data.poolsReserves || [];
 };
 
