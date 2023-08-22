@@ -97,7 +97,7 @@ const Accounts = ({
   query: string;
   selectedAccount: ReefSigner;
 }): JSX.Element => {
-  const getAccounts = useMemo(() => {
+  const availableAccounts = useMemo(() => {
     const list = accounts.filter(({ address }) => selectedAccount.address !== address);
 
     if (!query) return list;
@@ -116,29 +116,34 @@ const Accounts = ({
 
   return (
     <div className="send-accounts">
-      <Uik.Dropdown
-        isOpen={isOpen}
-        onClose={onClose}
-      >
-        {
-          getAccounts.map((account, index) => (
-            <Uik.DropdownItem
-              key={`account-${index}`}
-              className={`
-                send-accounts__account
-                ${account.address === query ? 'send-accounts__account--selected' : ''}
-              `}
-              onClick={() => selectAccount(index, account)}
+      {
+        availableAccounts?.length > 0
+          && (
+            <Uik.Dropdown
+              isOpen={isOpen}
+              onClose={onClose}
             >
-              <Identicon className="send-accounts__account-identicon" value={account.address} size={44} theme="substrate" />
-              <div className="send-accounts__account-info">
-                <div className="send-accounts__account-name">{ account.name }</div>
-                <div className="send-accounts__account-address">{ shortAddress(account.address) }</div>
-              </div>
-            </Uik.DropdownItem>
-          ))
-        }
-      </Uik.Dropdown>
+              {
+                availableAccounts.map((account, index) => (
+                  <Uik.DropdownItem
+                    key={`account-${index}`}
+                    className={`
+                      send-accounts__account
+                      ${account.address === query ? 'send-accounts__account--selected' : ''}
+                    `}
+                    onClick={() => selectAccount(index, account)}
+                  >
+                    <Identicon className="send-accounts__account-identicon" value={account.address} size={44} theme="substrate" />
+                    <div className="send-accounts__account-info">
+                      <div className="send-accounts__account-name">{ account.name }</div>
+                      <div className="send-accounts__account-address">{ shortAddress(account.address) }</div>
+                    </div>
+                  </Uik.DropdownItem>
+                ))
+              }
+            </Uik.Dropdown>
+          )
+      }
     </div>
   );
 };
@@ -272,14 +277,20 @@ export const Send = ({
           onBlur={closeAccountsList}
         />
 
-        <Accounts
-          isOpen={isAccountListOpen}
-          onClose={() => setAccountsListOpen(false)}
-          accounts={accounts}
-          query={to}
-          selectAccount={(_, signer) => setTo(signer.address)}
-          selectedAccount={signer}
-        />
+        {
+          accounts?.length > 0
+          && (
+            <Accounts
+              isOpen={isAccountListOpen}
+              onClose={() => setAccountsListOpen(false)}
+              accounts={accounts}
+              query={to}
+              selectAccount={(_, signer) => setTo(signer.address)}
+              selectedAccount={signer}
+            />
+          )
+        }
+
       </div>
 
       <div className="uik-pool-actions__tokens">

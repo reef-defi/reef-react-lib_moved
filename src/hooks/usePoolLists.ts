@@ -1,9 +1,12 @@
-import { ApolloClient, useQuery } from '@apollo/client';
 import BigNumber from 'bignumber.js';
-import { useMemo } from 'react';
-import { AllPoolsListCountQuery, AllPoolsListQuery, ALL_POOLS_LIST, ALL_POOLS_LIST_COUNT, PoolListItem, PoolsListCountVar, PoolsListVar, UserPoolsListCountQuery, UserPoolsListQuery, USER_POOLS_LIST, USER_POOLS_LIST_COUNT } from '../graphql/pools';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  AllPoolsListCountQuery, AllPoolsListQuery, ALL_POOLS_LIST, ALL_POOLS_LIST_COUNT, PoolListItem,PoolsListVar, UserPoolsListCountQuery, UserPoolsListQuery, USER_POOLS_LIST, USER_POOLS_LIST_COUNT,
+} from '../graphql/pools';
 import { TokenPrices } from '../state';
 import { getIconUrl } from '../utils';
+import axios, { AxiosInstance } from 'axios';
+import { graphqlRequest } from '../graphql/gqlUtils';
 
 interface PoolItem {
   address: string;
@@ -23,23 +26,22 @@ interface PoolItem {
 
 interface UsePoolsList extends PoolsListVar {
   tokenPrices: TokenPrices;
-  dexClient: ApolloClient<any>;
+  httpClient:AxiosInstance;
   queryType: 'All' | 'User';
 }
 
 const calculate24hVolumeUSD = ({
-    token1,
-    token2,
-    dayVolume1,
-    dayVolume2,
-    prevDayVolume1,
-    prevDayVolume2,
-    decimals1,
-    decimals2,
-  }: PoolListItem,
-  tokenPrices: TokenPrices,
-  current: boolean,
-): BigNumber => {
+  token1,
+  token2,
+  dayVolume1,
+  dayVolume2,
+  prevDayVolume1,
+  prevDayVolume2,
+  decimals1,
+  decimals2,
+}: PoolListItem,
+tokenPrices: TokenPrices,
+current: boolean): BigNumber => {
   const v1 = current ? dayVolume1 : prevDayVolume1;
   const v2 = current ? dayVolume2 : prevDayVolume2;
   if (v1 === null && v2 === null) return new BigNumber(0);
@@ -95,30 +97,63 @@ const calculateUserLiquidity = (
   return res.gt(0) ? res.toFormat(2) : undefined;
 };
 
+export const getUserPoolList = ( queryType:string,limit:number, offset:number, search:string, signerAddress:string) => ({
+  query: queryType === 'User' ?USER_POOLS_LIST:ALL_POOLS_LIST,
+  variables: {  limit, offset, search, signerAddress },
+});
+export const getUserPoolCount = ( queryType:string,search:string, signerAddress:string) => ({
+  query: queryType === 'User' ? USER_POOLS_LIST_COUNT : ALL_POOLS_LIST_COUNT,
+  variables: {  search, signerAddress },
+});
+
 export const usePoolsList = ({
-  limit, offset, search, signerAddress, tokenPrices, queryType, dexClient
+  limit, offset, search, signerAddress, tokenPrices, queryType
 }: UsePoolsList): [PoolItem[], boolean, number] => {
+  const [loadingPoolsList, setLoadingPoolsList] = useState(true);
+  const [loadingPoolsCount, setLoadingPoolsCount] = useState(true);
+  const [dataPoolsList, setDataPoolsList] = useState<UserPoolsListQuery|AllPoolsListQuery>();
+  const [dataPoolsCount, setDataPoolsCount] = useState<UserPoolsListCountQuery|AllPoolsListCountQuery>();
 
-  const { data: dataPoolsList, loading: loadingPoolsList } = useQuery<AllPoolsListQuery | UserPoolsListQuery, PoolsListVar>(
-    queryType === 'User' ? USER_POOLS_LIST : ALL_POOLS_LIST,
-    {
-      client: dexClient,
-      variables: { limit, offset, search, signerAddress },
-    },
-  );
 
-  const { data: dataPoolsCount, loading: loadingPoolsCount } = useQuery<AllPoolsListCountQuery | UserPoolsListCountQuery, PoolsListCountVar>(
-    queryType === 'User' ? USER_POOLS_LIST_COUNT : ALL_POOLS_LIST_COUNT,
-    {
-      client: dexClient,
-      variables: { search, signerAddress },
-    },
-  );
+  useEffect(() => {
+   const fetchRes = async()=>{
+    const userPoolCountQry = getUserPoolCount(queryType,search, signerAddress);
+    const userPoolCountQryResp = await graphqlRequest(axios, userPoolCountQry);
+    setDataPoolsCount(userPoolCountQryResp.data);
+    setLoadingPoolsCount(false);
+    const userPoolQry = getUserPoolList(queryType,limit, offset, search, signerAddress,);
+    const response = await graphqlRequest(axios, userPoolQry);
+    setDataPoolsList(response.data);
+    setLoadingPoolsList(false);
+   }
+   fetchRes();
+  }, [])
+  
+  
+  
+  // const { data: dataPoolsList, loading: loadingPoolsList } = useQuery<AllPoolsListQuery | UserPoolsListQuery, PoolsListVar>(
+  //   queryType === 'User' ? USER_POOLS_LIST : ALL_POOLS_LIST,
+  //   {
+  //     client: dexClient,
+  //     variables: {
+  //       limit, offset, search, signerAddress,
+  //     },
+  //   },
+  // );
+
+  
+  // const { data: dataPoolsCount, loading: loadingPoolsCount } = useQuery<AllPoolsListCountQuery | UserPoolsListCountQuery, PoolsListCountVar>(
+  //   queryType === 'User' ? USER_POOLS_LIST_COUNT : ALL_POOLS_LIST_COUNT,
+  //   {
+  //     client: dexClient,
+  //     variables: { search, signerAddress },
+  //   },
+  // );
 
   const processed = useMemo((): PoolItem[] => {
     if (!dataPoolsList) return [];
-    const poolsList = queryType === 'User' 
-      ? (dataPoolsList as UserPoolsListQuery).userPoolsList 
+    const poolsList = queryType === 'User'
+      ? (dataPoolsList as UserPoolsListQuery).userPoolsList
       : (dataPoolsList as AllPoolsListQuery).allPoolsList;
     return poolsList.map((pool) => ({
       address: pool.id,
@@ -134,16 +169,16 @@ export const usePoolsList = ({
       volume24h: calculate24hVolumeUSD(pool, tokenPrices, true).toFormat(2),
       volumeChange24h: calculateVolumeChange(pool, tokenPrices),
       myLiquidity: calculateUserLiquidity(pool, tokenPrices),
-    })); 
+    }));
   }, [dataPoolsList]);
 
   return [
-    processed, 
-    loadingPoolsList || loadingPoolsCount, 
-    dataPoolsCount 
-      ? queryType === 'User' 
-          ? (dataPoolsCount as UserPoolsListCountQuery).userPoolsListCount
-          : (dataPoolsCount as AllPoolsListCountQuery).allPoolsListCount
-      : 0
+    processed,
+    loadingPoolsList || loadingPoolsCount,
+    dataPoolsCount
+      ? queryType === 'User'
+        ? (dataPoolsCount as UserPoolsListCountQuery).userPoolsListCount
+        : (dataPoolsCount as AllPoolsListCountQuery).allPoolsListCount
+      : 0,
   ];
-}
+};

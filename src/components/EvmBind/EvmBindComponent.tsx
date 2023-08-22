@@ -3,6 +3,8 @@ import { Provider } from '@reef-defi/evm-provider';
 import { BigNumber, ethers } from 'ethers';
 import React, { useEffect, useState } from 'react';
 import Uik from '@reef-chain/ui-kit';
+import { faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
+import ReactTooltip from 'react-tooltip';
 import { ReefSigner } from '../../state';
 import {
   toReefEVMAddressWithNotification,
@@ -20,8 +22,6 @@ import { currentProvider$ } from '../../appState/providerState';
 import { OpenModalButton } from '../common/Modal';
 import { AccountListModal } from '../AccountSelector/AccountListModal';
 import './bind.css';
-import { faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
-import ReactTooltip from 'react-tooltip';
 
 export enum EvmBindComponentTxType {
   TRANSFER = 'TRANSFER',
@@ -75,7 +75,7 @@ export const EvmBindComponent = ({
   const [availableTxAccounts, setAvailableTxAccounts] = useState<ReefSigner[]>([]);
   const [transferBalanceFrom, setTransferBalanceFrom] = useState<ReefSigner>();
   const [txStatus, setTxStatus] = useState<TxStatusUpdate | undefined>();
-  const [customBindState, setCustomBindState] = useState<CustomBindState>({useCustomEvmAddress: false});
+  const [customBindState, setCustomBindState] = useState<CustomBindState>({ useCustomEvmAddress: false });
 
   useEffect(() => {
     setBindFor(bindSigner);
@@ -96,11 +96,13 @@ export const EvmBindComponent = ({
   const signEvmMessage = (): void => {
     setCustomBindState({ useCustomEvmAddress: true, signingInProcess: true });
     signBindEvmAddress(bindFor).then((res) => {
-      res.error ? setCustomBindState({ useCustomEvmAddress: true, signingInProcess: false, error: res.error }) 
-        : setCustomBindState({ useCustomEvmAddress: true, signingInProcess: false, evmAddress: res.evmAddress, signature: res.signature });
+      res.error ? setCustomBindState({ useCustomEvmAddress: true, signingInProcess: false, error: res.error })
+        : setCustomBindState({
+          useCustomEvmAddress: true, signingInProcess: false, evmAddress: res.evmAddress, signature: res.signature,
+        });
     }).catch((e) => {
       console.error(e);
-      setCustomBindState({ useCustomEvmAddress: true, signingInProcess: false, error: 'Failed to sign message.' }) 
+      setCustomBindState({ useCustomEvmAddress: true, signingInProcess: false, error: 'Failed to sign message.' });
     });
   };
 
@@ -228,7 +230,9 @@ export const EvmBindComponent = ({
             {!txStatus.error && txStatus.isInBlock && txStatus.componentTxType === EvmBindComponentTxType.BIND && (
             <div>
               <p>
-                Connected Ethereum VM address is {" "}
+                Connected Ethereum VM address is
+                {' '}
+                {' '}
                 { customBindState.useCustomEvmAddress && customBindState.evmAddress ? customBindState.evmAddress : bindFor.evmAddress }
               </p>
             </div>
@@ -283,19 +287,27 @@ export const EvmBindComponent = ({
           )}
 
           {/* Start binding */}
-          {(!customBindState.signingInProcess && ((!txStatus && hasBalanceForBinding(bindFor.balance)) 
+          {(!customBindState.signingInProcess && ((!txStatus && hasBalanceForBinding(bindFor.balance))
             || (txStatus && !txStatus.error && txStatus.isInBlock && txStatus.componentTxType === EvmBindComponentTxType.TRANSFER)))
           && (
           <div>
             { !customBindState.signature && txStatus && <p>Transfer complete. Now run connect EVM account transaction.</p> }
-            { customBindState.signature && customBindState.evmAddress && <p>Message signed for {customBindState.evmAddress} address. Now run connect EVM account transaction.</p>  }
-            { !customBindState.signature &&
-              <div className='bind-evm__custom-select'>
+            { customBindState.signature && customBindState.evmAddress && (
+            <p>
+              Message signed for
+              {customBindState.evmAddress}
+              {' '}
+              address. Now run connect EVM account transaction.
+            </p>
+            ) }
+            { !customBindState.signature
+              && (
+              <div className="bind-evm__custom-select">
                 <Uik.Toggle
                   value={customBindState.useCustomEvmAddress}
-                  onChange={() => setCustomBindState({useCustomEvmAddress: !customBindState.useCustomEvmAddress})}
-                /> 
-                <div className='prompt'>
+                  onChange={() => setCustomBindState({ useCustomEvmAddress: !customBindState.useCustomEvmAddress })}
+                />
+                <div className="prompt">
                   <span>Use custom EVM address</span>
                   <div>
                     <span data-tip data-for="custom-evm-select">
@@ -307,22 +319,26 @@ export const EvmBindComponent = ({
                       effect="solid"
                       backgroundColor="#46288b"
                     >
-                      By default, your Reef account will be bound to a predetermined EVM address. 
-                      You should use this EVM address <b>only in the Reef network</b>.<br/>
+                      By default, your Reef account will be bound to a predetermined EVM address.
+                      You should use this EVM address
+                      {' '}
+                      <b>only in the Reef network</b>
+                      .
+                      <br />
                       Enabling this option you will bind your Reef account to an EVM address you own by signing a message with an EVM wallet.
                     </ReactTooltip>
                   </div>
                 </div>
               </div>
-            }
+              )}
 
             <Uik.Button
               fill
               size="large"
               text="Continue"
-              onClick={() => customBindState.useCustomEvmAddress && !customBindState.signature
+              onClick={() => (customBindState.useCustomEvmAddress && !customBindState.signature
                 ? signEvmMessage()
-                : bindAccount(getUpdateTxCallback([onTxUpdate as TxStatusHandler, setTxStatus]))}
+                : bindAccount(getUpdateTxCallback([onTxUpdate as TxStatusHandler, setTxStatus])))}
             />
           </div>
           )}

@@ -16,7 +16,7 @@ import {
 } from '../utils';
 import { useKeepTokenUpdated } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
-import { ApolloClient } from '@apollo/client';
+import { AxiosInstance } from 'axios';
 
 interface OnRemoveLiquidity {
   network?: Network;
@@ -34,7 +34,7 @@ interface UseRemoveLiquidity {
   address2: string;
   tokens: Token[];
   tokenPrices: AddressToNumber<number>;
-  dexClient?: ApolloClient<any>;
+  httpClient?: AxiosInstance;
   signer?: ReefSigner;
   batchTxs?: boolean;
   state: RemoveLiquidityState;
@@ -63,7 +63,7 @@ export const useRemoveLiquidity = ({
   address2,
   state,
   signer,
-  dexClient,
+  httpClient,
   tokens,
   tokenPrices,
   dispatch,
@@ -80,7 +80,7 @@ export const useRemoveLiquidity = ({
     token1,
     token2,
     signer?.address || '',
-    dexClient,
+    httpClient,
     isLoading,
   );
   // Updating pool

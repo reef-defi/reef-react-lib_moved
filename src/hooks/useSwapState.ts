@@ -30,7 +30,7 @@ import {
 } from '../utils';
 import { findToken } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
-import { ApolloClient } from '@apollo/client';
+import { AxiosInstance } from 'axios';
 
 const swapStatus = (
   sell: TokenWithAmount,
@@ -85,7 +85,7 @@ interface UseSwapState {
   state: SwapState;
   tokens: Token[];
   account?: ReefSigner;
-  dexClient?: ApolloClient<any>;
+  httpClient?: AxiosInstance;
   tokenPrices: AddressToNumber<number>;
   dispatch: Dispatch<SwapAction>;
   waitForPool?: boolean;
@@ -95,7 +95,7 @@ export const useSwapState = ({
   state,
   tokens,
   account,
-  dexClient,
+  httpClient,
   address1,
   address2,
   tokenPrices,
@@ -114,7 +114,7 @@ export const useSwapState = ({
   const prevAddress2 = useRef<string>('');
   const prevBuyBalance = useRef<string>('');
   const prevSellBalance = useRef<string>('');
-  
+
   // Updating swap pool
   let loadedPool: Pool | undefined;
   let isPoolLoading = false;
@@ -126,7 +126,7 @@ export const useSwapState = ({
       sell,
       buy,
       account?.evmAddress || '',
-      dexClient,
+      httpClient,
       isLoading,
     );
   }
@@ -139,7 +139,7 @@ export const useSwapState = ({
   // Updating swap tokens
   useEffect(() => {
     const foundToken1 = findToken(address2, tokens);
-    if (prevAddress2.current != address2 || (!tokenBuySet.current && buy.address) 
+    if (prevAddress2.current != address2 || (!tokenBuySet.current && buy.address)
         || prevBuyBalance.current !== foundToken1.balance.toString()) {
       const price = tokenPrices[address2];
       setBuy({ ...foundToken1, amount: buy.amount, price });
@@ -148,7 +148,7 @@ export const useSwapState = ({
       prevBuyBalance.current = foundToken1.balance.toString();
     }
     const foundToken2 = findToken(address1, tokens);
-    if (prevAddress1.current !== address1 || (!tokenSellSet.current && sell.address) 
+    if (prevAddress1.current !== address1 || (!tokenSellSet.current && sell.address)
         || prevSellBalance.current !== foundToken2.balance.toString()) {
       const price = tokenPrices[address1];
       setSell({ ...foundToken2, amount: sell.amount, price });
@@ -279,10 +279,10 @@ export const onSwap = ({
           (status: any) => {
             const err = captureError(status.events);
             if (err) {
-              reject({message: err});
+              reject({ message: err });
             }
             if (status.dispatchError) {
-              reject({message: status.dispatchError.toString()});
+              reject({ message: status.dispatchError.toString() });
             }
             if (status.status.isInBlock) {
               resolve();
@@ -309,11 +309,11 @@ export const onSwap = ({
           (status: any) => {
             const err = captureError(status.events);
             if (err) {
-              reject({message: err});
+              reject({ message: err });
             }
             if (status.dispatchError) {
               console.error(status.dispatchError.toString());
-              reject({message: status.dispatchError.toString()});
+              reject({ message: status.dispatchError.toString() });
             }
             if (status.status.isInBlock) {
               resolve();
@@ -340,11 +340,11 @@ export const onSwap = ({
           (status: any) => {
             const err = captureError(status.events);
             if (err) {
-              reject({message: err});
+              reject({ message: err });
             }
             if (status.dispatchError) {
               console.error(status.dispatchError.toString());
-              reject({message: status.dispatchError.toString()});
+              reject({ message: status.dispatchError.toString() });
             }
             if (status.status.isInBlock) {
               resolve();

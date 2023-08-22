@@ -2,7 +2,7 @@ import { Observable, Subscription } from 'rxjs';
 import { useEffect, useRef, useState } from 'react';
 
 export const useObservableState = <T>(
-  observable: Observable<T>, initVal?: T
+  observable: Observable<T>, initVal?: T,
 ): T => {
   const [value, setValue] = useState<T>(initVal as T);
   const subs = useRef<Subscription>();

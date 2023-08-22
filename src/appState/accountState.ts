@@ -1,34 +1,34 @@
 import {
-    catchError,
-    combineLatest,
-    distinctUntilChanged,
-    map,
-    merge,
-    mergeScan,
-    Observable,
-    of,
-    ReplaySubject,
-    scan,
-    shareReplay,
-    startWith,
-    Subject,
-    switchMap,
-    take,
-    withLatestFrom,
+  catchError,
+  combineLatest,
+  distinctUntilChanged,
+  map,
+  merge,
+  mergeScan,
+  Observable,
+  of,
+  ReplaySubject,
+  scan,
+  shareReplay,
+  startWith,
+  Subject,
+  switchMap,
+  take,
+  withLatestFrom,
 } from 'rxjs';
-import {Provider} from '@reef-defi/evm-provider';
-import {BigNumber} from 'ethers';
-import {filter} from 'rxjs/operators';
-import {AccountJson} from '@reef-defi/extension-base/background/types';
-import type {InjectedAccountWithMeta} from '@reef-defi/extension-inject/types';
-import type {Signer as InjectedSigningKey} from '@polkadot/api/types';
-import {UpdateDataCtx} from './updateStateModel';
-import {replaceUpdatedSigners, updateSignersEvmBindings} from './accountStateUtil';
-import {currentProvider$} from './providerState';
-import {ReefSigner} from '../state';
-import {apolloExplorerClientInstance$, zenToRx} from '../graphql/apollo';
-import {accountJsonToMeta, metaAccountToSigner} from '../rpc/accounts';
-import {graphql} from '@reef-chain/util-lib';
+import { Provider } from '@reef-defi/evm-provider';
+import { BigNumber } from 'ethers';
+import { filter } from 'rxjs/operators';
+import { AccountJson } from '@reef-defi/extension-base/background/types';
+import type { InjectedAccountWithMeta } from '@reef-defi/extension-inject/types';
+import type { Signer as InjectedSigningKey } from '@polkadot/api/types';
+import { graphql } from '@reef-chain/util-lib';
+import { UpdateDataCtx } from './updateStateModel';
+import { replaceUpdatedSigners, updateSignersEvmBindings } from './accountStateUtil';
+import { currentProvider$ } from './providerState';
+import { ReefSigner } from '../state';
+import { apolloExplorerClientInstance$, zenToRx } from '../graphql/apollo';
+import { accountJsonToMeta, metaAccountToSigner } from '../rpc/accounts';
 
 export const accountsSubj = new ReplaySubject<ReefSigner[] | null>(1);
 export const accountsJsonSubj = new ReplaySubject<AccountJson[]| InjectedAccountWithMeta[] | null>(1);
@@ -217,9 +217,7 @@ const indexedAccountValues$ = combineLatest([
           fetchPolicy: 'network-only',
         }),
       ))),
-    map((result: any): AccountEvmAddrData[] => {
-        return result.data.accounts.map(a=>({address:a.id, evmAddress: a.evmAddress, isEvmClaimed: !!a.evmAddress} as AccountEvmAddrData))
-    }),
+    map((result: any): AccountEvmAddrData[] => result.data.accounts.map((a) => ({ address: a.id, evmAddress: a.evmAddress, isEvmClaimed: !!a.evmAddress } as AccountEvmAddrData))),
     filter((v) => !!v),
     startWith([]),
   );

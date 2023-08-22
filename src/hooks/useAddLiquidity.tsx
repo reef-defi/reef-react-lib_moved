@@ -39,14 +39,14 @@ import {
 import { useKeepTokenUpdated } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
 import { useUpdateLiquidityAmount } from './useUpdateAmount';
-import { ApolloClient } from '@apollo/client';
+import { AxiosInstance } from 'axios';
 
 interface UseAddLiquidityState {
   address1: string;
   address2: string;
   state: AddLiquidityState;
   tokens: Token[];
-  dexClient?: ApolloClient<any>;
+  httpClient?: AxiosInstance;
   signer?: ReefSigner;
   tokenPrices: AddressToNumber<number>;
   dispatch: Dispatch<AddLiquidityActions>;
@@ -84,7 +84,7 @@ export const useAddLiquidity = ({
   state,
   tokens,
   signer,
-  dexClient,
+  httpClient,
   tokenPrices,
 }: UseAddLiquidityState): void => {
   const {
@@ -94,7 +94,7 @@ export const useAddLiquidity = ({
     token1,
     token2,
     signer?.address || '',
-    dexClient,
+    httpClient,
     isLoading,
   );
   const newPoolSupply = calculatePoolSupply(token1, token2, pool);
@@ -301,20 +301,20 @@ export const onAddLiquidity = ({
         approveExtrinsic1.signAndSend(
           signer.address,
           { signer: signer.signer.signingKey },
-            (status: any) => {
-              console.log('Stake status: ', status);
-              const err = captureError(status.events);
-              if (err) {
-                reject({ message: err });
-              }
-              if (status.dispatchError) {
-                console.error(status.dispatchError.toString());
-                reject({ message: status.dispatchError.toString() });
-              }
-              if (status.status.isInBlock) {
-                resolve();
-              }
-            },
+          (status: any) => {
+            console.log('Stake status: ', status);
+            const err = captureError(status.events);
+            if (err) {
+              reject({ message: err });
+            }
+            if (status.dispatchError) {
+              console.error(status.dispatchError.toString());
+              reject({ message: status.dispatchError.toString() });
+            }
+            if (status.status.isInBlock) {
+              resolve();
+            }
+          },
         );
       });
       await signAndSendApprove1;
@@ -324,20 +324,20 @@ export const onAddLiquidity = ({
         approveExtrinsic2.signAndSend(
           signer.address,
           { signer: signer.signer.signingKey },
-            (status: any) => {
-              console.log('Stake status: ', status);
-              const err = captureError(status.events);
-              if (err) {
-                reject({ message: err });
-              }
-              if (status.dispatchError) {
-                console.error(status.dispatchError.toString());
-                reject({ message: status.dispatchError.toString() });
-              }
-              if (status.status.isInBlock) {
-                resolve();
-              }
-            },
+          (status: any) => {
+            console.log('Stake status: ', status);
+            const err = captureError(status.events);
+            if (err) {
+              reject({ message: err });
+            }
+            if (status.dispatchError) {
+              console.error(status.dispatchError.toString());
+              reject({ message: status.dispatchError.toString() });
+            }
+            if (status.status.isInBlock) {
+              resolve();
+            }
+          },
         );
       });
       await signAndSendApprove2;
