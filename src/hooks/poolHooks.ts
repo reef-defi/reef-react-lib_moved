@@ -3,7 +3,7 @@ import {
 } from '@apollo/client';
 import {
   PoolBasicTransactionVar, PoolDayFeeQuery, PoolDayVolumeQuery, PoolFeeQuery, PoolFeeVar, PoolDayFeeVar,
-  PoolQuery, PoolReservesQuery, PoolReservesVar, PoolSupplyQuery, PoolSupplyVar, PoolTransactionCountQuery,
+  PoolQuery, PoolReservesQuery, PoolSupplyQuery, PoolSupplyVar, PoolTransactionCountQuery,
   PoolTransactionQuery, PoolDayTvlQuery, PoolDayTvlVar, PoolVar, PoolVolumeAggregateQuery,
   PoolVolumeAggregateVar, PoolVolumeVar, POOL_CURRENT_RESERVES_GQL, POOL_DAY_FEE_QUERY_GQL, POOL_DAY_TVL_GQL,
   POOL_DAY_VOLUME_GQL, POOL_FEES_GQL, POOL_GQL, POOL_SUPPLY_GQL, POOL_TRANSACTIONS_GQL, POOL_TRANSACTION_COUNT_GQL,
@@ -11,8 +11,8 @@ import {
 } from '../graphql/pools';
 import useInterval from './userInterval';
 import { POLL_INTERVAL } from '../utils';
-import { AxiosInstance } from 'axios';
-import {  useState } from 'react';
+import axios, { AxiosInstance } from 'axios';
+import {  useEffect, useState } from 'react';
 import { graphqlRequest } from './useAllPools';
 
 // Intermediate query hooks
@@ -48,25 +48,19 @@ export const usePoolQuery = (address: string): QueryResult<PoolQuery> => useQuer
 
 export const useCurrentPoolReserve = (
   address: string,
-): QueryResult<PoolReservesQuery> => useQuery<PoolReservesQuery, PoolReservesVar>(POOL_CURRENT_RESERVES_GQL, {
-  variables: { address },
-});
+): PoolReservesQuery =>{ 
+  const [data, setData] = useState<PoolReservesQuery|undefined>()
+  const poolCurrReservesQry = getPoolCurrentReservesQry(address);
+  useEffect(()=>{
+    const handleResponse = async()=>{
+      const response = await graphqlRequest(axios,poolCurrReservesQry);
+      setData(response.data);
+    }
+    handleResponse();
+  },[]);
 
-// export const usePools = (
-//   fromTime: string,
-//   offset: number,
-//   search?: string,
-// ): QueryResult<PoolsQuery> => useQuery<PoolsQuery, PoolsVar>(POOLS_GQL, {
-//   variables: {
-//     fromTime,
-//     offset,
-//     search: search || '',
-//   },
-// });
-
-// export const usePoolCount = (search?: string): QueryResult<PoolCountQuery> => useQuery<PoolCountQuery, PoolCountVar>(POOL_COUNT_GQL, {
-//   variables: { search: search ? { _ilike: `${search}%` } : {} },
-// });
+  return data as any;
+}
 
 const resolveTransactionVariables = (
   search: string | undefined,
@@ -80,6 +74,12 @@ const getPoolTransactionCountQry =(address: string | undefined, type: Transactio
   query: POOL_TRANSACTION_COUNT_GQL,
   variables: resolveTransactionVariables(address, type),
 });
+
+const getPoolCurrentReservesQry =(address: string) => ({
+  query: POOL_CURRENT_RESERVES_GQL,
+  variables: {address},
+});
+
 const getPoolTransactionQry = (address: string | undefined, type: TransactionTypes, limit: number, pageIndex: number): {query: string, variables: any} => ({
   query: POOL_TRANSACTIONS_GQL,
   variables: {

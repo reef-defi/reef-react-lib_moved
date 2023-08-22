@@ -394,7 +394,7 @@ export const POOL_GQL = gql`
   }
 `;
 
-export const POOL_CURRENT_RESERVES_GQL = gql`
+export const POOL_CURRENT_RESERVES_GQL = `
   query poolEvent($address: String!) {
     poolEvents(
       where: { pool: { id_eq: $address }, type_eq: Sync }
