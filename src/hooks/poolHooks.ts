@@ -1,11 +1,8 @@
 import {
-  QueryResult, SubscriptionResult, useQuery,
-} from '@apollo/client';
-import {
-  PoolBasicTransactionVar, PoolDayFeeQuery, PoolDayVolumeQuery, PoolFeeQuery, PoolFeeVar, PoolDayFeeVar,
-  PoolQuery, PoolReservesQuery, PoolSupplyQuery, PoolSupplyVar, PoolTransactionCountQuery,
-  PoolTransactionQuery, PoolDayTvlQuery, PoolDayTvlVar, PoolVar, PoolVolumeAggregateQuery,
-   PoolVolumeVar, POOL_CURRENT_RESERVES_GQL, POOL_DAY_FEE_QUERY_GQL, POOL_DAY_TVL_GQL,
+  PoolBasicTransactionVar, PoolDayFeeQuery, PoolDayVolumeQuery, PoolFeeQuery,
+  PoolQuery, PoolReservesQuery, PoolSupplyQuery, PoolTransactionCountQuery,
+  PoolTransactionQuery, PoolDayTvlQuery, PoolVolumeAggregateQuery,
+ POOL_CURRENT_RESERVES_GQL, POOL_DAY_FEE_QUERY_GQL, POOL_DAY_TVL_GQL,
   POOL_DAY_VOLUME_GQL, POOL_FEES_GQL, POOL_GQL, POOL_SUPPLY_GQL, POOL_TRANSACTIONS_GQL, POOL_TRANSACTION_COUNT_GQL,
   POOL_VOLUME_AGGREGATE_GQL, TransactionTypes,
 } from '../graphql/pools';
@@ -45,22 +42,73 @@ export const useDayVolume = (
   return data as any;
 }
 
-export const useCurrentPoolSupply = (
-  address: string,
-): QueryResult<PoolSupplyQuery> => useQuery<PoolSupplyQuery, PoolSupplyVar>(POOL_SUPPLY_GQL, {
+const getPoolSupplyQuery = (address: string) => ({
+  query: POOL_SUPPLY_GQL,
   variables: { address },
 });
+
+export const useCurrentPoolSupply = (
+  address: string,
+): PoolSupplyQuery =>{ 
+  const [data, setData] = useState<PoolSupplyQuery|undefined>()
+  const poolCurrReservesQry = getPoolSupplyQuery(address);
+  useEffect(()=>{
+    const handleResponse = async()=>{
+      const response = await graphqlRequest(axios,poolCurrReservesQry);
+      setData(response.data);
+    }
+    handleResponse();
+  },[]);
+
+  return data as any;
+
+}
+
+export const getPoolFeesQuery = (address: string, fromTime: string) => ({
+  query: POOL_FEES_GQL,
+  variables: {
+    address,
+    fromTime,
+  },
+});
+
 export const useDayFee = (
   address: string,
   fromTime: string,
-): QueryResult<PoolFeeQuery> => useQuery<PoolFeeQuery, PoolFeeVar>(POOL_FEES_GQL, {
-  variables: { address, fromTime },
-});
+): PoolFeeQuery =>{ 
+  
+  const [data, setData] = useState<PoolSupplyQuery|undefined>()
+  const poolCurrReservesQry = getPoolFeesQuery(address,fromTime);
+  useEffect(()=>{
+    const handleResponse = async()=>{
+      const response = await graphqlRequest(axios,poolCurrReservesQry);
+      setData(response.data);
+    }
+    handleResponse();
+  },[]);
 
-export const usePoolQuery = (address: string): QueryResult<PoolQuery> => useQuery<PoolQuery, PoolVar>(POOL_GQL, {
+  return data as any;
+}
+
+const getPoolQuery = (address: string) => ({
+  query: POOL_GQL,
   variables: { address },
 });
 
+export const usePoolQuery = (address: string): PoolQuery => 
+{
+  const [data, setData] = useState<PoolQuery|undefined>()
+  const poolQry = getPoolQuery(address);
+  useEffect(()=>{
+    const handleResponse = async()=>{
+      const response = await graphqlRequest(axios,poolQry);
+      setData(response.data);
+    }
+    handleResponse();
+  },[]);
+
+  return data as any;
+}
 export const useCurrentPoolReserve = (
   address: string,
 ): PoolReservesQuery =>{ 
@@ -109,7 +157,7 @@ export const usePoolTransactionCountSubscription = (
   address: string | undefined,
   type: TransactionTypes,
   httpClient: AxiosInstance,
-): QueryResult<PoolTransactionCountQuery> => {
+): PoolTransactionCountQuery => {
   const [data,setData]= useState<PoolTransactionCountQuery|undefined>();
   const [loading,setLoading] = useState<boolean>(true);
   if (httpClient === undefined) {
@@ -132,7 +180,7 @@ export const usePoolTransactionSubscription = (
   pageIndex = 0,
   limit = 10,
   httpClient: AxiosInstance,
-): SubscriptionResult<PoolTransactionQuery> => {
+): PoolTransactionQuery => {
   const [data,setData]= useState<PoolTransactionQuery|undefined>();
   const [loading,setLoading] = useState<boolean>(true);
   if (httpClient === undefined) {
@@ -150,34 +198,76 @@ export const usePoolTransactionSubscription = (
   return [data, loading] as any;
   }
 
+  const getPoolDayTvlQuery = (address: string, fromTime: string) => ({
+    query: POOL_DAY_TVL_GQL,
+    variables: {
+      address,
+      fromTime,
+    },
+  });
+
 export const useDayTvl = (
   address: string,
   fromTime: number,
-): QueryResult<PoolDayTvlQuery> => useQuery<PoolDayTvlQuery, PoolDayTvlVar>(POOL_DAY_TVL_GQL, {
+): PoolDayTvlQuery => {
+  const [data, setData] = useState<PoolDayVolumeQuery|undefined>()
+  const poolCurrReservesQry = getPoolDayTvlQuery(address, new Date(fromTime).toISOString());
+  useEffect(()=>{
+    const handleResponse = async()=>{
+      const response = await graphqlRequest(axios,poolCurrReservesQry);
+      setData(response.data);
+    }
+    handleResponse();
+  },[]);
+
+  return data as any;
+}
+
+const getPoolDayVolumeQuery = (address: string, fromTime: string) => ({
+  query: POOL_DAY_VOLUME_GQL,
   variables: {
     address,
-    fromTime: new Date(fromTime).toISOString(),
+    fromTime,
   },
 });
+
 export const useDayPoolVolume = (
   address: string,
   fromTime: number,
-): QueryResult<PoolDayVolumeQuery> => useQuery<PoolDayVolumeQuery, PoolVolumeVar>(POOL_DAY_VOLUME_GQL, {
+): PoolDayVolumeQuery => {
+  const [data, setData] = useState<PoolDayVolumeQuery|undefined>()
+  const poolCurrReservesQry = getPoolDayVolumeQuery(address, new Date(fromTime).toISOString());
+  useEffect(()=>{
+    const handleResponse = async()=>{
+      const response = await graphqlRequest(axios,poolCurrReservesQry);
+      setData(response.data);
+    }
+    handleResponse();
+  },[]);
+
+  return data as any;
+}
+
+const getPoolDayFeeQuery = (address: string, fromTime: string) => ({
+  query: POOL_DAY_FEE_QUERY_GQL,
   variables: {
     address,
-    fromTime: new Date(fromTime).toISOString(),
+    fromTime,
   },
 });
 
 export const useDayPoolFee = (
   address: string,
   fromTime: number,
-): SubscriptionResult<PoolDayFeeQuery> => useQuery<PoolDayFeeQuery, PoolDayFeeVar>(
-  POOL_DAY_FEE_QUERY_GQL,
-  {
-    variables: {
-      address,
-      fromTime: new Date(fromTime).toISOString(),
-    },
-  },
-);
+): PoolDayFeeQuery => {const [data, setData] = useState<PoolDayFeeQuery|undefined>()
+  const poolCurrReservesQry = getPoolDayFeeQuery(address, new Date(fromTime).toISOString());
+  useEffect(()=>{
+    const handleResponse = async()=>{
+      const response = await graphqlRequest(axios,poolCurrReservesQry);
+      setData(response.data);
+    }
+    handleResponse();
+  },[]);
+
+  return data as any;
+}
