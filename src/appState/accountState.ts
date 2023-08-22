@@ -238,8 +238,7 @@ const indexedAccountValues$ = combineLatest([
       ? []
       : graphqlRequest(axios,getAllAccounts(signers.map((s: any) => s.address)),true))),
       map((result: any): AccountEvmAddrData[] => 
-      {console.log("result===",result);
-      
+      {
         return result.data.data.accounts.map((a) => ({ address: a.id, evmAddress: a.evmAddress, isEvmClaimed: !!a.evmAddress } as AccountEvmAddrData))}),
     filter((v) => !!v),
     startWith([]),
