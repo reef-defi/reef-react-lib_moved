@@ -5,7 +5,7 @@ import {
   PoolBasicTransactionVar, PoolDayFeeQuery, PoolDayVolumeQuery, PoolFeeQuery, PoolFeeVar, PoolDayFeeVar,
   PoolQuery, PoolReservesQuery, PoolSupplyQuery, PoolSupplyVar, PoolTransactionCountQuery,
   PoolTransactionQuery, PoolDayTvlQuery, PoolDayTvlVar, PoolVar, PoolVolumeAggregateQuery,
-  PoolVolumeAggregateVar, PoolVolumeVar, POOL_CURRENT_RESERVES_GQL, POOL_DAY_FEE_QUERY_GQL, POOL_DAY_TVL_GQL,
+   PoolVolumeVar, POOL_CURRENT_RESERVES_GQL, POOL_DAY_FEE_QUERY_GQL, POOL_DAY_TVL_GQL,
   POOL_DAY_VOLUME_GQL, POOL_FEES_GQL, POOL_GQL, POOL_SUPPLY_GQL, POOL_TRANSACTIONS_GQL, POOL_TRANSACTION_COUNT_GQL,
   POOL_VOLUME_AGGREGATE_GQL, TransactionTypes,
 } from '../graphql/pools';
@@ -15,21 +15,36 @@ import axios, { AxiosInstance } from 'axios';
 import {  useEffect, useState } from 'react';
 import { graphqlRequest } from './useAllPools';
 
+const getPoolVolumeAggregateQuery = (address: string,
+  fromTime: string,
+  toTime: string) => ({
+  query: POOL_VOLUME_AGGREGATE_GQL,
+  variables: {
+    address,
+    fromTime,
+    toTime,
+  },
+});
+
 // Intermediate query hooks
 export const useDayVolume = (
   address: string,
   fromTime: string,
   toTime: string,
-): QueryResult<PoolVolumeAggregateQuery> => useQuery<PoolVolumeAggregateQuery, PoolVolumeAggregateVar>(
-  POOL_VOLUME_AGGREGATE_GQL,
-  {
-    variables: {
-      address,
-      fromTime,
-      toTime,
-    },
-  },
-);
+): PoolVolumeAggregateQuery => {
+  const [data, setData] = useState<PoolVolumeAggregateQuery|undefined>()
+  const poolCurrReservesQry = getPoolVolumeAggregateQuery(address,fromTime,toTime);
+  useEffect(()=>{
+    const handleResponse = async()=>{
+      const response = await graphqlRequest(axios,poolCurrReservesQry);
+      setData(response.data);
+    }
+    handleResponse();
+  },[]);
+
+  return data as any;
+}
+
 export const useCurrentPoolSupply = (
   address: string,
 ): QueryResult<PoolSupplyQuery> => useQuery<PoolSupplyQuery, PoolSupplyVar>(POOL_SUPPLY_GQL, {
