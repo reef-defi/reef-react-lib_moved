@@ -157,7 +157,7 @@ export const usePoolTransactionCountSubscription = (
   address: string | undefined,
   type: TransactionTypes,
   httpClient: AxiosInstance,
-): PoolTransactionCountQuery => {
+): {data:PoolTransactionCountQuery,loading:boolean} => {
   const [data,setData]= useState<PoolTransactionCountQuery|undefined>();
   const [loading,setLoading] = useState<boolean>(true);
   if (httpClient === undefined) {
@@ -171,7 +171,7 @@ export const usePoolTransactionCountSubscription = (
     setLoading(false);
   }, POLL_INTERVAL);
 
-  return [data, loading] as any;
+  return {data, loading} as any;
 };
 
 export const usePoolTransactionSubscription = (
@@ -180,7 +180,7 @@ export const usePoolTransactionSubscription = (
   pageIndex = 0,
   limit = 10,
   httpClient: AxiosInstance,
-): PoolTransactionQuery => {
+): {data:PoolTransactionQuery,loading:boolean} => {
   const [data,setData]= useState<PoolTransactionQuery|undefined>();
   const [loading,setLoading] = useState<boolean>(true);
   if (httpClient === undefined) {
@@ -195,7 +195,7 @@ export const usePoolTransactionSubscription = (
     setLoading(false);
   }, POLL_INTERVAL);
 
-  return [data, loading] as any;
+  return {data, loading} as any;
   }
 
   const getPoolDayTvlQuery = (address: string, fromTime: string) => ({
