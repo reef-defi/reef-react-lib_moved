@@ -1,16 +1,44 @@
 import {
-  combineLatest, map, Observable, switchMap,
+  combineLatest, from, map, Observable, switchMap,
 } from 'rxjs';
-import { graphql } from '@reef-chain/util-lib';
+// import { graphql } from '@reef-chain/util-lib';
 import { BigNumber } from 'ethers';
 import { NFT } from '../state';
-import { apolloExplorerClientInstance$, zenToRx } from '../graphql';
+// import { apolloExplorerClientInstance$, zenToRx } from '../graphql';
 import { currentProvider$ } from './providerState';
 import { selectedSignerAddressUpdate$ } from './tokenState';
 import { resolveNftImageLinks } from '../utils/nftUtil';
 import { _NFT_IPFS_RESOLVER_FN } from './util';
+import axios, { AxiosInstance } from 'axios';
+import { graphqlRequest } from './accountState';
 
-const { SIGNER_NFTS_GQL } = graphql;
+const SIGNER_NFTS_GQL = `
+subscription query($accountId: String) {
+  tokenHolders(
+  orderBy: balance_DESC
+  limit:199
+  where: {AND: {nftId_isNull: false, token: {id_isNull: false}, signer: {id_eq: $accountId}, balance_gt: "0"}, type_eq: Account}
+) {
+  token {
+    id
+    type
+  }
+  balance
+  nftId
+}
+}`;
+
+
+const getSignerNfts = (accountId: string) => {
+  return {
+    query: SIGNER_NFTS_GQL,
+    variables: {
+      accountId
+    },
+  };
+};
+
+// const { SIGNER_NFTS_GQL } = graphql;
 /* new graphql
 const SIGNER_NFTS_GQL = gql`
   subscription query($accountId: String) {
@@ -131,23 +159,29 @@ const parseTokenHolderArray = (resArr: VerifiedNft[]): NFT[] => resArr.map(({
     } as VerifiedNft));
 } */
 
+const queryGql$ = (
+  client: AxiosInstance,
+  queryObj: { query: string; variables: any }
+) =>
+  from(graphqlRequest(client as AxiosInstance, queryObj,true).then(res => res.data));
+
 export const selectedSignerNFTs$: Observable<NFT[]> = combineLatest([
-  apolloExplorerClientInstance$,
   selectedSignerAddressUpdate$,
   currentProvider$,
 ])
   .pipe(
-    switchMap(([apollo, signer]) => (!signer
+    switchMap(([ signer]) => (!signer
       ? []
-      : zenToRx(
-        apollo.subscribe({
-          query: SIGNER_NFTS_GQL,
-          variables: {
-            accountId: signer.address,
-          },
-          fetchPolicy: 'network-only',
-        }),
-      )
+      :queryGql$(axios,getSignerNfts(signer.address))
+      //  zenToRx(
+      //   apollo.subscribe({
+      //     query: SIGNER_NFTS_GQL,
+      //     variables: {
+      //       accountId: signer.address,
+      //     },
+      //     fetchPolicy: 'network-only',
+      //   }),
+      // )
         .pipe(
           map(({ data }) => {
             const verNfts = data && Array.isArray(data.tokenHolders)

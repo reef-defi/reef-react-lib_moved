@@ -407,7 +407,7 @@ export const POOL_CURRENT_RESERVES_GQL = gql`
   }
 `;
 
-export const POOLS_RESERVES_GQL = gql`
+export const POOLS_RESERVES_GQL = `
   query poolsReserves($tokens: [String!]!) {
     poolsReserves(tokens: $tokens) {
       token1
