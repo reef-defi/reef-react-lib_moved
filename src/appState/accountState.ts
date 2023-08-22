@@ -22,13 +22,15 @@ import { filter } from 'rxjs/operators';
 import { AccountJson } from '@reef-defi/extension-base/background/types';
 import type { InjectedAccountWithMeta } from '@reef-defi/extension-inject/types';
 import type { Signer as InjectedSigningKey } from '@polkadot/api/types';
-import { graphql } from '@reef-chain/util-lib';
+// import { graphql } from '@reef-chain/util-lib';
 import { UpdateDataCtx } from './updateStateModel';
 import { replaceUpdatedSigners, updateSignersEvmBindings } from './accountStateUtil';
 import { currentProvider$ } from './providerState';
 import { ReefSigner } from '../state';
-import { apolloExplorerClientInstance$, zenToRx } from '../graphql/apollo';
+// import { apolloExplorerClientInstance$, zenToRx, } from '../graphql/apollo';
 import { accountJsonToMeta, metaAccountToSigner } from '../rpc/accounts';
+import { graphqlRequest } from '../graphql/gqlUtils';
+import axios from 'axios';
 
 export const accountsSubj = new ReplaySubject<ReefSigner[] | null>(1);
 export const accountsJsonSubj = new ReplaySubject<AccountJson[]| InjectedAccountWithMeta[] | null>(1);
@@ -203,24 +205,58 @@ interface AccountEvmAddrData {
   isEvmClaimed?: boolean;
 }
 
+export const EVM_ADDRESS_UPDATE_GQL = `
+  query query($accountIds: [String!]!) {
+    accounts(where: {id_in: $accountIds}, orderBy: timestamp_DESC) {
+      id
+      evmAddress 
+   }
+  }
+`;
+
+export const getAllAccounts = (accountIds:any) => ({
+  query: EVM_ADDRESS_UPDATE_GQL,
+  variables: {accountIds}
+});
+
 const indexedAccountValues$ = combineLatest([
-  apolloExplorerClientInstance$,
   signersInjected$,
-])
-  .pipe(
-    switchMap(([apollo, signers]) => (!signers
-      ? []
-      : zenToRx(
-        apollo.subscribe({
-          query: graphql.EVM_ADDRESS_UPDATE_GQL,
-          variables: { accountIds: signers.map((s: any) => s.address) },
-          fetchPolicy: 'network-only',
-        }),
-      ))),
-    map((result: any): AccountEvmAddrData[] => result.data.accounts.map((a) => ({ address: a.id, evmAddress: a.evmAddress, isEvmClaimed: !!a.evmAddress } as AccountEvmAddrData))),
-    filter((v) => !!v),
-    startWith([]),
-  );
+]).pipe(
+  switchMap(([signers]) => {
+    try {
+      console.log("signers:", signers);
+
+
+      if (!signers) {
+        return [];
+      } else {
+        console.log("Subscribing to GraphQL...");
+        const x = graphqlRequest(axios,getAllAccounts(signers.map((s: any) => s.address)),true);
+        console.log(x);
+        return x;
+          // apollo.subscribe({
+          //   query: EVM_ADDRESS_UPDATE_GQL,
+          //   variables: { accountIds: signers.map((s: any) => s.address) },
+          //   fetchPolicy: 'network-only',
+          // })
+      }
+    } catch (error) {
+      console.log("anuna error", error);
+      return [];
+    }
+  }),
+  map((result: any): AccountEvmAddrData[] =>{
+    console.log("result==",result);
+    return result.data?.data.accounts.map((a) => ({
+      address: a.id,
+      evmAddress: a.evmAddress,
+      isEvmClaimed: !!a.evmAddress,
+    } as AccountEvmAddrData))
+  }
+  ),
+  filter((v) => !!v),
+  startWith([])
+);
 
 const signersWithUpdatedData$ = combineLatest([
   signersWithUpdatedBalances$,
