@@ -376,13 +376,6 @@ export const transferHistory$: Observable<
   switchMap(([ signer, network]) => (!signer
     ? []
     : queryGql$(axios,getTransferHistoryQuery(signer.address))
-    // zenToRx(
-    //   apollo.subscribe({
-    //     query: graphql.TRANSFER_HISTORY_GQL,
-    //     variables: { accountId: signer.address },
-    //     fetchPolicy: 'network-only',
-    //   }),
-    // )
       .pipe(
         map((res: any) => {
           const resHist = res.data && Array.isArray(res.data.transfers) ? res.data.transfers : [];
