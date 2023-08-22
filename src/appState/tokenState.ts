@@ -17,7 +17,6 @@ import { graphql } from '@reef-chain/util-lib';
 import { _NFT_IPFS_RESOLVER_FN, combineTokensDistinct, toTokensWithPrice } from './util';
 import { selectedSigner$ } from './accountState';
 import { currentNetwork$, currentProvider$ } from './providerState';
-import { apolloExplorerClientInstance$, zenToRx } from '../graphql/apollo';
 import { getIconUrl, getTransferUrl } from '../utils';
 import { getReefCoinBalance } from '../rpc';
 import { retrieveReefCoingeckoPrice } from '../api';
@@ -330,19 +329,68 @@ const toTokenTransfers = (resTransferData: any[], signer, network: Network): Tok
   extrinsic: { blockId: transferData.extrinsic.block_id, hash: transferData.extrinsic.hash, index: transferData.extrinsic.index },
 }));
 
+export const TRANSFER_HISTORY_GQL = `
+  query query($accountId: String!) {
+    transfers(
+      where: {
+        OR: [{ from: { id_eq: $accountId } }, { to: { id_eq: $accountId } }]
+      }
+      limit: 15
+      orderBy: timestamp_DESC
+    ) {
+      timestamp
+      amount
+      feeAmount
+      fromEvmAddress
+      id
+      nftId
+      success
+      type
+      toEvmAddress
+      token {
+        id
+        name
+        type
+        contractData
+      }
+      extrinsic {
+        id
+        block {
+          id
+          height
+          hash
+        }
+      }
+      from {
+        id
+        evmAddress
+      }
+      to {
+        id
+        evmAddress
+      }
+    }
+  }
+`;
+
+export const getTransferHistoryQry = (accountId:string) => ({
+  query: TRANSFER_HISTORY_GQL,
+  variables: {accountId}
+});
+
 export const transferHistory$: Observable<
   | null
   | TokenTransfer[]
-> = combineLatest([apolloExplorerClientInstance$, selectedSigner$, currentNetwork$]).pipe(
-  switchMap(([apollo, signer, network]) => (!signer
+> = combineLatest([selectedSigner$, currentNetwork$]).pipe(
+  switchMap(([ signer, network]) => (!signer
     ? []
-    : zenToRx(
-      apollo.subscribe({
-        query: graphql.TRANSFER_HISTORY_GQL,
-        variables: { accountId: signer.address },
-        fetchPolicy: 'network-only',
-      }),
-    )
+    : 
+      queryGql$(axios,getTransferHistoryQry(signer.address))
+      // apollo.subscribe({
+      //   query: TRANSFER_HISTORY_GQL,
+      //   variables: { accountId: signer.address },
+      //   fetchPolicy: 'network-only',
+      // }),
       .pipe(
         map((res: any) => {
           const resHist = res.data && Array.isArray(res.data.transfers) ? res.data.transfers : [];
