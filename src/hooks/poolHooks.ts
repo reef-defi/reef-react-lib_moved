@@ -13,6 +13,9 @@ import {
 } from '../graphql/pools';
 import useInterval from './userInterval';
 import { POLL_INTERVAL } from '../utils';
+import { AxiosInstance } from 'axios';
+import {  useState } from 'react';
+import { graphqlRequest } from './useAllPools';
 
 // Intermediate query hooks
 export const useDayVolume = (
@@ -74,29 +77,42 @@ const resolveTransactionVariables = (
   search: search || '',
   type: type === 'All' ? ['Swap', 'Mint', 'Burn'] : [type],
 });
+
+const getPoolTransactionCountQry =(address: string | undefined, type: TransactionTypes) => ({
+  query: POOL_TRANSACTION_COUNT_GQL,
+  variables: resolveTransactionVariables(address, type),
+});
+
 export const usePoolTransactionCountSubscription = (
   address: string | undefined,
   type: TransactionTypes,
-  dexClient: ApolloClient<any>,
+  httpClient: AxiosInstance,
 ): QueryResult<PoolTransactionCountQuery> => {
-  if (dexClient === undefined) {
+  const [data,setData]= useState<PoolTransactionCountQuery|undefined>();
+  const [loading,setLoading] = useState<boolean>(true);
+  if (httpClient === undefined) {
     return [undefined, true] as any;
   }
 
-  const { data, loading, refetch } = useQuery<PoolTransactionCountQuery, PoolBasicTransactionVar>(
-    POOL_TRANSACTION_COUNT_GQL,
-    {
-      client: dexClient,
-      variables: resolveTransactionVariables(address, type),
-    },
-  );
-
-  useInterval(() => {
-    refetch();
+  
+  // const { data, loading, refetch } = useQuery<PoolTransactionCountQuery, PoolBasicTransactionVar>(
+  //   POOL_TRANSACTION_COUNT_GQL,
+  //   {
+  //     client: dexClient,
+  //     variables: resolveTransactionVariables(address, type),
+  //   },
+  // );
+  const queryObj = getPoolTransactionCountQry(address, type);
+  useInterval(async() => {
+    setLoading(true);
+    const response = await graphqlRequest(httpClient, queryObj);
+    setData(response.data);
+    setLoading(false);
   }, POLL_INTERVAL);
 
   return [data, loading] as any;
 };
+
 export const usePoolTransactionSubscription = (
   address: string | undefined,
   type: TransactionTypes,
