@@ -25,7 +25,6 @@ import {
 } from '../state/token';
 import { Network, NFT, ReefSigner } from '../state';
 import { resolveNftImageLinks } from '../utils/nftUtil';
-import { apolloDexClientInstance$ } from '../graphql';
 import { PoolReserves, POOLS_RESERVES_GQL } from '../graphql/pools';
 import { graphqlRequest } from '../graphql/gqlUtils';
 import axios, { AxiosInstance } from 'axios';
@@ -65,12 +64,11 @@ export const getContractDataQry = (addresses:string) => ({
 
 // eslint-disable-next-line camelcase
 const fetchTokensData = (
-  // apollo: ApolloClient<any>,
   axios: AxiosInstance,
   missingCacheContractDataAddresses: string[],
   state: { tokens: Token[]; contractData: Token[] },
 ): Promise<Token[]> =>
-graphqlRequest(axios, getContractDataQry(missingCacheContractDataAddresses[0].toString()),true)
+ graphqlRequest(axios, getContractDataQry(missingCacheContractDataAddresses[0]),true)
 //  apollo
 //   .query({
 //     query: CONTRACT_DATA_GQL,
@@ -80,7 +78,6 @@ graphqlRequest(axios, getContractDataQry(missingCacheContractDataAddresses[0].to
 // eslint-disable-next-line camelcase
   .then((res) => 
   {
-    console.log(res);
   return res.data.data.verifiedContracts.map(
     // eslint-disable-next-line camelcase
     (vContract: { id: string; contractData: any }) => ({
@@ -105,8 +102,9 @@ const tokenBalancesWithContractDataCache = (axios:AxiosInstance) => (
       (tb) => !state.contractData.some((cd) => cd.address === tb.token_address),
     )
     .map((tb) => tb.token_address);
+  console.log("anuna===",missingCacheContractDataAddresses)
   const contractDataPromise = missingCacheContractDataAddresses.length
-    ? fetchTokensData(axios, missingCacheContractDataAddresses, state)
+    ? fetchTokensData(axios,missingCacheContractDataAddresses, state)
     : Promise.resolve(state.contractData);
 
   return contractDataPromise.then((cData: Token[]) => {
@@ -244,7 +242,6 @@ export const allAvailableSignerTokens$: Observable<Token[]> = combineLatest([
 
 export const pools$: Observable<PoolReserves[]> = combineLatest([
   allAvailableSignerTokens$,
-  apolloDexClientInstance$,
 ]).pipe(
   switchMap(([tkns]) => loadPoolsReserves(tkns, axios)),
   shareReplay(1),
