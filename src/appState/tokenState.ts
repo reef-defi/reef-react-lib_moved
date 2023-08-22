@@ -71,7 +71,7 @@ const CONTRACT_DATA_GQL = `
 `;
 
 const TRANSFER_HISTORY_GQL = `
-  subscription query($accountId: String!) {
+  query query($accountId: String!) {
         transfers(
             where: {
                 OR: [
