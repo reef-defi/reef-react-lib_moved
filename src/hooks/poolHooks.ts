@@ -1,12 +1,10 @@
 import {
-  ApolloClient,
   QueryResult, SubscriptionResult, useQuery,
-  useSubscription,
 } from '@apollo/client';
 import {
   PoolBasicTransactionVar, PoolDayFeeQuery, PoolDayVolumeQuery, PoolFeeQuery, PoolFeeVar, PoolDayFeeVar,
   PoolQuery, PoolReservesQuery, PoolReservesVar, PoolSupplyQuery, PoolSupplyVar, PoolTransactionCountQuery,
-  PoolTransactionQuery, PoolTransactionVar, PoolDayTvlQuery, PoolDayTvlVar, PoolVar, PoolVolumeAggregateQuery,
+  PoolTransactionQuery, PoolDayTvlQuery, PoolDayTvlVar, PoolVar, PoolVolumeAggregateQuery,
   PoolVolumeAggregateVar, PoolVolumeVar, POOL_CURRENT_RESERVES_GQL, POOL_DAY_FEE_QUERY_GQL, POOL_DAY_TVL_GQL,
   POOL_DAY_VOLUME_GQL, POOL_FEES_GQL, POOL_GQL, POOL_SUPPLY_GQL, POOL_TRANSACTIONS_GQL, POOL_TRANSACTION_COUNT_GQL,
   POOL_VOLUME_AGGREGATE_GQL, TransactionTypes,
@@ -82,6 +80,15 @@ const getPoolTransactionCountQry =(address: string | undefined, type: Transactio
   query: POOL_TRANSACTION_COUNT_GQL,
   variables: resolveTransactionVariables(address, type),
 });
+const getPoolTransactionQry = (address: string | undefined, type: TransactionTypes, limit: number, pageIndex: number): {query: string, variables: any} => ({
+  query: POOL_TRANSACTIONS_GQL,
+  variables: {
+    ...resolveTransactionVariables(address, type),
+    limit,
+    offset: pageIndex * limit,
+  },
+});
+
 
 export const usePoolTransactionCountSubscription = (
   address: string | undefined,
@@ -93,15 +100,6 @@ export const usePoolTransactionCountSubscription = (
   if (httpClient === undefined) {
     return [undefined, true] as any;
   }
-
-  
-  // const { data, loading, refetch } = useQuery<PoolTransactionCountQuery, PoolBasicTransactionVar>(
-  //   POOL_TRANSACTION_COUNT_GQL,
-  //   {
-  //     client: dexClient,
-  //     variables: resolveTransactionVariables(address, type),
-  //   },
-  // );
   const queryObj = getPoolTransactionCountQry(address, type);
   useInterval(async() => {
     setLoading(true);
@@ -118,18 +116,24 @@ export const usePoolTransactionSubscription = (
   type: TransactionTypes,
   pageIndex = 0,
   limit = 10,
-  dexClient: ApolloClient<any>,
-): SubscriptionResult<PoolTransactionQuery> => useSubscription<PoolTransactionQuery, PoolTransactionVar>(
-  POOL_TRANSACTIONS_GQL,
-  {
-    client: dexClient,
-    variables: {
-      ...resolveTransactionVariables(address, type),
-      limit,
-      offset: pageIndex * limit,
-    },
-  },
-);
+  httpClient: AxiosInstance,
+): SubscriptionResult<PoolTransactionQuery> => {
+  const [data,setData]= useState<PoolTransactionQuery|undefined>();
+  const [loading,setLoading] = useState<boolean>(true);
+  if (httpClient === undefined) {
+    return [undefined, true] as any;
+  }
+  const queryObj = getPoolTransactionQry(address, type, limit, pageIndex);
+
+  useInterval(async() => {
+    setLoading(true);
+    const response = await graphqlRequest(httpClient, queryObj);
+    setData(response.data);
+    setLoading(false);
+  }, POLL_INTERVAL);
+
+  return [data, loading] as any;
+  }
 
 export const useDayTvl = (
   address: string,
