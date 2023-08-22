@@ -1,24 +1,41 @@
-import { ApolloClient, useQuery } from '@apollo/client';
-import { AllPoolsQuery, ALL_POOLS } from '../graphql/pools';
+import { AxiosInstance } from 'axios';
+import {  ALL_POOLS } from '../graphql/pools';
 import { POLL_INTERVAL, getIconUrl } from '../utils';
+import { useState } from 'react';
 import useInterval from './userInterval';
 import { PoolWithReserves } from '../state';
 
-export const useAllPools = (dexClient: ApolloClient<any>): PoolWithReserves[] => {
-  const { data, refetch } = useQuery<AllPoolsQuery>(
-    ALL_POOLS,
-    { client: dexClient },
-  );
+export const graphqlRequest = (
+  httpClient: AxiosInstance,
+  queryObj: { query: string; variables: any },
+  isExplorer?:boolean
+) => {
+  const graphql = JSON.stringify(queryObj);
+  if(isExplorer)return httpClient.post('https://squid.subsquid.io/reef-explorer-testnet/graphql', graphql, {
+    headers: { 'Content-Type': 'application/json' },
+  });
+  return httpClient.post('https://squid.subsquid.io/reef-swap-testnet/graphql', graphql, {
+    headers: { 'Content-Type': 'application/json' },
+  });
+};
 
-  useInterval(() => {
-    refetch();
+export const getAllPoolsQuery = () => ({
+  query: ALL_POOLS,
+  variables: {}
+});
+export const useAllPools =  (httpClient: AxiosInstance): PoolWithReserves[] => {
+  const [allPools,setAllPools] = useState([]);
+  const queryObj = getAllPoolsQuery();
+
+  useInterval(async() => {
+    const response = await graphqlRequest(httpClient, queryObj);
+    let pools = response.data.data?.allPools.map((pool) => ({
+      ...pool,
+      iconUrl1: pool.iconUrl1 === '' ? getIconUrl(pool.token1) : pool.iconUrl1,
+      iconUrl2: pool.iconUrl2 === '' ? getIconUrl(pool.token2) : pool.iconUrl2,
+    }));
+    setAllPools(pools);
   }, POLL_INTERVAL);
 
-  const pools = data?.allPools.map((pool) => ({
-    ...pool,
-    iconUrl1: pool.iconUrl1 === '' ? getIconUrl(pool.token1) : pool.iconUrl1,
-    iconUrl2: pool.iconUrl2 === '' ? getIconUrl(pool.token2) : pool.iconUrl2,
-  }));
-
-  return pools || [];
+  return allPools;
 };

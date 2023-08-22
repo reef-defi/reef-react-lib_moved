@@ -76,7 +76,6 @@ export const selectedSignerNFTs$: Observable<NFT[]> = combineLatest([
       :queryGql$(axios,getSignerNfts(signer.address))
         .pipe(
           map(({ data }) => {
-            console.log(data);
             const verNfts = data && Array.isArray(data.tokenHolders)
               ? data.tokenHolders.map((th: any) => ({
                 balance: th.balance,
