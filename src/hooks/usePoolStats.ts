@@ -1,5 +1,5 @@
 import { BigNumber } from 'bignumber.js';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AxiosInstance } from 'axios';
 import {
   POOLS_TOTAL_VALUE_LOCKED,
@@ -38,7 +38,8 @@ export const getPoolInfoQuery = (address:string, signerAddress:string, fromTime:
     };
   };
 
-  export const useTotalSupply = async (tokenPrices: TokenPrices, httpClient: AxiosInstance, previous = false): Promise<string> => {
+  export const useTotalSupply =  (tokenPrices: TokenPrices, httpClient: AxiosInstance, previous = false): string=> {
+    const [data, setData] = useState<any>()
     const toTime = useMemo(() => {
       const tm = new Date();
       if (previous) {
@@ -47,9 +48,15 @@ export const getPoolInfoQuery = (address:string, signerAddress:string, fromTime:
       return tm;
     }, []);
 
-      const poolsTotalValueLockedQry = getPoolsTotalValueLockedQuery(toTime.toISOString());
-      const response = await graphqlRequest(httpClient, poolsTotalValueLockedQry);
-      const data = response.data;
+    useEffect(()=>{
+      const handleResponse = async()=>{
+        const poolsTotalValueLockedQry = getPoolsTotalValueLockedQuery(toTime.toISOString());
+        const response = await graphqlRequest(httpClient, poolsTotalValueLockedQry);
+        setData(response.data);
+      }
+      handleResponse();
+    })
+      
 
       if (!data || data.totalSupply.length === 0) {
         return '0';
@@ -116,7 +123,12 @@ export interface PoolStats {
   volumeChange24h: number;
 }
 
-export const usePoolInfo = async (address: string, signerAddress: string, tokenPrices: TokenPrices, httpClient: AxiosInstance): Promise<[PoolStats|undefined, boolean]> => {
+export const usePoolInfo = (address: string, signerAddress: string, tokenPrices: TokenPrices, httpClient: AxiosInstance): [PoolStats|undefined, boolean] => {
+  const [poolTokensDataQryResp, setPoolTokensDataQryResp] = useState<any>();
+  const [poolInfoQryResp, setPoolInfoQryResp] = useState<any>();
+  const [tokensLoading, setTokensLoading] = useState<boolean>(true);
+  const [poolInfoLoading, setPoolInfoLoading] = useState<boolean>(true);
+
   const toTime = useMemo(() => {
     const date = new Date();
     date.setDate(date.getDate() - 1);
@@ -129,18 +141,32 @@ export const usePoolInfo = async (address: string, signerAddress: string, tokenP
     return date.toISOString();
   }, [address, signerAddress]);
 
-  const poolTokensDataQry = getPoolTokensDataQuery(address);
-  const response = await graphqlRequest(httpClient, poolTokensDataQry);
-
-  const { data: tokensData, loading: tokensLoading } = response.data;
-
-  const poolInfoQry = getPoolInfoQuery(address, signerAddress, fromTime, toTime);
+  useEffect(()=>{
+    const handleResp = async()=>{
+      const poolTokensDataQry = getPoolTokensDataQuery(address);
+      const response = await graphqlRequest(httpClient, poolTokensDataQry);
+      setPoolTokensDataQryResp(response);
+      setTokensLoading(false);
+      const poolInfoQry = getPoolInfoQuery(address, signerAddress, fromTime, toTime);
   const response_ = await graphqlRequest(httpClient, poolInfoQry);
+  setPoolInfoQryResp(response_);
+  setPoolInfoLoading(false);
+    }
+    handleResp();
+  })
 
-  const { data: poolInfoData, loading: poolInfoLoading, refetch: refetchPoolInfo } = response_.data;
+  const { data: tokensData} = poolTokensDataQryResp.data;
+  const { data: poolInfoData } = poolInfoQryResp.data;
 
   useInterval(() => {
-    refetchPoolInfo();
+    setPoolInfoLoading(true);
+    const handleResp = async()=>{
+      const poolInfoQry = getPoolInfoQuery(address, signerAddress, fromTime, toTime);
+  const response_ = await graphqlRequest(httpClient, poolInfoQry);
+  setPoolInfoQryResp(response_);
+  setPoolInfoLoading(false);
+    }
+    handleResp();
   }, POLL_INTERVAL);
 
   const info = useMemo<PoolStats|undefined>(() => {

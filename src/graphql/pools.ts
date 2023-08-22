@@ -1,4 +1,4 @@
-import { DocumentNode, gql } from '@apollo/client';
+import {  gql } from '@apollo/client';
 import {
   BaseFeeData, BaseReservedData, BaseVolumeData, FeeData, PriceData, ReservedData, VolumeData,
 } from '../state';
@@ -407,7 +407,7 @@ export const POOL_CURRENT_RESERVES_GQL = `
   }
 `;
 
-export const POOLS_RESERVES_GQL = gql`
+export const POOLS_RESERVES_GQL = `
   query poolsReserves($tokens: [String!]!) {
     poolsReserves(tokens: $tokens) {
       token1
@@ -582,7 +582,7 @@ export const POOL_INFO_GQL = `
   }
 `;
 
-export const poolDataQuery = (time: Time): DocumentNode => gql`
+export const poolDataQuery = (time: Time): string => `
   query poolData($address: String!, $fromTime: String!) {
     poolData(
       address: $address,
@@ -613,7 +613,7 @@ export const poolDataQuery = (time: Time): DocumentNode => gql`
   }
 `;
 
-export const ALL_POOLS = gql`
+export const ALL_POOLS = `
   query allPools {
     allPools {
       address
@@ -633,7 +633,7 @@ export const ALL_POOLS = gql`
   }
 `;
 
-export const ALL_POOLS_LIST = gql`
+export const ALL_POOLS_LIST = `
   query allPoolsList($signerAddress: String!, $limit: Float!, $offset: Float!, $search: String!) {
     allPoolsList(signerAddress: $signerAddress, limit: $limit, offset: $offset, search: $search) {
       id
@@ -659,13 +659,13 @@ export const ALL_POOLS_LIST = gql`
   }
 `;
 
-export const ALL_POOLS_LIST_COUNT = gql`
+export const ALL_POOLS_LIST_COUNT = `
   query allPoolsListCount($signerAddress: String!, $search: String!) {
     allPoolsListCount(signerAddress: $signerAddress, search: $search)
   }
 `;
 
-export const USER_POOLS_LIST = gql`
+export const USER_POOLS_LIST = `
   query userPoolsList($signerAddress: String!, $limit: Float!, $offset: Float!, $search: String!) {
     userPoolsList(signerAddress: $signerAddress, limit: $limit, offset: $offset, search: $search) {
       id
@@ -689,13 +689,13 @@ export const USER_POOLS_LIST = gql`
   }
 `;
 
-export const USER_POOLS_LIST_COUNT = gql`
+export const USER_POOLS_LIST_COUNT = `
   query userPoolsListCount($signerAddress: String!, $search: String!) {
     userPoolsListCount(signerAddress: $signerAddress, search: $search)
   }
 `;
 
-export const USER_POOL_SUPPLY = gql`
+export const USER_POOL_SUPPLY = `
   query userPoolSupply($token1: String!, $token2: String!, $signerAddress: String!) {
     userPoolSupply(token1: $token1, token2: $token2, signerAddress: $signerAddress) {
       address
