@@ -1,17 +1,15 @@
 import { AxiosInstance } from 'axios';
 import {  ALL_POOLS } from '../graphql/pools';
-import { graphqlRequest } from '../graphql/gqlUtils';
 import { POLL_INTERVAL, getIconUrl } from '../utils';
 import { useState } from 'react';
 import useInterval from './userInterval';
 import { PoolWithReserves } from '../state';
+import { graphqlRequest } from '../graphql/gqlUtils';
 
 export const getAllPoolsQuery = () => ({
   query: ALL_POOLS,
   variables: {}
 });
-
-
 export const useAllPools =  (httpClient: AxiosInstance): PoolWithReserves[] => {
   const [allPools,setAllPools] = useState([]);
   const queryObj = getAllPoolsQuery();
