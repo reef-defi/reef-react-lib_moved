@@ -28,7 +28,7 @@ import { currentProvider$ } from './providerState';
 import { ReefSigner } from '../state';
 import { accountJsonToMeta, metaAccountToSigner } from '../rpc/accounts';
 import axios, { AxiosInstance } from 'axios';
-import { axiosDexUrlsSubj, axiosExplorerUrlsSubj } from '../graphql';
+import { axiosDexUrlsSubj } from '../graphql';
 
 export const accountsSubj = new ReplaySubject<ReefSigner[] | null>(1);
 export const accountsJsonSubj = new ReplaySubject<AccountJson[]| InjectedAccountWithMeta[] | null>(1);
@@ -212,24 +212,39 @@ const EVM_ADDRESS_UPDATE_GQL = `
   }
 `;
 
+const getGraphqlEndpoint = (network:string,isExplorer:boolean):string=>{
+  if(isExplorer){
+    if(network=='testnet'){
+      return 'https://squid.subsquid.io/reef-explorer-testnet/graphql'
+    }else{
+      return 'https://squid.subsquid.io/reef-explorer/graphql'
+    }
+  }else{
+    if(network=='testnet'){
+      return "https://squid.subsquid.io/reef-swap-testnet/graphql";
+    }
+  }
+  return 'https://squid.subsquid.io/reef-swap/graphql'
+}
+
 export const graphqlRequest = (
   httpClient: AxiosInstance,
   queryObj: { query: string; variables: any },
   isExplorer?:boolean
 ) => {
-  let url;
+  let selectedNetwork:string;
+  axiosDexUrlsSubj.asObservable().subscribe((urls)=>{
+    selectedNetwork = urls.http.includes('testnet')?'testnet':'mainnet';
+  });
   const graphql = JSON.stringify(queryObj);
   if(isExplorer){
-    axiosExplorerUrlsSubj.asObservable().subscribe((urls)=>{
-    url=urls;
-   })
-    return httpClient.post(url?.http!, graphql, {
+    let url = getGraphqlEndpoint(selectedNetwork!,true);
+    return httpClient.post(url, graphql, {
     headers: { 'Content-Type': 'application/json' },
   });
-} axiosDexUrlsSubj.asObservable().subscribe((urls)=>{
-  url = urls;
-});
-return httpClient.post(url?.http!, graphql, {
+} 
+let url = getGraphqlEndpoint(selectedNetwork!,false);
+return httpClient.post(url, graphql, {
   headers: { 'Content-Type': 'application/json' },
 });
 };
