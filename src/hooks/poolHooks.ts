@@ -10,7 +10,7 @@ import useInterval from './userInterval';
 import { POLL_INTERVAL } from '../utils';
 import axios, { AxiosInstance } from 'axios';
 import {  useEffect, useState } from 'react';
-import { graphqlRequest } from './useAllPools';
+import { graphqlRequest } from '../appState/accountState';
 
 const getPoolVolumeAggregateQuery = (address: string,
   fromTime: string,
