@@ -25,7 +25,7 @@ import { ERC1155Uri } from '../assets/abi/ERC1155Uri';
 import { initProvider } from '../utils/providerUtil';
 import { currentNetwork$, setCurrentNetwork, setCurrentProvider } from './providerState';
 import {
-  apolloDexClientSubj, apolloExplorerClientSubj, GQLUrl, setApolloDexUrls, setApolloExplorerUrls,
+  axiosDexClientSubj, axiosExplorerClientSubj, GQLUrl, setAxiosDexUrls, setAxiosExplorerUrls,
 } from '../graphql';
 import { ipfsUrlResolverFn } from '../utils/nftUtil';
 import { PoolReserves } from '../graphql/pools';
@@ -142,18 +142,18 @@ export function initApolloClients(selectedNetwork?: Network, explorerClient?: Ax
       const gqlUrls = getGQLUrls(selectedNetwork);
       if (gqlUrls) {
         if (gqlUrls.get('explorer')) {
-          setApolloExplorerUrls(gqlUrls.get('explorer')!);
+          setAxiosExplorerUrls(gqlUrls.get('explorer')!);
         }
         if (gqlUrls.get('dex')) {
-          setApolloDexUrls(gqlUrls.get('dex')!);
+          setAxiosDexUrls(gqlUrls.get('dex')!);
         }
       }
     } else {
       if (explorerClient) {
-        apolloExplorerClientSubj.next(explorerClient);
+        axiosExplorerClientSubj.next(explorerClient);
       }
       if (dexClient) {
-        apolloDexClientSubj.next(dexClient);
+        axiosDexClientSubj.next(dexClient);
       }
     }
   }

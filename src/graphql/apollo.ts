@@ -14,11 +14,11 @@ export interface GQLUrl {
 }
 
 // Explorer
-const apolloExplorerUrlsSubj = new ReplaySubject<GQLUrl>(1);
-export const apolloExplorerClientSubj = new ReplaySubject<AxiosInstance>(1);
+const axiosExplorerUrlsSubj = new ReplaySubject<GQLUrl>(1);
+export const axiosExplorerClientSubj = new ReplaySubject<AxiosInstance>(1);
 
-export const setApolloExplorerUrls = (urls: GQLUrl): void => {
-  apolloExplorerUrlsSubj.next(urls);
+export const setAxiosExplorerUrls = (urls: GQLUrl): void => {
+  axiosExplorerUrlsSubj.next(urls);
 };
 
 // const splitExplorerLink$ = apolloExplorerUrlsSubj.pipe(
@@ -60,11 +60,11 @@ export const setApolloExplorerUrls = (urls: GQLUrl): void => {
 // );
 
 // DEX
-const apolloDexUrlsSubj = new ReplaySubject<GQLUrl>(1);
-export const apolloDexClientSubj = new ReplaySubject<AxiosInstance>(1);
+const axiosDexUrlsSubj = new ReplaySubject<GQLUrl>(1);
+export const axiosDexClientSubj = new ReplaySubject<AxiosInstance>(1);
 
-export const setApolloDexUrls = (urls: GQLUrl): void => {
-  apolloDexUrlsSubj.next(urls);
+export const setAxiosDexUrls = (urls: GQLUrl): void => {
+  axiosDexUrlsSubj.next(urls);
 };
 
 export const zenToRx = <T>(zenObservable: ZenObservable<T>): Observable<T> => new Observable((observer) => zenObservable.subscribe(observer));
