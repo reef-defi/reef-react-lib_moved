@@ -1,4 +1,4 @@
-import { DocumentNode, gql } from '@apollo/client';
+import {  gql } from '@apollo/client';
 import {
   BaseFeeData, BaseReservedData, BaseVolumeData, FeeData, PriceData, ReservedData, VolumeData,
 } from '../state';
@@ -278,7 +278,7 @@ export type PoolsListCountVar = PoolSearchVar
 
 // Graphql statements
 // Total supply of all pools
-export const POOLS_TOTAL_VALUE_LOCKED = gql`
+export const POOLS_TOTAL_VALUE_LOCKED = `
   query totalSupply($toTime: String!) {
     totalSupply(toTime: $toTime) {
       pool {
@@ -293,7 +293,7 @@ export const POOLS_TOTAL_VALUE_LOCKED = gql`
 `;
 
 // Aggregating pool hour volume
-export const POOL_24H_VOLUME = gql`
+export const POOL_24H_VOLUME = `
   query volume($fromTime: String!) {
     volume(fromTime: $fromTime) {
       pool {
@@ -526,7 +526,7 @@ export const POOL_DAY_FEE_QUERY_GQL = feeQuery('Day');
 export const POOL_HOUR_FEE_QUERY_GQL = feeQuery('Hour');
 export const POOL_MINUTE_FEE_QUERY_GQL = feeQuery('Minute');
 
-export const POOL_TOKENS_DATA_GQL = gql`
+export const POOL_TOKENS_DATA_GQL = `
   query poolTokens($address: String!) {
     poolById(id: $address) {
       token1 {
@@ -547,7 +547,7 @@ export const POOL_TOKENS_DATA_GQL = gql`
   }
 `;
 
-export const POOL_INFO_GQL = gql`
+export const POOL_INFO_GQL = `
   query poolInfo(
     $address: String!
     $signerAddress: String!
@@ -582,7 +582,7 @@ export const POOL_INFO_GQL = gql`
   }
 `;
 
-export const poolDataQuery = (time: Time): DocumentNode => gql`
+export const poolDataQuery = (time: Time): string => `
   query poolData($address: String!, $fromTime: String!) {
     poolData(
       address: $address,

@@ -1,7 +1,6 @@
 import Uik from '@reef-chain/ui-kit';
 import { BigNumber, Contract } from 'ethers';
 import { Dispatch, useEffect, useRef } from 'react';
-import { ApolloClient } from '@apollo/client';
 import { ERC20 } from '../assets/abi/ERC20';
 import { getReefswapRouter } from '../rpc';
 import {
@@ -31,6 +30,7 @@ import {
 } from '../utils';
 import { findToken } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
+import { AxiosInstance } from 'axios';
 
 const swapStatus = (
   sell: TokenWithAmount,
@@ -85,7 +85,7 @@ interface UseSwapState {
   state: SwapState;
   tokens: Token[];
   account?: ReefSigner;
-  dexClient?: ApolloClient<any>;
+  httpClient?:AxiosInstance;
   tokenPrices: AddressToNumber<number>;
   dispatch: Dispatch<SwapAction>;
   waitForPool?: boolean;
@@ -95,7 +95,7 @@ export const useSwapState = ({
   state,
   tokens,
   account,
-  dexClient,
+  httpClient,
   address1,
   address2,
   tokenPrices,
@@ -126,7 +126,7 @@ export const useSwapState = ({
       sell,
       buy,
       account?.evmAddress || '',
-      dexClient,
+      httpClient,
       isLoading,
     );
   }
