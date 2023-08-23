@@ -14,8 +14,8 @@ export interface GQLUrl {
 }
 
 // Explorer
-const axiosExplorerUrlsSubj = new ReplaySubject<GQLUrl>(1);
 export const axiosExplorerClientSubj = new ReplaySubject<AxiosInstance>(1);
+export const axiosExplorerUrlsSubj = new ReplaySubject<GQLUrl>(1);
 
 export const setAxiosExplorerUrls = (urls: GQLUrl): void => {
   axiosExplorerUrlsSubj.next(urls);
@@ -60,7 +60,7 @@ export const setAxiosExplorerUrls = (urls: GQLUrl): void => {
 // );
 
 // DEX
-const axiosDexUrlsSubj = new ReplaySubject<GQLUrl>(1);
+export const axiosDexUrlsSubj = new ReplaySubject<GQLUrl>(1);
 export const axiosDexClientSubj = new ReplaySubject<AxiosInstance>(1);
 
 export const setAxiosDexUrls = (urls: GQLUrl): void => {

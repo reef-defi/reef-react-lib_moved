@@ -28,6 +28,7 @@ import { currentProvider$ } from './providerState';
 import { ReefSigner } from '../state';
 import { accountJsonToMeta, metaAccountToSigner } from '../rpc/accounts';
 import axios, { AxiosInstance } from 'axios';
+import { axiosDexUrlsSubj, axiosExplorerUrlsSubj } from '../graphql';
 
 export const accountsSubj = new ReplaySubject<ReefSigner[] | null>(1);
 export const accountsJsonSubj = new ReplaySubject<AccountJson[]| InjectedAccountWithMeta[] | null>(1);
@@ -216,13 +217,21 @@ export const graphqlRequest = (
   queryObj: { query: string; variables: any },
   isExplorer?:boolean
 ) => {
+  let url;
   const graphql = JSON.stringify(queryObj);
-  if(isExplorer)return httpClient.post('https://squid.subsquid.io/reef-explorer-testnet/graphql', graphql, {
+  if(isExplorer){
+    axiosExplorerUrlsSubj.asObservable().subscribe((urls)=>{
+    url=urls;
+   })
+    return httpClient.post(url?.http!, graphql, {
     headers: { 'Content-Type': 'application/json' },
   });
-  return httpClient.post('https://squid.subsquid.io/reef-swap-testnet/graphql', graphql, {
-    headers: { 'Content-Type': 'application/json' },
-  });
+} axiosDexUrlsSubj.asObservable().subscribe((urls)=>{
+  url = urls;
+});
+return httpClient.post(url?.http!, graphql, {
+  headers: { 'Content-Type': 'application/json' },
+});
 };
 
 const getAllAccounts = (accountIds:any) => ({
