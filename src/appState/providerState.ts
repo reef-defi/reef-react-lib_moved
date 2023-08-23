@@ -2,8 +2,8 @@ import { ReplaySubject, shareReplay } from 'rxjs';
 import { Provider } from '@reef-defi/evm-provider';
 import { Network } from '../state';
 
-const providerSubj: ReplaySubject<Provider> = new ReplaySubject<Provider>(1);
-const selectedNetworkSubj: ReplaySubject<Network> = new ReplaySubject<Network>();
+export const providerSubj: ReplaySubject<Provider> = new ReplaySubject<Provider>(1);
+export const selectedNetworkSubj: ReplaySubject<Network> = new ReplaySubject<Network>();
 
 export const ACTIVE_NETWORK_LS_KEY = 'reef-app-active-network';
 export const currentProvider$ = providerSubj.asObservable().pipe(shareReplay(1));
