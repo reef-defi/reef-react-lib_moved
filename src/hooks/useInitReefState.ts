@@ -4,16 +4,18 @@ import { availableNetworks, Network } from '../state';
 import { useProvider } from './useProvider';
 import {
   ACTIVE_NETWORK_LS_KEY,
-  currentNetwork$,
   setCurrentNetwork,
   setCurrentProvider,
+  currentNetwork$,
 } from '../appState/providerState';
+// import {reefState} from '@reef-chain/util-lib'
 import { accountsSubj } from '../appState/accountState';
 import { useLoadSigners } from './useLoadSigners';
 import { disconnectProvider } from '../utils/providerUtil';
 import {
   _NFT_IPFS_RESOLVER_FN, initApolloClients, setNftIpfsResolverFn, State, StateOptions,
 } from '../appState/util';
+// import { useInjectExtension } from './useInjectExtension';
 
 const getNetworkFallback = (): Network => {
   let storedNetwork;
@@ -34,10 +36,25 @@ export const useInitReefState = (
   const {
     network, explorerClient, dexClient, signers, ipfsHashResolverFn,
   } = options;
+
+  // const injectedExtension= useInjectExtension(applicationDisplayName);
+  // console.log("injectedExtension===",injectedExtension);
+  // const [accounts, extension, loadingExtension, errExtension] =injectedExtension;
+  // console.log("accounts ===",accounts);
+  // console.log("extension ===",extension);
+  // console.log("loadingExtension ===",loadingExtension);
+  // console.log("errExtension ===",errExtension);
+
   const selectedNetwork: Network|undefined = useObservableState(currentNetwork$);
+
   const [provider, isProviderLoading] = useProvider((selectedNetwork as Network)?.rpcUrl);
+
   const [loadedSigners, isSignersLoading, error] = useLoadSigners(applicationDisplayName, signers ? undefined : provider, signers);
+
+  console.log("loadedsigners===",loadedSigners);
+  console.log("signers===",signers);
   const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     const newNetwork = network ?? getNetworkFallback();
     if (newNetwork !== selectedNetwork) {
