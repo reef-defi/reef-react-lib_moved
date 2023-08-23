@@ -64,14 +64,16 @@ export const useTotalSupply = (tokenPrices: TokenPrices, httpClient:AxiosInstanc
     return '0';
   }
 
-  return data.totalSupply.reduce((acc, { reserved1, reserved2, pool: { token1, token2 } }) => {
-    const tokenPrice1 = getTokenPrice(token1, tokenPrices);
-    const tokenPrice2 = getTokenPrice(token2, tokenPrices);
-    const r1 = tokenPrice1.multipliedBy(new BigNumber(reserved1).div(new BigNumber(10).pow(18)));
-    const r2 = tokenPrice2.multipliedBy(new BigNumber(reserved2).div(new BigNumber(10).pow(18)));
-    return acc.plus(r1).plus(r2);
-  }, new BigNumber(0)).toString();
-};
+      const totalSupply = data.totalSupply.reduce((acc, { reserved1, reserved2, pool: { token1, token2 } }) => {
+        const tokenPrice1 = getTokenPrice(token1, tokenPrices);
+        const tokenPrice2 = getTokenPrice(token2, tokenPrices);
+        const r1 = tokenPrice1.multipliedBy(new BigNumber(reserved1).div(new BigNumber(10).pow(18)));
+        const r2 = tokenPrice2.multipliedBy(new BigNumber(reserved2).div(new BigNumber(10).pow(18)));
+        return acc.plus(r1).plus(r2);
+      }, new BigNumber(0));
+
+      return totalSupply.toString();
+  };
 
 export const usePoolVolume = (tokenPrices: TokenPrices, httpClient:AxiosInstance): string => {
   const [data, setData] = useState<Pool24HVolume|undefined>()
