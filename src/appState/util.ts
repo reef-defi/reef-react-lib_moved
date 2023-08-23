@@ -1,5 +1,6 @@
 import { ContractInterface } from 'ethers';
 import { Provider } from '@reef-defi/evm-provider';
+import { ApolloClient } from '@apollo/client';
 import {
   defer, finalize, Observable, scan, switchMap, tap,
 } from 'rxjs';
@@ -24,7 +25,7 @@ import { ERC1155Uri } from '../assets/abi/ERC1155Uri';
 import { initProvider } from '../utils/providerUtil';
 import { currentNetwork$, setCurrentNetwork, setCurrentProvider } from './providerState';
 import {
-GQLUrl, 
+  apolloDexClientSubj, apolloExplorerClientSubj, GQLUrl, setApolloDexUrls, setApolloExplorerUrls,
 } from '../graphql';
 import { ipfsUrlResolverFn } from '../utils/nftUtil';
 import { PoolReserves } from '../graphql/pools';
@@ -128,38 +129,40 @@ export interface State {
 export interface StateOptions {
   network?: Network;
   signers?: ReefSigner[];
-  // explorerClient?: ApolloClient<any>;
-  // dexClient?: ApolloClient<any>;
+  explorerClient?: ApolloClient<any>;
+  dexClient?: ApolloClient<any>;
   jsonAccounts?:{accounts: AccountJson[] | InjectedAccountWithMeta[] | InjectedAccountWithMetaReef[], injectedSigner: InjectedSigningKey}
   ipfsHashResolverFn?: ipfsUrlResolverFn;
 }
 
-// export function initApolloClients(selectedNetwork?: Network, explorerClient?: ApolloClient<any>, dexClient?: ApolloClient<any>) {
-//   if (selectedNetwork) {
-//     if (!explorerClient && !dexClient) {
-//       const gqlUrls = getGQLUrls(selectedNetwork);
-//       if (gqlUrls) {
-//         if (gqlUrls.get('explorer')) {
-//           setApolloExplorerUrls(gqlUrls.get('explorer')!);
-//         }
-//         if (gqlUrls.get('dex')) {
-//           setApolloDexUrls(gqlUrls.get('dex')!);
-//         }
-//       }
-//     } else {
-//       if (explorerClient) {
-//         apolloExplorerClientSubj.next(explorerClient);
-//       }
-//       if (dexClient) {
-//         apolloDexClientSubj.next(dexClient);
-//       }
-//     }
-//   }
-// }
+export function initApolloClients(selectedNetwork?: Network, explorerClient?: ApolloClient<any>, dexClient?: ApolloClient<any>) {
+  if (selectedNetwork) {
+    if (!explorerClient && !dexClient) {
+      const gqlUrls = getGQLUrls(selectedNetwork);
+      if (gqlUrls) {
+        if (gqlUrls.get('explorer')) {
+          setApolloExplorerUrls(gqlUrls.get('explorer')!);
+        }
+        if (gqlUrls.get('dex')) {
+          setApolloDexUrls(gqlUrls.get('dex')!);
+        }
+      }
+    } else {
+      if (explorerClient) {
+        apolloExplorerClientSubj.next(explorerClient);
+      }
+      if (dexClient) {
+        apolloDexClientSubj.next(dexClient);
+      }
+    }
+  }
+}
 
 export const initReefState = (
   {
     network,
+    explorerClient,
+    dexClient,
     signers,
     jsonAccounts,
     ipfsHashResolverFn,
@@ -180,9 +183,9 @@ export const initReefState = (
     tap((p_n: { provider: Provider, network: Network }) => {
       setCurrentProvider(p_n.provider);
     }),
-    // tap((p_n) => {
-    //   initApolloClients(p_n.network, explorerClient, dexClient);
-    // }),
+    tap((p_n) => {
+      initApolloClients(p_n.network, explorerClient, dexClient);
+    }),
     finalizeWithValue(((p_n) => disconnectProvider(p_n.provider))),
   )
     .subscribe({
