@@ -1,6 +1,6 @@
 import { ContractInterface } from 'ethers';
 import { Provider } from '@reef-defi/evm-provider';
-import { ApolloClient } from '@apollo/client';
+// import { ApolloClient } from '@apollo/client';
 import {
   defer, finalize, Observable, scan, switchMap, tap,
 } from 'rxjs';
@@ -29,6 +29,7 @@ import {
 } from '../graphql';
 import { ipfsUrlResolverFn } from '../utils/nftUtil';
 import { PoolReserves } from '../graphql/pools';
+import { AxiosInstance } from 'axios';
 
 type destroyConnection = ()=>void;
 
@@ -129,13 +130,13 @@ export interface State {
 export interface StateOptions {
   network?: Network;
   signers?: ReefSigner[];
-  explorerClient?: ApolloClient<any>;
-  dexClient?: ApolloClient<any>;
+  explorerClient?: AxiosInstance;
+  dexClient?: AxiosInstance;
   jsonAccounts?:{accounts: AccountJson[] | InjectedAccountWithMeta[] | InjectedAccountWithMetaReef[], injectedSigner: InjectedSigningKey}
   ipfsHashResolverFn?: ipfsUrlResolverFn;
 }
 
-export function initApolloClients(selectedNetwork?: Network, explorerClient?: ApolloClient<any>, dexClient?: ApolloClient<any>) {
+export function initApolloClients(selectedNetwork?: Network, explorerClient?: AxiosInstance, dexClient?: AxiosInstance) {
   if (selectedNetwork) {
     if (!explorerClient && !dexClient) {
       const gqlUrls = getGQLUrls(selectedNetwork);

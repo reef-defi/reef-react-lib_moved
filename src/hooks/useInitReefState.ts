@@ -74,6 +74,7 @@ export const useInitReefState = (
   useEffect(() => {
     setLoading(isProviderLoading || isSignersLoading);
   }, [isProviderLoading, isSignersLoading]);
+  console.log("error===",error);
   return {
     error,
     loading,
