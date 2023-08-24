@@ -1,61 +1,3 @@
-// import { useEffect, useState } from 'react';
-// import {
-//   initReefState,
-//   ipfsUrlResolverFn,
-//   Network,
-//   providerConnState$,
-//   selectedNetworkProvider$,
-// } from '@reef-chain/util-lib/dist/reefState';
-// import { map } from 'rxjs';
-// import { Provider } from '@reef-defi/evm-provider';
-// import { InjectedExtension } from '@reef-defi/extension-inject/types';
-// import { useInjectExtension } from './useInjectExtension';
-// import { useObservableState } from './useObservableState';
-
-// export interface State {
-//   loading: boolean;
-//   provider?: Provider;
-//   network?: Network;
-//   error?: any; // TODO!
-//   extension?: InjectedExtension;
-// }
-
-// export const useInitReefState = (
-//   applicationDisplayName: string,
-//   options: {network?: Network; ipfsHashResolverFn?: ipfsUrlResolverFn;} = {},
-// ): State => {
-//   const [accounts, extension, loadingExtension, errExtension] = useInjectExtension(applicationDisplayName);
-//   const { network: selectedNetwork, provider } = useObservableState(selectedNetworkProvider$);
-//   const isProviderLoading = useObservableState(providerConnState$.pipe(map((v) => !v.isConnected)), false);
-
-//   const [loading, setLoading] = useState(false);
-
-//   useEffect(() => {
-//     if (!accounts || !accounts.length || !extension) {
-//       return;
-//     }
-
-//     const jsonAccounts = { accounts, injectedSigner: extension?.signer };
-//     initReefState({
-//       network: options.network,
-//       jsonAccounts,
-//       ipfsHashResolverFn: options.ipfsHashResolverFn,
-//     });
-//   }, [accounts, extension, options]);
-
-//   useEffect(() => {
-//     setLoading(loadingExtension && isProviderLoading);
-//   }, [isProviderLoading, loadingExtension]);
-
-//   return {
-//     error: errExtension,
-//     loading,
-//     provider,
-//     network: selectedNetwork,
-//     extension,
-//   };
-// };
-
 import {
   reefState,
 } from '@reef-chain/util-lib';
@@ -63,16 +5,13 @@ import { useEffect, useState } from 'react';
 import { useObservableState } from './useObservableState';
 import { availableNetworks, Network } from '../state';
 import { useProvider } from './useProvider';
-import {
-  ACTIVE_NETWORK_LS_KEY,
-  setCurrentProvider,
-} from '../appState/providerState';
 import { accountsSubj } from '../appState/accountState';
 import { useLoadSigners } from './useLoadSigners';
 import { disconnectProvider } from '../utils/providerUtil';
 import {
-  _NFT_IPFS_RESOLVER_FN, initApolloClients, setNftIpfsResolverFn, State, StateOptions,
+  _NFT_IPFS_RESOLVER_FN, initAxiosClients, setNftIpfsResolverFn, State, StateOptions,
 } from '../appState/util';
+import { ACTIVE_NETWORK_LS_KEY } from '../appState/providerState';
 
 const getNetworkFallback = (): Network => {
   let storedNetwork;
@@ -83,6 +22,7 @@ const getNetworkFallback = (): Network => {
   } catch (e) {
     // when cookies disabled localStorage can throw
   }
+  console.log("reefState===",reefState)
   return storedNetwork != null ? storedNetwork : availableNetworks.mainnet;
 };
 
@@ -102,9 +42,6 @@ export const useInitReefState = (
     if (newNetwork !== selectedNetwork) {
       reefState.setSelectedNetwork(newNetwork);
     }
-    reefState.selectedNetwork$.subscribe(network =>
-      console.log("SELECTED NETWORK===", network)
-    );
   }, [network]);
 
   useEffect(() => {
@@ -112,12 +49,12 @@ export const useInitReefState = (
   }, [ipfsHashResolverFn]);
 
   useEffect(() => {
-    initApolloClients(selectedNetwork, explorerClient, dexClient);
+    initAxiosClients(selectedNetwork, explorerClient, dexClient);
   }, [selectedNetwork, explorerClient, dexClient]);
 
   useEffect(() => {
     if (provider) {
-      setCurrentProvider(provider);
+      reefState.setSelectedProvider(provider);
     }
     return () => {
       if (provider) {
@@ -136,7 +73,6 @@ export const useInitReefState = (
   useEffect(() => {
     setLoading(isProviderLoading || isSignersLoading);
   }, [isProviderLoading, isSignersLoading]);
-  console.log("error===",error);
   return {
     error,
     loading,

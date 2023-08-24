@@ -136,7 +136,7 @@ export interface StateOptions {
   ipfsHashResolverFn?: ipfsUrlResolverFn;
 }
 
-export function initApolloClients(selectedNetwork?: Network, explorerClient?: AxiosInstance, dexClient?: AxiosInstance) {
+export function initAxiosClients(selectedNetwork?: Network, explorerClient?: AxiosInstance, dexClient?: AxiosInstance) {
   if (selectedNetwork) {
     if (!explorerClient && !dexClient) {
       const gqlUrls = getGQLUrls(selectedNetwork);
@@ -185,7 +185,7 @@ export const initReefState = (
       setCurrentProvider(p_n.provider);
     }),
     tap((p_n) => {
-      initApolloClients(p_n.network, explorerClient, dexClient);
+      initAxiosClients(p_n.network, explorerClient, dexClient);
     }),
     finalizeWithValue(((p_n) => disconnectProvider(p_n.provider))),
   )
