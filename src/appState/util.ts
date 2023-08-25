@@ -23,7 +23,7 @@ import { ERC20 } from '../assets/abi/ERC20';
 import { ERC721Uri } from '../assets/abi/ERC721Uri';
 import { ERC1155Uri } from '../assets/abi/ERC1155Uri';
 import { initProvider } from '../utils/providerUtil';
-import { currentNetwork$, setCurrentNetwork, setCurrentProvider } from './providerState';
+import { currentNetwork$, setCurrentNetwork } from './providerState';
 import {
   axiosDexClientSubj, axiosExplorerClientSubj, GQLUrl, setAxiosDexUrls, setAxiosExplorerUrls,
 } from '../graphql';
@@ -181,9 +181,9 @@ export const initReefState = (
       }
       return { provider: newVal.provider, network: newVal.network };
     }, {}),
-    tap((p_n: { provider: Provider, network: Network }) => {
-      setCurrentProvider(p_n.provider);
-    }),
+    // tap((p_n: { provider: Provider, network: Network }) => {
+    //   setCurrentProvider(p_n.provider);
+    // }),
     tap((p_n) => {
       initAxiosClients(p_n.network, explorerClient, dexClient);
     }),
