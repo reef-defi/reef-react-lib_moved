@@ -11,7 +11,7 @@ import { disconnectProvider } from '../utils/providerUtil';
 import {
   _NFT_IPFS_RESOLVER_FN, initAxiosClients, setNftIpfsResolverFn, State, StateOptions,
 } from '../appState/util';
-import { ACTIVE_NETWORK_LS_KEY } from '../appState/providerState';
+import { ACTIVE_NETWORK_LS_KEY, setCurrentProvider } from '../appState/providerState';
 
 const getNetworkFallback = (): Network => {
   let storedNetwork;
@@ -54,7 +54,7 @@ export const useInitReefState = (
 
   useEffect(() => {
     if (provider) {
-      reefState.setSelectedProvider(provider);
+      setCurrentProvider(provider);
     }
     return () => {
       if (provider) {
