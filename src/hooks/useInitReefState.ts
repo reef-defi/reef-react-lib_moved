@@ -11,7 +11,7 @@ import { disconnectProvider } from '../utils/providerUtil';
 import {
   _NFT_IPFS_RESOLVER_FN, initAxiosClients, setNftIpfsResolverFn, State, StateOptions,
 } from '../appState/util';
-import { ACTIVE_NETWORK_LS_KEY,setCurrentProvider } from '../appState/providerState';
+import { ACTIVE_NETWORK_LS_KEY, setCurrentProvider } from '../appState/providerState';
 
 const getNetworkFallback = (): Network => {
   let storedNetwork;
