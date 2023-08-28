@@ -1,0 +1,11 @@
+{
+  "version": "v1",
+  "packages": {
+    "@reef-chain/util-lib": {
+      "version": "1.0.0-rc7",
+      "signature": "d05925328f048299a18c73f3004bd9e5",
+      "file": true,
+      "replaced": "^1.0.0-rc7"
+    }
+  }
+}

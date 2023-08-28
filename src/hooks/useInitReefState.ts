@@ -1,17 +1,21 @@
 import {
+  getAccountSigner,
   reefState,
 } from '@reef-chain/util-lib';
 import { useEffect, useState } from 'react';
 import { useObservableState } from './useObservableState';
-import { availableNetworks, Network } from '../state';
+import { availableNetworks, Network, ReefSigner } from '../state';
 import { useProvider } from './useProvider';
 import { accountsSubj } from '../appState/accountState';
 import { useLoadSigners } from './useLoadSigners';
 import { disconnectProvider } from '../utils/providerUtil';
+import type { Signer as InjectedSigner } from '@polkadot/api/types';
 import {
   _NFT_IPFS_RESOLVER_FN, initAxiosClients, setNftIpfsResolverFn, State, StateOptions,
 } from '../appState/util';
 import { ACTIVE_NETWORK_LS_KEY, setCurrentProvider } from '../appState/providerState';
+import { useInjectExtension } from './useInjectExtension';
+import { Provider } from '@reef-defi/evm-provider';
 
 const getNetworkFallback = (): Network => {
   let storedNetwork;
@@ -26,6 +30,28 @@ const getNetworkFallback = (): Network => {
   return storedNetwork != null ? storedNetwork : availableNetworks.mainnet;
 };
 
+const reefAccountToReefSigner = async(accountsFromUtilLib:any,provider:Provider,injectedSigner:InjectedSigner)=>{
+  // balance: BigNumber;
+  let reefSigners = <ReefSigner[]>[];
+  for(let i = 0;i<accountsFromUtilLib?.data.length;i++){
+    let reefAccount = accountsFromUtilLib.data[i].data;
+    let reefAccountSigner = await getAccountSigner(reefAccount.address,provider)
+    let isEvmClaimed = await reefAccountSigner.isClaimed();
+    let toReefSigner = {
+      name:reefAccount.name,
+      address:reefAccount.address,
+      source:reefAccount.source,
+      genesisHash:reefAccount.genesisHash,
+      signer:reefAccountSigner,
+      sign:injectedSigner,
+      isEvmClaimed
+    } as ReefSigner;
+    reefSigners.push(toReefSigner);
+  }
+  console.log("reefSigners===",reefSigners);
+  return reefSigners;
+}
+
 export const useInitReefState = (
   applicationDisplayName: string,
   options: StateOptions = {},
@@ -33,6 +59,9 @@ export const useInitReefState = (
   const {
     network, explorerClient, dexClient, signers, ipfsHashResolverFn,
   } = options;
+  const [accounts, extension, loadingExtension, errExtension] = useInjectExtension(applicationDisplayName);
+  const jsonAccounts = { accounts, injectedSigner: extension?.signer };
+  console.log("ignore me ===",loadingExtension,errExtension);
   const selectedNetwork: Network|undefined = useObservableState(reefState.selectedNetwork$);
   const [provider, isProviderLoading] = useProvider((selectedNetwork as Network)?.rpcUrl);
   const [loadedSigners, isSignersLoading, error] = useLoadSigners(applicationDisplayName, signers ? undefined : provider, signers);
@@ -48,9 +77,21 @@ export const useInitReefState = (
     setNftIpfsResolverFn(ipfsHashResolverFn);
   }, [ipfsHashResolverFn]);
 
+  console.log("signers===",signers);
   useEffect(() => {
     initAxiosClients(selectedNetwork, explorerClient, dexClient);
   }, [selectedNetwork, explorerClient, dexClient]);
+
+  console.log("loadedSigners = ",loadedSigners);
+  let accountsFromUtilLib: any= useObservableState(reefState.accounts$);
+  useEffect(()=>{
+    if(accountsFromUtilLib==undefined || accountsFromUtilLib.data.length==0){
+      reefState.setAccounts(jsonAccounts.accounts);
+    }
+  },[accountsFromUtilLib])
+
+  console.log("accountsFromUtilLib===",accountsFromUtilLib);
+  reefAccountToReefSigner(accountsFromUtilLib,provider!,jsonAccounts.injectedSigner!).then((val)=>console.log("reefSigners===",val));
 
   useEffect(() => {
     if (provider) {
@@ -67,8 +108,8 @@ export const useInitReefState = (
   }, [provider]);
 
   useEffect(() => {
-    accountsSubj.next(signers || loadedSigners || []);
-  }, [loadedSigners, signers]);
+    accountsSubj.next(loadedSigners || []);
+  }, [loadedSigners]);
 
   useEffect(() => {
     setLoading(isProviderLoading || isSignersLoading);
