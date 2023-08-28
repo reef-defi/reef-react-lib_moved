@@ -1,5 +1,4 @@
 import {
-  getAccountSigner,
   reefState,
 } from '@reef-chain/util-lib';
 import { useEffect, useState } from 'react';
@@ -16,6 +15,7 @@ import {
 import { ACTIVE_NETWORK_LS_KEY, setCurrentProvider } from '../appState/providerState';
 import { useInjectExtension } from './useInjectExtension';
 import { Provider } from '@reef-defi/evm-provider';
+import { accountToSigner } from '../rpc';
 
 const getNetworkFallback = (): Network => {
   let storedNetwork;
@@ -30,26 +30,36 @@ const getNetworkFallback = (): Network => {
   return storedNetwork != null ? storedNetwork : availableNetworks.mainnet;
 };
 
-const reefAccountToReefSigner = async(accountsFromUtilLib:any,provider:Provider,injectedSigner:InjectedSigner)=>{
+export const getReefSignersArray = async (
+  extensionAccounts: any,
+  provider: Provider,
+): Promise<ReefSigner[]> => {
+    const accountPromisses = extensionAccounts.flatMap(
+      ({ accounts, name, sig }) => accounts.map((account) => accountToSigner(account, provider, sig, name)),
+    );
+    const accounts = await Promise.all(accountPromisses);
+    return accounts as ReefSigner[];
+};
+
+export const reefAccountToReefSigner = (accountsFromUtilLib:any,injectedSigner:InjectedSigner)=>{
   // balance: BigNumber;
-  let reefSigners = <ReefSigner[]>[];
+  const resultObj = {
+    name:'reef',
+    sig:injectedSigner,
+  };
+  let reefSigners = <any[]>[];
   for(let i = 0;i<accountsFromUtilLib?.data.length;i++){
     let reefAccount = accountsFromUtilLib.data[i].data;
-    let reefAccountSigner = await getAccountSigner(reefAccount.address,provider)
-    let isEvmClaimed = await reefAccountSigner.isClaimed();
     let toReefSigner = {
       name:reefAccount.name,
       address:reefAccount.address,
       source:reefAccount.source,
       genesisHash:reefAccount.genesisHash,
-      signer:reefAccountSigner,
-      sign:injectedSigner,
-      isEvmClaimed
-    } as ReefSigner;
+    };
     reefSigners.push(toReefSigner);
   }
-  console.log("reefSigners===",reefSigners);
-  return reefSigners;
+  resultObj['accounts'] = reefSigners;
+  return resultObj;
 }
 
 export const useInitReefState = (
@@ -66,6 +76,7 @@ export const useInitReefState = (
   const [provider, isProviderLoading] = useProvider((selectedNetwork as Network)?.rpcUrl);
   const [loadedSigners, isSignersLoading, error] = useLoadSigners(applicationDisplayName, signers ? undefined : provider, signers);
   const [loading, setLoading] = useState(false);
+  const [loadedReefSigners, setLoadedReefSigners] = useState<ReefSigner[]>();
   useEffect(() => {
     const newNetwork = network ?? getNetworkFallback();
     if (newNetwork !== selectedNetwork) {
@@ -77,12 +88,10 @@ export const useInitReefState = (
     setNftIpfsResolverFn(ipfsHashResolverFn);
   }, [ipfsHashResolverFn]);
 
-  console.log("signers===",signers);
   useEffect(() => {
     initAxiosClients(selectedNetwork, explorerClient, dexClient);
   }, [selectedNetwork, explorerClient, dexClient]);
 
-  console.log("loadedSigners = ",loadedSigners);
   let accountsFromUtilLib: any= useObservableState(reefState.accounts$);
   useEffect(()=>{
     if(accountsFromUtilLib==undefined || accountsFromUtilLib.data.length==0){
@@ -90,8 +99,13 @@ export const useInitReefState = (
     }
   },[accountsFromUtilLib])
 
-  console.log("accountsFromUtilLib===",accountsFromUtilLib);
-  reefAccountToReefSigner(accountsFromUtilLib,provider!,jsonAccounts.injectedSigner!).then((val)=>console.log("reefSigners===",val));
+  if(provider){
+    getReefSignersArray([reefAccountToReefSigner(accountsFromUtilLib,jsonAccounts.injectedSigner!)],provider!).then((val)=>{
+      if(loadedReefSigners==undefined){
+        setLoadedReefSigners(val)
+      }
+    });
+  }
 
   useEffect(() => {
     if (provider) {
@@ -108,8 +122,8 @@ export const useInitReefState = (
   }, [provider]);
 
   useEffect(() => {
-    accountsSubj.next(loadedSigners || []);
-  }, [loadedSigners]);
+    accountsSubj.next(loadedReefSigners || []);
+  }, [loadedReefSigners]);
 
   useEffect(() => {
     setLoading(isProviderLoading || isSignersLoading);

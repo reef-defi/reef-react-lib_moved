@@ -173,9 +173,11 @@ export const getExtensionSigners = async (
       accounts: await extension.accounts.get(),
     })),
   );
+  console.log("extensionAccounts === ",typeof(extensionAccounts));
   const accountPromisses = extensionAccounts.flatMap(
     ({ accounts, name, sig }) => accounts.map((account) => accountToSigner(account, provider, sig, name)),
   );
+  console.log("accountPromisses===",accountPromisses);
   const accounts = await Promise.all(accountPromisses);
   return accounts as ReefSigner[];
 };
