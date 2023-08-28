@@ -4,13 +4,14 @@ import {
 import { useEffect, useState } from 'react';
 import { useObservableState } from './useObservableState';
 import { availableNetworks, Network } from '../state';
+import { useProvider } from './useProvider';
 import { accountsSubj } from '../appState/accountState';
 import { useLoadSigners } from './useLoadSigners';
+import { disconnectProvider } from '../utils/providerUtil';
 import {
   _NFT_IPFS_RESOLVER_FN, initAxiosClients, setNftIpfsResolverFn, State, StateOptions,
 } from '../appState/util';
-import { ACTIVE_NETWORK_LS_KEY } from '../appState/providerState';
-import { Provider } from '@reef-defi/evm-provider';
+import { ACTIVE_NETWORK_LS_KEY,setCurrentProvider } from '../appState/providerState';
 
 const getNetworkFallback = (): Network => {
   let storedNetwork;
@@ -21,6 +22,7 @@ const getNetworkFallback = (): Network => {
   } catch (e) {
     // when cookies disabled localStorage can throw
   }
+  console.log("reefState===",reefState)
   return storedNetwork != null ? storedNetwork : availableNetworks.mainnet;
 };
 
@@ -31,11 +33,8 @@ export const useInitReefState = (
   const {
     network, explorerClient, dexClient, signers, ipfsHashResolverFn,
   } = options;
-  console.log("reefState===",reefState)
   const selectedNetwork: Network|undefined = useObservableState(reefState.selectedNetwork$);
-  // const [provider, isProviderLoading] = useProvider((selectedNetwork as Network)?.rpcUrl);
-  const provider:Provider = useObservableState(reefState.selectedProvider$);
-  console.log(provider);
+  const [provider, isProviderLoading] = useProvider((selectedNetwork as Network)?.rpcUrl);
   const [loadedSigners, isSignersLoading, error] = useLoadSigners(applicationDisplayName, signers ? undefined : provider, signers);
   const [loading, setLoading] = useState(false);
   useEffect(() => {
@@ -53,15 +52,27 @@ export const useInitReefState = (
     initAxiosClients(selectedNetwork, explorerClient, dexClient);
   }, [selectedNetwork, explorerClient, dexClient]);
 
-  
+  useEffect(() => {
+    if (provider) {
+      setCurrentProvider(provider);
+    }
+    return () => {
+      if (provider) {
+        const disc = async (prov) => {
+          await disconnectProvider(prov);
+        };
+        disc(provider);
+      }
+    };
+  }, [provider]);
 
   useEffect(() => {
     accountsSubj.next(signers || loadedSigners || []);
   }, [loadedSigners, signers]);
 
   useEffect(() => {
-    setLoading( isSignersLoading);
-  }, [isSignersLoading]);
+    setLoading(isProviderLoading || isSignersLoading);
+  }, [isProviderLoading, isSignersLoading]);
   return {
     error,
     loading,

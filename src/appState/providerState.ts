@@ -7,5 +7,6 @@ import { Network } from '../state';
 
 export const ACTIVE_NETWORK_LS_KEY = 'reef-app-active-network';
 export const currentProvider$ = reefState.selectedProvider$ as Observable<Provider>;
+export const setCurrentProvider = reefState.setSelectedProvider;
 export const currentNetwork$ = reefState.selectedNetwork$ as Observable<Network>;
 export const setCurrentNetwork = reefState.setSelectedNetwork;
