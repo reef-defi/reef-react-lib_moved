@@ -42,6 +42,7 @@ useAsyncEffect(async()=>{
   );
   let _accounts = await Promise.all(accountPromisses);
   setAccounts(_accounts);
+  reefState.setAccounts(_accounts);
   try {
     setCurrentAddress(_accounts[0].address);
   } catch (error) {
@@ -85,7 +86,7 @@ export const useInitReefState = (
   const selectedNetwork: Network|undefined = useObservableState(reefState.selectedNetwork$);
   const [provider, isProviderLoading] = useProvider((selectedNetwork as Network)?.rpcUrl);
   const [loading, setLoading] = useState(true);
-
+console.log("reefstate===",reefState);
   useEffect(() => {
     const newNetwork = network ?? getNetworkFallback();
     if (newNetwork !== selectedNetwork) {

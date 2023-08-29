@@ -29,6 +29,7 @@ import { ReefSigner } from '../state';
 import { accountJsonToMeta, metaAccountToSigner } from '../rpc/accounts';
 import axios, { AxiosInstance } from 'axios';
 import { axiosDexUrlsSubj } from '../graphql';
+import {reefState} from "@reef-chain/util-lib";
 
 export const accountsSubj = new ReplaySubject<ReefSigner[] | null>(1);
 export const accountsJsonSubj = new ReplaySubject<AccountJson[]| InjectedAccountWithMeta[] | null>(1);
@@ -334,14 +335,9 @@ const signersWithUpdatedData$ = combineLatest([
   );
 
 export const signers$: Observable<ReefSigner[] | null> = signersWithUpdatedData$;
-const currentAddressSubj: Subject<string | undefined> = new Subject<string | undefined>();
-export const setCurrentAddress = (address: string|undefined) => currentAddressSubj.next(address);
-export const currentAddress$: Observable<string | undefined> = currentAddressSubj.asObservable()
-  .pipe(
-    startWith(''),
-    distinctUntilChanged(),
-    shareReplay(1),
-  );
+
+export const setCurrentAddress:(address: string | undefined) => void = reefState.setSelectedAddress;
+export const currentAddress$: Observable<string | undefined> = reefState.selectedAddress$;
 
 // setting default signer (when signers exist) if no selected address exists
 combineLatest([signers$, currentAddress$])
