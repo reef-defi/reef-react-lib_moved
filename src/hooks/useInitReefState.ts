@@ -5,8 +5,7 @@ import { useEffect, useState } from 'react';
 import { useObservableState } from './useObservableState';
 import { availableNetworks, Network, ReefSigner } from '../state';
 import { useProvider } from './useProvider';
-import { accountsSubj } from '../appState/accountState';
-import { useLoadSigners } from './useLoadSigners';
+import { accountsSubj, setCurrentAddress } from '../appState/accountState';
 import { disconnectProvider } from '../utils/providerUtil';
 import type { Signer as InjectedSigner } from '@polkadot/api/types';
 import {
@@ -16,6 +15,7 @@ import { ACTIVE_NETWORK_LS_KEY, setCurrentProvider } from '../appState/providerS
 import { useInjectExtension } from './useInjectExtension';
 import { Provider } from '@reef-defi/evm-provider';
 import { accountToSigner } from '../rpc';
+import { useAsyncEffect } from './useAsyncEffect';
 
 const getNetworkFallback = (): Network => {
   let storedNetwork;
@@ -30,15 +30,23 @@ const getNetworkFallback = (): Network => {
   return storedNetwork != null ? storedNetwork : availableNetworks.mainnet;
 };
 
-export const getReefSignersArray = async (
+export const getReefSignersArray = (
   extensionAccounts: any,
   provider: Provider,
-): Promise<ReefSigner[]> => {
-    const accountPromisses = extensionAccounts.flatMap(
-      ({ accounts, name, sig }) => accounts.map((account) => accountToSigner(account, provider, sig, name)),
-    );
-    const accounts = await Promise.all(accountPromisses);
-    return accounts as ReefSigner[];
+): [ReefSigner[],boolean] => {
+  const [accounts, setAccounts] = useState<ReefSigner[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+useAsyncEffect(async()=>{
+  setIsLoading(true);
+  const accountPromisses = extensionAccounts.flatMap(
+    ({ accounts, name, sig }) => accounts.map((account) => accountToSigner(account, provider, sig, name)),
+  );
+  let _accounts = await Promise.all(accountPromisses);
+  setAccounts(_accounts);
+  setCurrentAddress(_accounts[0].address);
+  setIsLoading(false);
+},[provider]);
+  return [accounts,isLoading];
 };
 
 export const reefAccountToReefSigner = (accountsFromUtilLib:any,injectedSigner:InjectedSigner)=>{
@@ -67,16 +75,15 @@ export const useInitReefState = (
   options: StateOptions = {},
 ): State => {
   const {
-    network, explorerClient, dexClient, signers, ipfsHashResolverFn,
+    network, explorerClient, dexClient, ipfsHashResolverFn,
   } = options;
-  const [accounts, extension, loadingExtension, errExtension] = useInjectExtension(applicationDisplayName);
+  let [accounts, extension, loadingExtension, errExtension] = useInjectExtension(applicationDisplayName);
   const jsonAccounts = { accounts, injectedSigner: extension?.signer };
-  console.log("ignore me ===",loadingExtension,errExtension);
   const selectedNetwork: Network|undefined = useObservableState(reefState.selectedNetwork$);
   const [provider, isProviderLoading] = useProvider((selectedNetwork as Network)?.rpcUrl);
-  const [loadedSigners, isSignersLoading, error] = useLoadSigners(applicationDisplayName, signers ? undefined : provider, signers);
-  const [loading, setLoading] = useState(false);
-  const [loadedReefSigners, setLoadedReefSigners] = useState<ReefSigner[]>();
+  console.log("ignore me ===",loadingExtension,errExtension);
+  const [loading, setLoading] = useState(true);
+  
   useEffect(() => {
     const newNetwork = network ?? getNetworkFallback();
     if (newNetwork !== selectedNetwork) {
@@ -99,14 +106,6 @@ export const useInitReefState = (
     }
   },[accountsFromUtilLib])
 
-  if(provider){
-    getReefSignersArray([reefAccountToReefSigner(accountsFromUtilLib,jsonAccounts.injectedSigner!)],provider!).then((val)=>{
-      if(loadedReefSigners==undefined){
-        setLoadedReefSigners(val)
-      }
-    });
-  }
-
   useEffect(() => {
     if (provider) {
       setCurrentProvider(provider);
@@ -121,18 +120,31 @@ export const useInitReefState = (
     };
   }, [provider]);
 
+  const [loadedReefSigners,isLoadingReefSigners] = getReefSignersArray([reefAccountToReefSigner(accountsFromUtilLib,jsonAccounts.injectedSigner!)],provider!);
+  console.log("are both equal===",loadedReefSigners,isLoadingReefSigners);
   useEffect(() => {
-    accountsSubj.next(loadedReefSigners || []);
+  //   if(provider){
+  //     getReefSignersArray([reefAccountToReefSigner(accountsFromUtilLib,jsonAccounts.injectedSigner!)],provider!).then((val)=>{
+  //       if(loadedReefSigners==undefined){
+          accountsSubj.next(loadedReefSigners || []);
+  //       }else{
+  //         if(val!=loadedReefSigners){
+  //           setLoadedReefSigners(val)}
+  //         }
+  //     });
+  //   }
   }, [loadedReefSigners]);
 
   useEffect(() => {
-    setLoading(isProviderLoading || isSignersLoading);
-  }, [isProviderLoading, isSignersLoading]);
+    setLoading(isProviderLoading || isLoadingReefSigners);
+
+  }, [isProviderLoading,isLoadingReefSigners,loadedReefSigners]);
+
   return {
-    error,
+    error:errExtension,
     loading,
     provider,
     network: selectedNetwork,
-    signers: loadedSigners,
+    signers: loadedReefSigners,
   };
 };
