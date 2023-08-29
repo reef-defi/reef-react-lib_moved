@@ -26,7 +26,6 @@ const getNetworkFallback = (): Network => {
   } catch (e) {
     // when cookies disabled localStorage can throw
   }
-  console.log("reefState===",reefState)
   return storedNetwork != null ? storedNetwork : availableNetworks.mainnet;
 };
 
@@ -43,7 +42,11 @@ useAsyncEffect(async()=>{
   );
   let _accounts = await Promise.all(accountPromisses);
   setAccounts(_accounts);
-  setCurrentAddress(_accounts[0].address);
+  try {
+    setCurrentAddress(_accounts[0].address);
+  } catch (error) {
+    console.log("no accounts");
+  }
   setIsLoading(false);
 },[provider]);
   return [accounts,isLoading];
@@ -81,9 +84,8 @@ export const useInitReefState = (
   const jsonAccounts = { accounts, injectedSigner: extension?.signer };
   const selectedNetwork: Network|undefined = useObservableState(reefState.selectedNetwork$);
   const [provider, isProviderLoading] = useProvider((selectedNetwork as Network)?.rpcUrl);
-  console.log("ignore me ===",loadingExtension,errExtension);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     const newNetwork = network ?? getNetworkFallback();
     if (newNetwork !== selectedNetwork) {
@@ -121,24 +123,14 @@ export const useInitReefState = (
   }, [provider]);
 
   const [loadedReefSigners,isLoadingReefSigners] = getReefSignersArray([reefAccountToReefSigner(accountsFromUtilLib,jsonAccounts.injectedSigner!)],provider!);
-  console.log("are both equal===",loadedReefSigners,isLoadingReefSigners);
   useEffect(() => {
-  //   if(provider){
-  //     getReefSignersArray([reefAccountToReefSigner(accountsFromUtilLib,jsonAccounts.injectedSigner!)],provider!).then((val)=>{
-  //       if(loadedReefSigners==undefined){
           accountsSubj.next(loadedReefSigners || []);
-  //       }else{
-  //         if(val!=loadedReefSigners){
-  //           setLoadedReefSigners(val)}
-  //         }
-  //     });
-  //   }
   }, [loadedReefSigners]);
 
   useEffect(() => {
-    setLoading(isProviderLoading || isLoadingReefSigners);
+    setLoading(isProviderLoading || isLoadingReefSigners||loadingExtension);
 
-  }, [isProviderLoading,isLoadingReefSigners,loadedReefSigners]);
+  }, [isProviderLoading,isLoadingReefSigners,loadedReefSigners,loadingExtension]);
 
   return {
     error:errExtension,
