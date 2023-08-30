@@ -24,7 +24,7 @@ import type { InjectedAccountWithMeta } from '@reef-defi/extension-inject/types'
 import type { Signer as InjectedSigningKey } from '@polkadot/api/types';
 import { UpdateDataCtx } from './updateStateModel';
 import { replaceUpdatedSigners, updateSignersEvmBindings } from './accountStateUtil';
-import { ACTIVE_NETWORK_LS_KEY, currentProvider$ } from './providerState';
+import { currentProvider$ } from './providerState';
 import { ReefSigner } from '../state';
 import { accountJsonToMeta, metaAccountToSigner } from '../rpc/accounts';
 import axios, { AxiosInstance } from 'axios';
@@ -219,7 +219,7 @@ export const graphqlRequest = (
 ) => {
   let selectedNetwork:string="mainnet";
   try {
-    let storedNetwork = localStorage.getItem(ACTIVE_NETWORK_LS_KEY);
+    let storedNetwork = localStorage.getItem("reef-app-active-network");
     if(storedNetwork){
       let parsedStoredNetwork = JSON.parse(storedNetwork);
       selectedNetwork = parsedStoredNetwork.name;

@@ -76,22 +76,18 @@ export const useInitReefState = (
   options: StateOptions = {},
 ): State => {
   const {
-    network, explorerClient, dexClient, ipfsHashResolverFn,
+    explorerClient, dexClient, ipfsHashResolverFn,
   } = options;
   const [accounts, extension, loadingExtension, errExtension] = useInjectExtension(applicationDisplayName);
   const jsonAccounts = { accounts, injectedSigner: extension?.signer };
   const selectedNetwork: Network|undefined = useObservableState(reefState.selectedNetwork$);
   const provider = useObservableState(reefState.selectedProvider$) as Provider|undefined;
   const [loading, setLoading] = useState(true);
-console.log("reefstate===",reefState);
-  useEffect(() => {
-    const newNetwork = network ?? getNetworkFallback();
-    if (newNetwork !== selectedNetwork) {
-      reefState.setSelectedNetwork(newNetwork);
-    }
-  }, [network]);
 
+  console.log("selectedNetwork ===",selectedNetwork);
   useEffect(() => {
+    const network = getNetworkFallback();
+
     console.log({extension,accounts})
     if (!accounts || !accounts.length || !extension) {
       return;
