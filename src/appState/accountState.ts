@@ -28,8 +28,8 @@ import { currentProvider$ } from './providerState';
 import { ReefSigner } from '../state';
 import { accountJsonToMeta, metaAccountToSigner } from '../rpc/accounts';
 import axios, { AxiosInstance } from 'axios';
-import { axiosDexUrlsSubj } from '../graphql';
 import {reefState} from "@reef-chain/util-lib";
+import { useObservableState } from '../hooks';
 
 export const accountsSubj = new ReplaySubject<ReefSigner[] | null>(1);
 export const accountsJsonSubj = new ReplaySubject<AccountJson[]| InjectedAccountWithMeta[] | null>(1);
@@ -218,10 +218,7 @@ export const graphqlRequest = (
   queryObj: { query: string; variables: any },
   isExplorer?:boolean
 ) => {
-  let selectedNetwork:string;
-  axiosDexUrlsSubj.asObservable().subscribe((urls)=>{
-    selectedNetwork = urls.http.includes('testnet')?'testnet':'mainnet';
-  });
+  let selectedNetwork = useObservableState(currentAddress$);
   const graphql = JSON.stringify(queryObj);
   if(isExplorer){
     let url = getGraphqlEndpoint(selectedNetwork!,true);
