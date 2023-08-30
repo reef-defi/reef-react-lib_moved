@@ -4,7 +4,6 @@ import {
 import { useEffect, useState } from 'react';
 import { useObservableState } from './useObservableState';
 import { availableNetworks, Network, ReefSigner } from '../state';
-// import { useProvider } from './useProvider';
 import { accountsSubj, setCurrentAddress } from '../appState/accountState';
 import type { Signer as InjectedSigner } from '@polkadot/api/types';
 import {
@@ -41,7 +40,6 @@ useAsyncEffect(async()=>{
   );
   let _accounts = await Promise.all(accountPromisses);
   setAccounts(_accounts);
-  reefState.setAccounts(_accounts);
   try {
     setCurrentAddress(_accounts[0].address);
   } catch (error) {
@@ -83,7 +81,6 @@ export const useInitReefState = (
   const [accounts, extension, loadingExtension, errExtension] = useInjectExtension(applicationDisplayName);
   const jsonAccounts = { accounts, injectedSigner: extension?.signer };
   const selectedNetwork: Network|undefined = useObservableState(reefState.selectedNetwork$);
-  // const [provider, isProviderLoading] = useProvider((selectedNetwork as Network)?.rpcUrl);
   const provider = useObservableState(reefState.selectedProvider$) as Provider|undefined;
   const [loading, setLoading] = useState(true);
 console.log("reefstate===",reefState);
@@ -95,7 +92,6 @@ console.log("reefstate===",reefState);
   }, [network]);
 
   useEffect(() => {
-    console.log("called");
     console.log({extension,accounts})
     if (!accounts || !accounts.length || !extension) {
       return;
@@ -119,13 +115,10 @@ console.log("reefstate===",reefState);
   }, [selectedNetwork, explorerClient, dexClient]);
 
   let accountsFromUtilLib: any= useObservableState(reefState.accounts$);
-  useEffect(()=>{
-    if(accountsFromUtilLib==undefined || accountsFromUtilLib.data.length==0){
-      reefState.setAccounts(jsonAccounts.accounts);
-    }
-  },[accountsFromUtilLib])
+  console.log(accountsFromUtilLib);
 
   const [loadedReefSigners,isLoadingReefSigners] = getReefSignersArray([reefAccountToReefSigner(accountsFromUtilLib,jsonAccounts.injectedSigner!)],provider!);
+  console.log("loadedReefSigners === ",loadedReefSigners);
   useEffect(() => {
           accountsSubj.next(loadedReefSigners || []);
   }, [loadedReefSigners]);
