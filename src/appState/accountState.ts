@@ -24,12 +24,11 @@ import type { InjectedAccountWithMeta } from '@reef-defi/extension-inject/types'
 import type { Signer as InjectedSigningKey } from '@polkadot/api/types';
 import { UpdateDataCtx } from './updateStateModel';
 import { replaceUpdatedSigners, updateSignersEvmBindings } from './accountStateUtil';
-import { currentProvider$ } from './providerState';
+import { ACTIVE_NETWORK_LS_KEY, currentProvider$ } from './providerState';
 import { ReefSigner } from '../state';
 import { accountJsonToMeta, metaAccountToSigner } from '../rpc/accounts';
 import axios, { AxiosInstance } from 'axios';
 import {reefState} from "@reef-chain/util-lib";
-import { useObservableState } from '../hooks';
 
 export const accountsSubj = new ReplaySubject<ReefSigner[] | null>(1);
 export const accountsJsonSubj = new ReplaySubject<AccountJson[]| InjectedAccountWithMeta[] | null>(1);
@@ -218,7 +217,16 @@ export const graphqlRequest = (
   queryObj: { query: string; variables: any },
   isExplorer?:boolean
 ) => {
-  let selectedNetwork = useObservableState(currentAddress$);
+  let selectedNetwork:string="mainnet";
+  try {
+    let storedNetwork = localStorage.getItem(ACTIVE_NETWORK_LS_KEY);
+    if(storedNetwork){
+      let parsedStoredNetwork = JSON.parse(storedNetwork);
+      selectedNetwork = parsedStoredNetwork.name;
+    }
+  } catch (error) {
+    console.log(error);
+  }
   const graphql = JSON.stringify(queryObj);
   if(isExplorer){
     let url = getGraphqlEndpoint(selectedNetwork!,true);
