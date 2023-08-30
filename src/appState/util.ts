@@ -1,9 +1,5 @@
 import { ContractInterface } from 'ethers';
 import { Provider } from '@reef-defi/evm-provider';
-// import { ApolloClient } from '@apollo/client';
-import {
-  defer, finalize, Observable, scan, switchMap, tap,
-} from 'rxjs';
 import type { Signer as InjectedSigningKey } from '@polkadot/api/types';
 import { AccountJson } from '@reef-defi/extension-base/background/types';
 import type { InjectedAccountWithMeta as InjectedAccountWithMetaReef } from '@reef-defi/extension-inject/types';
@@ -11,27 +7,22 @@ import type {
   InjectedAccountWithMeta,
 } from '@polkadot/extension-inject/types';
 import { ContractType, Token, TokenWithAmount } from '../state/token';
-import {
-  accountsJsonSigningKeySubj, accountsJsonSubj, accountsSubj, reloadSignersSubj,
+import {reloadSignersSubj,
 } from './accountState';
 import { UpdateAction } from './updateStateModel';
 import {
-  availableNetworks, Network, ReefSigner,
+ Network, ReefSigner,
 } from '../state';
-import { calculateTokenPrice, disconnectProvider, TxStatusUpdate } from '../utils';
+import { calculateTokenPrice, TxStatusUpdate } from '../utils';
 import { ERC20 } from '../assets/abi/ERC20';
 import { ERC721Uri } from '../assets/abi/ERC721Uri';
 import { ERC1155Uri } from '../assets/abi/ERC1155Uri';
-import { initProvider } from '../utils/providerUtil';
-import { currentNetwork$, setCurrentNetwork, setCurrentProvider } from './providerState';
 import {
   axiosDexClientSubj, axiosExplorerClientSubj, GQLUrl, setAxiosDexUrls, setAxiosExplorerUrls,
 } from '../graphql';
 import { ipfsUrlResolverFn } from '../utils/nftUtil';
 import { PoolReserves } from '../graphql/pools';
 import { AxiosInstance } from 'axios';
-
-type destroyConnection = ()=>void;
 
 type GQLUrlType = 'explorer' | 'dex';
 
@@ -158,61 +149,4 @@ export function initAxiosClients(selectedNetwork?: Network, explorerClient?: Axi
       }
     }
   }
-}
-
-export const initReefState = (
-  {
-    network,
-    explorerClient,
-    dexClient,
-    signers,
-    jsonAccounts,
-    ipfsHashResolverFn,
-  }: StateOptions,
-): destroyConnection => {
-  const subscription = currentNetwork$.pipe(
-    switchMap((network) => initProvider(network.rpcUrl)
-      .then((provider) => ({
-        provider,
-        network,
-      }))),
-    scan((state: { provider: Provider }, newVal: { provider: Provider, network }) => {
-      if (state.provider) {
-        disconnectProvider(state.provider);
-      }
-      return { provider: newVal.provider, network: newVal.network };
-    }, {}),
-    tap((p_n: { provider: Provider, network: Network }) => {
-      setCurrentProvider(p_n.provider);
-    }),
-    tap((p_n) => {
-      initAxiosClients(p_n.network, explorerClient, dexClient);
-    }),
-    finalizeWithValue(((p_n) => disconnectProvider(p_n.provider))),
-  )
-    .subscribe({
-      error: (e) => {
-        console.log('initReefState ERR=', e);
-      },
-    });
-  setCurrentNetwork(network || availableNetworks.mainnet);
-  setNftIpfsResolverFn(ipfsHashResolverFn);
-  if (signers) {
-    accountsSubj.next(signers || null);
-  }
-  if (jsonAccounts) {
-    accountsJsonSigningKeySubj.next(jsonAccounts.injectedSigner);
-    accountsJsonSubj.next(jsonAccounts.accounts);
-  }
-  return () => subscription.unsubscribe();
-};
-
-function finalizeWithValue<T>(callback: (value: T) => void) {
-  return (source: Observable<T>) => defer(() => {
-    let lastValue: T;
-    return source.pipe(
-      tap((value) => lastValue = value),
-      finalize(() => callback(lastValue)),
-    );
-  });
 }

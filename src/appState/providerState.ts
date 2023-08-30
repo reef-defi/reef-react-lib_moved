@@ -8,6 +8,5 @@ import { Network } from '../state';
 export const providerSubj: ReplaySubject<Provider> = new ReplaySubject<Provider>(1);
 export const ACTIVE_NETWORK_LS_KEY = 'reef-app-active-network';
 export const currentProvider$ = reefState.selectedProvider$ as Observable<Provider>;
-export const setCurrentProvider = (provider: Provider): void => providerSubj.next(provider);
 export const currentNetwork$ = reefState.selectedNetwork$ as Observable<Network>;
 export const setCurrentNetwork = reefState.setSelectedNetwork;
