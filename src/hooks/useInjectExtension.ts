@@ -39,14 +39,20 @@ export const useInjectExtension = (
 ] => {
   const [accountsVal, setAccountsVal] = useState<InjectedAccountWithMeta[]>([]);
   const [extensionVal, setExtensionVal] = useState<InjectedExtension>();
+  const [isReefInjected, setIsReefInjected] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<{ message: string; code?: number; url?: string }>();
+  let extensions: InjectedExtension[];
+  
 
+  document.addEventListener('reef-injected', async()=>{
+    if(!isReefInjected)setIsReefInjected(true);
+  });
   useAsyncEffect(async () => {
     try {
+      setError(undefined);
       setIsLoading(true);
-      const extensions: InjectedExtension[] = await web3Enable(appDisplayName);
-      console.log("extensions===",extensions);
+      extensions= await web3Enable(appDisplayName);
       const reefExt = extensions.find((ext) => ext.name === REEF_EXTENSION_IDENT);
       if (!reefExt) {
         const installExtensionMessage = getInstallExtensionMessage();
@@ -90,7 +96,7 @@ export const useInjectExtension = (
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [isReefInjected]);
 
   /* useEffect(() => {
     if (!accountsVal.length) {

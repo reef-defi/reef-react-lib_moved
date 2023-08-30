@@ -51,7 +51,6 @@ useAsyncEffect(async()=>{
 };
 
 export const reefAccountToReefSigner = (accountsFromUtilLib:any,injectedSigner:InjectedSigner)=>{
-  // balance: BigNumber;
   const resultObj = {
     name:'reef',
     sig:injectedSigner,
