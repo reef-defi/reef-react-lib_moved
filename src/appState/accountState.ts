@@ -181,21 +181,6 @@ const signersWithUpdatedBalances$ = combineLatest([
     }),
   );
 
-// const EVM_ADDRESS_UPDATE_GQL = graphql.EVM_ADDRESS_UPDATE_GQL;
-/*
-const EVM_ADDRESS_UPDATE_GQL = gql`
-  subscription query($accountIds: [String!]!) {
-    account(
-      where: { address: { _in: $accountIds } }
-      order_by: { timestamp: asc, address: asc }
-    ) {
-      address
-      evm_address
-    }
-  }
-`;
-*/
-
 // eslint-disable-next-line camelcase
 interface AccountEvmAddrData {
   address: string;

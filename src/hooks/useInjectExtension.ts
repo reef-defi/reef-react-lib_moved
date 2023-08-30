@@ -46,6 +46,7 @@ export const useInjectExtension = (
     try {
       setIsLoading(true);
       const extensions: InjectedExtension[] = await web3Enable(appDisplayName);
+      console.log("extensions===",extensions);
       const reefExt = extensions.find((ext) => ext.name === REEF_EXTENSION_IDENT);
       if (!reefExt) {
         const installExtensionMessage = getInstallExtensionMessage();

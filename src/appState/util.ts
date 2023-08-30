@@ -140,6 +140,7 @@ export function initAxiosClients(selectedNetwork?: Network, explorerClient?: Axi
   if (selectedNetwork) {
     if (!explorerClient && !dexClient) {
       const gqlUrls = getGQLUrls(selectedNetwork);
+      console.log(gqlUrls.get('explorer')!);
       if (gqlUrls) {
         if (gqlUrls.get('explorer')) {
           setAxiosExplorerUrls(gqlUrls.get('explorer')!);

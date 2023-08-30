@@ -4,14 +4,13 @@ import {
 import { useEffect, useState } from 'react';
 import { useObservableState } from './useObservableState';
 import { availableNetworks, Network, ReefSigner } from '../state';
-import { useProvider } from './useProvider';
+// import { useProvider } from './useProvider';
 import { accountsSubj, setCurrentAddress } from '../appState/accountState';
-import { disconnectProvider } from '../utils/providerUtil';
 import type { Signer as InjectedSigner } from '@polkadot/api/types';
 import {
   _NFT_IPFS_RESOLVER_FN, initAxiosClients, setNftIpfsResolverFn, State, StateOptions,
 } from '../appState/util';
-import { ACTIVE_NETWORK_LS_KEY, setCurrentProvider } from '../appState/providerState';
+import { ACTIVE_NETWORK_LS_KEY } from '../appState/providerState';
 import { useInjectExtension } from './useInjectExtension';
 import { Provider } from '@reef-defi/evm-provider';
 import { accountToSigner } from '../rpc';
@@ -81,10 +80,11 @@ export const useInitReefState = (
   const {
     network, explorerClient, dexClient, ipfsHashResolverFn,
   } = options;
-  let [accounts, extension, loadingExtension, errExtension] = useInjectExtension(applicationDisplayName);
+  const [accounts, extension, loadingExtension, errExtension] = useInjectExtension(applicationDisplayName);
   const jsonAccounts = { accounts, injectedSigner: extension?.signer };
   const selectedNetwork: Network|undefined = useObservableState(reefState.selectedNetwork$);
-  const [provider, isProviderLoading] = useProvider((selectedNetwork as Network)?.rpcUrl);
+  // const [provider, isProviderLoading] = useProvider((selectedNetwork as Network)?.rpcUrl);
+  const provider = useObservableState(reefState.selectedProvider$) as Provider|undefined;
   const [loading, setLoading] = useState(true);
 console.log("reefstate===",reefState);
   useEffect(() => {
@@ -93,6 +93,22 @@ console.log("reefstate===",reefState);
       reefState.setSelectedNetwork(newNetwork);
     }
   }, [network]);
+
+  useEffect(() => {
+    console.log("called");
+    console.log({extension,accounts})
+    if (!accounts || !accounts.length || !extension) {
+      return;
+    }
+
+    const jsonAccounts = { accounts, injectedSigner: extension?.signer };
+      reefState.initReefState({
+        network,
+        jsonAccounts,
+        ipfsHashResolverFn,
+      });
+  }, [accounts, extension]);
+
 
   useEffect(() => {
     setNftIpfsResolverFn(ipfsHashResolverFn);
@@ -109,29 +125,15 @@ console.log("reefstate===",reefState);
     }
   },[accountsFromUtilLib])
 
-  useEffect(() => {
-    if (provider) {
-      setCurrentProvider(provider);
-    }
-    return () => {
-      if (provider) {
-        const disc = async (prov) => {
-          await disconnectProvider(prov);
-        };
-        disc(provider);
-      }
-    };
-  }, [provider]);
-
   const [loadedReefSigners,isLoadingReefSigners] = getReefSignersArray([reefAccountToReefSigner(accountsFromUtilLib,jsonAccounts.injectedSigner!)],provider!);
   useEffect(() => {
           accountsSubj.next(loadedReefSigners || []);
   }, [loadedReefSigners]);
 
   useEffect(() => {
-    setLoading(isProviderLoading || isLoadingReefSigners||loadingExtension);
+    setLoading(isLoadingReefSigners||loadingExtension);
 
-  }, [isProviderLoading,isLoadingReefSigners,loadedReefSigners,loadingExtension]);
+  }, [isLoadingReefSigners,loadedReefSigners,loadingExtension]);
 
   return {
     error:errExtension,
