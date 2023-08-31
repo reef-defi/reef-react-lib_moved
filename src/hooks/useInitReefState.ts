@@ -82,8 +82,6 @@ export const useInitReefState = (
   const selectedNetwork: Network|undefined = useObservableState(reefState.selectedNetwork$);
   const provider = useObservableState(reefState.selectedProvider$) as Provider|undefined;
   const [loading, setLoading] = useState(true);
-
-  console.log("selectedNetwork ===",selectedNetwork);
   useEffect(() => {
     const network = getNetworkFallback();
 
@@ -111,7 +109,6 @@ export const useInitReefState = (
   let accountsFromUtilLib: any= useObservableState(reefState.accounts$);
 
   const [loadedReefSigners,isLoadingReefSigners] = getReefSignersArray([reefAccountToReefSigner(accountsFromUtilLib,jsonAccounts.injectedSigner!)],provider!);
-  console.log("loadedReefSigners === ",loadedReefSigners);
   useEffect(() => {
           accountsSubj.next(loadedReefSigners || []);
   }, [loadedReefSigners]);
