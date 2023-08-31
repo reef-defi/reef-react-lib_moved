@@ -87,7 +87,6 @@ export const useInitReefState = (
   useEffect(() => {
     const network = getNetworkFallback();
 
-    console.log({extension,accounts})
     if (!accounts || !accounts.length || !extension) {
       return;
     }
@@ -110,7 +109,6 @@ export const useInitReefState = (
   }, [selectedNetwork, explorerClient, dexClient]);
 
   let accountsFromUtilLib: any= useObservableState(reefState.accounts$);
-  console.log(accountsFromUtilLib);
 
   const [loadedReefSigners,isLoadingReefSigners] = getReefSignersArray([reefAccountToReefSigner(accountsFromUtilLib,jsonAccounts.injectedSigner!)],provider!);
   console.log("loadedReefSigners === ",loadedReefSigners);
@@ -119,9 +117,9 @@ export const useInitReefState = (
   }, [loadedReefSigners]);
 
   useEffect(() => {
-    setLoading(isLoadingReefSigners||loadingExtension);
+    setLoading(isLoadingReefSigners||loadingExtension||provider==undefined);
 
-  }, [isLoadingReefSigners,loadedReefSigners,loadingExtension]);
+  }, [isLoadingReefSigners,loadedReefSigners,loadingExtension,provider]);
 
   return {
     error:errExtension,
