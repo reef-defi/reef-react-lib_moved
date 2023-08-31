@@ -2,7 +2,7 @@ import type {
   InjectedAccountWithMeta, InjectedExtension,
 } from '@polkadot/extension-inject/types';
 import { Provider, Signer } from '@reef-defi/evm-provider';
-
+import {getAccountSigner as getSignerUtil} from "@reef-chain/util-lib";
 import { DeriveBalancesAccountData } from '@polkadot/api-derive/balances/types';
 import type { Signer as InjectedSigner } from '@polkadot/api/types';
 import type {
@@ -77,6 +77,8 @@ const signerToReefSigner = async (
   }
   const balance = await getReefCoinBalance(address, provider);
   inj?.signer;
+
+  
   return {
     signer,
     balance,
@@ -137,7 +139,14 @@ export const accountToSigner = async (
   sign: InjectedSigner,
   source: string,
 ): Promise<ReefSigner> => {
-  const signer = new Signer(provider, account.address, sign);
+  let signer:Signer;
+  
+  let _signer = await getSignerUtil(account.address,provider,sign);
+  if(_signer.provider == provider){
+    signer = _signer;
+  }else{
+    signer = new Signer(provider,account.address,sign);
+  }
   return signerToReefSigner(
     signer,
     provider,
