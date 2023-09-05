@@ -95,8 +95,12 @@ const TRANSFER_HISTORY_GQL = `
           type
           contractData
         }
+        event{
+          index
+        }
         extrinsic{
           id
+          index
           block{
             id
             height
@@ -357,7 +361,10 @@ const toTransferToken = (transfer): Token|NFT => (transfer.token.type === Contra
     contractType: transfer.token.type,
   } as NFT);
 
-const toTokenTransfers = (resTransferData: any[], signer, network: Network): TokenTransfer[] => resTransferData.map((transferData): TokenTransfer => ({
+const toTokenTransfers = (resTransferData: any[], signer, network: Network): TokenTransfer[] => resTransferData.map((transferData): TokenTransfer => {
+  console.log("transferData===",transferData)
+  return ({
+  
   from: transferData.from.evmAddress || transferData.from.id,
   to: transferData.to.evmAddress || transferData.to.id,
   inbound:
@@ -365,9 +372,9 @@ const toTokenTransfers = (resTransferData: any[], signer, network: Network): Tok
     || transferData.to.id === signer.address,
   timestamp: transferData.timestamp,
   token: toTransferToken(transferData),
-  url: getTransferUrl(transferData.extrinsic, network),
-  extrinsic: { blockId: transferData.extrinsic.block_id, hash: transferData.extrinsic.hash, index: transferData.extrinsic.index },
-}));
+  url: getTransferUrl(transferData.extrinsic,transferData.event, network),
+  extrinsic: { blockId: transferData.extrinsic.id, hash: transferData.extrinsic.hash, index: transferData.extrinsic.index },
+})});
 
 export const transferHistory$: Observable<
   | null
