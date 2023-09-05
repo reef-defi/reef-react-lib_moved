@@ -362,7 +362,6 @@ const toTransferToken = (transfer): Token|NFT => (transfer.token.type === Contra
   } as NFT);
 
 const toTokenTransfers = (resTransferData: any[], signer, network: Network): TokenTransfer[] => resTransferData.map((transferData): TokenTransfer => {
-  console.log("transferData===",transferData)
   return ({
   
   from: transferData.from.evmAddress || transferData.from.id,

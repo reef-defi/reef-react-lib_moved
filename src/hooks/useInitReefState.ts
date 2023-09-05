@@ -83,13 +83,6 @@ export const useInitReefState = (
   const provider = useObservableState(reefState.selectedProvider$) as Provider|undefined;
   const [loading, setLoading] = useState(true);
 
-  // for testing only
-  reefState.selectedTransactionHistory$.subscribe({
-    next:(val)=>console.log(val),
-    err:(err)=>console.log(err),
-    completed:()=>console.log("completed")
-  });
-
   const x = useObservableState(reefState.selectedTransactionHistory$);
   console.log("x===",x);
 
