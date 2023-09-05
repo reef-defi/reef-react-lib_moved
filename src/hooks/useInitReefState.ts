@@ -82,6 +82,19 @@ export const useInitReefState = (
   const selectedNetwork: Network|undefined = useObservableState(reefState.selectedNetwork$);
   const provider = useObservableState(reefState.selectedProvider$) as Provider|undefined;
   const [loading, setLoading] = useState(true);
+
+  // for testing only
+  reefState.selectedTransactionHistory$.subscribe({
+    next:(val)=>console.log(val),
+    err:(err)=>console.log(err),
+    completed:()=>console.log("completed")
+  });
+
+  const x = useObservableState(reefState.selectedTransactionHistory$);
+  console.log("x===",x);
+
+  console.log("reefstate===",reefState);
+
   useEffect(() => {
     const network = getNetworkFallback();
 
@@ -96,7 +109,6 @@ export const useInitReefState = (
         ipfsHashResolverFn,
       });
   }, [accounts, extension]);
-
 
   useEffect(() => {
     setNftIpfsResolverFn(ipfsHashResolverFn);

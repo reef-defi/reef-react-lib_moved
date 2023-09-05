@@ -418,7 +418,7 @@ export const POOLS_RESERVES_GQL = `
 `;
 
 export const POOL_TRANSACTIONS_GQL = `
-  subscription transactions(
+  query transactions(
     $search: String!
     $type: [PoolType!]
     $offset: Int!

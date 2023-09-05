@@ -24,7 +24,7 @@ import type { InjectedAccountWithMeta } from '@reef-defi/extension-inject/types'
 import type { Signer as InjectedSigningKey } from '@polkadot/api/types';
 import { UpdateDataCtx } from './updateStateModel';
 import { replaceUpdatedSigners, updateSignersEvmBindings } from './accountStateUtil';
-import { currentProvider$ } from './providerState';
+import { ACTIVE_NETWORK_LS_KEY, currentProvider$ } from './providerState';
 import { ReefSigner } from '../state';
 import { accountJsonToMeta, metaAccountToSigner } from '../rpc/accounts';
 import axios, { AxiosInstance } from 'axios';
@@ -35,6 +35,13 @@ export const accountsSubj = new ReplaySubject<ReefSigner[] | null>(1);
 export const accountsJsonSubj = new ReplaySubject<AccountJson[]| InjectedAccountWithMeta[] | null>(1);
 export const accountsJsonSigningKeySubj = new ReplaySubject<InjectedSigningKey>(1);
 export const reloadSignersSubj = new Subject<UpdateDataCtx<ReefSigner[]>>();
+
+const graphqlUrls = {
+  explorerTestnet:'https://squid.subsquid.io/reef-explorer-testnet/graphql',
+  dexTestnet:'https://squid.subsquid.io/reef-swap-testnet/graphql',
+  explorerMainnet:'https://squid.subsquid.io/reef-explorer/graphql',
+  dexMainnet:'https://squid.subsquid.io/reef-swap/graphql'
+}
 
 const signersFromJson$: Observable<ReefSigner[]> = combineLatest([accountsJsonSubj, currentProvider$, accountsJsonSigningKeySubj]).pipe(
   switchMap(([jsonAccounts, provider, signingKey]: [(AccountJson[] | InjectedAccountWithMeta[] | null), Provider, InjectedSigningKey]) => {
@@ -201,16 +208,16 @@ const EVM_ADDRESS_UPDATE_GQL = `
 const getGraphqlEndpoint = (network:string,isExplorer:boolean):string=>{
   if(isExplorer){
     if(network=='testnet'){
-      return 'https://squid.subsquid.io/reef-explorer-testnet/graphql'
+      return graphqlUrls.explorerTestnet
     }else{
-      return 'https://squid.subsquid.io/reef-explorer/graphql'
+      return graphqlUrls.explorerMainnet
     }
   }else{
     if(network=='testnet'){
-      return "https://squid.subsquid.io/reef-swap-testnet/graphql";
+      return graphqlUrls.dexTestnet;
     }
   }
-  return 'https://squid.subsquid.io/reef-swap/graphql'
+  return graphqlUrls.dexMainnet;
 }
 
 export const graphqlRequest = (
@@ -220,7 +227,7 @@ export const graphqlRequest = (
 ) => {
   let selectedNetwork:string="mainnet";
   try {
-    let storedNetwork = localStorage.getItem("reef-app-active-network");
+    let storedNetwork = localStorage.getItem(ACTIVE_NETWORK_LS_KEY);
     if(storedNetwork){
       let parsedStoredNetwork = JSON.parse(storedNetwork);
       selectedNetwork = parsedStoredNetwork.name;
@@ -241,7 +248,7 @@ return httpClient.post(url, graphql, {
 });
 };
 
-const getAllAccounts = (accountIds:any) => ({
+const getAllAccountsQuery = (accountIds:any) => ({
   query: EVM_ADDRESS_UPDATE_GQL,
   variables: {accountIds}
 });
@@ -252,7 +259,7 @@ const indexedAccountValues$ = combineLatest([
   .pipe(
     switchMap(([ signers]) => (!signers
       ? []
-      : graphqlRequest(axios,getAllAccounts(signers.map((s: any) => s.address)),true))),
+      : graphqlRequest(axios,getAllAccountsQuery(signers.map((s: any) => s.address)),true))),
       map((result: any): AccountEvmAddrData[] => 
       {
         return result.data.data.accounts.map((a) => ({ address: a.id, evmAddress: a.evmAddress, isEvmClaimed: !!a.evmAddress } as AccountEvmAddrData))}),
