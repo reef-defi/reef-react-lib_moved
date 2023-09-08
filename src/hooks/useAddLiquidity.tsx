@@ -1,7 +1,6 @@
 import Uik from '@reef-chain/ui-kit';
 import React, { Dispatch, useEffect } from 'react';
 import { BigNumber, Contract } from 'ethers';
-import { ApolloClient } from '@apollo/client';
 import { ERC20 } from '../assets/abi/ERC20';
 import { getReefswapRouter } from '../rpc';
 import {
@@ -40,13 +39,14 @@ import {
 import { useKeepTokenUpdated } from './useKeepTokenUpdated';
 import { useLoadPool } from './useLoadPool';
 import { useUpdateLiquidityAmount } from './useUpdateAmount';
+import { AxiosInstance } from 'axios';
 
 interface UseAddLiquidityState {
   address1: string;
   address2: string;
   state: AddLiquidityState;
   tokens: Token[];
-  dexClient?: ApolloClient<any>;
+  httpClient?: AxiosInstance;
   signer?: ReefSigner;
   tokenPrices: AddressToNumber<number>;
   dispatch: Dispatch<AddLiquidityActions>;
@@ -84,7 +84,7 @@ export const useAddLiquidity = ({
   state,
   tokens,
   signer,
-  dexClient,
+  httpClient,
   tokenPrices,
 }: UseAddLiquidityState): void => {
   const {
@@ -94,7 +94,7 @@ export const useAddLiquidity = ({
     token1,
     token2,
     signer?.address || '',
-    dexClient,
+    httpClient,
     isLoading,
   );
   const newPoolSupply = calculatePoolSupply(token1, token2, pool);

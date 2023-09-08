@@ -1,30 +1,27 @@
 import { useState, useEffect } from 'react';
-import { ApolloClient } from '@apollo/client';
 import { BigNumber } from 'ethers';
 import { Pool, Token } from '..';
-import { USER_POOL_SUPPLY, UserPoolSupplyQuery, UserPoolSupplyVar } from '../graphql/pools';
+import { USER_POOL_SUPPLY } from '../graphql/pools';
 import { EMPTY_ADDRESS, ensure } from '../utils';
+import  { AxiosInstance } from 'axios';
+import { graphqlRequest } from '../appState/accountState';
 
 type LoadingPool = Pool | undefined;
+
+export const getUserPoolSupply = (token1:string, token2:string, signerAddress:string) => ({
+  query: USER_POOL_SUPPLY,
+  variables: { token1, token2, signerAddress },
+});
 
 export const loadPool = async (
   token1: Token,
   token2: Token,
   signerAddress: string,
-  dexClient: ApolloClient<any>,
+  httpClient:AxiosInstance,
 ): Promise<Pool> => {
-  const result = await dexClient.query<UserPoolSupplyQuery, UserPoolSupplyVar>(
-    {
-      query: USER_POOL_SUPPLY,
-      variables: {
-        token1: token1.address,
-        token2: token2.address,
-        signerAddress,
-      },
-    },
-  );
-
-  const userPoolSupply = result.data?.userPoolSupply || undefined;
+  const getUserPoolQry = getUserPoolSupply(token1.address, token2.address, signerAddress);
+  const result = await graphqlRequest(httpClient, getUserPoolQry);
+  const userPoolSupply = result.data.data?.userPoolSupply || undefined;
 
   ensure(!!userPoolSupply && userPoolSupply.address !== EMPTY_ADDRESS, 'Pool does not exist!');
 
@@ -54,7 +51,7 @@ export const useLoadPool = (
   token1: Token,
   token2: Token,
   userAddress: string,
-  dexClient?: ApolloClient<any>,
+  httpClient?:AxiosInstance,
   disable?: boolean,
 ): [LoadingPool, boolean] => {
   const [pool, setPool] = useState<Pool>();
@@ -62,12 +59,12 @@ export const useLoadPool = (
 
   useEffect(() => {
     const load = async (): Promise<void> => {
-      if (!token1.address || !token2.address || token2.address === '0x' || userAddress === '' || !dexClient || disable) {
+      if (!token1.address || !token2.address || token2.address === '0x' || userAddress === '' || !httpClient || disable) {
         return;
       }
       Promise.resolve()
         .then(() => setIsLoading(true))
-        .then(() => loadPool(token1, token2, userAddress, dexClient))
+        .then(() => loadPool(token1, token2, userAddress, httpClient))
         .then(setPool)
         .catch(() => setPool(undefined))
         .finally(() => setIsLoading(false));

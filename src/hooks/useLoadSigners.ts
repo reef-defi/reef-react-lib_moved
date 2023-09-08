@@ -80,7 +80,7 @@ export const useLoadSigners = (
         setIsLoading(false);
         return;
       }
-
+      
       const sgnrs = await getExtensionSigners(extensions, provider);
       // TODO signers objects are large cause of provider object inside. Find a way to overcome this problem.
       setSignersVal(sgnrs);
