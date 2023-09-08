@@ -22,18 +22,26 @@ import { filter } from 'rxjs/operators';
 import { AccountJson } from '@reef-defi/extension-base/background/types';
 import type { InjectedAccountWithMeta } from '@reef-defi/extension-inject/types';
 import type { Signer as InjectedSigningKey } from '@polkadot/api/types';
-import { graphql } from '@reef-chain/util-lib';
 import { UpdateDataCtx } from './updateStateModel';
 import { replaceUpdatedSigners, updateSignersEvmBindings } from './accountStateUtil';
-import { currentProvider$ } from './providerState';
+import { ACTIVE_NETWORK_LS_KEY, currentProvider$ } from './providerState';
 import { ReefSigner } from '../state';
-import { apolloExplorerClientInstance$, zenToRx } from '../graphql/apollo';
 import { accountJsonToMeta, metaAccountToSigner } from '../rpc/accounts';
+import axios, { AxiosInstance } from 'axios';
+import {reefState} from "@reef-chain/util-lib";
 
 export const accountsSubj = new ReplaySubject<ReefSigner[] | null>(1);
+
 export const accountsJsonSubj = new ReplaySubject<AccountJson[]| InjectedAccountWithMeta[] | null>(1);
 export const accountsJsonSigningKeySubj = new ReplaySubject<InjectedSigningKey>(1);
 export const reloadSignersSubj = new Subject<UpdateDataCtx<ReefSigner[]>>();
+
+const graphqlUrls = {
+  explorerTestnet:'https://squid.subsquid.io/reef-explorer-testnet/graphql',
+  dexTestnet:'https://squid.subsquid.io/reef-swap-testnet/graphql',
+  explorerMainnet:'https://squid.subsquid.io/reef-explorer/graphql',
+  dexMainnet:'https://squid.subsquid.io/reef-swap/graphql'
+}
 
 const signersFromJson$: Observable<ReefSigner[]> = combineLatest([accountsJsonSubj, currentProvider$, accountsJsonSigningKeySubj]).pipe(
   switchMap(([jsonAccounts, provider, signingKey]: [(AccountJson[] | InjectedAccountWithMeta[] | null), Provider, InjectedSigningKey]) => {
@@ -180,21 +188,6 @@ const signersWithUpdatedBalances$ = combineLatest([
     }),
   );
 
-// const EVM_ADDRESS_UPDATE_GQL = graphql.EVM_ADDRESS_UPDATE_GQL;
-/*
-const EVM_ADDRESS_UPDATE_GQL = gql`
-  subscription query($accountIds: [String!]!) {
-    account(
-      where: { address: { _in: $accountIds } }
-      order_by: { timestamp: asc, address: asc }
-    ) {
-      address
-      evm_address
-    }
-  }
-`;
-*/
-
 // eslint-disable-next-line camelcase
 interface AccountEvmAddrData {
   address: string;
@@ -203,21 +196,73 @@ interface AccountEvmAddrData {
   isEvmClaimed?: boolean;
 }
 
+const EVM_ADDRESS_UPDATE_GQL = `
+  query query($accountIds: [String!]!) {
+    accounts(where: {id_in: $accountIds}, orderBy: timestamp_DESC) {
+      id
+      evmAddress 
+   }
+  }
+`;
+
+const getGraphqlEndpoint = (network:string,isExplorer:boolean):string=>{
+  if(isExplorer){
+    if(network=='testnet'){
+      return graphqlUrls.explorerTestnet
+    }else{
+      return graphqlUrls.explorerMainnet
+    }
+  }else{
+    if(network=='testnet'){
+      return graphqlUrls.dexTestnet;
+    }
+  }
+  return graphqlUrls.dexMainnet;
+}
+
+export const graphqlRequest = (
+  httpClient: AxiosInstance,
+  queryObj: { query: string; variables: any },
+  isExplorer?:boolean
+) => {
+  let selectedNetwork:string="mainnet";
+  try {
+    let storedNetwork = localStorage.getItem(ACTIVE_NETWORK_LS_KEY);
+    if(storedNetwork){
+      let parsedStoredNetwork = JSON.parse(storedNetwork);
+      selectedNetwork = parsedStoredNetwork.name;
+    }
+  } catch (error) {
+    console.log(error);
+  }
+  const graphql = JSON.stringify(queryObj);
+  if(isExplorer){
+    let url = getGraphqlEndpoint(selectedNetwork!,true);
+    return httpClient.post(url, graphql, {
+    headers: { 'Content-Type': 'application/json' },
+  });
+} 
+let url = getGraphqlEndpoint(selectedNetwork!,false);
+return httpClient.post(url, graphql, {
+  headers: { 'Content-Type': 'application/json' },
+});
+};
+
+const getAllAccountsQuery = (accountIds:any) => ({
+  query: EVM_ADDRESS_UPDATE_GQL,
+  variables: {accountIds}
+});
+
 const indexedAccountValues$ = combineLatest([
-  apolloExplorerClientInstance$,
   signersInjected$,
 ])
   .pipe(
-    switchMap(([apollo, signers]) => (!signers
+    switchMap(([ signers]) => (!signers
       ? []
-      : zenToRx(
-        apollo.subscribe({
-          query: graphql.EVM_ADDRESS_UPDATE_GQL,
-          variables: { accountIds: signers.map((s: any) => s.address) },
-          fetchPolicy: 'network-only',
-        }),
-      ))),
-    map((result: any): AccountEvmAddrData[] => result.data.accounts.map((a) => ({ address: a.id, evmAddress: a.evmAddress, isEvmClaimed: !!a.evmAddress } as AccountEvmAddrData))),
+      : graphqlRequest(axios,getAllAccountsQuery(signers.map((s: any) => s.address)),true))),
+      map((result: any): AccountEvmAddrData[] => 
+      {
+        return result.data.data.accounts.map((a) => ({ address: a.id, evmAddress: a.evmAddress, isEvmClaimed: !!a.evmAddress } as AccountEvmAddrData))}),
     filter((v) => !!v),
     startWith([]),
   );
@@ -288,14 +333,9 @@ const signersWithUpdatedData$ = combineLatest([
   );
 
 export const signers$: Observable<ReefSigner[] | null> = signersWithUpdatedData$;
-const currentAddressSubj: Subject<string | undefined> = new Subject<string | undefined>();
-export const setCurrentAddress = (address: string|undefined) => currentAddressSubj.next(address);
-export const currentAddress$: Observable<string | undefined> = currentAddressSubj.asObservable()
-  .pipe(
-    startWith(''),
-    distinctUntilChanged(),
-    shareReplay(1),
-  );
+
+export const setCurrentAddress:(address: string | undefined) => void = reefState.setSelectedAddress;
+export const currentAddress$: Observable<string | undefined> = reefState.selectedAddress$;
 
 // setting default signer (when signers exist) if no selected address exists
 combineLatest([signers$, currentAddress$])
