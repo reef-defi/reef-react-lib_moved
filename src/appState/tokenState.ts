@@ -387,7 +387,7 @@ export const transferHistory$: Observable<
           const resHist = res.data && Array.isArray(res.data.transfers) ? res.data.transfers : [];
           return resHist;
         }),
-        map((resData: any) => toTokenTransfers(resData, signer, network)),
+        map((resData: any) => toTokenTransfers(resData, signer, network as any)),
         switchMap((transfers: TokenTransfer[]) => {
           const tokens = transfers.map((tr: TokenTransfer) => tr.token);
           return resolveTransferHistoryNfts(tokens, signer)
