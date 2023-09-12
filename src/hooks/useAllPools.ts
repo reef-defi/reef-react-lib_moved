@@ -4,7 +4,7 @@ import { POLL_INTERVAL, getIconUrl } from '../utils';
 import { useState } from 'react';
 import useInterval from './userInterval';
 import { PoolWithReserves } from '../state';
-import { graphqlRequest } from '../appState/accountState';
+import { graphqlRequest } from '../graphql/utils';
 
 export const getAllPoolsQuery = () => ({
   query: ALL_POOLS,

@@ -14,7 +14,7 @@ import { getTokenPrice, TokenPrices } from '../state';
 import { getIconUrl, normalize, POLL_INTERVAL } from '../utils';
 import useInterval from './userInterval';
 import { AxiosInstance } from 'axios';
-import { graphqlRequest } from '../appState/accountState';
+import { graphqlRequest } from '../graphql/utils';
 
 const getPoolTotalValueLockedQry = (toTime: any) => ({
   query: POOLS_TOTAL_VALUE_LOCKED,

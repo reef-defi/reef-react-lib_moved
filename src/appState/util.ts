@@ -1,15 +1,16 @@
 import { ContractInterface } from 'ethers';
 import { ContractType, Token, TokenWithAmount } from '../state/token';
-import {
- reloadSignersSubj,
-} from './accountState';
-import { UpdateAction } from './updateStateModel';
+import { UpdateAction, UpdateDataCtx } from './updateStateModel';
 import { calculateTokenPrice,  TxStatusUpdate } from '../utils';
 import { ERC20 } from '../assets/abi/ERC20';
 import { ERC721Uri } from '../assets/abi/ERC721Uri';
 import { ERC1155Uri } from '../assets/abi/ERC1155Uri';
 import { ipfsUrlResolverFn } from '../utils/nftUtil';
 import { PoolReserves } from '../graphql/pools';
+import { Subject } from 'rxjs';
+import { ReefSigner } from '../state';
+
+export const reloadSignersSubj = new Subject<UpdateDataCtx<ReefSigner[]>>();
 
 export let _NFT_IPFS_RESOLVER_FN: ipfsUrlResolverFn|undefined;
 

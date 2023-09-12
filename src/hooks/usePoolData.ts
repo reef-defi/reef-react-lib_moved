@@ -4,7 +4,7 @@ import { PoolDataQuery, poolDataQuery } from '../graphql/pools';
 import { BaseCandlestickData, BaseVolumeData, CandlestickData } from '../state';
 import { calcTimeRange, timeDataToMs, truncateDate } from './useFromTime';
 import { AxiosInstance } from 'axios';
-import { graphqlRequest } from '../appState/accountState';
+import { graphqlRequest } from '../graphql/utils';
 
 interface Time {
   time: Date;

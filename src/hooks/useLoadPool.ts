@@ -4,7 +4,7 @@ import { Pool, Token } from '..';
 import { USER_POOL_SUPPLY } from '../graphql/pools';
 import { EMPTY_ADDRESS, ensure } from '../utils';
 import  { AxiosInstance } from 'axios';
-import { graphqlRequest } from '../appState/accountState';
+import { graphqlRequest } from '../graphql/utils';
 
 type LoadingPool = Pool | undefined;
 

@@ -2,8 +2,6 @@ export * from './useProvider';
 export * from './useAsyncEffect';
 export * from './useUpdateAccountBalance';
 export * from './useLoadSignerTokens';
-export * from './useReefPriceInterval';
-export * from './useLoadSigners';
 export * from './useObservableState';
 export * from './useLoader';
 export * from './poolHooks';

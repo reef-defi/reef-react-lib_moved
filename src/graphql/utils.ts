@@ -1,5 +1,5 @@
-import { ACTIVE_NETWORK_LS_KEY } from "@reef-chain/util-lib/lib/reefState/providerState";
 import { AxiosInstance } from "axios";
+const ACTIVE_NETWORK_LS_KEY = "reef-app-active-network";
 
 const graphqlUrls = {
     explorerTestnet:'https://squid.subsquid.io/reef-explorer-testnet/graphql',

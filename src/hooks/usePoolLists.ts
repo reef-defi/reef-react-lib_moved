@@ -6,7 +6,7 @@ import {
 import { TokenPrices } from '../state';
 import { getIconUrl } from '../utils';
 import { AxiosInstance } from 'axios';
-import { graphqlRequest } from '../appState/accountState';
+import { graphqlRequest } from '../graphql/utils';
 
 interface PoolItem {
   address: string;
