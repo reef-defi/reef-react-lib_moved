@@ -90,6 +90,9 @@ const calculateRate = (
     reserve2,
   }: Pool,
 ): string => {
+  if (reserve1 === '0' || reserve2 === '0') {
+    return 'No liquidity';
+  }
   const r1 = new BigNumber(reserve1).div(new BigNumber(10).pow(decimals1));
   const r2 = new BigNumber(reserve2).div(new BigNumber(10).pow(decimals2));
   const res = sellTokenAddress === address ? r1.div(r2) : r2.div(r1);

@@ -92,18 +92,20 @@ export const Provide = ({
       </div>
 
       <div className="uik-pool-actions__slider">
-        <Uik.Slider
-          value={percentage}
-          onChange={setPercentage}
-          tooltip={`${Uik.utils.maxDecimals(percentage, 2)}%`}
-          helpers={[
-            { position: 0, text: '0%' },
-            { position: 25 },
-            { position: 50, text: '50%' },
-            { position: 75 },
-            { position: 100, text: '100%' },
-          ]}
-        />
+        { pool?.reserve1 !== "0" && pool?.reserve2 !== "0" && (
+          <Uik.Slider
+            value={percentage}
+            onChange={setPercentage}
+            tooltip={`${Uik.utils.maxDecimals(percentage, 2)}%`}
+            helpers={[
+              { position: 0, text: '0%' },
+              { position: 25 },
+              { position: 50, text: '50%' },
+              { position: 75 },
+              { position: 100, text: '100%' },
+            ]}
+          />
+        )}
       </div>
 
       <Uik.Button

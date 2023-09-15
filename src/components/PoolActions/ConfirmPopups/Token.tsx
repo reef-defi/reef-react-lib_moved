@@ -36,7 +36,7 @@ const Token = ({
         <div className="confirm-popup-token__symbol">{ symbol }</div>
         <div className="confirm-popup-token__price">
           Price: $
-          { price }
+          { Number.isNaN(price) ? 0 : price }
         </div>
       </div>
     </div>

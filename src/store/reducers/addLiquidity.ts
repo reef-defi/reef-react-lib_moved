@@ -50,7 +50,7 @@ export const initialAddLiquidityState: AddLiquidityState = {
 
 type MaxToken = [BigNumber, BigNumber]
 const maxToken = (token: Token, pool?: Pool): MaxToken => {
-  if (!pool) {
+  if (!pool || pool.reserve1 === '0' || pool.reserve2 === '0') {
     return [
       new BigNumber(0),
       new BigNumber(0),
@@ -113,7 +113,7 @@ export const addLiquidityReducer = (
         token2: { ...createEmptyTokenWithAmount(false), ...action.token },
       };
     case SET_TOKEN1_AMOUNT:
-      if (!state.pool) {
+      if (!state.pool || state.pool.reserve1 === '0' || state.pool.reserve2 === '0') {
         return {
           ...state,
           percentage: 0,
@@ -157,7 +157,7 @@ export const addLiquidityReducer = (
         token2: { ...state.token2, amount: otherAmount.toString() },
       };
     case SET_TOKEN2_AMOUNT:
-      if (!state.pool) {
+      if (!state.pool || state.pool.reserve1 === '0' || state.pool.reserve2 === '0') {
         return {
           ...state,
           percentage: 0,
