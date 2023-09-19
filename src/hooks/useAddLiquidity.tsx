@@ -58,7 +58,7 @@ const status = (
   isEvmClaimed?: boolean,
 ): ButtonStatus => {
   try {
-    ensure(isEvmClaimed === true, 'Bind signer');
+    ensure(isEvmClaimed === true, 'Bind account');
     ensure(!token1.isEmpty, 'Select token 1');
     ensure(!token2.isEmpty, 'Select token 2');
     ensure(token1.amount.length > 0, `Missing ${token1.symbol} amount`);
@@ -297,50 +297,56 @@ export const onAddLiquidity = ({
       await signAndSend;
     } else {
       // Approve token 1
-      const signAndSendApprove1 = new Promise<void>((resolve, reject) => {
-        approveExtrinsic1.signAndSend(
-          signer.address,
-          { signer: signer.signer.signingKey },
-          (status: any) => {
-            console.log('Stake status: ', status);
-            const err = captureError(status.events);
-            if (err) {
-              reject({ message: err });
-            }
-            if (status.dispatchError) {
-              console.error(status.dispatchError.toString());
-              reject({ message: status.dispatchError.toString() });
-            }
-            if (status.status.isInBlock) {
-              resolve();
-            }
-          },
-        );
-      });
-      await signAndSendApprove1;
+      const allowance1 = await token1Contract.allowance(signer.evmAddress, network.routerAddress);
+      if (allowance1.lt(amount1)) {
+        const signAndSendApprove1 = new Promise<void>((resolve, reject) => {
+          approveExtrinsic1.signAndSend(
+            signer.address,
+            { signer: signer.signer.signingKey },
+            (status: any) => {
+              console.log('Stake status: ', status);
+              const err = captureError(status.events);
+              if (err) {
+                reject({ message: err });
+              }
+              if (status.dispatchError) {
+                console.error(status.dispatchError.toString());
+                reject({ message: status.dispatchError.toString() });
+              }
+              if (status.status.isInBlock) {
+                resolve();
+              }
+            },
+          );
+        });
+        await signAndSendApprove1;
+      }
 
       // Approve token 2
-      const signAndSendApprove2 = new Promise<void>((resolve, reject) => {
-        approveExtrinsic2.signAndSend(
-          signer.address,
-          { signer: signer.signer.signingKey },
-          (status: any) => {
-            console.log('Stake status: ', status);
-            const err = captureError(status.events);
-            if (err) {
-              reject({ message: err });
-            }
-            if (status.dispatchError) {
-              console.error(status.dispatchError.toString());
-              reject({ message: status.dispatchError.toString() });
-            }
-            if (status.status.isInBlock) {
-              resolve();
-            }
-          },
-        );
-      });
-      await signAndSendApprove2;
+      const allowance2 = await token2Contract.allowance(signer.evmAddress, network.routerAddress);
+      if (allowance2.lt(amount2)) {
+        const signAndSendApprove2 = new Promise<void>((resolve, reject) => {
+          approveExtrinsic2.signAndSend(
+            signer.address,
+            { signer: signer.signer.signingKey },
+            (status: any) => {
+              console.log('Stake status: ', status);
+              const err = captureError(status.events);
+              if (err) {
+                reject({ message: err });
+              }
+              if (status.dispatchError) {
+                console.error(status.dispatchError.toString());
+                reject({ message: status.dispatchError.toString() });
+              }
+              if (status.status.isInBlock) {
+                resolve();
+              }
+            },
+          );
+        });
+        await signAndSendApprove2;
+      }
 
       // Provide liquidity
       const provideResources = await signer.signer.provider.estimateResources(provideTransaction);

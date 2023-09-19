@@ -190,7 +190,7 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
         amountLocked: amountLocked1.toFormat(0),
         fees24h: fee1.toFormat(2),
         mySupply: mySupply1.toFormat(0),
-        percentage: amountLocked1.div(all).multipliedBy(100).toFormat(2),
+        percentage: all.isZero() ? '0' : amountLocked1.div(all).multipliedBy(100).toFormat(2),
         ratio: {
           amount: amountLocked1.div(amountLocked2).toFormat(4),
           name: token2.name,
@@ -206,7 +206,7 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
         amountLocked: amountLocked2.toFormat(0),
         fees24h: fee2.toFormat(2),
         mySupply: mySupply2.toFormat(0),
-        percentage: amountLocked2.div(all).multipliedBy(100).toFormat(2),
+        percentage: all.isZero() ? '0' : amountLocked2.div(all).multipliedBy(100).toFormat(2),
         ratio: {
           amount: amountLocked2.div(amountLocked1).toFormat(4),
           name: token1.name,

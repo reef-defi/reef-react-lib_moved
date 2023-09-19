@@ -48,8 +48,8 @@ export const Provide = ({
     status,
   } = state;
   const getTotalValue = useMemo((): number => {
-    const firstTokenValue = new BigNumber(token1.price).times(token1.amount).toNumber();
-    const secondTokenValue = new BigNumber(token2.price).times(token2.amount).toNumber();
+    const firstTokenValue = isNaN(Number(token1.price)) ? 0 : new BigNumber(token1.price).times(token1.amount).toNumber();
+    const secondTokenValue = isNaN(Number(token2.price)) ? 0 : new BigNumber(token2.price).times(token2.amount).toNumber();
     const sum = firstTokenValue + secondTokenValue;
     return Uik.utils.maxDecimals(sum, 2);
   }, [token1, token2]);
@@ -92,18 +92,20 @@ export const Provide = ({
       </div>
 
       <div className="uik-pool-actions__slider">
-        <Uik.Slider
-          value={percentage}
-          onChange={setPercentage}
-          tooltip={`${Uik.utils.maxDecimals(percentage, 2)}%`}
-          helpers={[
-            { position: 0, text: '0%' },
-            { position: 25 },
-            { position: 50, text: '50%' },
-            { position: 75 },
-            { position: 100, text: '100%' },
-          ]}
-        />
+        { pool?.reserve1 !== "0" && pool?.reserve2 !== "0" && (
+          <Uik.Slider
+            value={percentage}
+            onChange={setPercentage}
+            tooltip={`${Uik.utils.maxDecimals(percentage, 2)}%`}
+            helpers={[
+              { position: 0, text: '0%' },
+              { position: 25 },
+              { position: 50, text: '50%' },
+              { position: 75 },
+              { position: 100, text: '100%' },
+            ]}
+          />
+        )}
       </div>
 
       <Uik.Button

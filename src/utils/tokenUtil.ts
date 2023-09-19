@@ -54,7 +54,7 @@ export const calculateTokenPrice = (
         reefTokenPool,
         reefAddress,
       );
-      ratio = reefReserve / tokenReserve;
+      ratio = tokenReserve ? reefReserve / tokenReserve : 0;
       return ratio * (reefPrice as number);
     }
     return DataProgress.NO_DATA;
