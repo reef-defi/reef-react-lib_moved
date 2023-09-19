@@ -48,8 +48,8 @@ export const Provide = ({
     status,
   } = state;
   const getTotalValue = useMemo((): number => {
-    const firstTokenValue = new BigNumber(token1.price).times(token1.amount).toNumber();
-    const secondTokenValue = new BigNumber(token2.price).times(token2.amount).toNumber();
+    const firstTokenValue = isNaN(Number(token1.price)) ? 0 : new BigNumber(token1.price).times(token1.amount).toNumber();
+    const secondTokenValue = isNaN(Number(token2.price)) ? 0 : new BigNumber(token2.price).times(token2.amount).toNumber();
     const sum = firstTokenValue + secondTokenValue;
     return Uik.utils.maxDecimals(sum, 2);
   }, [token1, token2]);
