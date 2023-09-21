@@ -304,6 +304,9 @@ export const onAddLiquidity = ({
             signer.address,
             { signer: signer.signer.signingKey },
             (status: any) => {
+              dispatch(
+                setCompleteStatusAction("Adding Supply", false, true),
+              )
               console.log('Stake status: ', status);
               const err = captureError(status.events);
               if (err) {
@@ -326,6 +329,9 @@ export const onAddLiquidity = ({
       const allowance2 = await token2Contract.allowance(signer.evmAddress, network.routerAddress);
       if (allowance2.lt(amount2)) {
         const signAndSendApprove2 = new Promise<void>((resolve, reject) => {
+          dispatch(
+            setCompleteStatusAction("Adding Supply", false, true),
+          )
           approveExtrinsic2.signAndSend(
             signer.address,
             { signer: signer.signer.signingKey },
@@ -359,6 +365,9 @@ export const onAddLiquidity = ({
       );
 
       const signAndSendProvide = new Promise<void>((resolve, reject) => {
+        dispatch(
+          setCompleteStatusAction("Adding Supply", false, true),
+        )
         provideExtrinsic.signAndSend(
           signer.address,
           { signer: signer.signer.signingKey },
