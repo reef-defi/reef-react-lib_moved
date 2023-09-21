@@ -152,8 +152,8 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
     const mySupply1 = amountLocked1.multipliedBy(poolShare);
     const mySupply2 = amountLocked2.multipliedBy(poolShare);
 
-    const price1 = tokenPrices[token1.id] || 0;
-    const price2 = tokenPrices[token2.id] || 0;
+    const price1 = tokenPrices[token1.id] && !isNaN(tokenPrices[token1.id]) ? tokenPrices[token1.id] : 0;
+    const price2 = tokenPrices[token2.id] && !isNaN(tokenPrices[token2.id]) ? tokenPrices[token2.id] : 0;
     const mySupplyUSD = mySupply1
       .multipliedBy(price1)
       .plus(mySupply2.multipliedBy(price2))
