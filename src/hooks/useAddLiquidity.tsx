@@ -52,6 +52,12 @@ interface UseAddLiquidityState {
   dispatch: Dispatch<AddLiquidityActions>;
 }
 
+const getInsufficientTokenSymbol = (token1:TokenWithAmount,token2:TokenWithAmount):string=>{
+  if(token1.balance._hex=="0x00"){
+    return token1.symbol
+  }return token2.symbol
+}
+
 const status = (
   token1: TokenWithAmount,
   token2: TokenWithAmount,
@@ -64,13 +70,14 @@ const status = (
     ensure(token1.amount.length > 0, `Missing ${token1.symbol} amount`);
     ensure(token2.amount.length > 0, `Missing ${token2.symbol} amount`);
     ensure(
-      BigNumber.from(calculateAmount(token1)).lte(token1.balance),
-      `Insufficient ${token1.symbol} balance`,
+      BigNumber.from(calculateAmount(token1)).lte(token1.balance) && BigNumber.from(calculateAmount(token1)).gt(0),
+      `Insufficient ${getInsufficientTokenSymbol(token1,token2)} balance`,
     );
     ensure(
-      BigNumber.from(calculateAmount(token2)).lte(token2.balance),
-      `Insufficient ${token2.symbol} balance`,
+      BigNumber.from(calculateAmount(token2)).lte(token2.balance) && BigNumber.from(calculateAmount(token1)).gt(0),
+      `Insufficient ${getInsufficientTokenSymbol(token1,token2)} balance`,
     );
+
     return { isValid: true, text: 'Stake' };
   } catch (e) {
     return { isValid: false, text: e.message };
