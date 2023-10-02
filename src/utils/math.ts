@@ -30,7 +30,12 @@ export const transformAmount = (decimals: number, amount: string): string => {
   return cleanedAmount + '0'.repeat(decimals - decimalPositions);
 };
 
-export const assertAmount = (amount?: string): string => (!amount ? '0' : amount);
+export const assertAmount = (amount?: string): string => {
+  if(amount==="NaN") {
+    return '0'
+  };
+  return !amount ? '0' : amount;
+}
 
 export const convert2Normal = (
   decimals: number,
