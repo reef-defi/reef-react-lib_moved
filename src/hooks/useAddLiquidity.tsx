@@ -245,6 +245,12 @@ export const onAddLiquidity = ({
       approveResources2.storage.lt(0) ? BigNumber.from(0) : approveResources2.storage,
     );
 
+    const disableStakeBtn = ()=>{
+      dispatch(
+        setCompleteStatusAction("Adding Supply", false, true),
+      )
+    }
+
     if (batchTxs) {
       const provideExtrinsic = signer.signer.provider.api.tx.evm.call(
         provideTransaction.to,
@@ -304,6 +310,7 @@ export const onAddLiquidity = ({
             signer.address,
             { signer: signer.signer.signingKey },
             (status: any) => {
+              disableStakeBtn();
               console.log('Stake status: ', status);
               const err = captureError(status.events);
               if (err) {
@@ -326,6 +333,7 @@ export const onAddLiquidity = ({
       const allowance2 = await token2Contract.allowance(signer.evmAddress, network.routerAddress);
       if (allowance2.lt(amount2)) {
         const signAndSendApprove2 = new Promise<void>((resolve, reject) => {
+          disableStakeBtn();
           approveExtrinsic2.signAndSend(
             signer.address,
             { signer: signer.signer.signingKey },
@@ -359,6 +367,7 @@ export const onAddLiquidity = ({
       );
 
       const signAndSendProvide = new Promise<void>((resolve, reject) => {
+        disableStakeBtn()
         provideExtrinsic.signAndSend(
           signer.address,
           { signer: signer.signer.signingKey },
