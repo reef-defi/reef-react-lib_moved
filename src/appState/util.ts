@@ -212,3 +212,11 @@ function finalizeWithValue<T>(callback: (value: T) => void) {
     );
   });
 }
+
+export const getTokenUrl = (tokenUrl:string):string=>{
+  const ipfsProtocol = "ipfs://";
+  if (tokenUrl?.startsWith(ipfsProtocol)) {
+    return `https://cloudflare-ipfs.com/ipfs/${tokenUrl.substring(ipfsProtocol.length)}`
+  }
+  return tokenUrl;
+}
