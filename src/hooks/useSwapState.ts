@@ -57,8 +57,8 @@ const swapStatus = (
     const { reserve1, reserve2 } = pool!;
     const amountOut1 = BigNumber.from(calculateAmount(sell));
     const amountOut2 = BigNumber.from(calculateAmount(buy));
-    const reserved1 = BigNumber.from(reserve1).sub(amountOut1);
-    const reserved2 = BigNumber.from(reserve2).sub(amountOut2);
+    const reserved1 = BigNumber.from(amountOut1).sub(reserve1);
+    const reserved2 = BigNumber.from(amountOut2).sub(reserve2);
 
     ensure(reserved1.gt(0) || reserved2.gt(0), 'Insufficient amounts');
 
