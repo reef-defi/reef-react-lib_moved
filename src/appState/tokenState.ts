@@ -25,7 +25,7 @@ import {
   ContractType, reefTokenWithAmount, Token, TokenTransfer, TokenWithAmount,
 } from '../state/token';
 import { Network, NFT, ReefSigner } from '../state';
-import { resolveNftImageLinks } from '../utils/nftUtil';
+import {resolveNftImageLinks, toIpfsProviderUrl} from '../utils/nftUtil';
 import { apolloDexClientInstance$ } from '../graphql';
 import { PoolReserves, POOLS_RESERVES_GQL, PoolsWithReservesQuery } from '../graphql/pools';
 
@@ -67,7 +67,7 @@ const fetchTokensData = (
     // eslint-disable-next-line camelcase
     (vContract: { id: string; contractData: any }) => ({
       address: vContract.id,
-      iconUrl: vContract.contractData.tokenIconUrl,
+      iconUrl: toIpfsProviderUrl(vContract.contractData.iconUrl)||vContract.contractData.iconUrl,
       decimals: vContract.contractData.decimals,
       name: vContract.contractData.name,
       symbol: vContract.contractData.symbol,
@@ -90,7 +90,6 @@ const tokenBalancesWithContractDataCache = (apollo: any) => (
   const contractDataPromise = missingCacheContractDataAddresses.length
     ? fetchTokensData(apollo, missingCacheContractDataAddresses, state)
     : Promise.resolve(state.contractData);
-
   return contractDataPromise.then((cData: Token[]) => {
     const tkns = tokenBalances
       .map((tBalance) => {
