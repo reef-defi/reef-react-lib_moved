@@ -1,5 +1,6 @@
 import React from 'react';
 import './confirm-popup.css';
+import { toHumanAmount } from '../../../utils/math';
 
 export interface Props {
   image?: string,
@@ -36,7 +37,7 @@ const Token = ({
         <div className="confirm-popup-token__symbol">{ symbol }</div>
         <div className="confirm-popup-token__price">
           Price: $
-          { price }
+          { Number.isNaN(price) ? 0 : price }
         </div>
       </div>
     </div>
@@ -46,7 +47,7 @@ const Token = ({
         $
         { value }
       </div>
-      <div className="confirm-popup-token__amount">{ amount }</div>
+      <div className="confirm-popup-token__amount">{ amount ? toHumanAmount(amount.toString()) : '0' }</div>
     </div>
   </div>
 );

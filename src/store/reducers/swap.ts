@@ -5,8 +5,8 @@ import {
 import { assertAmount, getInputAmount, getOutputAmount } from '../../utils';
 import { SwapAction, SwapFocus } from '../actions/swap';
 import {
-  CLEAR_TOKEN_AMOUNTS, SET_COMPLETE_STATUS, SET_LOADING, SET_PERCENTAGE, SET_POOL, SET_SETTINGS, 
-  SET_STATUS, SET_TOKEN1, SET_TOKEN1_AMOUNT, SET_TOKEN2, SET_TOKEN2_AMOUNT, SET_VALIDITY, 
+  CLEAR_TOKEN_AMOUNTS, SET_COMPLETE_STATUS, SET_LOADING, SET_PERCENTAGE, SET_POOL, SET_SETTINGS,
+  SET_STATUS, SET_TOKEN1, SET_TOKEN1_AMOUNT, SET_TOKEN2, SET_TOKEN2_AMOUNT, SET_VALIDITY,
   SWITCH_TOKENS, SET_TOKEN_PRICES,
 } from '../actionTypes';
 
@@ -52,7 +52,7 @@ export const swapReducer = (state = initialSwapState, action: SwapAction): SwapS
   const {
     token1, token2, pool, focus,
   } = state;
-  
+
   if (pool?.token2.address === token1.address && pool?.token1.address === token2.address) {
     // Switch order of tokens
     const poolToken1 = pool.token2;
@@ -79,7 +79,7 @@ export const swapReducer = (state = initialSwapState, action: SwapAction): SwapS
       }
 
       sellAmount = new BigNumber(assertAmount(action.amount));
-      buyAmount = new BigNumber(getOutputAmount({ ...token2, amount: sellAmount.toString() }, state.pool))
+      buyAmount = new BigNumber(getOutputAmount({ ...token2, amount: sellAmount.toString() }, state.pool));
 
       if (sellAmount.lt(0)) {
         return {
@@ -100,10 +100,10 @@ export const swapReducer = (state = initialSwapState, action: SwapAction): SwapS
       percentage = token1.balance.lte(0)
         ? 0
         : sellAmount
-            .multipliedBy(new BigNumber(10).pow(token1.decimals))
-            .div(token1.balance.toString())
-            .multipliedBy(100)
-            .toNumber();
+          .multipliedBy(new BigNumber(10).pow(token1.decimals))
+          .div(token1.balance.toString())
+          .multipliedBy(100)
+          .toNumber();
       return {
         ...state,
         focus: 'sell',
@@ -114,7 +114,7 @@ export const swapReducer = (state = initialSwapState, action: SwapAction): SwapS
         },
         token2: {
           ...token2,
-          amount: buyAmount.toFixed(MAX_DECIMALS).replace(/\.?0+$/, '')
+          amount: buyAmount.toFixed(MAX_DECIMALS).replace(/\.?0+$/, ''),
         },
       };
     case SET_TOKEN2_AMOUNT:
@@ -145,28 +145,28 @@ export const swapReducer = (state = initialSwapState, action: SwapAction): SwapS
       percentage = token1.balance.lte(0)
         ? 0
         : sellAmount
-            .multipliedBy(new BigNumber(10).pow(token1.decimals))
-            .div(token1.balance.toString())
-            .multipliedBy(100)
-            .toNumber();
-            
+          .multipliedBy(new BigNumber(10).pow(token1.decimals))
+          .div(token1.balance.toString())
+          .multipliedBy(100)
+          .toNumber();
+
       return {
         ...state,
         focus: 'buy',
         percentage,
-        token1: {...token1, amount: sellAmount.toFixed(MAX_DECIMALS).replace(/\.?0+$/, '')},
-        token2: {...token2, amount: action.amount},
-      }
+        token1: { ...token1, amount: sellAmount.toFixed(MAX_DECIMALS).replace(/\.?0+$/, '') },
+        token2: { ...token2, amount: action.amount },
+      };
     case SET_TOKEN_PRICES:
       if (!state.pool) {
         return state;
       }
-            
+
       return {
         ...state,
-        token1: {...token1, price: action.tokenPrices[token1.address] || token1.price},
-        token2: {...token2, price: action.tokenPrices[token2.address] || token2.price},
-      }
+        token1: { ...token1, price: action.tokenPrices[token1.address] || token1.price },
+        token2: { ...token2, price: action.tokenPrices[token2.address] || token2.price },
+      };
     case SWITCH_TOKENS: return {
       ...state,
       token1: { ...token2 },

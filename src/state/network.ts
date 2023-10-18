@@ -1,5 +1,5 @@
-import { REEF_TOKEN, Token } from "./token";
-import {network} from '@reef-chain/util-lib';
+import { network } from '@reef-chain/util-lib';
+import { REEF_TOKEN, Token } from './token';
 
 export type AvailableNetworks = 'mainnet' | 'testnet' | 'localhost';
 
@@ -35,10 +35,10 @@ export const availableNetworks: Networks = {
     rpcUrl: network.AVAILABLE_NETWORKS.testnet.rpcUrl,
     reefscanUrl: network.AVAILABLE_NETWORKS.testnet.reefscanUrl,
     verificationApiUrl: 'https://api-testnet.reefscan.com', // network.AVAILABLE_NETWORKS.testnet.verificationApiUrl,
-    factoryAddress: '0x06D7a7334B9329D0750FFd0a636D6C3dFA77E580', // network.AVAILABLE_NETWORKS.testnet.factoryAddress,
-    routerAddress: '0xa29DFc7329ac30445Ba963E313fD26E171722057', // network.AVAILABLE_NETWORKS.testnet.routerAddress,
+    factoryAddress: '0x8Fc2f9577f6c58e6A91C4A80B45C03d1e71c031f', // network.AVAILABLE_NETWORKS.testnet.factoryAddress,
+    routerAddress: '0xd855a7c33ebF6566e846B0D6F7Ba7f7e1fe99768', // network.AVAILABLE_NETWORKS.testnet.routerAddress,
     graphqlExplorerUrl: network.AVAILABLE_NETWORKS.testnet.graphqlUrl,
-    graphqlDexsUrl: "https://squid.subsquid.io/reef-swap-testnet/graphql", // network.AVAILABLE_NETWORKS.testnet.graphqlDexsUrl,
+    graphqlDexsUrl: 'https://squid.subsquid.io/reef-swap-testnet/graphql', // network.AVAILABLE_NETWORKS.testnet.graphqlDexsUrl,
     genesisHash: network.AVAILABLE_NETWORKS.testnet.genesisHash,
     bonds: [],
   },
@@ -50,7 +50,7 @@ export const availableNetworks: Networks = {
     factoryAddress: '0x380a9033500154872813F6E1120a81ed6c0760a8', // network.AVAILABLE_NETWORKS.mainnet.factoryAddress,
     routerAddress: '0x641e34931C03751BFED14C4087bA395303bEd1A5', // network.AVAILABLE_NETWORKS.mainnet.routerAddress,
     graphqlExplorerUrl: network.AVAILABLE_NETWORKS.mainnet.graphqlUrl,
-    graphqlDexsUrl: "https://squid.subsquid.io/reef-swap/graphql", // network.AVAILABLE_NETWORKS.mainnet.graphqlDexsUrl,
+    graphqlDexsUrl: 'https://squid.subsquid.io/reef-swap/graphql', // network.AVAILABLE_NETWORKS.mainnet.graphqlDexsUrl,
     genesisHash: network.AVAILABLE_NETWORKS.mainnet.genesisHash,
     bonds: [
       {
@@ -72,7 +72,7 @@ export const availableNetworks: Networks = {
     factoryAddress: '', // network.AVAILABLE_NETWORKS.localhost.factoryAddress,
     routerAddress: '', // network.AVAILABLE_NETWORKS.localhost.routerAddress,
     graphqlExplorerUrl: network.AVAILABLE_NETWORKS.localhost.graphqlUrl,
-    graphqlDexsUrl: "http://localhost:4351/graphql", // network.AVAILABLE_NETWORKS.localhost.graphqlDexsUrl,
+    graphqlDexsUrl: 'http://localhost:4351/graphql', // network.AVAILABLE_NETWORKS.localhost.graphqlDexsUrl,
     genesisHash: network.AVAILABLE_NETWORKS.localhost.genesisHash,
     bonds: [],
   },

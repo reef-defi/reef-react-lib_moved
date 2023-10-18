@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
+import { ApolloClient } from '@apollo/client';
 import { Token, Pool } from '..';
 import { ensureVoidRun, uniqueCombinations } from '../utils/utils';
 import { loadPool } from './useLoadPool';
-import { ApolloClient } from '@apollo/client';
 
 export const loadPools = async (
   tokens: Token[],
   userAddress: string,
-  dexClient: ApolloClient<any>
+  dexClient: ApolloClient<any>,
 ): Promise<Pool[]> => {
   const tokenCombinations = uniqueCombinations(tokens);
   const pools: Pool[] = [];

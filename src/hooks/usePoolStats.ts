@@ -2,15 +2,15 @@ import { ApolloClient, useQuery } from '@apollo/client';
 import { BigNumber } from 'bignumber.js';
 import { useMemo } from 'react';
 import {
-  Pool24HVolume, 
+  Pool24HVolume,
   PoolInfoQuery,
-  PoolInfoVar, 
+  PoolInfoVar,
   PoolsTotalSupply,
-  PoolsTotalValueLockedVar, 
-  PoolTokensDataQuery, 
+  PoolsTotalValueLockedVar,
+  PoolTokensDataQuery,
   PoolTokensVar,
-  POOLS_TOTAL_VALUE_LOCKED, 
-  PoolVolume24HVar, 
+  POOLS_TOTAL_VALUE_LOCKED,
+  PoolVolume24HVar,
   POOL_24H_VOLUME,
   POOL_INFO_GQL,
   POOL_TOKENS_DATA_GQL,
@@ -19,7 +19,7 @@ import { getTokenPrice, TokenPrices } from '../state';
 import { getIconUrl, normalize, POLL_INTERVAL } from '../utils';
 import useInterval from './userInterval';
 
-export const useTotalSupply = (tokenPrices: TokenPrices,  dexClient: ApolloClient<any>, previous = false): string => {
+export const useTotalSupply = (tokenPrices: TokenPrices, dexClient: ApolloClient<any>, previous = false): string => {
   const toTime = useMemo(() => {
     const tm = new Date();
     if (previous) {
@@ -120,7 +120,9 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
 
   const { data: poolInfoData, loading: poolInfoLoading, refetch: refetchPoolInfo } = useQuery<PoolInfoQuery, PoolInfoVar>(POOL_INFO_GQL, {
     client: dexClient,
-    variables: { address, signerAddress, fromTime, toTime },
+    variables: {
+      address, signerAddress, fromTime, toTime,
+    },
   });
 
   useInterval(() => {
@@ -133,8 +135,8 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
     }
 
     const pool = poolInfoData.poolInfo;
-    const token1 = tokensData!.poolById.token1;
-    const token2 = tokensData!.poolById.token2;
+    const { token1 } = tokensData!.poolById;
+    const { token2 } = tokensData!.poolById;
 
     const amountLocked1 = normalize(pool.reserves.reserved1, token1.decimals);
     const amountLocked2 = normalize(pool.reserves.reserved2, token2.decimals);
@@ -150,8 +152,8 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
     const mySupply1 = amountLocked1.multipliedBy(poolShare);
     const mySupply2 = amountLocked2.multipliedBy(poolShare);
 
-    const price1 = tokenPrices[token1.id] || 0;
-    const price2 = tokenPrices[token2.id] || 0;
+    const price1 = tokenPrices[token1.id] && !isNaN(tokenPrices[token1.id]) ? tokenPrices[token1.id] : 0;
+    const price2 = tokenPrices[token2.id] && !isNaN(tokenPrices[token2.id]) ? tokenPrices[token2.id] : 0;
     const mySupplyUSD = mySupply1
       .multipliedBy(price1)
       .plus(mySupply2.multipliedBy(price2))
@@ -188,7 +190,7 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
         amountLocked: amountLocked1.toFormat(0),
         fees24h: fee1.toFormat(2),
         mySupply: mySupply1.toFormat(0),
-        percentage: amountLocked1.div(all).multipliedBy(100).toFormat(2),
+        percentage: all.isZero() ? '0' : amountLocked1.div(all).multipliedBy(100).toFormat(2),
         ratio: {
           amount: amountLocked1.div(amountLocked2).toFormat(4),
           name: token2.name,
@@ -204,7 +206,7 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
         amountLocked: amountLocked2.toFormat(0),
         fees24h: fee2.toFormat(2),
         mySupply: mySupply2.toFormat(0),
-        percentage: amountLocked2.div(all).multipliedBy(100).toFormat(2),
+        percentage: all.isZero() ? '0' : amountLocked2.div(all).multipliedBy(100).toFormat(2),
         ratio: {
           amount: amountLocked2.div(amountLocked1).toFormat(4),
           name: token1.name,

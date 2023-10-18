@@ -1,7 +1,9 @@
 import { BigNumber, utils } from 'ethers';
+import BN from 'bignumber.js';
 import { ensure } from './utils';
-import {NFT, Pool, Token, TokenWithAmount} from '../state';
-import BN from "bignumber.js";
+import {
+  NFT, Pool, Token, TokenWithAmount,
+} from '../state';
 
 const findDecimalPoint = (amount: string): number => {
   const { length } = amount;
@@ -24,12 +26,16 @@ export const transformAmount = (decimals: number, amount: string): string => {
   const cleanedAmount = amount.replaceAll(',', '').replaceAll('.', '');
   if (decimalPositions > decimals) {
     return cleanedAmount.slice(0, cleanedAmount.length - (decimalPositions - decimals));
-  } else {
-    return cleanedAmount + '0'.repeat(decimals - decimalPositions);
   }
+  return cleanedAmount + '0'.repeat(decimals - decimalPositions);
 };
 
-export const assertAmount = (amount?: string): string => (!amount ? '0' : amount);
+export const assertAmount = (amount?: string): string => {
+  if(amount==="NaN") {
+    return '0'
+  };
+  return !amount ? '0' : amount;
+}
 
 export const convert2Normal = (
   decimals: number,
@@ -265,7 +271,7 @@ export const ensureAmount = (token: TokenWithAmount): void => ensure(
 
 export const getOutputAmount = (token: TokenWithAmount, pool: Pool): number => {
   const inputAmount = new BN(assertAmount(token.amount)).multipliedBy(997);
-  const inputReserves = new BN(pool.reserve1)
+  const inputReserves = new BN(pool.reserve1);
   const outputReserves = new BN(pool.reserve2);
 
   const numerator = inputAmount.multipliedBy(outputReserves);

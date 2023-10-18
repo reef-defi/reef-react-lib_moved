@@ -1,5 +1,7 @@
 import { DocumentNode, gql } from '@apollo/client';
-import { BaseFeeData, BaseReservedData, BaseVolumeData, FeeData, PriceData, ReservedData, VolumeData } from '../state';
+import {
+  BaseFeeData, BaseReservedData, BaseVolumeData, FeeData, PriceData, ReservedData, VolumeData,
+} from '../state';
 
 // Data interfaces
 export type BasePoolTransactionTypes = 'Swap' | 'Mint' | 'Burn';
@@ -248,7 +250,7 @@ interface PoolSearchVar {
   signerAddress: string;
 }
 
-export interface UserPoolSupplyVar { 
+export interface UserPoolSupplyVar {
   signerAddress: string;
   token1: string;
   token2: string;
@@ -272,7 +274,7 @@ export interface PoolBasicTransactionVar extends OptionalSearchVar, TransactionT
 export interface PoolTransactionCountVar extends OptionalSearchVar, TransactionTypeVar { }
 export interface PoolTransactionVar extends PoolBasicTransactionVar, OffsetVar, LimitVar { }
 export interface PoolsListVar extends PoolSearchVar, PaginationVar { }
-export interface PoolsListCountVar extends PoolSearchVar { }
+export type PoolsListCountVar = PoolSearchVar
 
 // Graphql statements
 // Total supply of all pools

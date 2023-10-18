@@ -11,7 +11,7 @@ import {
 } from '../utils/utils';
 import { assertAmount, calculateAmount } from '../utils/math';
 import { TokenPrices } from './pool';
-import {NFT} from "./nft";
+import { NFT } from './nft';
 
 export enum ContractType {
   ERC20 = 'ERC20',
@@ -152,8 +152,10 @@ export const reefTokenWithAmount = (): TokenWithAmount => toTokenAmount(
   },
 );
 
-export const getTokenPrice = (address: string, prices: TokenPrices): BN => new BN(prices[address]
-  ? prices[address]
-  : 0);
+export const getTokenPrice = (address: string, prices: TokenPrices): BN => new BN(
+  prices[address] && !isNaN(prices[address])
+    ? prices[address]
+    : 0
+);
 
 export const isNativeAddress = (toAddress: string) => toAddress.length === 48 && toAddress[0] === '5';

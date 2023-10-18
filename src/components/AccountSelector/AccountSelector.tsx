@@ -4,7 +4,8 @@ import { ReefSigner } from '../../state';
 import { toReefBalanceDisplay, trim } from '../../utils';
 import './AccountSelector.css';
 import { faGear } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Account } from '@reef-chain/ui-kit/dist/ui-kit/components/organisms/AccountSelector/AccountSelector';
 
 export type Network = 'mainnet' | 'testnet';
 export type Language = 'en' | 'hi';
@@ -18,6 +19,7 @@ interface AccountSelector {
   onLanguageSelect?: (language: Language) => any;
   isBalanceHidden?: boolean;
   showBalance?: (...args: any[]) => any;
+  availableNetworks: Network[];
 }
 
 export const AccountSelector = ({
@@ -29,17 +31,26 @@ export const AccountSelector = ({
   onLanguageSelect,
   isBalanceHidden,
   showBalance,
+  availableNetworks,
 }: AccountSelector): JSX.Element => {
   const name = selectedSigner ? selectedSigner.name : '';
   const balance = toReefBalanceDisplay(selectedSigner?.balance);
 
   const [isOpen, setOpen] = useState(false);
 
-  const getAccounts = useMemo(() => accounts.map(({
-    name, address, evmAddress, source,
-  }) => ({
-    name, address, evmAddress, source,
-  })), [accounts]);
+  const getAccounts = useMemo(() => {
+    const allAccounts: Account[] = [];
+    accounts.map(async (acc) => {
+      const {
+        name, address, evmAddress, source,
+      } = acc;
+      const isEvmClaimed = await acc.signer.isClaimed();
+      allAccounts.push({
+        name, address, evmAddress, source, isEvmClaimed,
+      } as Account);
+    });
+    return allAccounts;
+  }, [accounts]);
 
   const selectedAccount = useMemo(() => {
     if (!selectedSigner?.address) return null;
@@ -61,11 +72,11 @@ export const AccountSelector = ({
   };
 
   return (
-    <div className='account-selector-box--nav'>
+    <div className="account-selector-box--nav">
 
-    <div className="nav-account border-rad">
-      <div className="my-auto mx-2 fs-6">
-        {
+      <div className="nav-account border-rad">
+        <div className="my-auto mx-2 fs-6">
+          {
           isBalanceHidden ? (
             <button
               type="button"
@@ -82,31 +93,33 @@ export const AccountSelector = ({
             <span className="nav-account__balance">{ balance }</span>
           )
         }
+        </div>
+        <button
+          type="button"
+          className="nav-account__account"
+          onClick={() => setOpen(true)}
+        >
+          <span>{trim(name)}</span>
+        </button>
+
+        <Uik.AccountSelector
+          isOpen={isOpen}
+          onClose={() => setOpen(false)}
+          accounts={getAccounts}
+          selectedAccount={selectedAccount}
+          onSelect={select}
+          selectedNetwork={selectedNetwork}
+          onNetworkSelect={onNetworkSelect}
+          onLanguageSelect={onLanguageSelect}
+          availableNetworks={availableNetworks}
+        />
       </div>
       <button
         type="button"
-        className="nav-account__account"
-      >
-        <span>{trim(name)}</span>
-      </button>
-
-      <Uik.AccountSelector
-        isOpen={isOpen}
-        onClose={() => setOpen(false)}
-        accounts={getAccounts}
-        selectedAccount={selectedAccount}
-        onSelect={select}
-        selectedNetwork={selectedNetwork}
-        onNetworkSelect={onNetworkSelect}
-        onLanguageSelect={onLanguageSelect}
-      />
-    </div>
-    <button
-        type="button"
         className="nav-account__gear"
         onClick={() => setOpen(true)}
-        >
-      <FontAwesomeIcon icon={faGear} />
+      >
+        <FontAwesomeIcon icon={faGear} />
       </button>
 
     </div>

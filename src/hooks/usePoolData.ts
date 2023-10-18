@@ -34,38 +34,38 @@ export interface TimeData {
 }
 
 const fillMissingDates = <T extends Time>(
-  data: T[], 
-  start: T, 
-  end: T, 
+  data: T[],
+  start: T,
+  end: T,
   timeUnit: TimeUnit,
-  resolvePrev: (prev: T, last: Date) => T
+  resolvePrev: (prev: T, last: Date) => T,
 ): T[] => [
-  ...data,
-  { ...end },
-]
-  .reduce((acc, item) => {
-    const last = acc[acc.length - 1];
+    ...data,
+    { ...end },
+  ]
+    .reduce((acc, item) => {
+      const last = acc[acc.length - 1];
 
-    let lastDate = new Date(last.time.getTime());
-    if (acc.length > 1) {
-      lastDate = new Date(lastDate.getTime() + timeDataToMs({ timeUnit, timeSpan: 1 }));
-    }
+      let lastDate = new Date(last.time.getTime());
+      if (acc.length > 1) {
+        lastDate = new Date(lastDate.getTime() + timeDataToMs({ timeUnit, timeSpan: 1 }));
+      }
 
-    while (lastDate < item.time) {
-      acc.push(resolvePrev(last, lastDate));
-      lastDate = new Date(lastDate.getTime() + timeDataToMs({ timeUnit, timeSpan: 1 }));
-    }
-    acc.push({ ...item });
-    return acc;
-  },
-  [start])
-  .slice(1, -1);
+      while (lastDate < item.time) {
+        acc.push(resolvePrev(last, lastDate));
+        lastDate = new Date(lastDate.getTime() + timeDataToMs({ timeUnit, timeSpan: 1 }));
+      }
+      acc.push({ ...item });
+      return acc;
+    },
+    [start])
+    .slice(1, -1);
 
 const processCandlestick = (
   data: CandlestickData[],
   prevClose: BaseDataHolder,
   toTime: Date,
-  timeData: TimeData
+  timeData: TimeData,
 ): CandlestickHolder[] => fillMissingDates(
   data.map((item) => ({ ...item, time: new Date(item.timeframe) })), // data
   {
@@ -100,7 +100,7 @@ const groupByTimeframe = (data: BaseDataHolder[], timeUnit: TimeUnit): BaseDataH
   const groups: BaseDataHolder[][] = [];
   let currentGroup: BaseDataHolder[] = [];
   let currentGroupStartTime = truncateDate(new Date(data[0].time), timeUnit).getTime();
-  
+
   const timeframe = timeDataToMs({ timeUnit, timeSpan: 1 });
 
   for (const obj of data) {
@@ -117,12 +117,12 @@ const groupByTimeframe = (data: BaseDataHolder[], timeUnit: TimeUnit): BaseDataH
   }
 
   return groups;
-}
+};
 
 function calculateCandlesticks(
   data: BaseDataHolder[][],
   timeUnit: TimeUnit,
-  prev: BaseDataHolder
+  prev: BaseDataHolder,
 ): CandlestickData[] {
   const candlesticks: CandlestickData[] = [];
 
@@ -142,7 +142,9 @@ function calculateCandlesticks(
       }
     }
 
-    candlesticks.push({ open, close, high, low, timeframe: truncateDate(timeframe, timeUnit).toISOString() });
+    candlesticks.push({
+      open, close, high, low, timeframe: truncateDate(timeframe, timeUnit).toISOString(),
+    });
   }
 
   return candlesticks;
@@ -202,7 +204,7 @@ export const usePoolData = ({
       };
     }
 
-    const poolData = data.poolData;
+    const { poolData } = data;
     const process = defaultProcess(price1, price2, decimals1, decimals2);
 
     // *********************** Process volume ******************************************
@@ -258,21 +260,21 @@ export const usePoolData = ({
     );
 
     // ************************** TVL **************************************************
-    const prevTvl = { 
-      value: poolData.previousReserves.timeframe 
-          ? new BigNumber(poolData.previousReserves.reserved1)
-              .div(new BigNumber(10).pow(decimals1))
-              .multipliedBy(price1)
-              .plus(
-                new BigNumber(poolData.previousReserves.reserved2)
-                  .div(new BigNumber(10).pow(decimals2))
-                  .multipliedBy(price2),
-              )
-              .toNumber() 
-          : 0, 
-      time: fromTime 
+    const prevTvl = {
+      value: poolData.previousReserves.timeframe
+        ? new BigNumber(poolData.previousReserves.reserved1)
+          .div(new BigNumber(10).pow(decimals1))
+          .multipliedBy(price1)
+          .plus(
+            new BigNumber(poolData.previousReserves.reserved2)
+              .div(new BigNumber(10).pow(decimals2))
+              .multipliedBy(price2),
+          )
+          .toNumber()
+        : 0,
+      time: fromTime,
     };
-    
+
     let tvl = groupByTimeframe(
       poolData.allReserves
         .map(({ reserved1, reserved2, timeframe }): Amounts => ({
@@ -304,22 +306,22 @@ export const usePoolData = ({
         .div(new BigNumber(10).pow(decimals1))
         .div(
           new BigNumber(amount2)
-            .div(new BigNumber(10).pow(decimals2))
+            .div(new BigNumber(10).pow(decimals2)),
         )
         .toNumber(),
     });
 
-    const prevPrice = { 
-      value: poolData.previousReserves.timeframe 
+    const prevPrice = {
+      value: poolData.previousReserves.timeframe
         ? new BigNumber(poolData.previousReserves.reserved1)
-            .div(new BigNumber(10).pow(decimals1))
-            .div(
-              new BigNumber(poolData.previousReserves.reserved2)
-                .div(new BigNumber(10).pow(decimals2))
-            )
-            .toNumber()
-        :0, 
-      time: fromTime 
+          .div(new BigNumber(10).pow(decimals1))
+          .div(
+            new BigNumber(poolData.previousReserves.reserved2)
+              .div(new BigNumber(10).pow(decimals2)),
+          )
+          .toNumber()
+        : 0,
+      time: fromTime,
     };
 
     const allPrices = poolData.allReserves
@@ -329,10 +331,10 @@ export const usePoolData = ({
         amount2: reserved2,
       }))
       .map(processPrices(decimals1, decimals2));
-    
+
     const allPricesGrouped: BaseDataHolder[][] = groupByTimeframe(allPrices, timeData.timeUnit);
     const pricesCandlesticks = calculateCandlesticks(allPricesGrouped, timeData.timeUnit, prevPrice);
-    const price = processCandlestick(pricesCandlesticks, prevPrice, toTime, timeData); 
+    const price = processCandlestick(pricesCandlesticks, prevPrice, toTime, timeData);
 
     return {
       price,
