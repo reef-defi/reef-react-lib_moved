@@ -24,17 +24,20 @@ import { ERC721Uri } from '../assets/abi/ERC721Uri';
 import { ERC1155Uri } from '../assets/abi/ERC1155Uri';
 import { initProvider } from '../utils/providerUtil';
 import { currentNetwork$, setCurrentNetwork, setCurrentProvider } from './providerState';
-import { apolloDexClientSubj, apolloExplorerClientSubj, GQLUrl, setApolloDexUrls, setApolloExplorerUrls } from '../graphql';
-import {ipfsUrlResolverFn, toIpfsProviderUrl} from '../utils/nftUtil';
+import {
+  apolloDexClientSubj, apolloExplorerClientSubj, GQLUrl, setApolloDexUrls, setApolloExplorerUrls,
+} from '../graphql';
+import { ipfsUrlResolverFn } from '../utils/nftUtil';
 import { PoolReserves } from '../graphql/pools';
 
 type destroyConnection = ()=>void;
 
 type GQLUrlType = 'explorer' | 'dex';
 
+// eslint-disable-next-line import/no-mutable-exports
 export let _NFT_IPFS_RESOLVER_FN: ipfsUrlResolverFn|undefined;
 
-export const setNftIpfsResolverFn = (val?: ipfsUrlResolverFn) => {
+export const setNftIpfsResolverFn = (val?: ipfsUrlResolverFn):void => {
   _NFT_IPFS_RESOLVER_FN = val;
 };
 
@@ -133,7 +136,7 @@ export interface StateOptions {
   ipfsHashResolverFn?: ipfsUrlResolverFn;
 }
 
-export function initApolloClients(selectedNetwork?: Network, explorerClient?: ApolloClient<any>, dexClient?: ApolloClient<any>) {
+export function initApolloClients(selectedNetwork?: Network, explorerClient?: ApolloClient<any>, dexClient?: ApolloClient<any>): void {
   if (selectedNetwork) {
     if (!explorerClient && !dexClient) {
       const gqlUrls = getGQLUrls(selectedNetwork);
@@ -154,6 +157,18 @@ export function initApolloClients(selectedNetwork?: Network, explorerClient?: Ap
       }
     }
   }
+}
+
+function finalizeWithValue<T>(callback: (value: T) => void) {
+  return (source: Observable<T>) => defer(() => {
+    let lastValue: T;
+    return source.pipe(
+      tap((value) => {
+        lastValue = value;
+      }),
+      finalize(() => callback(lastValue)),
+    );
+  });
 }
 
 export const initReefState = (
@@ -202,13 +217,3 @@ export const initReefState = (
   }
   return () => subscription.unsubscribe();
 };
-
-function finalizeWithValue<T>(callback: (value: T) => void) {
-  return (source: Observable<T>) => defer(() => {
-    let lastValue: T;
-    return source.pipe(
-      tap((value) => lastValue = value),
-      finalize(() => callback(lastValue)),
-    );
-  });
-}
