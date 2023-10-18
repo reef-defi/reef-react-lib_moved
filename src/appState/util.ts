@@ -25,7 +25,7 @@ import { ERC1155Uri } from '../assets/abi/ERC1155Uri';
 import { initProvider } from '../utils/providerUtil';
 import { currentNetwork$, setCurrentNetwork, setCurrentProvider } from './providerState';
 import { apolloDexClientSubj, apolloExplorerClientSubj, GQLUrl, setApolloDexUrls, setApolloExplorerUrls } from '../graphql';
-import { ipfsUrlResolverFn } from '../utils/nftUtil';
+import {ipfsUrlResolverFn, toIpfsProviderUrl} from '../utils/nftUtil';
 import { PoolReserves } from '../graphql/pools';
 
 type destroyConnection = ()=>void;
@@ -211,12 +211,4 @@ function finalizeWithValue<T>(callback: (value: T) => void) {
       finalize(() => callback(lastValue)),
     );
   });
-}
-
-export const getTokenUrl = (tokenUrl:string):string=>{
-  const ipfsProtocol = "ipfs://";
-  if (tokenUrl?.startsWith(ipfsProtocol)) {
-    return `https://cloudflare-ipfs.com/ipfs/${tokenUrl.substring(ipfsProtocol.length)}`
-  }
-  return tokenUrl;
 }

@@ -13,7 +13,7 @@ const extractIpfsHash = (ipfsUri: string): string|null => {
   return null;
 };
 
-const toIpfsProviderUrl = (ipfsUriStr: string, ipfsUrlResolver?: ipfsUrlResolverFn): string | null => {
+export const toIpfsProviderUrl = (ipfsUriStr: string, ipfsUrlResolver?: ipfsUrlResolverFn): string | null => {
   const ipfsHash = extractIpfsHash(ipfsUriStr);
   if (ipfsHash) {
     return !ipfsUrlResolver ? `https://cloudflare-ipfs.com/ipfs/${ipfsHash}` : ipfsUrlResolver(ipfsHash);

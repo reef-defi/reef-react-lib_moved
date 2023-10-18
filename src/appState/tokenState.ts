@@ -13,7 +13,7 @@ import {
 import { BigNumber, FixedNumber, utils } from 'ethers';
 import { filter } from 'rxjs/operators';
 import { graphql } from '@reef-chain/util-lib';
-import { _NFT_IPFS_RESOLVER_FN, combineTokensDistinct, getTokenUrl, toTokensWithPrice } from './util';
+import { _NFT_IPFS_RESOLVER_FN, combineTokensDistinct, toTokensWithPrice } from './util';
 import { selectedSigner$ } from './accountState';
 import { currentNetwork$, currentProvider$ } from './providerState';
 import { apolloExplorerClientInstance$, zenToRx } from '../graphql/apollo';
@@ -24,7 +24,7 @@ import {
   ContractType, reefTokenWithAmount, Token, TokenTransfer, TokenWithAmount,
 } from '../state/token';
 import { Network, NFT, ReefSigner } from '../state';
-import { resolveNftImageLinks } from '../utils/nftUtil';
+import {resolveNftImageLinks, toIpfsProviderUrl} from '../utils/nftUtil';
 import { apolloDexClientInstance$ } from '../graphql';
 import { ApolloClient } from '@apollo/client';
 import { PoolReserves, POOLS_RESERVES_GQL, PoolsWithReservesQuery } from '../graphql/pools';
@@ -67,7 +67,7 @@ const fetchTokensData = (
     // eslint-disable-next-line camelcase
     (vContract: { id: string; contractData: any }) => ({
       address: vContract.id,
-      iconUrl: getTokenUrl(vContract.contractData.iconUrl),
+      iconUrl: toIpfsProviderUrl(vContract.contractData.iconUrl)||vContract.contractData.iconUrl,
       decimals: vContract.contractData.decimals,
       name: vContract.contractData.name,
       symbol: vContract.contractData.symbol,
@@ -198,7 +198,7 @@ const loadPoolsReserves = async (
   dexClient: ApolloClient<any>
 ): Promise<PoolReserves[]> => {
   if (tokens.length < 2) return [];
-  
+
   const tokenAddresses = tokens.map((t) => t.address);
   const res = await dexClient.query<PoolsWithReservesQuery>(
     { query: POOLS_RESERVES_GQL, variables: { tokens: tokenAddresses } }
