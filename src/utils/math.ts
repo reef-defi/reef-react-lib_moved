@@ -322,7 +322,8 @@ export const getHashSumLastNr = (address: string): number => {
 };
 
 export const toHumanAmount = (amount: string): string => {
-  const head = amount.slice(0, amount.indexOf('.'));
+  const decimalPosition = amount.includes('.') ? amount.indexOf('.') : amount.length;
+  const head = amount.slice(0, decimalPosition);
   const amo = amount.replace('.', '');
 
   if (head.length > 9) {
