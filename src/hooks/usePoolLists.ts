@@ -124,24 +124,24 @@ export const usePoolsList = ({
   //       limit, offset, search, signerAddress,
   //     },
   //   },
-  // );
-  const userPoolQry = getUserPoolList(queryType,limit, offset, search, signerAddress);
+     // );
   useEffect(() => {
     const handleResp = async()=>{
+      const userPoolQry = getUserPoolList(queryType,limit, offset, search, signerAddress);
       setLoadingPoolsList(true);
       const response = await graphqlRequest(httpClient, userPoolQry);
-      setdataPoolsList(response.data);
+      setdataPoolsList(response.data.data);
       setLoadingPoolsList(false);
     }
     handleResp();
-  }, []);
+  }, [limit, offset]);
 
   const userPoolCountQry = getUserPoolCountQry(queryType, search, signerAddress);
   useEffect(() => {
     const handleResp = async()=>{
       setLoadingPoolsCount(true);
       const response = await graphqlRequest(httpClient, userPoolCountQry);
-      setDataPoolsCount(response.data);
+      setDataPoolsCount(response.data.data);
       setLoadingPoolsCount(false);
     }
     handleResp();
@@ -176,7 +176,6 @@ export const usePoolsList = ({
       myLiquidity: calculateUserLiquidity(pool, tokenPrices),
     }));
   }, [dataPoolsList]);
-
   return [
     processed,
     loadingPoolsList || loadingPoolsCount,

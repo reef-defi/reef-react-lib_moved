@@ -204,7 +204,7 @@ export const usePoolData = ({
     const handleResp = async()=>{
       setLoading(true);
       const response = await graphqlRequest(httpClient, queryObj);
-      setData(response.data);
+      setData(response.data.data);
       setLoading(false);
     }
     handleResp();

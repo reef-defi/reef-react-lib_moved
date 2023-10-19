@@ -48,7 +48,7 @@ export const useTotalSupply = (tokenPrices: TokenPrices, httpClient:AxiosInstanc
   useEffect(() => {
     const handleRes = async ()=>{
       const res = await graphqlRequest(httpClient,getPoolTotalValueLockedQry(toTime.toISOString()));
-      setData(res.data);
+      setData(res.data.data);
     }
     handleRes();
   }, [])
@@ -86,7 +86,7 @@ export const usePoolVolume = (tokenPrices: TokenPrices, httpClient:AxiosInstance
   useEffect(() => {
     const handleRes = async ()=>{
       const res = await graphqlRequest(httpClient,getPool24HvolQry(fromTime));
-      setData(res.data);
+      setData(res.data.data);
     }
     handleRes();
   }, [])
@@ -165,7 +165,7 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
     const handleRes = async ()=>{
       setTokensLoading(true);
       const res = await graphqlRequest(httpClient,getPoolTokensDataQry(address));
-      setTokensData(res.data);
+      setTokensData(res.data.data);
       setTokensLoading(false);
     }
     handleRes();
@@ -182,7 +182,7 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
   useInterval(async() => {
     setPoolInfoLoading(true);
     const response = await graphqlRequest(httpClient, queryObj);
-    setPoolInfoData(response.data);
+    setPoolInfoData(response.data.data);
     setPoolInfoLoading(false);
   }, POLL_INTERVAL);
 
