@@ -296,6 +296,7 @@ export const transferHistory$: Observable<
               }))),
             );
         }),
+        map((transfers:TokenTransfer[])=>transfers.sort((a, b) => Date.parse(b.timestamp as any)- Date.parse(a.timestamp as any)))
       ))),
   startWith(null),
   shareReplay(1),
