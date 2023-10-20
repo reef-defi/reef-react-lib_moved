@@ -12,9 +12,10 @@ import { ReefSigner } from '../state';
 
 export const reloadSignersSubj = new Subject<UpdateDataCtx<ReefSigner[]>>();
 
+// eslint-disable-next-line import/no-mutable-exports
 export let _NFT_IPFS_RESOLVER_FN: ipfsUrlResolverFn|undefined;
 
-export const setNftIpfsResolverFn = (val?: ipfsUrlResolverFn) => {
+export const setNftIpfsResolverFn = (val?: ipfsUrlResolverFn):void => {
   _NFT_IPFS_RESOLVER_FN = val;
 };
 

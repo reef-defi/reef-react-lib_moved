@@ -209,8 +209,8 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
     const mySupply1 = amountLocked1.multipliedBy(poolShare);
     const mySupply2 = amountLocked2.multipliedBy(poolShare);
 
-    const price1 = tokenPrices[token1.id] || 0;
-    const price2 = tokenPrices[token2.id] || 0;
+    const price1 = tokenPrices[token1.id] && !isNaN(tokenPrices[token1.id]) ? tokenPrices[token1.id] : 0;
+    const price2 = tokenPrices[token2.id] && !isNaN(tokenPrices[token2.id]) ? tokenPrices[token2.id] : 0;
     const mySupplyUSD = mySupply1
       .multipliedBy(price1)
       .plus(mySupply2.multipliedBy(price2))
@@ -247,7 +247,7 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
         amountLocked: amountLocked1.toFormat(0),
         fees24h: fee1.toFormat(2),
         mySupply: mySupply1.toFormat(0),
-        percentage: amountLocked1.div(all).multipliedBy(100).toFormat(2),
+        percentage: all.isZero() ? '0' : amountLocked1.div(all).multipliedBy(100).toFormat(2),
         ratio: {
           amount: amountLocked1.div(amountLocked2).toFormat(4),
           name: token2.name,
@@ -263,7 +263,7 @@ export const usePoolInfo = (address: string, signerAddress: string, tokenPrices:
         amountLocked: amountLocked2.toFormat(0),
         fees24h: fee2.toFormat(2),
         mySupply: mySupply2.toFormat(0),
-        percentage: amountLocked2.div(all).multipliedBy(100).toFormat(2),
+        percentage: all.isZero() ? '0' : amountLocked2.div(all).multipliedBy(100).toFormat(2),
         ratio: {
           amount: amountLocked2.div(amountLocked1).toFormat(4),
           name: token1.name,

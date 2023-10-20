@@ -32,8 +32,8 @@ export const loadPool = async (
   const totalSupply = BigNumber.from(userPoolSupply.totalSupply);
   const liquidity = BigNumber.from(userPoolSupply.userSupply);
 
-  const tokenBalance1 = reserves1.mul(liquidity).div(totalSupply);
-  const tokenBalance2 = reserves2.mul(liquidity).div(totalSupply);
+  const tokenBalance1 = totalSupply.isZero() ? BigNumber.from(0) : reserves1.mul(liquidity).div(totalSupply);
+  const tokenBalance2 = totalSupply.isZero() ? BigNumber.from(0) : reserves2.mul(liquidity).div(totalSupply);
 
   return {
     poolAddress: address,
@@ -66,7 +66,10 @@ export const useLoadPool = (
         .then(() => setIsLoading(true))
         .then(() => loadPool(token1, token2, userAddress, httpClient))
         .then(setPool)
-        .catch(() => setPool(undefined))
+        .catch((e: any) => { 
+          console.error('useLoadPool error', e);
+          setPool(undefined); 
+        })
         .finally(() => setIsLoading(false));
     };
 

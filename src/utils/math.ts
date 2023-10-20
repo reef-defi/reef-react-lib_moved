@@ -30,7 +30,12 @@ export const transformAmount = (decimals: number, amount: string): string => {
   return cleanedAmount + '0'.repeat(decimals - decimalPositions);
 };
 
-export const assertAmount = (amount?: string): string => (!amount ? '0' : amount);
+export const assertAmount = (amount?: string): string => {
+  if(amount==="NaN") {
+    return '0'
+  };
+  return !amount ? '0' : amount;
+}
 
 export const convert2Normal = (
   decimals: number,
@@ -317,7 +322,8 @@ export const getHashSumLastNr = (address: string): number => {
 };
 
 export const toHumanAmount = (amount: string): string => {
-  const head = amount.slice(0, amount.indexOf('.'));
+  const decimalPosition = amount.includes('.') ? amount.indexOf('.') : amount.length;
+  const head = amount.slice(0, decimalPosition);
   const amo = amount.replace('.', '');
 
   if (head.length > 9) {

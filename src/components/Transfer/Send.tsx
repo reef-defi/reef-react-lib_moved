@@ -158,10 +158,10 @@ export const Send = ({
 
   const getInitToken = (): TokenWithAmount => {
     if (tokenAddress) {
-      const targetToken = tokens.find(({ address }) => address === tokenAddress);
+      const targetToken = tokens.find(({ address }) => address === tokenAddress) as TokenWithAmount;
       if (targetToken) {
         return {
-          ...targetToken, isEmpty: false, price: 0, amount: '',
+          ...targetToken, isEmpty: false, price:targetToken.price?? 0, amount: '',
         };
       }
     }

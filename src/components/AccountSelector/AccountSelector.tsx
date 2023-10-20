@@ -19,6 +19,7 @@ interface AccountSelector {
   onLanguageSelect?: (language: Language) => any;
   isBalanceHidden?: boolean;
   showBalance?: (...args: any[]) => any;
+  availableNetworks: Network[];
 }
 
 export const AccountSelector = ({
@@ -30,6 +31,7 @@ export const AccountSelector = ({
   onLanguageSelect,
   isBalanceHidden,
   showBalance,
+  availableNetworks,
 }: AccountSelector): JSX.Element => {
   const name = selectedSigner ? selectedSigner.name : '';
   const balance = toReefBalanceDisplay(selectedSigner?.balance);
@@ -109,6 +111,7 @@ export const AccountSelector = ({
           selectedNetwork={selectedNetwork}
           onNetworkSelect={onNetworkSelect}
           onLanguageSelect={onLanguageSelect}
+          availableNetworks={availableNetworks}
         />
       </div>
       <button

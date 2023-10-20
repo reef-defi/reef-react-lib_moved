@@ -37,14 +37,14 @@ const ProvidePopup = ({
       token1: {
         iconUrl: token1.iconUrl,
         symbol: token1.symbol,
-        price: Uik.utils.maxDecimals(token2.price, 4),
+        price: Uik.utils.maxDecimals(token1.price, 4),
         amount: token1.amount,
         value: value1,
       },
       token2: {
         iconUrl: token2.iconUrl,
         symbol: token2.symbol,
-        price: Uik.utils.maxDecimals(token1.price, 4),
+        price: Uik.utils.maxDecimals(token2.price, 4),
         amount: token2.amount,
         value: value2,
       },
