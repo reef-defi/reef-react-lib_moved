@@ -1,5 +1,7 @@
 # @reef-defi/react-lib
 
+## Moved to https://github.com/reef-chain/react-lib
+
 > Reef React Library
 
 [![NPM](https://img.shields.io/npm/v/@reef-defi/react-lib.svg)](https://www.npmjs.com/package/@reef-defi/react-lib) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
