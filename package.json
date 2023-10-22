@@ -26,7 +26,6 @@
     "deploy": "gh-pages -d example/build"
   },
   "dependencies": {
-    "@apollo/client": "^3.6.2",
     "@fortawesome/free-regular-svg-icons": "^6.1.0",
     "@fortawesome/free-solid-svg-icons": "^6.1.0",
     "@polkadot/extension-dapp": "^0.40.4",
